@@ -176,7 +176,7 @@ export default function Login() {
 
           <div className="mt-10 text-center">
             <p className="text-[10px] text-slate-400 font-medium uppercase tracking-[3px] mb-1">
-              &copy; {new Date().getFullYear()} SN Tech Solutions
+              &copy; {new Date().getFullYear()} Alpha Tech Business Solutions
             </p>
             <div className="w-8 h-1 bg-slate-100 mx-auto rounded-full"></div>
           </div>
