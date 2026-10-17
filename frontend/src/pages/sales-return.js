@@ -286,7 +286,7 @@ export default function SalesReturn() {
       )}
 
       {/* Hidden Print Component (Credit Note) */}
-      <div style={{ display: 'none' }}>
+      <div style={{ position: 'absolute', top: '-9999px', left: '-9999px', pointerEvents: 'none' }}>
         <ProfessionalInvoice
           ref={componentRef}
           printData={{

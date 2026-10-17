@@ -2023,7 +2023,7 @@ const CURRENCY_SYMBOLS = {
             )}
 
             {lastSale && (
-                <div style={{ display: 'none' }}>
+                <div style={{ position: 'absolute', top: '-9999px', left: '-9999px', pointerEvents: 'none' }}>
                     <div ref={componentRef}>
                         <ProfessionalInvoice
                             printData={{
