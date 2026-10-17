@@ -44,7 +44,8 @@ export default function SalesReturn() {
   };
 
   const handlePrint = useReactToPrint({
-    content: () => componentRef.current,
+    contentRef: componentRef,
+    pageStyle: `@page { size: auto; margin: 0mm; } @media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }`
   });
 
   const handleSearch = async () => {
