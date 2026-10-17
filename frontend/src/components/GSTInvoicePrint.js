@@ -213,6 +213,12 @@ export default function GSTInvoicePrint({ data }) {
               <span>₹{parseFloat(sale.taxAmount).toFixed(2)}</span>
             </div>
           )}
+          {(parseFloat(sale.deliveryCharge || 0) > 0 || sale.hasDeliveryCharge) && (
+            <div className="flex justify-between p-2 border-b border-black">
+              <span>Delivery Charge:</span>
+              <span>₹{parseFloat(sale.deliveryCharge || 0).toFixed(2)}</span>
+            </div>
+          )}
           {parseFloat(sale.roundOffAmount) !== 0 && (
             <div className="flex justify-between p-2 border-b border-black">
               <span>Round Off:</span>

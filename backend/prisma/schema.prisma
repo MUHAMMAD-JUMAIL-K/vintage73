@@ -379,6 +379,8 @@ model Sale {
   discount        Float          @default(0)
   advanceUsed     Decimal        @default(0) @db.Decimal(10, 2)
   description     String?
+  deliveryCharge  Decimal        @default(0) @db.Decimal(10, 2)
+  hasDeliveryCharge Boolean      @default(false)
   payments        Payment[]
   branch          Branch         @relation(fields: [branchId], references: [id])
   customer        Customer?      @relation(fields: [customerId], references: [id])

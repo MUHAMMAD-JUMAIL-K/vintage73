@@ -31,7 +31,7 @@ exports.getSchemaMetadata = asyncHandler(async (req, res) => {
             name: 'Sales (Invoice)',
             fields: [
                 'subTotal', 'taxAmount', 'totalAmount', 'discount',
-                'roundOffAmount', 'paidAmount', 'balanceAmount',
+                'deliveryCharge', 'roundOffAmount', 'paidAmount', 'balanceAmount',
                 'incentiveAmount', 'isReturn', 'isB2B'
             ]
         },
