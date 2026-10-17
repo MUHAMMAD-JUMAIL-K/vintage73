@@ -1412,7 +1412,7 @@ export default function SalesReport() {
             )}
 
             {/* Hidden Professional Invoice for printing */}
-            <div style={{ display: 'none' }}>
+            <div style={{ position: 'absolute', top: '-9999px', left: '-9999px', pointerEvents: 'none' }}>
                 <ProfessionalInvoice
                     ref={componentRef}
                     printData={{ 
