@@ -1015,7 +1015,10 @@ const CURRENCY_SYMBOLS = {
 
     // Checkout
     const componentRef = useRef();
-    const handlePrint = useReactToPrint({ contentRef: componentRef });
+    const handlePrint = useReactToPrint({
+        contentRef: componentRef,
+        pageStyle: `@page { size: auto; margin: 0mm; } @media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }`
+    });
 
     const closePaymentModal = () => {
         setShowPaymentModal(false);
@@ -1205,8 +1208,8 @@ const CURRENCY_SYMBOLS = {
             setShowPaymentModal(false);
             setAddedPayments([]);
             setPaymentData({ method: 'Cash', paidAmount: '0.00' });
-            // Delay print slightly to allow state update
-            setTimeout(() => handlePrint(), 100);
+            // Delay print slightly to allow state update and DOM rasterization
+            setTimeout(() => handlePrint(), 300);
 
             setCart([]);
             setSearch('');
@@ -2199,7 +2202,7 @@ const CURRENCY_SYMBOLS = {
 
                                         <div className="mt-6 flex gap-3">
                                             <button
-                                                onClick={() => { setLastSale(selectedHistorySale); setTimeout(() => handlePrint(), 100); }}
+                                                onClick={() => { setLastSale(selectedHistorySale); setTimeout(() => handlePrint(), 300); }}
                                                 className="flex-1 py-2 bg-slate-800 text-white rounded-lg font-medium hover:bg-slate-900 flex items-center justify-center gap-2"
                                             >
                                                 <FiMonitor /> Reprint Invoice

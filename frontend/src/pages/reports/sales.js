@@ -218,7 +218,10 @@ export default function SalesReport() {
     };
 
     // Printing single invoice
-    const handlePrintInvoice = useReactToPrint({ contentRef: componentRef });
+    const handlePrintInvoice = useReactToPrint({
+        contentRef: componentRef,
+        pageStyle: `@page { size: auto; margin: 0mm; } @media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }`
+    });
     const triggerInvoicePrint = (sale) => {
         setPrintSale(sale);
         toast.info("Preparing Invoice Print...", { autoClose: 1000, position: 'bottom-right' });
