@@ -60,8 +60,8 @@ exports.createBranch = asyncHandler(async (req, res) => {
   }
 
   const { name, address, phone, email, stockIncluded, invoiceTemplate, invoiceSettings, currencyCode, currencySymbol } = req.body;
-  const code = currencyCode || 'INR';
-  const symbol = currencySymbol || CURRENCY_SYMBOLS[code] || '₹';
+  const code = (currencyCode || 'INR').trim().toUpperCase();
+  const symbol = (currencySymbol && currencySymbol !== '₹') ? currencySymbol : (CURRENCY_SYMBOLS[code] || '₹');
 
   const dataToSave = {
     name,
@@ -107,9 +107,11 @@ exports.updateBranch = asyncHandler(async (req, res) => {
   const dataToUpdate = { name, address, phone, email, isActive, stockIncluded };
 
   if (currencyCode !== undefined) {
-    const code = currencyCode || 'INR';
+    const code = (currencyCode || 'INR').trim().toUpperCase();
     dataToUpdate.currencyCode = code;
-    dataToUpdate.currencySymbol = currencySymbol || CURRENCY_SYMBOLS[code] || '₹';
+    dataToUpdate.currencySymbol = (currencySymbol && currencySymbol !== '₹') ? currencySymbol : (CURRENCY_SYMBOLS[code] || '₹');
+  } else if (currencySymbol !== undefined) {
+    dataToUpdate.currencySymbol = currencySymbol;
   }
 
   if (invoiceTemplate !== undefined) {

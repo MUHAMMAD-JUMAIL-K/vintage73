@@ -9,6 +9,7 @@ import { getTerminalId, checkTerminalAccess } from '@/lib/terminal';
 import SearchableSelect from '@/components/SearchableSelect';
 import DynamicInvoice from '@/components/DynamicInvoice';
 import ProfessionalInvoice from '@/components/ProfessionalInvoice';
+import { CURRENCY_LIST, CURRENCY_SYMBOLS, getCurrencySymbol, normalizeCurrencySymbol } from '@/lib/currency';
 export default function POS() {
     const router = useRouter();
     const [products, setProducts] = useState([]);
@@ -71,13 +72,6 @@ const EXCHANGE_RATES = {
     AED: 1,
     EUR: 1,
     USD: 1
-};
-
-const CURRENCY_SYMBOLS = {
-    INR: '₹',
-    AED: 'د.إ',
-    EUR: '€',
-    USD: '$'
 };
     // Customer Search
     const [customerSearch, setCustomerSearch] = useState('');
@@ -171,7 +165,7 @@ const CURRENCY_SYMBOLS = {
                     setDeliveryCharge(parsed.deliveryCharge || '');
                     const restoredCode = parsed.currencyCode || 'INR';
                     setCurrencyCode(restoredCode);
-                    setCurrencySymbol(CURRENCY_SYMBOLS[restoredCode] || '₹');
+                    setCurrencySymbol(normalizeCurrencySymbol(parsed.currencySymbol || CURRENCY_SYMBOLS[restoredCode], restoredCode));
                     setExchangeRate(1);
                     setSaleDescription(parsed.saleDescription || '');
                 } catch (e) {
@@ -293,7 +287,7 @@ const CURRENCY_SYMBOLS = {
                 setBranchSettings({ stockIncluded: isStockEnabled });
 
                 const bCode = branchRes.data.currencyCode || 'INR';
-                const bSymbol = branchRes.data.currencySymbol || CURRENCY_SYMBOLS[bCode] || '₹';
+                const bSymbol = normalizeCurrencySymbol(branchRes.data.currencySymbol, bCode);
                 setCurrencyCode(bCode);
                 setCurrencySymbol(bSymbol);
 
@@ -371,8 +365,9 @@ const CURRENCY_SYMBOLS = {
             setCustomerName(invoice.customerName || 'Walk-in Customer');
             setSalesmanId(invoice.salesmanId || '');
             setSaleDate(new Date(invoice.saleDate).toISOString().split('T')[0]);
-            setCurrencyCode(invoice.currencyCode || 'INR');
-            setCurrencySymbol(CURRENCY_SYMBOLS[invoice.currencyCode || 'INR']);
+            const invCode = invoice.currencyCode || 'INR';
+            setCurrencyCode(invCode);
+            setCurrencySymbol(normalizeCurrencySymbol(invoice.currencySymbol || CURRENCY_SYMBOLS[invCode], invCode));
             setExchangeRate(1);
             setSaleDescription(invoice.description || '');
             setTaxEnabled(parseFloat(invoice.taxAmount || 0) > 0);
@@ -1582,14 +1577,13 @@ const CURRENCY_SYMBOLS = {
                                 onChange={(e) => {
                                     const code = e.target.value;
                                     setCurrencyCode(code);
-                                    setCurrencySymbol(CURRENCY_SYMBOLS[code] || code);
+                                    setCurrencySymbol(normalizeCurrencySymbol(CURRENCY_SYMBOLS[code], code));
                                     setExchangeRate(1);
                                 }}
                             >
-                                <option value="INR">INR (₹)</option>
-                                <option value="AED">AED (د.إ)</option>
-                                <option value="USD">USD ($)</option>
-                                <option value="EUR">EUR (€)</option>
+                                {CURRENCY_LIST.map((c) => (
+                                    <option key={c.code} value={c.code}>{c.label}</option>
+                                ))}
                             </select>
                         </div>
                         <div className="flex items-center">
@@ -2078,13 +2072,13 @@ const CURRENCY_SYMBOLS = {
                                                 <td className="p-3 text-right text-slate-500">{sale.discount > 0 ? sale.discount : '-'}</td>
                                                 <td className="p-3 text-right text-slate-500">{sale.taxAmount > 0 ? sale.taxAmount : '-'}</td>
                                                 <td className="p-3 text-right text-orange-500">{sale.advanceUsed > 0 ? sale.advanceUsed : '-'}</td>
-                                                <td className="p-3 text-right font-medium text-slate-800">
+                                                 <td className="p-3 text-right font-medium text-slate-800">
                                                     {(() => {
-                                                        const sym = CURRENCY_SYMBOLS[sale.currencyCode] || '₹';
+                                                        const sym = getCurrencySymbol(sale.currencyCode);
                                                         const val = parseFloat(sale.totalAmount).toFixed(2);
                                                         return sale.currencyCode === 'AED' ? `${val} ${sym}` : `${sym}${val}`;
                                                     })()}
-                                                </td>
+                                                 </td>
                                                 <td className="p-3 text-primary"><FiMonitor /></td>
                                             </tr>
                                         ))}
@@ -2118,7 +2112,7 @@ const CURRENCY_SYMBOLS = {
                                                         msg = msg.replace(/\[\[customer_name\]\]/g, selectedHistorySale.customer?.name || 'Customer')
                                                             .replace(/\[\[bill_no\]\]/g, selectedHistorySale.invoiceNumber)
                                                             .replace(/\[\[total_amount\]\]/g, (() => {
-                                                                const sym = CURRENCY_SYMBOLS[selectedHistorySale.currencyCode] || '₹';
+                                                                const sym = getCurrencySymbol(selectedHistorySale.currencyCode);
                                                                 const val = parseFloat(selectedHistorySale.totalAmount).toFixed(2);
                                                                 return selectedHistorySale.currencyCode === 'AED' ? `${val} ${sym}` : `${sym}${val}`;
                                                             })())
@@ -2193,7 +2187,7 @@ const CURRENCY_SYMBOLS = {
                                             <span>Total Amount</span>
                                             <span>
                                                 {(() => {
-                                                    const sym = CURRENCY_SYMBOLS[selectedHistorySale.currencyCode] || '₹';
+                                                    const sym = getCurrencySymbol(selectedHistorySale.currencyCode);
                                                     const val = parseFloat(selectedHistorySale.totalAmount).toFixed(2);
                                                     return selectedHistorySale.currencyCode === 'AED' ? `${val} ${sym}` : `${sym}${val}`;
                                                 })()}

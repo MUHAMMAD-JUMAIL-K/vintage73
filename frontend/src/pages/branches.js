@@ -5,7 +5,7 @@ import { FiPlus, FiEdit2, FiTrash2, FiMapPin, FiPhone, FiMail, FiEye, FiFileText
 import { toast } from 'react-toastify';
 import ProfessionalInvoice from '@/components/ProfessionalInvoice';
 import { INVOICE_TEMPLATES, getDemoInvoiceData, getTemplateName } from '@/lib/invoiceTemplates';
-import { CURRENCY_LIST } from '@/lib/currency';
+import { CURRENCY_LIST, getCurrencySymbol, normalizeCurrencySymbol } from '@/lib/currency';
 
 export default function Branches() {
   const [branches, setBranches] = useState([]);
@@ -55,11 +55,17 @@ export default function Branches() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      const code = formData.currencyCode || 'INR';
+      const payload = {
+        ...formData,
+        currencyCode: code,
+        currencySymbol: getCurrencySymbol(code, { raw: true })
+      };
       if (editingId) {
-        await api.put(`/branches/${editingId}`, formData);
+        await api.put(`/branches/${editingId}`, payload);
         toast.success('Branch updated');
       } else {
-        await api.post('/branches', formData);
+        await api.post('/branches', payload);
         toast.success('Branch created');
       }
       setShowModal(false);
@@ -125,7 +131,7 @@ export default function Branches() {
           className="btn btn-primary w-full md:w-auto justify-center whitespace-nowrap" 
           onClick={() => {
             setEditingId(null);
-            setFormData({ name: '', address: '', phone: '', email: '', isActive: true, stockIncluded: true });
+            setFormData({ name: '', address: '', phone: '', email: '', currencyCode: 'INR', isActive: true, stockIncluded: true });
             setShowModal(true);
           }}
         >
@@ -141,11 +147,16 @@ export default function Branches() {
 
               <div className="relative">
                 <div className="flex justify-between items-start mb-4">
-                  <div className={`px-2 py-1 rounded text-[10px] font-medium uppercase tracking-wider ${branch.isActive ? 'bg-primary-light/10 text-primary border border-primary/20' : 'bg-slate-100 text-slate-500 border border-slate-200'}`}>
-                    {branch.isActive ? 'Active' : 'Inactive'}
-                  </div>
-                  <div className={`px-2 py-1 rounded text-[10px] font-medium uppercase tracking-wider ${branch.stockIncluded ? 'bg-orange-50 text-orange-600 border border-orange-100' : 'bg-slate-100 text-slate-500 border border-slate-200'}`}>
-                    Stock: {branch.stockIncluded ? 'Enabled' : 'Disabled'}
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-medium uppercase tracking-wider ${branch.isActive ? 'bg-primary-light/10 text-primary border border-primary/20' : 'bg-slate-100 text-slate-500 border border-slate-200'}`}>
+                      {branch.isActive ? 'Active' : 'Inactive'}
+                    </span>
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-medium uppercase tracking-wider ${branch.stockIncluded ? 'bg-orange-50 text-orange-600 border border-orange-100' : 'bg-slate-100 text-slate-500 border border-slate-200'}`}>
+                      Stock: {branch.stockIncluded ? 'Enabled' : 'Disabled'}
+                    </span>
+                    <span className="px-2 py-0.5 rounded text-[10px] font-semibold tracking-wider bg-blue-50 text-blue-700 border border-blue-200">
+                      {branch.currencyCode || 'INR'} ({normalizeCurrencySymbol(branch.currencySymbol, branch.currencyCode)})
+                    </span>
                   </div>
                   <div className="flex gap-2">
                     <button onClick={() => openEditModal(branch)} className="p-2 text-slate-400 hover:text-primary hover:bg-primary-light/10 rounded-lg transition-colors" title="Edit Branch">

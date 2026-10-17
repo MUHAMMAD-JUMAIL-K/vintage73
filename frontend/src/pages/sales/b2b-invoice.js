@@ -5,6 +5,7 @@ import { useReactToPrint } from 'react-to-print';
 import { FiPlus, FiTrash2, FiPrinter, FiTruck, FiFileText, FiSearch, FiChevronDown, FiChevronUp, FiList, FiFilter, FiEye, FiCalendar, FiMessageSquare } from 'react-icons/fi';
 import GSTInvoicePrint from '@/components/GSTInvoicePrint';
 import SearchableSelect from '@/components/SearchableSelect';
+import { getCurrencySymbol, normalizeCurrencySymbol, formatAmountWithCurrency } from '@/lib/currency';
 
 export default function B2BInvoice() {
   const [customers, setCustomers] = useState([]);
@@ -13,6 +14,8 @@ export default function B2BInvoice() {
   const [settings, setSettings] = useState(null);
   const [company, setCompany] = useState(null);
   const [user, setUser] = useState(null);
+  const [currencyCode, setCurrencyCode] = useState('INR');
+  const [currencySymbol, setCurrencySymbol] = useState('₹');
   const [branchSettings, setBranchSettings] = useState({ stockIncluded: true });
 
   // Tab State
@@ -74,11 +77,18 @@ export default function B2BInvoice() {
         setSettings(settingsRes.data);
         setCompany(companyRes.data);
 
+        let code = companyRes?.data?.currencyCode || 'INR';
+        let symbol = companyRes?.data?.currencySymbol;
+
         if (user?.branchId) {
           const { data: bData } = await api.get(`/branches/${user.branchId}`);
           setBranchSettings({
             stockIncluded: bData.stockIncluded !== undefined ? bData.stockIncluded : true
           });
+          if (bData?.currencyCode) {
+            code = bData.currencyCode;
+            symbol = bData.currencySymbol;
+          }
 
           // Fetch the authoritative active business date
           try {
@@ -98,6 +108,8 @@ export default function B2BInvoice() {
           // No branch — fall back to calendar date
           setInvoiceDate(new Date().toISOString().split('T')[0]);
         }
+        setCurrencyCode(code);
+        setCurrencySymbol(normalizeCurrencySymbol(symbol, code));
       } catch (err) {
         console.error(err);
         toast.error('Failed to load data');
@@ -296,7 +308,7 @@ export default function B2BInvoice() {
           let msg = wsSettings.salesTemplate || 'Hello [[customer_name]], your B2B invoice [[bill_no]] for [[total_amount]] is ready.';
           msg = msg.replace(/\[\[customer_name\]\]/g, customer.name)
             .replace(/\[\[bill_no\]\]/g, data.sale.invoiceNumber)
-            .replace(/\[\[total_amount\]\]/g, `₹${data.sale.totalAmount.toFixed(2)}`)
+            .replace(/\[\[total_amount\]\]/g, formatAmountWithCurrency(data.sale.totalAmount, data.sale.currencyCode || currencyCode, data.sale.currencySymbol || currencySymbol))
             .replace(/\[\[company_name\]\]/g, 'Our Store');
 
           try {
@@ -471,7 +483,7 @@ export default function B2BInvoice() {
                       <div className="text-xs text-slate-400">HSN: {product.hsnCode || 'N/A'} | GST: {product.taxRate}%</div>
                     </div>
                     <div className="text-right">
-                      <div className="font-medium text-primary">₹{product.price}</div>
+                      <div className="font-medium text-primary">{formatAmountWithCurrency(product.price, currencyCode, currencySymbol)}</div>
                       <div className="text-xs text-slate-400">Stock: {product.stock || 0}</div>
                     </div>
                   </div>
@@ -632,7 +644,7 @@ export default function B2BInvoice() {
                               min="1"
                             />
                           </td>
-                          <td className="p-3 text-right">₹{item.unitPrice.toFixed(2)}</td>
+                          <td className="p-3 text-right">{formatAmountWithCurrency(item.unitPrice, currencyCode, currencySymbol)}</td>
                           <td className="p-3">
                             <input
                               type="number"
@@ -642,16 +654,16 @@ export default function B2BInvoice() {
                               min="0" max="100"
                             />
                           </td>
-                          <td className="p-3 text-right">₹{taxable.toFixed(2)}</td>
+                          <td className="p-3 text-right">{formatAmountWithCurrency(taxable, currencyCode, currencySymbol)}</td>
                           {taxType === 'INTRA' ? (
                             <>
-                              <td className="p-3 text-right text-slate-600">₹{(tax / 2).toFixed(2)}</td>
-                              <td className="p-3 text-right text-slate-600">₹{(tax / 2).toFixed(2)}</td>
+                              <td className="p-3 text-right text-slate-600">{formatAmountWithCurrency(tax / 2, currencyCode, currencySymbol)}</td>
+                              <td className="p-3 text-right text-slate-600">{formatAmountWithCurrency(tax / 2, currencyCode, currencySymbol)}</td>
                             </>
                           ) : (
-                            <td className="p-3 text-right text-slate-600">₹{tax.toFixed(2)}</td>
+                            <td className="p-3 text-right text-slate-600">{formatAmountWithCurrency(tax, currencyCode, currencySymbol)}</td>
                           )}
-                          <td className="p-3 text-right font-medium">₹{total.toFixed(2)}</td>
+                          <td className="p-3 text-right font-medium">{formatAmountWithCurrency(total, currencyCode, currencySymbol)}</td>
                           <td className="p-3">
                             <button onClick={() => removeItem(item.productId)} className="text-red-500 hover:text-red-700">
                               <FiTrash2 size={16} />
@@ -675,23 +687,23 @@ export default function B2BInvoice() {
                 <div className="w-72 space-y-2 text-sm">
                   <div className="flex justify-between">
                     <span className="text-slate-500">Subtotal:</span>
-                    <span className="font-medium">₹{calculations.subTotal.toFixed(2)}</span>
+                    <span className="font-medium">{formatAmountWithCurrency(calculations.subTotal, currencyCode, currencySymbol)}</span>
                   </div>
                   {taxType === 'INTRA' ? (
                     <>
                       <div className="flex justify-between">
                         <span className="text-slate-500">CGST:</span>
-                        <span className="font-medium">₹{calculations.cgst.toFixed(2)}</span>
+                        <span className="font-medium">{formatAmountWithCurrency(calculations.cgst, currencyCode, currencySymbol)}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-slate-500">SGST:</span>
-                        <span className="font-medium">₹{calculations.sgst.toFixed(2)}</span>
+                        <span className="font-medium">{formatAmountWithCurrency(calculations.sgst, currencyCode, currencySymbol)}</span>
                       </div>
                     </>
                   ) : (
                     <div className="flex justify-between">
                       <span className="text-slate-500">IGST:</span>
-                      <span className="font-medium">₹{calculations.igst.toFixed(2)}</span>
+                      <span className="font-medium">{formatAmountWithCurrency(calculations.igst, currencyCode, currencySymbol)}</span>
                     </div>
                   )}
                   <div className="flex justify-between items-center">
@@ -706,7 +718,7 @@ export default function B2BInvoice() {
                   </div>
                   <div className="flex justify-between pt-2 border-t border-slate-200">
                     <span className="font-medium text-slate-700">Grand Total:</span>
-                    <span className="font-bold text-lg text-primary">₹{grandTotal.toFixed(2)}</span>
+                    <span className="font-bold text-lg text-primary">{formatAmountWithCurrency(grandTotal, currencyCode, currencySymbol)}</span>
                   </div>
                   {ewayRequired && (
                     <div className="text-xs text-orange-600 text-right">⚠️ E-Way Bill Required</div>
@@ -806,7 +818,7 @@ export default function B2BInvoice() {
                       <td className="p-4">{new Date(inv.saleDate).toLocaleDateString('en-GB')}</td>
                       <td className="p-4 font-medium">{inv.customer?.name}</td>
                       <td className="p-4 text-slate-500 text-xs">{inv.customer?.gstin}</td>
-                      <td className="p-4 text-right font-medium">₹{parseFloat(inv.totalAmount).toFixed(2)}</td>
+                      <td className="p-4 text-right font-medium">{formatAmountWithCurrency(inv.totalAmount, inv.currencyCode || currencyCode, inv.currencySymbol || currencySymbol)}</td>
                       <td className="p-4 text-center">
                         {inv.ewayBillNumber ? (
                           <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">{inv.ewayBillNumber}</span>
@@ -833,7 +845,7 @@ export default function B2BInvoice() {
                               let msg = wsSettings.salesTemplate || '';
                               msg = msg.replace(/\[\[customer_name\]\]/g, inv.customer?.name || 'Customer')
                                 .replace(/\[\[bill_no\]\]/g, inv.invoiceNumber)
-                                .replace(/\[\[total_amount\]\]/g, `₹${parseFloat(inv.totalAmount).toFixed(2)}`)
+                                .replace(/\[\[total_amount\]\]/g, formatAmountWithCurrency(inv.totalAmount, inv.currencyCode || currencyCode, inv.currencySymbol || currencySymbol))
                                 .replace(/\[\[company_name\]\]/g, 'Our Store');
 
                               try {

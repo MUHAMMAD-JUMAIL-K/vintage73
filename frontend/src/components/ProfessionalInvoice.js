@@ -1,5 +1,6 @@
 
 import React, { useMemo } from 'react';
+import { getCurrencySymbol as getAppCurrencySymbol, normalizeCurrencySymbol } from '@/lib/currency';
 
 // Indian Number to Words conversion
 const numberToWords = (num) => {
@@ -53,16 +54,11 @@ const ProfessionalInvoice = React.forwardRef(({ printData, companyProfile, previ
     // fallback to saleDate if createdAt is missing
     const invoiceDate = quotationDate || createdAt || saleDate || null;
 
-    const getCurrencySymbol = (code) => {
-        if (!code) return null;
-        const symbols = {
-            'INR': '₹', 'USD': '$', 'AED': 'د.إ', 'EUR': '€', 'GBP': '£',
-            'OMR': 'ر.ع.', 'KWD': 'د.ك', 'BHD': 'د.ب', 'QAR': 'ر.ق'
-        };
-        return symbols[code.toUpperCase()] || null;
-    };
-
-    const currentSymbol = currencySymbol || getCurrencySymbol(currencyCode) || companyProfile?.currencySymbol || '₹';
+    const activeCurrencyCode = currencyCode || companyProfile?.currencyCode || 'INR';
+    const rawSym = (currencyCode && currencyCode !== 'INR' && currencySymbol === '₹')
+        ? getAppCurrencySymbol(activeCurrencyCode)
+        : (currencySymbol || getAppCurrencySymbol(activeCurrencyCode) || companyProfile?.currencySymbol || '₹');
+    const currentSymbol = normalizeCurrencySymbol(rawSym, activeCurrencyCode);
     const settings = printData.settings || {};
     const tpl = (settings.template || 'modern').toLowerCase();
     const pageSize = settings.pageSize || 'A5';
@@ -166,15 +162,11 @@ const ProfessionalInvoice = React.forwardRef(({ printData, companyProfile, previ
                             background: #ffffff !important;
                             color: #000000 !important;
                             font-family: Arial, Helvetica, sans-serif !important;
-                            text-rendering: geometricPrecision !important;
                         } 
                         .thermal-invoice, .thermal-invoice * {
                             color: #000000 !important;
                             border-color: #000000 !important;
                             font-family: Arial, Helvetica, sans-serif !important;
-                            text-rendering: geometricPrecision !important;
-                            -webkit-text-stroke: 0.35px #000000;
-                            text-stroke: 0.35px #000000;
                         }
                     }
                     .thermal-invoice {
@@ -194,33 +186,33 @@ const ProfessionalInvoice = React.forwardRef(({ printData, companyProfile, previ
                             <div className="w-8 h-8 border border-black rounded flex items-center justify-center text-[8px] font-bold mx-auto mb-1 uppercase tracking-tighter">Logo</div>
                         )
                     )}
-                    {settings.showCompanyName !== false && <h2 className="text-[14px] font-black uppercase text-black">{companyProfile?.companyName || 'OUR STORE'}</h2>}
-                    <p className="text-[10px] font-bold text-black">{companyProfile?.address}</p>
-                    <p className="text-[10px] font-bold text-black">Ph: {companyProfile?.phone}</p>
-                    <div className="border-t border-b border-black py-1 mt-1 font-black text-black">{settings.headerTitle || (isQuotation ? 'QUOTATION' : 'TAX INVOICE')}</div>
+                    {settings.showCompanyName !== false && <h2 className="text-[14px] font-bold uppercase text-black">{companyProfile?.companyName || 'OUR STORE'}</h2>}
+                    <p className="text-[10px] text-black">{companyProfile?.address}</p>
+                    <p className="text-[10px] text-black">Ph: {companyProfile?.phone}</p>
+                    <div className="border-t border-b border-black py-1 mt-1 font-bold text-black">{settings.headerTitle || (isQuotation ? 'QUOTATION' : 'TAX INVOICE')}</div>
                 </div>
                 <div className="text-[10px] mb-4 text-black">
-                    <div className="flex justify-between font-bold"><span>{isQuotation ? 'Quote' : 'Inv'}: <strong className="font-black">{quotationNumber || invoiceNumber || ''}</strong></span><span>{invoiceDate ? new Date(invoiceDate).toLocaleDateString() : ''}</span></div>
-                    <div className="font-bold mt-1">Bill To: {customer?.name || customerName || 'Walk-in'}</div>
+                    <div className="flex justify-between font-normal"><span>{isQuotation ? 'Quote' : 'Inv'}: <strong className="font-semibold">{quotationNumber || invoiceNumber || ''}</strong></span><span>{invoiceDate ? new Date(invoiceDate).toLocaleDateString() : ''}</span></div>
+                    <div className="font-medium mt-1">Bill To: {customer?.name || customerName || 'Walk-in'}</div>
                 </div>
                 <table className="w-full text-[10px] border-b border-dashed border-black mb-4 text-black">
-                    <thead><tr><th className="text-left font-black py-1">Item</th><th className="text-right font-black w-12 py-1">Qty</th><th className="text-right font-black w-16 py-1">Amt</th></tr></thead>
-                    <tbody>{items?.map((item, i) => (<tr key={i}><td className="py-1 font-bold">{item.product?.name || item.name || 'Item'}</td><td className="text-right py-1 font-bold">{item.quantity || 0}</td><td className="text-right py-1 font-black">{currentSymbol}{formatAmt(item.total)}</td></tr>))}</tbody>
+                    <thead><tr><th className="text-left font-bold py-1">Item</th><th className="text-right font-bold w-12 py-1">Qty</th><th className="text-right font-bold w-16 py-1">Amt</th></tr></thead>
+                    <tbody>{items?.map((item, i) => (<tr key={i}><td className="py-1 font-normal">{item.product?.name || item.name || 'Item'}</td><td className="text-right py-1 font-normal">{item.quantity || 0}</td><td className="text-right py-1 font-semibold">{currentSymbol}{formatAmt(item.total)}</td></tr>))}</tbody>
                 </table>
-                <div className="space-y-1 text-[11px] font-bold flex flex-col items-end text-black">
-                    <div className="flex justify-between w-full"><span>Subtotal:</span><span className="font-black">{currentSymbol}{formatAmt(parseFloat(subTotal) + parseFloat(invoiceDiscount))}</span></div>
+                <div className="space-y-1 text-[11px] font-normal flex flex-col items-end text-black">
+                    <div className="flex justify-between w-full"><span>Subtotal:</span><span className="font-semibold">{currentSymbol}{formatAmt(parseFloat(subTotal) + parseFloat(invoiceDiscount))}</span></div>
                     {invoiceDiscount > 0 && (
-                        <div className="flex justify-between w-full text-black"><span>Discount:</span><span className="font-black">- {currentSymbol}{formatAmt(invoiceDiscount)}</span></div>
+                        <div className="flex justify-between w-full text-black"><span>Discount:</span><span className="font-semibold">- {currentSymbol}{formatAmt(invoiceDiscount)}</span></div>
                     )}
                     {parseFloat(taxAmount || 0) > 0 && (
-                        <div className="flex justify-between w-full"><span>Tax:</span><span className="font-black">{currentSymbol}{formatAmt(taxAmount)}</span></div>
+                        <div className="flex justify-between w-full"><span>Tax:</span><span className="font-semibold">{currentSymbol}{formatAmt(taxAmount)}</span></div>
                     )}
                     {(parseFloat(deliveryCharge || 0) > 0 || hasDeliveryCharge) && (
-                        <div className="flex justify-between w-full"><span>Delivery Charge:</span><span className="font-black">+{currentSymbol}{formatAmt(deliveryCharge)}</span></div>
+                        <div className="flex justify-between w-full"><span>Delivery Charge:</span><span className="font-semibold">+{currentSymbol}{formatAmt(deliveryCharge)}</span></div>
                     )}
-                    <div className="flex justify-between w-full text-[13px] border-t-2 border-black pt-1 mt-1 font-black"><span>TOTAL:</span><span>{currentSymbol}{formatAmt(totalAmount)}</span></div>
+                    <div className="flex justify-between w-full text-[13px] border-t-2 border-black pt-1 mt-1 font-bold"><span>TOTAL:</span><span>{currentSymbol}{formatAmt(totalAmount)}</span></div>
                     {paymentMethod && (
-                        <div className="flex justify-between w-full text-[10.5px] pt-1 font-bold"><span>Payment Method:</span><span className="font-black">{paymentMethod}</span></div>
+                        <div className="flex justify-between w-full text-[10.5px] pt-1"><span>Payment Method:</span><span className="font-semibold">{paymentMethod}</span></div>
                     )}
                     {(() => {
                         const paid = printData.paidAmount !== undefined ? parseFloat(printData.paidAmount) : parseFloat(paidAmount || 0);
@@ -229,24 +221,24 @@ const ProfessionalInvoice = React.forwardRef(({ printData, companyProfile, previ
                         return (
                             <>
                                 {paymentsList.length > 1 && (
-                                    <div className="w-full text-[10px] text-black pl-2 border-l border-black my-0.5 space-y-0.5 font-bold">
+                                    <div className="w-full text-[10px] text-black pl-2 border-l border-black my-0.5 space-y-0.5 font-normal">
                                         {paymentsList.map((p, idx) => (
                                             <div key={idx} className="flex justify-between">
                                                 <span>{p.method}:</span>
-                                                <span className="font-black">{currentSymbol}{formatAmt(p.amount)}</span>
+                                                <span className="font-semibold">{currentSymbol}{formatAmt(p.amount)}</span>
                                             </div>
                                         ))}
                                     </div>
                                 )}
-                                <div className="flex justify-between w-full text-[10.5px] text-black font-bold"><span>Amount Paid:</span><span className="font-black">{currentSymbol}{formatAmt(paid)}</span></div>
+                                <div className="flex justify-between w-full text-[10.5px] text-black"><span>Amount Paid:</span><span className="font-semibold">{currentSymbol}{formatAmt(paid)}</span></div>
                                 {bal > 0.01 && (
-                                    <div className="flex justify-between w-full text-[10.5px] text-black font-black"><span>Balance Due:</span><span>{currentSymbol}{formatAmt(bal)}</span></div>
+                                    <div className="flex justify-between w-full text-[10.5px] text-black font-bold"><span>Balance Due:</span><span>{currentSymbol}{formatAmt(bal)}</span></div>
                                 )}
                             </>
                         );
                     })()}
                 </div>
-                <div className="text-center mt-4 pt-2 border-t border-dashed border-black text-[10.5px] font-bold tracking-wider text-black"><p>{settings.footerText || settings.footerNote || 'THANK YOU!'}</p></div>
+                <div className="text-center mt-4 pt-2 border-t border-dashed border-black text-[9.5px] font-medium tracking-wider text-black"><p>{settings.footerText || settings.footerNote || 'THANK YOU!'}</p></div>
             </div>
         );
     }
