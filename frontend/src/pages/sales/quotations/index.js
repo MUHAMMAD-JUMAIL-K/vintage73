@@ -6,6 +6,7 @@ import { toast } from 'react-toastify';
 import { useReactToPrint } from 'react-to-print';
 import ProfessionalInvoice from '@/components/ProfessionalInvoice';
 import Swal from 'sweetalert2';
+import { getCurrencySymbol, normalizeCurrencySymbol, formatAmountWithCurrency } from '@/lib/currency';
 
 export default function QuotationsList() {
     const [quotations, setQuotations] = useState([]);
@@ -179,7 +180,7 @@ export default function QuotationsList() {
                                     {q.customer?.name || 'Walk-in'}
                                 </td>
                                 <td className="px-6 py-4 text-sm text-right font-medium text-slate-700">
-                                    ₹{Number(q.totalAmount).toFixed(2)}
+                                    {formatAmountWithCurrency(q.totalAmount, q.currencyCode || companyProfile?.currencyCode, q.currencySymbol || companyProfile?.currencySymbol)}
                                 </td>
                                 <td className="px-6 py-4">
                                     <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium
@@ -208,7 +209,7 @@ export default function QuotationsList() {
                                             let msg = wsSettings.quotationTemplate || '';
                                             msg = msg.replace(/\[\[customer_name\]\]/g, q.customer?.name || 'Customer')
                                                 .replace(/\[\[quotation_no\]\]/g, q.quotationNumber)
-                                                .replace(/\[\[total_amount\]\]/g, `₹${Number(q.totalAmount).toFixed(2)}`)
+                                                .replace(/\[\[total_amount\]\]/g, formatAmountWithCurrency(q.totalAmount, q.currencyCode || companyProfile?.currencyCode, q.currencySymbol || companyProfile?.currencySymbol))
                                                 .replace(/\[\[company_name\]\]/g, companyProfile?.companyName || 'Our Store');
 
                                             try {

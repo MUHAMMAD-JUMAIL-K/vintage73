@@ -10,6 +10,7 @@ import {
 } from 'recharts';
 import { useTheme } from '@/context/ThemeContext';
 import SearchableSelect from '@/components/SearchableSelect';
+import { getCurrencySymbol, normalizeCurrencySymbol, formatAmountWithCurrency } from '@/lib/currency';
 
 export default function SalesPerformance() {
     const { theme } = useTheme();
@@ -22,17 +23,18 @@ export default function SalesPerformance() {
 
     const [branches, setBranches] = useState([]);
     const [selectedBranch, setSelectedBranch] = useState('');
+    const [companyProfile, setCompanyProfile] = useState(null);
     const [user, setUser] = useState(null);
 
     useEffect(() => {
+        api.get('/company').then(res => setCompanyProfile(res.data)).catch(console.error);
+        api.get('/branches').then(res => setBranches(res.data)).catch(console.error);
+
         const storedUser = localStorage.getItem('user');
         if (storedUser) {
             const u = JSON.parse(storedUser);
             setUser(u);
             setSelectedBranch(u.branchId?.toString() || '');
-            if (u.role === 'admin') {
-                api.get('/branches').then(res => setBranches(res.data)).catch(console.error);
-            }
         }
     }, []);
 
@@ -82,6 +84,10 @@ export default function SalesPerformance() {
     }, [startDate, endDate, sales, selectedBranch]);
 
     // Calculations
+    const currentBranch = branches.find(b => b.id?.toString() === selectedBranch?.toString());
+    const activeCurrencyCode = currentBranch?.currencyCode || companyProfile?.currencyCode || 'INR';
+    const activeCurrencySymbol = normalizeCurrencySymbol(currentBranch?.currencySymbol || companyProfile?.currencySymbol, activeCurrencyCode);
+
     const activeSales = filteredSales.filter(s => s.status !== 'cancelled');
     const grossSales = activeSales.reduce((sum, s) => sum + parseFloat(s.totalAmount), 0);
     const totalTax = activeSales.reduce((sum, s) => sum + parseFloat(s.taxAmount), 0);
@@ -187,7 +193,7 @@ export default function SalesPerformance() {
                         <div className="group bg-slate-900 rounded-2xl p-5 relative overflow-hidden transition-all hover:translate-y-[-2px] hover:shadow-lg hover:shadow-indigo-500/10">
                             <div className="relative z-10">
                                 <p className="text-indigo-300/80 text-[9px] font-medium uppercase tracking-widest mb-1">Gross Revenue</p>
-                                <h3 className="text-2xl font-bold text-white tabular-nums">₹{grossSales.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</h3>
+                                <h3 className="text-2xl font-bold text-white tabular-nums">{formatAmountWithCurrency(grossSales, activeCurrencyCode, activeCurrencySymbol)}</h3>
                                 <p className="mt-2 text-[10px] text-indigo-400 font-medium flex items-center gap-1">
                                     <FiTrendingUp size={10} /> Insights Active
                                 </p>
@@ -197,7 +203,7 @@ export default function SalesPerformance() {
 
                         <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm transition-all hover:translate-y-[-2px]">
                             <p className="text-slate-400 text-[9px] font-medium uppercase tracking-widest mb-1">Net Revenue</p>
-                            <h3 className="text-2xl font-bold text-slate-900 tabular-nums">₹{netRevenue.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</h3>
+                            <h3 className="text-2xl font-bold text-slate-900 tabular-nums">{formatAmountWithCurrency(netRevenue, activeCurrencyCode, activeCurrencySymbol)}</h3>
                             <div className="mt-2 text-[10px] font-medium text-slate-500 uppercase">After Returns & Cancellations</div>
                         </div>
 
@@ -206,7 +212,7 @@ export default function SalesPerformance() {
                                 <p className="text-slate-400 text-[9px] font-extrabold uppercase tracking-widest">Total Tax</p>
                                 <FiActivity size={12} className="text-indigo-400" />
                             </div>
-                            <h3 className="text-2xl font-extrabold text-slate-900 tabular-nums">₹{totalTax.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</h3>
+                            <h3 className="text-2xl font-extrabold text-slate-900 tabular-nums">{formatAmountWithCurrency(totalTax, activeCurrencyCode, activeCurrencySymbol)}</h3>
                             <p className="mt-2 text-[9px] text-slate-400 font-medium uppercase tracking-wider">GST Liability Tracked</p>
                         </div>
 
@@ -215,7 +221,7 @@ export default function SalesPerformance() {
                                 <p className="text-slate-400 text-[9px] font-medium uppercase tracking-widest">Discounts Given</p>
                                 <FiPercent size={12} className="text-rose-400" />
                             </div>
-                            <h3 className="text-2xl font-extrabold text-slate-900 tabular-nums">₹{totalDiscount.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</h3>
+                            <h3 className="text-2xl font-extrabold text-slate-900 tabular-nums">{formatAmountWithCurrency(totalDiscount, activeCurrencyCode, activeCurrencySymbol)}</h3>
                             <p className="mt-2 text-[9px] text-rose-500 font-medium uppercase tracking-widest">Promotion Impact</p>
                         </div>
                     </div>
@@ -315,7 +321,7 @@ export default function SalesPerformance() {
                                             <p className="text-[9px] text-slate-400 font-medium uppercase">{p.quantity} Units Sold</p>
                                         </div>
                                         <div className="text-right">
-                                            <p className="text-sm font-extrabold text-slate-900 tabular-nums">₹{p.total.toLocaleString()}</p>
+                                            <p className="text-sm font-extrabold text-slate-900 tabular-nums">{formatAmountWithCurrency(p.total, activeCurrencyCode, activeCurrencySymbol)}</p>
                                             <div className="w-24 h-1.5 bg-slate-100 rounded-full mt-1.5 overflow-hidden">
                                                 <div className="h-full bg-primary" style={{ backgroundColor: theme.primaryColor, width: `${sortedProducts[0].total > 0 ? (p.total / sortedProducts[0].total) * 100 : 0}%` }}></div>
                                             </div>
@@ -337,10 +343,10 @@ export default function SalesPerformance() {
                                             <p className="text-[10px] font-medium text-slate-400 uppercase">{ps.method}</p>
                                             <FiPieChart size={12} className="text-slate-200" />
                                         </div>
-                                        <p className="text-lg font-medium text-slate-900 tabular-nums">₹{ps.net.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</p>
+                                        <p className="text-lg font-medium text-slate-900 tabular-nums">{formatAmountWithCurrency(ps.net, activeCurrencyCode, activeCurrencySymbol)}</p>
                                         <div className="flex justify-between items-center pt-2 mt-2 border-t border-slate-200/50">
-                                            <span className="text-[9px] font-medium text-emerald-500 uppercase">+{ps.receipts.toLocaleString()}</span>
-                                            <span className="text-[9px] font-medium text-rose-400 uppercase">-{ps.payments.toLocaleString()}</span>
+                                            <span className="text-[9px] font-medium text-emerald-500 uppercase">+{formatAmountWithCurrency(ps.receipts, activeCurrencyCode, activeCurrencySymbol)}</span>
+                                            <span className="text-[9px] font-medium text-rose-400 uppercase">-{formatAmountWithCurrency(ps.payments, activeCurrencyCode, activeCurrencySymbol)}</span>
                                         </div>
                                     </div>
                                 ))}

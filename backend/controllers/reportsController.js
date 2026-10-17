@@ -798,6 +798,31 @@ exports.getSalesAnalyticsReport = asyncHandler(async (req, res) => {
     netSales: Number(summary.reduce((sum, s) => sum + (s.status !== 'cancelled' ? s.totalAmount : 0), 0).toFixed(2))
   };
 
+  // 8. Resolve active currency for branch / company context
+  let currency = null;
+  if (effectiveBranchId) {
+    const branch = await prisma.branch.findUnique({
+      where: { id: effectiveBranchId },
+      select: { currencyCode: true, currencySymbol: true }
+    });
+    if (branch) {
+      currency = {
+        code: branch.currencyCode || 'INR',
+        symbol: branch.currencySymbol || '₹'
+      };
+    }
+  }
+
+  if (!currency) {
+    const company = await prisma.companyProfile.findFirst({
+      select: { currencyCode: true, currencySymbol: true }
+    });
+    currency = {
+      code: company?.currencyCode || 'INR',
+      symbol: company?.currencySymbol || '₹'
+    };
+  }
+
   res.json({
     dashboard: {
       kpis: {
@@ -818,6 +843,7 @@ exports.getSalesAnalyticsReport = asyncHandler(async (req, res) => {
     },
     summary,
     detailed,
-    summaryTotals
+    summaryTotals,
+    currency
   });
 });

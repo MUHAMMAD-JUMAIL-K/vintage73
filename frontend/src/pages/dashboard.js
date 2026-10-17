@@ -8,6 +8,7 @@ import { TbBusinessplan } from 'react-icons/tb';
 import { useReactToPrint } from 'react-to-print';
 import { toast } from 'react-toastify';
 import DynamicInvoice from '@/components/DynamicInvoice';
+import { getCurrencySymbol, normalizeCurrencySymbol, formatAmountWithCurrency } from '@/lib/currency';
 
 export default function Dashboard() {
   const [data, setData] = useState(null);
@@ -15,6 +16,7 @@ export default function Dashboard() {
   const [userData, setUserData] = useState(null);
   const [printSale, setPrintSale] = useState(null);
   const [companyProfile, setCompanyProfile] = useState(null);
+  const [branch, setBranch] = useState(null);
   const [invoiceSettings, setInvoiceSettings] = useState(null);
   const componentRef = useRef();
 
@@ -47,6 +49,10 @@ export default function Dashboard() {
 
       if (compRes.data) {
         setCompanyProfile(compRes.data);
+      }
+
+      if (branchRes?.data) {
+        setBranch(branchRes.data);
       }
 
       if (branchRes?.data?.invoiceSettings) {
@@ -124,6 +130,9 @@ export default function Dashboard() {
     );
   }
 
+  const activeCurrencyCode = branch?.currencyCode || companyProfile?.currencyCode || 'INR';
+  const activeCurrencySymbol = normalizeCurrencySymbol(branch?.currencySymbol || companyProfile?.currencySymbol, activeCurrencyCode);
+
   return (
     <div className="space-y-6 md:space-y-8 font-sans relative">
       <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-2 md:gap-4 relative z-10">
@@ -141,7 +150,7 @@ export default function Dashboard() {
         {hasAccess('SALES') && (
           <DarkStatCard
             title="Total Sales"
-            value={`${companyProfile?.currencySymbol || '₹'}${Number(data.sales.total).toFixed(2)}`}
+            value={formatAmountWithCurrency(data.sales.total, activeCurrencyCode, activeCurrencySymbol)}
             subtext={`${data.sales.count} transactions`}
             icon={<FiTrendingUp />}
           />
@@ -149,7 +158,7 @@ export default function Dashboard() {
         {hasAccess('SALES') && (
           <DarkStatCard
             title="Today's Sales"
-            value={`${companyProfile?.currencySymbol || '₹'}${Number(data.sales.today).toFixed(2)}`}
+            value={formatAmountWithCurrency(data.sales.today, activeCurrencyCode, activeCurrencySymbol)}
             subtext={`${data.sales.todayCount} sales today`}
             icon={<FiDollarSign />}
           />
@@ -192,7 +201,7 @@ export default function Dashboard() {
                       <p className="text-[11px] md:text-xs text-slate-400 mt-0.5">{new Date(sale.createdAt).toLocaleDateString()}</p>
                     </div>
                     <div className="flex items-center gap-2 md:gap-3">
-                      <span className="font-medium text-primary text-[13px] md:text-sm">₹{Number(sale.totalAmount).toFixed(2)}</span>
+                      <span className="font-medium text-primary text-[13px] md:text-sm">{formatAmountWithCurrency(sale.totalAmount, sale.currencyCode || activeCurrencyCode, sale.currencySymbol || activeCurrencySymbol)}</span>
                       <button
                         onClick={() => triggerPrint(sale)}
                         className="p-1.5 text-slate-400 hover:text-primary hover:bg-primary-light rounded-md transition-all opacity-100 md:opacity-0 md:group-hover:opacity-100"
@@ -227,7 +236,7 @@ export default function Dashboard() {
                     </div>
                     <div className="text-right whitespace-nowrap">
                       <p className={`font-medium text-[13px] md:text-sm ${item.stock < 10 ? 'text-red-500' : 'text-slate-800'}`}>{item.stock} units</p>
-                      <p className="text-[11px] md:text-xs text-slate-400 mt-0.5">₹{Number(item.price).toFixed(2)}</p>
+                      <p className="text-[11px] md:text-xs text-slate-400 mt-0.5">{formatAmountWithCurrency(item.price, activeCurrencyCode, activeCurrencySymbol)}</p>
                     </div>
                   </div>
                 ))
@@ -283,24 +292,32 @@ export default function Dashboard() {
               value={data.finance.receipts}
               color="text-primary"
               bgColor="bg-primary-light"
+              currencyCode={activeCurrencyCode}
+              currencySymbol={activeCurrencySymbol}
             />
             <FinanceCard
               label="Total Expenses"
               value={data.finance.expenses}
               color="text-red-500"
               bgColor="bg-red-50"
+              currencyCode={activeCurrencyCode}
+              currencySymbol={activeCurrencySymbol}
             />
             <FinanceCard
               label="Total Purchases"
               value={data.finance.purchases}
               color="text-blue-600"
               bgColor="bg-blue-50"
+              currencyCode={activeCurrencyCode}
+              currencySymbol={activeCurrencySymbol}
             />
             <FinanceCard
               label="Net Profit"
               value={data.finance.netProfit}
               color="text-purple-600"
               bgColor="bg-purple-50"
+              currencyCode={activeCurrencyCode}
+              currencySymbol={activeCurrencySymbol}
             />
           </div>
         </div>
@@ -338,12 +355,15 @@ function DarkStatCard({ title, value, subtext, icon }) {
   );
 }
 
-function FinanceCard({ label, value, color, bgColor }) {
+function FinanceCard({ label, value, color, bgColor, currencyCode, currencySymbol }) {
+  const num = Number(value) || 0;
+  const sign = num < 0 ? '-' : '';
+  const formatted = formatAmountWithCurrency(Math.abs(num), currencyCode, currencySymbol);
   return (
     <div className={`rounded-xl p-3 md:p-6 flex flex-col items-center justify-center text-center ${bgColor} border-2 border-white shadow-sm`}>
       <p className="text-slate-500 text-[10px] md:text-xs font-medium uppercase tracking-wider mb-1 md:mb-2">{label}</p>
       <p className={`text-lg md:text-2xl font-semibold ${color} truncate max-w-full`}>
-        {Number(value) < 0 ? '-' : ''}₹{Math.abs(Number(value)).toFixed(2)}
+        {sign}{formatted}
       </p>
     </div>
   );

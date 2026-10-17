@@ -14,6 +14,7 @@ import {
 import ProfessionalInvoice from '@/components/ProfessionalInvoice';
 import SearchableSelect from '@/components/SearchableSelect';
 import { useTheme } from '@/context/ThemeContext';
+import { formatCurrency, getCurrencySymbol } from '@/lib/currency';
 
 // Timezone-aware date utilities for Business Timezone (Asia/Kolkata, UTC+5:30)
 const BUSINESS_TZ = 'Asia/Kolkata';
@@ -119,17 +120,44 @@ export default function SalesReport() {
 
     const componentRef = useRef();
 
+    // Dynamic branch and currency resolution
+    const activeBranch = useMemo(() => {
+        if (!selectedBranch || selectedBranch === 'all') {
+            if (user?.branchId) {
+                return branches.find(b => b.id?.toString() === user.branchId?.toString()) || null;
+            }
+            return null;
+        }
+        return branches.find(b => b.id?.toString() === selectedBranch?.toString()) || null;
+    }, [branches, selectedBranch, user]);
+
+    const activeCurrencyCode = useMemo(() => {
+        if (activeBranch?.currencyCode) return activeBranch.currencyCode;
+        if (reportData?.currency?.code) return reportData.currency.code;
+        return companyProfile?.currencyCode || 'INR';
+    }, [activeBranch, reportData?.currency, companyProfile]);
+
+    const activeCurrencySymbol = useMemo(() => {
+        if (activeBranch?.currencySymbol) return activeBranch.currencySymbol;
+        if (reportData?.currency?.symbol) return reportData.currency.symbol;
+        return companyProfile?.currencySymbol || getCurrencySymbol(activeCurrencyCode) || '₹';
+    }, [activeBranch, reportData?.currency, companyProfile, activeCurrencyCode]);
+
     // Initial setup: User, branches, salesmen, settings
     useEffect(() => {
         const storedUser = localStorage.getItem('user');
         if (storedUser) {
             const u = JSON.parse(storedUser);
             setUser(u);
-            setSelectedBranch(u.branchId?.toString() || '');
-            if (u.role === 'admin') {
-                api.get('/branches').then(res => setBranches(res.data)).catch(console.error);
-            }
+            setSelectedBranch(u.branchId?.toString() || (u.role === 'admin' ? 'all' : ''));
         }
+
+        // Fetch branches unconditionally so branch currency metadata is always available
+        api.get('/branches').then(res => {
+            if (Array.isArray(res.data)) {
+                setBranches(res.data);
+            }
+        }).catch(console.error);
 
         // Fetch salesmen / staff for filter
         api.get('/users').then(res => {
@@ -322,7 +350,7 @@ export default function SalesReport() {
 
         if (activeTab === 'summary') {
             csvRows = [
-                ['Invoice #', 'Date', 'Customer', 'Phone', 'Salesman', 'Payment Methods', 'Subtotal', 'Discount', 'Tax', 'Total Amount', 'Status'],
+                ['Invoice #', 'Date', 'Customer', 'Phone', 'Salesman', 'Payment Methods', `Subtotal (${activeCurrencyCode})`, `Discount (${activeCurrencyCode})`, `Tax (${activeCurrencyCode})`, `Total Amount (${activeCurrencyCode})`, 'Status'],
                 ...filteredSummary.map(s => [
                     `"${s.invoiceNumber}"`,
                     `"${formatDisplayDate(s.saleDate)}"`,
@@ -339,7 +367,7 @@ export default function SalesReport() {
             ];
         } else if (activeTab === 'detailed') {
             csvRows = [
-                ['Invoice #', 'Date', 'Customer', 'Phone', 'Salesman', 'Payment Method', 'Product Name', 'Product Type', 'Gender', 'Size', 'Barcode', 'Quantity', 'Unit Price', 'Discount', 'Tax', 'Line Total', 'Purchase Cost', 'Profit', 'Status'],
+                ['Invoice #', 'Date', 'Customer', 'Phone', 'Salesman', 'Payment Method', 'Product Name', 'Product Type', 'Gender', 'Size', 'Barcode', 'Quantity', `Unit Price (${activeCurrencyCode})`, `Discount (${activeCurrencyCode})`, `Tax (${activeCurrencyCode})`, `Line Total (${activeCurrencyCode})`, `Purchase Cost (${activeCurrencyCode})`, `Profit (${activeCurrencyCode})`, 'Status'],
                 ...filteredDetailed.map(row => [
                     `"${row.invoiceNumber}"`,
                     `"${formatDisplayDate(row.saleDate)}"`,
@@ -366,7 +394,7 @@ export default function SalesReport() {
             // Dashboard Export
             const kpis = reportData.dashboard.kpis;
             csvRows = [
-                ['KPI Metric', 'Value'],
+                ['KPI Metric', `Value (${activeCurrencyCode} where applicable)`],
                 ['Total Sales', kpis.totalSales],
                 ['Total Invoices', kpis.totalInvoices],
                 ['Total Items Sold', kpis.totalItemsSold],
@@ -378,12 +406,12 @@ export default function SalesReport() {
                 ['Gross Profit', kpis.grossProfit],
                 ['Profit Margin %', `${kpis.profitMargin}%`],
                 [],
-                ['Payment Method', 'Amount', 'Count', 'Share %'],
+                ['Payment Method', `Amount (${activeCurrencyCode})`, 'Count', 'Share %'],
                 ...reportData.dashboard.paymentSummary.map(p => [
                     `"${p.method}"`, p.amount, p.count, `${p.percentage}%`
                 ]),
                 [],
-                ['Top Product', 'Product Type', 'Qty Sold', 'Revenue'],
+                ['Top Product', 'Product Type', 'Qty Sold', `Revenue (${activeCurrencyCode})`],
                 ...reportData.dashboard.topProducts.map(tp => [
                     `"${tp.name}"`, `"${tp.productTypeName}"`, tp.qtySold, tp.salesAmount
                 ])
@@ -509,7 +537,7 @@ export default function SalesReport() {
                                 Branch
                             </label>
                             <div className="h-10 px-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-600 flex items-center font-medium">
-                                Current Branch
+                                {activeBranch ? activeBranch.name : 'Current Branch'}
                             </div>
                         </div>
                     )}
@@ -664,7 +692,7 @@ export default function SalesReport() {
                             </div>
                             <div className="mt-2">
                                 <h3 className="text-xl sm:text-2xl font-black text-slate-900 tabular-nums">
-                                    ₹{kpis.totalSales.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                                    {formatCurrency(kpis.totalSales, activeCurrencyCode)}
                                 </h3>
                                 <p className="text-[10px] text-slate-400 mt-0.5">Net Revenue (after returns)</p>
                             </div>
@@ -702,7 +730,7 @@ export default function SalesReport() {
                             </div>
                             <div className="mt-2">
                                 <h3 className="text-xl sm:text-2xl font-black text-slate-900 tabular-nums">
-                                    ₹{kpis.totalDiscount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                                    {formatCurrency(kpis.totalDiscount, activeCurrencyCode)}
                                 </h3>
                                 <p className="text-[10px] text-slate-400 mt-0.5">Customer discounts given</p>
                             </div>
@@ -716,7 +744,7 @@ export default function SalesReport() {
                             </div>
                             <div className="mt-2">
                                 <h3 className="text-xl sm:text-2xl font-black text-slate-900 tabular-nums">
-                                    ₹{kpis.totalTax.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                                    {formatCurrency(kpis.totalTax, activeCurrencyCode)}
                                 </h3>
                                 <p className="text-[10px] text-slate-400 mt-0.5">Collected GST / VAT</p>
                             </div>
@@ -730,7 +758,7 @@ export default function SalesReport() {
                             </div>
                             <div className="mt-2">
                                 <h3 className="text-xl sm:text-2xl font-black text-slate-900 tabular-nums">
-                                    ₹{kpis.netSales.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                                    {formatCurrency(kpis.netSales, activeCurrencyCode)}
                                 </h3>
                                 <p className="text-[10px] text-slate-400 mt-0.5">Pre-tax subtotal</p>
                             </div>
@@ -744,7 +772,7 @@ export default function SalesReport() {
                             </div>
                             <div className="mt-2">
                                 <h3 className="text-xl sm:text-2xl font-black text-slate-900 tabular-nums">
-                                    ₹{kpis.avgBillValue.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                                    {formatCurrency(kpis.avgBillValue, activeCurrencyCode)}
                                 </h3>
                                 <p className="text-[10px] text-slate-400 mt-0.5">Sales / Invoice count</p>
                             </div>
@@ -758,7 +786,7 @@ export default function SalesReport() {
                             </div>
                             <div className="mt-2">
                                 <h3 className="text-xl sm:text-2xl font-black text-slate-900 tabular-nums">
-                                    ₹{kpis.totalCost.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                                    {formatCurrency(kpis.totalCost, activeCurrencyCode)}
                                 </h3>
                                 <p className="text-[10px] text-slate-400 mt-0.5">COGS from inventory cost</p>
                             </div>
@@ -772,7 +800,7 @@ export default function SalesReport() {
                             </div>
                             <div className="mt-2">
                                 <h3 className={`text-xl sm:text-2xl font-black tabular-nums ${kpis.grossProfit >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
-                                    ₹{kpis.grossProfit.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                                    {formatCurrency(kpis.grossProfit, activeCurrencyCode)}
                                 </h3>
                                 <p className="text-[10px] text-slate-400 mt-0.5">Total Sales - Total Cost</p>
                             </div>
@@ -820,9 +848,9 @@ export default function SalesReport() {
                                         </defs>
                                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                                         <XAxis dataKey="dateLabel" tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: '#64748b' }} />
-                                        <YAxis tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: '#64748b' }} tickFormatter={v => `₹${v >= 1000 ? `${(v / 1000).toFixed(0)}k` : v}`} />
+                                        <YAxis tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: '#64748b' }} tickFormatter={v => `${activeCurrencySymbol}${v >= 1000 ? `${(v / 1000).toFixed(0)}k` : v}`} />
                                         <Tooltip
-                                            formatter={(value) => [`₹${parseFloat(value).toLocaleString('en-IN')}`, 'Sales Revenue']}
+                                            formatter={(value) => [formatCurrency(parseFloat(value) || 0, activeCurrencyCode), 'Sales Revenue']}
                                             labelFormatter={(label) => `Date: ${label}`}
                                             contentStyle={{ borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }}
                                         />
@@ -858,7 +886,7 @@ export default function SalesReport() {
                                                     </span>
                                                     <div className="text-right">
                                                         <span className="font-extrabold text-slate-900 tabular-nums">
-                                                            ₹{p.amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                                                            {formatCurrency(p.amount, activeCurrencyCode)}
                                                         </span>
                                                         <span className="text-xs text-slate-400 ml-2 font-medium">({p.percentage}%)</span>
                                                     </div>
@@ -924,7 +952,7 @@ export default function SalesReport() {
                                                         </td>
                                                         <td className="py-3 text-center font-bold text-slate-700">{tp.qtySold}</td>
                                                         <td className="py-3 text-right font-extrabold text-slate-900 tabular-nums">
-                                                            ₹{tp.salesAmount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                                                            {formatCurrency(tp.salesAmount, activeCurrencyCode)}
                                                         </td>
                                                     </tr>
                                                 ))
@@ -955,19 +983,19 @@ export default function SalesReport() {
                         </div>
                         <div className="bg-white p-3 rounded-xl border border-slate-100 shadow-xs">
                             <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Subtotal</span>
-                            <p className="text-base font-extrabold text-slate-900 mt-0.5">₹{reportData.summaryTotals.subTotal.toLocaleString('en-IN')}</p>
+                            <p className="text-base font-extrabold text-slate-900 mt-0.5">{formatCurrency(reportData.summaryTotals.subTotal, activeCurrencyCode)}</p>
                         </div>
                         <div className="bg-white p-3 rounded-xl border border-slate-100 shadow-xs">
                             <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Discount</span>
-                            <p className="text-base font-extrabold text-slate-900 mt-0.5">₹{reportData.summaryTotals.totalDiscount.toLocaleString('en-IN')}</p>
+                            <p className="text-base font-extrabold text-slate-900 mt-0.5">{formatCurrency(reportData.summaryTotals.totalDiscount, activeCurrencyCode)}</p>
                         </div>
                         <div className="bg-white p-3 rounded-xl border border-slate-100 shadow-xs">
                             <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Tax</span>
-                            <p className="text-base font-extrabold text-slate-900 mt-0.5">₹{reportData.summaryTotals.totalTax.toLocaleString('en-IN')}</p>
+                            <p className="text-base font-extrabold text-slate-900 mt-0.5">{formatCurrency(reportData.summaryTotals.totalTax, activeCurrencyCode)}</p>
                         </div>
                         <div className="bg-white p-3 rounded-xl border border-slate-100 shadow-xs">
                             <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Net Sales Total</span>
-                            <p className="text-base font-black text-emerald-600 mt-0.5">₹{reportData.summaryTotals.netSales.toLocaleString('en-IN')}</p>
+                            <p className="text-base font-black text-emerald-600 mt-0.5">{formatCurrency(reportData.summaryTotals.netSales, activeCurrencyCode)}</p>
                         </div>
                     </div>
 
@@ -1023,7 +1051,7 @@ export default function SalesReport() {
                                                             <div className="flex items-center gap-1 text-[9px] text-slate-400 ml-1">
                                                                 {sale.payments.map((p, pIdx) => (
                                                                     <span key={pIdx} className="bg-slate-50 px-1 rounded text-slate-500">
-                                                                        {p.method}: ₹{p.amount}
+                                                                        {p.method}: {formatCurrency(p.amount, activeCurrencyCode)}
                                                                     </span>
                                                                 ))}
                                                             </div>
@@ -1031,16 +1059,16 @@ export default function SalesReport() {
                                                     </div>
                                                 </td>
                                                 <td className="p-3.5 text-right font-medium text-slate-700 tabular-nums">
-                                                    ₹{sale.subTotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                                                    {formatCurrency(sale.subTotal, activeCurrencyCode)}
                                                 </td>
                                                 <td className="p-3.5 text-right font-medium text-amber-600 tabular-nums">
-                                                    {sale.discount > 0 ? `₹${sale.discount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}` : '—'}
+                                                    {sale.discount > 0 ? formatCurrency(sale.discount, activeCurrencyCode) : '—'}
                                                 </td>
                                                 <td className="p-3.5 text-right font-medium text-slate-700 tabular-nums">
-                                                    {sale.taxAmount > 0 ? `₹${sale.taxAmount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}` : '—'}
+                                                    {sale.taxAmount > 0 ? formatCurrency(sale.taxAmount, activeCurrencyCode) : '—'}
                                                 </td>
                                                 <td className="p-3.5 text-right font-extrabold text-slate-900 tabular-nums">
-                                                    ₹{sale.totalAmount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                                                    {formatCurrency(sale.totalAmount, activeCurrencyCode)}
                                                 </td>
                                                 <td className="p-3.5 text-center whitespace-nowrap">
                                                     <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider ${
@@ -1131,11 +1159,11 @@ export default function SalesReport() {
                         </div>
                         <div className="bg-white p-3 rounded-xl border border-slate-100 shadow-xs">
                             <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Total Revenue</span>
-                            <p className="text-base font-extrabold text-slate-900 mt-0.5">₹{detailedTotals.totalSales.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</p>
+                            <p className="text-base font-extrabold text-slate-900 mt-0.5">{formatCurrency(detailedTotals.totalSales, activeCurrencyCode)}</p>
                         </div>
                         <div className="bg-white p-3 rounded-xl border border-slate-100 shadow-xs">
                             <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Estimated Profit</span>
-                            <p className="text-base font-extrabold text-emerald-600 mt-0.5">₹{detailedTotals.totalProfit.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</p>
+                            <p className="text-base font-extrabold text-emerald-600 mt-0.5">{formatCurrency(detailedTotals.totalProfit, activeCurrencyCode)}</p>
                         </div>
                     </div>
 
@@ -1214,22 +1242,22 @@ export default function SalesReport() {
                                                     {row.quantity}
                                                 </td>
                                                 <td className="p-3 text-right font-medium text-slate-800 tabular-nums">
-                                                    ₹{row.unitPrice.toFixed(2)}
+                                                    {formatCurrency(row.unitPrice, activeCurrencyCode)}
                                                 </td>
                                                 <td className="p-3 text-right font-medium text-amber-600 tabular-nums">
-                                                    {row.discountAmount > 0 ? `₹${row.discountAmount.toFixed(2)}` : '—'}
+                                                    {row.discountAmount > 0 ? formatCurrency(row.discountAmount, activeCurrencyCode) : '—'}
                                                 </td>
                                                 <td className="p-3 text-right font-medium text-slate-700 tabular-nums">
-                                                    {row.taxAmount > 0 ? `₹${row.taxAmount.toFixed(2)}` : '—'}
+                                                    {row.taxAmount > 0 ? formatCurrency(row.taxAmount, activeCurrencyCode) : '—'}
                                                 </td>
                                                 <td className="p-3 text-right font-extrabold text-slate-900 tabular-nums">
-                                                    ₹{row.lineTotal.toFixed(2)}
+                                                    {formatCurrency(row.lineTotal, activeCurrencyCode)}
                                                 </td>
                                                 <td className="p-3 text-right font-medium text-slate-600 tabular-nums">
-                                                    {row.purchaseCost !== null ? `₹${row.purchaseCost.toFixed(2)}` : '—'}
+                                                    {row.purchaseCost !== null ? formatCurrency(row.purchaseCost, activeCurrencyCode) : '—'}
                                                 </td>
                                                 <td className={`p-3 text-right font-bold tabular-nums ${row.profit !== null && row.profit >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
-                                                    {row.profit !== null ? `₹${row.profit.toFixed(2)}` : '—'}
+                                                    {row.profit !== null ? formatCurrency(row.profit, activeCurrencyCode) : '—'}
                                                 </td>
                                                 <td className="p-3 whitespace-nowrap text-slate-600">
                                                     <span className="px-1.5 py-0.5 rounded bg-slate-100 text-[10px] font-medium">
@@ -1327,7 +1355,7 @@ export default function SalesReport() {
                                         selectedSale.payments.map((p, idx) => (
                                             <span key={idx} className="px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-xs font-semibold text-slate-800 flex items-center gap-1.5">
                                                 <span className="w-2 h-2 rounded-full bg-primary" style={{ backgroundColor: theme.primaryColor }}></span>
-                                                {p.method}: <strong className="text-slate-900">₹{p.amount.toFixed(2)}</strong>
+                                                {p.method}: <strong className="text-slate-900">{formatCurrency(p.amount, activeCurrencyCode)}</strong>
                                             </span>
                                         ))
                                     ) : (
@@ -1359,13 +1387,13 @@ export default function SalesReport() {
                                                     {item.productTypeName !== '—' && <span className="font-medium mr-1.5">{item.productTypeName}</span>}
                                                     {item.size && item.size !== '—' && (
                                                         <span className="px-1.5 py-0.5 rounded bg-slate-100 font-bold text-[10px] text-slate-700">
-                                                            {item.size}
+                                                             {item.size}
                                                         </span>
                                                     )}
                                                 </td>
                                                 <td className="py-2.5 text-center font-bold text-slate-800">{item.quantity}</td>
-                                                <td className="py-2.5 text-right font-medium text-slate-700">₹{item.unitPrice.toFixed(2)}</td>
-                                                <td className="py-2.5 text-right font-bold text-slate-900">₹{item.total.toFixed(2)}</td>
+                                                <td className="py-2.5 text-right font-medium text-slate-700">{formatCurrency(item.unitPrice, activeCurrencyCode)}</td>
+                                                <td className="py-2.5 text-right font-bold text-slate-900">{formatCurrency(item.total, activeCurrencyCode)}</td>
                                             </tr>
                                         ))}
                                     </tbody>
@@ -1376,21 +1404,21 @@ export default function SalesReport() {
                             <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 space-y-1.5 text-xs">
                                 <div className="flex justify-between text-slate-600">
                                     <span>Subtotal:</span>
-                                    <span className="font-medium">₹{selectedSale.subTotal.toFixed(2)}</span>
+                                    <span className="font-medium">{formatCurrency(selectedSale.subTotal, activeCurrencyCode)}</span>
                                 </div>
                                 {selectedSale.discount > 0 && (
                                     <div className="flex justify-between text-amber-600">
                                         <span>Discount:</span>
-                                        <span className="font-medium">-₹{selectedSale.discount.toFixed(2)}</span>
+                                        <span className="font-medium">-{formatCurrency(selectedSale.discount, activeCurrencyCode)}</span>
                                     </div>
                                 )}
                                 <div className="flex justify-between text-slate-600">
                                     <span>Tax Amount:</span>
-                                    <span className="font-medium">₹{selectedSale.taxAmount.toFixed(2)}</span>
+                                    <span className="font-medium">{formatCurrency(selectedSale.taxAmount, activeCurrencyCode)}</span>
                                 </div>
                                 <div className="flex justify-between text-base font-black text-slate-900 border-t border-slate-200 pt-2 mt-2">
                                     <span>Total Payable:</span>
-                                    <span className="text-primary" style={{ color: theme.primaryColor }}>₹{selectedSale.totalAmount.toFixed(2)}</span>
+                                    <span className="text-primary" style={{ color: theme.primaryColor }}>{formatCurrency(selectedSale.totalAmount, activeCurrencyCode)}</span>
                                 </div>
                             </div>
                         </div>
@@ -1420,6 +1448,8 @@ export default function SalesReport() {
                     ref={componentRef}
                     printData={{ 
                         ...printSale, 
+                        currencyCode: printSale?.branch?.currencyCode || activeCurrencyCode,
+                        currencySymbol: printSale?.branch?.currencySymbol || activeCurrencySymbol,
                         settings: {
                             ...(printSale?.isReturn ? returnSettings : salesSettings),
                             template: (printSale?.isReturn ? returnSettings?.template : salesSettings?.template) || 'modern'

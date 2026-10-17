@@ -4,12 +4,15 @@ import { useRouter } from 'next/router';
 import { toast } from 'react-toastify';
 import { FiPlus, FiTrash2, FiSave, FiUser, FiCalendar } from 'react-icons/fi';
 import SearchableSelect from '@/components/SearchableSelect';
+import { getCurrencySymbol, normalizeCurrencySymbol, formatAmountWithCurrency } from '@/lib/currency';
 
 export default function CreateQuotation() {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [customers, setCustomers] = useState([]);
     const [products, setProducts] = useState([]);
+    const [currencyCode, setCurrencyCode] = useState('INR');
+    const [currencySymbol, setCurrencySymbol] = useState('₹');
 
     // Form State
     const [formData, setFormData] = useState({
@@ -35,12 +38,31 @@ export default function CreateQuotation() {
 
     const fetchInitialData = async () => {
         try {
-            const [custRes, prodRes] = await Promise.all([
+            const [custRes, prodRes, compRes] = await Promise.all([
                 api.get('/customers'),
-                api.get('/products')
+                api.get('/products'),
+                api.get('/company').catch(() => null)
             ]);
             setCustomers(custRes.data);
             setProducts(prodRes.data);
+
+            let code = compRes?.data?.currencyCode || 'INR';
+            let symbol = compRes?.data?.currencySymbol;
+
+            const stored = typeof window !== 'undefined' ? localStorage.getItem('user') : null;
+            const currentUser = stored ? JSON.parse(stored) : null;
+            if (currentUser?.branchId) {
+                try {
+                    const branchRes = await api.get(`/branches/${currentUser.branchId}`);
+                    if (branchRes?.data?.currencyCode) {
+                        code = branchRes.data.currencyCode;
+                        symbol = branchRes.data.currencySymbol;
+                    }
+                } catch (e) {}
+            }
+
+            setCurrencyCode(code);
+            setCurrencySymbol(normalizeCurrencySymbol(symbol, code));
         } catch (error) {
             console.error(error);
             toast.error('Failed to load customers/products');
@@ -342,15 +364,15 @@ export default function CreateQuotation() {
                                                         value={item.discountAmount}
                                                         onChange={e => updateItem(index, 'discountAmount', e.target.value)}
                                                     />
-                                                    <span className="text-[10px] text-gray-400">₹</span>
+                                                    <span className="text-[10px] text-gray-400">{currencySymbol}</span>
                                                 </div>
                                             </div>
                                         </td>
                                         <td className="py-3 text-sm text-gray-600">
                                             {item.taxRate}%
-                                            <div className="text-[10px] text-gray-400">₹{item.taxAmount?.toFixed(2)}</div>
+                                            <div className="text-[10px] text-gray-400">{formatAmountWithCurrency(item.taxAmount || 0, currencyCode, currencySymbol)}</div>
                                         </td>
-                                        <td className="py-3 font-medium">₹{item.total.toFixed(2)}</td>
+                                        <td className="py-3 font-medium">{formatAmountWithCurrency(item.total, currencyCode, currencySymbol)}</td>
                                         <td className="py-3 text-right">
                                             <button onClick={() => removeItem(index)} className="text-red-500 hover:text-red-700">
                                                 <FiTrash2 />
@@ -363,19 +385,19 @@ export default function CreateQuotation() {
                                 <tr className="border-t border-gray-100">
                                     <td colSpan="5" className="text-right py-2 text-sm text-gray-600">Subtotal (Excl. Tax):</td>
                                     <td colSpan="2" className="py-2 text-right font-medium text-gray-800">
-                                        ₹{formData.items.reduce((sum, item) => sum + (item.total - (item.taxAmount || 0)), 0).toFixed(2)}
+                                        {formatAmountWithCurrency(formData.items.reduce((sum, item) => sum + (item.total - (item.taxAmount || 0)), 0), currencyCode, currencySymbol)}
                                     </td>
                                 </tr>
                                 <tr>
                                     <td colSpan="5" className="text-right py-2 text-sm text-gray-600">Total Tax:</td>
                                     <td colSpan="2" className="py-2 text-right font-medium text-gray-800">
-                                        ₹{formData.items.reduce((sum, item) => sum + (item.taxAmount || 0), 0).toFixed(2)}
+                                        {formatAmountWithCurrency(formData.items.reduce((sum, item) => sum + (item.taxAmount || 0), 0), currencyCode, currencySymbol)}
                                     </td>
                                 </tr>
                                 <tr className="border-t-2 border-gray-100">
                                     <td colSpan="5" className="text-right py-4 font-medium text-gray-600">Grand Total:</td>
                                     <td colSpan="2" className="py-4 text-xl font-semibold text-blue-600 text-right">
-                                        ₹{calculateGrandTotal().toFixed(2)}
+                                        {formatAmountWithCurrency(calculateGrandTotal(), currencyCode, currencySymbol)}
                                     </td>
                                 </tr>
                             </tfoot>
