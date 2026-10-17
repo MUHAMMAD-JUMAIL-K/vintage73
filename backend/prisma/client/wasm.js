@@ -375,7 +375,9 @@ exports.Prisma.SaleScalarFieldEnum = {
   exchangeRate: 'exchangeRate',
   discount: 'discount',
   advanceUsed: 'advanceUsed',
-  description: 'description'
+  description: 'description',
+  deliveryCharge: 'deliveryCharge',
+  hasDeliveryCharge: 'hasDeliveryCharge'
 };
 
 exports.Prisma.SaleItemScalarFieldEnum = {

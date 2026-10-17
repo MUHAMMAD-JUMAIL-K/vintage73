@@ -204,6 +204,13 @@ const DynamicInvoice = forwardRef(({ printData, companyProfile, invoiceSettings 
                 </div>
               ))}
 
+              {(parseFloat(printData.deliveryCharge || 0) > 0 || printData.hasDeliveryCharge) && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', width: '200px', fontSize: '10px' }}>
+                  <span>Delivery Charge:</span>
+                  <span>+{companyProfile?.currencySymbol || '₹'}{parseFloat(printData.deliveryCharge || 0).toFixed(2)}</span>
+                </div>
+              )}
+
               {(parseFloat(printData.roundOffAmount || 0) !== 0) && (
                 <div style={{ display: 'flex', justifyContent: 'space-between', width: '200px', fontSize: '10px', fontStyle: 'italic' }}>
                   <span>Round Off:</span>

@@ -39,7 +39,8 @@ const ProfessionalInvoice = React.forwardRef(({ printData, companyProfile, previ
     const {
         invoiceNumber, quotationNumber, saleDate, quotationDate, createdAt, items, subTotal, taxAmount, totalAmount, roundOffAmount,
         customer, customerName, previousBalance, currentBalance, placeOfSupply,
-        currencyCode, currencySymbol, exchangeRate, discount, advanceUsed, description, notes, terms, paidAmount, paymentMethod
+        currencyCode, currencySymbol, exchangeRate, discount, advanceUsed, description, notes, terms, paidAmount, paymentMethod,
+        deliveryCharge, hasDeliveryCharge
     } = printData;
 
     const isQuotation = !!quotationNumber;
@@ -176,6 +177,9 @@ const ProfessionalInvoice = React.forwardRef(({ printData, companyProfile, previ
                     )}
                     {parseFloat(taxAmount || 0) > 0 && (
                         <div className="flex justify-between w-full"><span>Tax:</span><span>{currentSymbol}{formatAmt(taxAmount)}</span></div>
+                    )}
+                    {(parseFloat(deliveryCharge || 0) > 0 || hasDeliveryCharge) && (
+                        <div className="flex justify-between w-full"><span>Delivery Charge:</span><span>+{currentSymbol}{formatAmt(deliveryCharge)}</span></div>
                     )}
                     <div className="flex justify-between w-full text-[13px] border-t border-black pt-1 mt-1 font-extrabold"><span>TOTAL:</span><span>{currentSymbol}{formatAmt(totalAmount)}</span></div>
                     {paymentMethod && (
@@ -379,6 +383,15 @@ const ProfessionalInvoice = React.forwardRef(({ printData, companyProfile, previ
                                         {settings.showColPrice !== false && <td className="py-0.5 px-3 text-right font-bold text-black border-r border-gray-300">Discount</td>}
                                         {settings.showColTotal !== false && <td className="py-0.5 px-1.5 text-right font-bold text-black">{totalDiscountAmt > 0 ? formatAmt(totalDiscountAmt) : ''}</td>}
                                     </tr>
+
+                                    {/* DELIVERY CHARGE ROW */}
+                                    {(parseFloat(deliveryCharge || 0) > 0 || hasDeliveryCharge) && (
+                                        <tr className="h-5.5">
+                                            <td colSpan={leadCols} className="border-r border-gray-300"></td>
+                                            {settings.showColPrice !== false && <td className="py-0.5 px-3 text-right font-bold text-black border-r border-gray-300">Delivery Charge</td>}
+                                            {settings.showColTotal !== false && <td className="py-0.5 px-1.5 text-right font-bold text-black">+{formatAmt(deliveryCharge)}</td>}
+                                        </tr>
+                                    )}
 
                                     {/* GRAND TOTAL ROW */}
                                     <tr className="h-6 bg-gray-200">
@@ -620,6 +633,14 @@ const ProfessionalInvoice = React.forwardRef(({ printData, companyProfile, previ
                             <div className="flex justify-between items-center text-slate-500 text-[11px] font-medium tracking-tight">
                                 <span className="whitespace-nowrap mr-2">Tax</span>
                                 <span className="font-semibold text-slate-700 whitespace-nowrap">{currentSymbol}{formatAmt(taxAmount)}</span>
+                            </div>
+                        )}
+
+                        {/* Delivery Charge */}
+                        {(parseFloat(deliveryCharge || 0) > 0 || hasDeliveryCharge) && (
+                            <div className="flex justify-between items-center text-slate-500 text-[11px] font-medium tracking-tight">
+                                <span className="whitespace-nowrap mr-2">Delivery Charge</span>
+                                <span className="font-semibold text-slate-700 whitespace-nowrap">+{currentSymbol}{formatAmt(deliveryCharge)}</span>
                             </div>
                         )}
 

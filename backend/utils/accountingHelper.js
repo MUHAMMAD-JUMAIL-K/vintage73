@@ -217,7 +217,7 @@ async function processSalePosting(tx, sale, userId) {
     ];
 
     const tax = parseFloat(String(taxAmount || 0));
-    const sub = parseFloat(String(subTotal || (grandTotal - tax)));
+    const sub = parseFloat((grandTotal - tax).toFixed(2));
 
     if (tax > 0) {
       entries.push({ ledgerId: salesLedger.id, type: 'CREDIT', amount: sub });

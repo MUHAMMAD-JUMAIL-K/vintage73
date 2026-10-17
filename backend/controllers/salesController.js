@@ -9,9 +9,25 @@ exports.createSale = asyncHandler(async (req, res) => {
   const { 
     customerId, items, paymentMethod, paidAmount, discount = 0, advanceRedeemed = 0, saleDate, salesmanId, 
     terminalId, isReturn = false, returnReason = '', originalInvoice = '',
-    currencyCode = 'INR', exchangeRate = 1.0, description
+    currencyCode = 'INR', exchangeRate = 1.0, description,
+    deliveryCharge = 0, hasDeliveryCharge = false
   } = req.body;
   let { branchId } = req.body;
+
+  let effectiveDeliveryCharge = 0;
+  const isDeliveryEnabled = hasDeliveryCharge === true || hasDeliveryCharge === 'true';
+  if (isDeliveryEnabled) {
+    const parsedCharge = parseFloat(deliveryCharge);
+    if (isNaN(parsedCharge) || parsedCharge < 0 || !isFinite(parsedCharge)) {
+      res.status(400);
+      throw new Error('Delivery Charge must be a valid non-negative number.');
+    }
+    if (parsedCharge > 10000000) {
+      res.status(400);
+      throw new Error('Delivery Charge exceeds maximum allowed limit.');
+    }
+    effectiveDeliveryCharge = Number(parsedCharge.toFixed(2));
+  }
 
   if (!branchId && req.user && req.user.branchId) {
     branchId = req.user.branchId;
@@ -195,8 +211,8 @@ exports.createSale = asyncHandler(async (req, res) => {
 
     const reqAdvanceUsed = parseFloat(advanceRedeemed || 0);
 
-    // Explicit Calculation Logic: Total = Subtotal + Tax + RoundOff (Gross)
-    const grandTotal = finalSubTotal + finalTaxAmount + finalRoundOffAmount;
+    // Explicit Calculation Logic: Total = Subtotal + Tax + Delivery Charge + RoundOff (Gross)
+    const grandTotal = finalSubTotal + finalTaxAmount + effectiveDeliveryCharge + finalRoundOffAmount;
     const finalGrandTotal = Number(grandTotal.toFixed(2));
 
     if (finalGrandTotal < 0) {
@@ -289,6 +305,8 @@ exports.createSale = asyncHandler(async (req, res) => {
         taxAmount: finalTaxAmount,
         totalAmount: finalGrandTotal,
         roundOffAmount: finalRoundOffAmount,
+        deliveryCharge: effectiveDeliveryCharge,
+        hasDeliveryCharge: isDeliveryEnabled,
         advanceUsed: reqAdvanceUsed,
         paidAmount: finalPaidAmount,
         balanceAmount: finalBalanceAmount,
@@ -517,13 +535,35 @@ exports.updateSale = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const { 
     customerId, items, paymentMethod, paidAmount, discount = 0, saleDate, salesmanId, 
-    terminalId, currencyCode = 'INR', exchangeRate = 1.0, advanceRedeemed = 0, description
+    terminalId, currencyCode = 'INR', exchangeRate = 1.0, advanceRedeemed = 0, description,
+    deliveryCharge, hasDeliveryCharge
   } = req.body;
   let branchId = req.body.branchId || req.user?.branchId;
 
   const validSaleId = parseInt(id);
   const existing = await prisma.sale.findUnique({ where: { id: validSaleId }, include: { items: true } });
   if (!existing) throw new Error('Sale not found');
+
+  let effectiveDeliveryCharge = 0;
+  let isDeliveryEnabled = false;
+  if (hasDeliveryCharge !== undefined) {
+    isDeliveryEnabled = hasDeliveryCharge === true || hasDeliveryCharge === 'true';
+    if (isDeliveryEnabled) {
+      const parsedCharge = parseFloat(deliveryCharge);
+      if (isNaN(parsedCharge) || parsedCharge < 0 || !isFinite(parsedCharge)) {
+        res.status(400);
+        throw new Error('Delivery Charge must be a valid non-negative number.');
+      }
+      if (parsedCharge > 10000000) {
+        res.status(400);
+        throw new Error('Delivery Charge exceeds maximum allowed limit.');
+      }
+      effectiveDeliveryCharge = Number(parsedCharge.toFixed(2));
+    }
+  } else if (existing.hasDeliveryCharge) {
+    isDeliveryEnabled = true;
+    effectiveDeliveryCharge = Number(parseFloat(existing.deliveryCharge || 0).toFixed(2));
+  }
 
   const result = await prisma.$transaction(async (tx) => {
     // Reverse old stock
@@ -686,8 +726,8 @@ exports.updateSale = asyncHandler(async (req, res) => {
     const finalTaxAmount = Number(taxAmount.toFixed(2));
     const finalDiscount = Math.max(parseFloat(discount || 0), totalItemsDiscount); // Still needed for display/record
     const finalRoundOffAmount = parseFloat(req.body.roundOffAmount || 0);
-    // Explicit Calculation Logic: Total = Subtotal + Tax + RoundOff
-    const grandTotal = finalSubTotal + finalTaxAmount + finalRoundOffAmount;
+    // Explicit Calculation Logic: Total = Subtotal + Tax + Delivery Charge + RoundOff
+    const grandTotal = finalSubTotal + finalTaxAmount + effectiveDeliveryCharge + finalRoundOffAmount;
     const finalGrandTotal = Number(grandTotal.toFixed(2));
     // Payment Breakdown Calculation
     let calculatedPaidAmount = 0;
@@ -726,6 +766,8 @@ exports.updateSale = asyncHandler(async (req, res) => {
         taxAmount: finalTaxAmount,
         totalAmount: finalGrandTotal,
         roundOffAmount: finalRoundOffAmount,
+        deliveryCharge: effectiveDeliveryCharge,
+        hasDeliveryCharge: isDeliveryEnabled,
         paidAmount: finalPaidAmount,
         advanceUsed: parseFloat(advanceRedeemed || 0),
         balanceAmount: finalBalanceAmount,

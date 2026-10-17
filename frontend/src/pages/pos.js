@@ -116,6 +116,8 @@ const CURRENCY_SYMBOLS = {
     // Round Off State
     const [roundOff, setRoundOff] = useState(0);
     const [taxEnabled, setTaxEnabled] = useState(true);
+    const [deliveryChargeEnabled, setDeliveryChargeEnabled] = useState(false);
+    const [deliveryCharge, setDeliveryCharge] = useState('');
     const [currencyCode, setCurrencyCode] = useState('INR');
     const [currencySymbol, setCurrencySymbol] = useState('₹');
     const [exchangeRate, setExchangeRate] = useState(1);
@@ -165,6 +167,8 @@ const CURRENCY_SYMBOLS = {
                     setSalesmanId(parsed.salesmanId || '');
                     setRoundOff(parsed.roundOff || 0);
                     setTaxEnabled(parsed.taxEnabled !== undefined ? parsed.taxEnabled : true);
+                    setDeliveryChargeEnabled(Boolean(parsed.deliveryChargeEnabled));
+                    setDeliveryCharge(parsed.deliveryCharge || '');
                     const restoredCode = parsed.currencyCode || 'INR';
                     setCurrencyCode(restoredCode);
                     setCurrencySymbol(CURRENCY_SYMBOLS[restoredCode] || '₹');
@@ -190,6 +194,8 @@ const CURRENCY_SYMBOLS = {
                 saleDate,
                 roundOff,
                 taxEnabled,
+                deliveryChargeEnabled,
+                deliveryCharge,
                 currencyCode,
                 currencySymbol,
                 exchangeRate,
@@ -198,7 +204,7 @@ const CURRENCY_SYMBOLS = {
             };
             localStorage.setItem(`pos_state_${user.id}`, JSON.stringify(stateToStore));
         }
-    }, [cart, customerId, customerName, salesmanId, saleDate, roundOff, advanceRedeemed, user?.id]);
+    }, [cart, customerId, customerName, salesmanId, saleDate, roundOff, taxEnabled, deliveryChargeEnabled, deliveryCharge, advanceRedeemed, user?.id]);
 
     // Calculations
     const calcResults = useMemo(() => {
@@ -206,8 +212,8 @@ const CURRENCY_SYMBOLS = {
             const effectivePrice = parseFloat(item.price || 0);
             const qty = parseFloat(item.quantity || 0);
             const effectiveDisc = parseFloat(item.discountAmount || 0);
-            
-            const rate = taxEnabled ? parseFloat(item.taxRate || 0) : 0; 
+
+            const rate = taxEnabled ? parseFloat(item.taxRate || 0) : 0;
             const isInc = item.isTaxInclusive === true;
 
             // Net Price = Price - Discount
@@ -220,7 +226,7 @@ const CURRENCY_SYMBOLS = {
             const lineTotalPayable = qty * netPricePerUnit;
 
             if (isInc && rate > 0) {
-                const baseAmount = lineTotalPayable / (1 + (rate / 100)); 
+                const baseAmount = lineTotalPayable / (1 + (rate / 100));
                 lineTax = lineTotalPayable - baseAmount;
                 lineSubTotal = baseAmount;
             } else if (rate > 0) {
@@ -253,14 +259,15 @@ const CURRENCY_SYMBOLS = {
     // Auto-fill advance if toggle is ON
     useEffect(() => {
         if (useFullAdvance && availableAdvance > 0) {
-            const payableBeforeAdvance = (calcResults.subTotal + calcResults.tax + parseFloat(roundOff || 0));
+            const effectiveDelivery = deliveryChargeEnabled ? (parseFloat(deliveryCharge) || 0) : 0;
+            const payableBeforeAdvance = (calcResults.subTotal + calcResults.tax + effectiveDelivery + parseFloat(roundOff || 0));
             const toRedeem = Math.min(availableAdvance, payableBeforeAdvance);
             setAdvanceRedeemed(toRedeem.toFixed(2));
         } else if (useFullAdvance && availableAdvance === 0) {
             setAdvanceRedeemed('');
             setUseFullAdvance(false);
         }
-    }, [useFullAdvance, availableAdvance, calcResults.subTotal, calcResults.tax, roundOff]);
+    }, [useFullAdvance, availableAdvance, calcResults.subTotal, calcResults.tax, roundOff, deliveryChargeEnabled, deliveryCharge]);
 
     const fetchData = async () => {
         try {
@@ -279,9 +286,9 @@ const CURRENCY_SYMBOLS = {
             if (branchRes.data) {
                 setAssignedBranch(branchRes.data);
                 // Robust check for stockIncluded
-                const isStockEnabled = branchRes.data.stockIncluded !== false && 
-                                       branchRes.data.stockIncluded !== 'false' && 
-                                       branchRes.data.stockIncluded !== 0 && 
+                const isStockEnabled = branchRes.data.stockIncluded !== false &&
+                                       branchRes.data.stockIncluded !== 'false' &&
+                                       branchRes.data.stockIncluded !== 0 &&
                                        branchRes.data.stockIncluded !== '0';
                 setBranchSettings({ stockIncluded: isStockEnabled });
 
@@ -369,6 +376,9 @@ const CURRENCY_SYMBOLS = {
             setExchangeRate(1);
             setSaleDescription(invoice.description || '');
             setTaxEnabled(parseFloat(invoice.taxAmount || 0) > 0);
+            const hasDelivery = Boolean(invoice.hasDeliveryCharge || parseFloat(invoice.deliveryCharge || 0) > 0);
+            setDeliveryChargeEnabled(hasDelivery);
+            setDeliveryCharge(hasDelivery ? parseFloat(invoice.deliveryCharge || 0).toFixed(2) : '');
 
             // Set other transaction values without exchange rate conversion
             setRoundOff(parseFloat(invoice.roundOffAmount || 0).toFixed(2));
@@ -467,9 +477,9 @@ const CURRENCY_SYMBOLS = {
             if (activeBranchId) {
                 try {
                     const { data } = await api.get(`/branches/${activeBranchId}`);
-                    const isStockEnabled = data?.stockIncluded !== false && 
-                                           data?.stockIncluded !== 'false' && 
-                                           data?.stockIncluded !== 0 && 
+                    const isStockEnabled = data?.stockIncluded !== false &&
+                                           data?.stockIncluded !== 'false' &&
+                                           data?.stockIncluded !== 0 &&
                                            data?.stockIncluded !== '0';
                     setBranchSettings({
                         stockIncluded: isStockEnabled
@@ -733,8 +743,8 @@ const CURRENCY_SYMBOLS = {
             });
 
             if (foundGroup) {
-                const matchedVariant = foundGroup.variants?.find(v => 
-                    v.barcode && String(v.barcode).trim().toLowerCase() === query && 
+                const matchedVariant = foundGroup.variants?.find(v =>
+                    v.barcode && String(v.barcode).trim().toLowerCase() === query &&
                     String(v.barcode).trim().toLowerCase() !== String(foundGroup.barcode || '').trim().toLowerCase()
                 );
 
@@ -861,7 +871,7 @@ const CURRENCY_SYMBOLS = {
         }
 
         const isStockEnabled = branchSettings.stockIncluded !== false && branchSettings.stockIncluded !== 'false';
-        
+
         // Only block if stockIncluded is ON
         if (isStockEnabled && newQty > item.stock) {
             toast.error(`Only ${item.stock} units available in stock`);
@@ -871,10 +881,10 @@ const CURRENCY_SYMBOLS = {
     };
 
     const updatePrice = (cartKey, newPrice) => {
-        setCart(cart.map(item => (item.cartItemId || `${item.id}_${item.selectedSize || 'nosize'}`) === cartKey ? { 
-            ...item, 
+        setCart(cart.map(item => (item.cartItemId || `${item.id}_${item.selectedSize || 'nosize'}`) === cartKey ? {
+            ...item,
             price: parseFloat(newPrice) || 0,
-            isPriceOverridden: true 
+            isPriceOverridden: true
         } : item));
     };
 
@@ -915,13 +925,37 @@ const CURRENCY_SYMBOLS = {
 
 
     const { subTotal, tax } = calcResults;
-    const totalBeforeRound = subTotal + tax;
+    const effectiveDelivery = deliveryChargeEnabled ? (parseFloat(deliveryCharge) || 0) : 0;
+    const totalBeforeRound = subTotal + tax + effectiveDelivery;
     const redeemedAmount = parseFloat(advanceRedeemed || 0);
-    // 'total' is now the Gross Bill Amount (Sub + Tax + RoundOff)
+    // 'total' is now the Gross Bill Amount (Sub + Tax + Delivery + RoundOff)
     const total = totalBeforeRound + parseFloat(roundOff || 0);
     // 'finalPayable' is what the customer actually pays now
     const finalPayable = Math.max(0, total - redeemedAmount);
     // Use the state currencySymbol instead of redeclaring
+
+    const handleDeliveryChargeChange = (val) => {
+        if (val === '') {
+            setDeliveryCharge('');
+            return;
+        }
+        const num = parseFloat(val);
+        if (isNaN(num)) return;
+        if (num < 0) {
+            toast.error("Delivery charge cannot be negative");
+            return;
+        }
+        if (num > 10000000) {
+            toast.error("Delivery charge is too high");
+            return;
+        }
+        const parts = val.split('.');
+        if (parts.length === 2 && parts[1].length > 2) {
+            setDeliveryCharge(`${parts[0]}.${parts[1].slice(0, 2)}`);
+            return;
+        }
+        setDeliveryCharge(val);
+    };
 
     // Auto Round Function
     const handleAutoRound = () => {
@@ -942,26 +976,15 @@ const CURRENCY_SYMBOLS = {
         if (cart.length === 0) return;
 
         // Calculate Ratio
-        // Current Total (Pre-RoundOff) derived from items
-        // We need to adjust items so that their sum + tax equals matchTotal
-        // This effectively means applying a discount.
-
-        // Reset current discounts first to get "Base Total"
-        // Note: This is complex because we need the ORIGINAL prices. 
-        // For simplicity in this iteration, we assume current cart state is the base, 
-        // OR we rely on the fact that existing discounts are intentional.
-
-        // Simple Approach: Adjust 'Global Discount' distributed via item discounts?
-        // Better: Calculate the required reduction ratio.
-
         if (matchTotal <= 0) return;
 
-        // 1. Calculate current potential total without round off
-        const currentTotal = subTotal + tax; // This uses current cart items' net prices
+        // Calculate current potential items total without round off and delivery
+        const currentItemsTotal = subTotal + tax;
+        const targetItemsTotal = matchTotal - effectiveDelivery;
 
-        if (currentTotal === 0) return;
+        if (currentItemsTotal <= 0 || targetItemsTotal <= 0) return;
 
-        const ratio = matchTotal / currentTotal;
+        const ratio = targetItemsTotal / currentItemsTotal;
 
         // Apply this ratio to the PRICE of items (effectively increasing discount)
         // NewNetPrice = OldNetPrice * ratio
@@ -970,7 +993,7 @@ const CURRENCY_SYMBOLS = {
         const newCart = cart.map(item => {
             const effPrice = parseFloat(item.price || 0);
             const effDisc = parseFloat(item.discountAmount || 0);
-            
+
             const currentNet = effPrice - effDisc;
             const newNet = currentNet * ratio;
             const newDiscountAmt = effPrice - newNet;
@@ -1137,6 +1160,8 @@ const CURRENCY_SYMBOLS = {
                 terminalId: terminal?.id,
                 roundOffAmount: parseFloat(roundOff || 0),
                 advanceRedeemed: parseFloat(advanceRedeemed || 0),
+                deliveryCharge: effectiveDelivery,
+                hasDeliveryCharge: deliveryChargeEnabled,
                 payments: finalPayments.map(p => ({
                     method: p.method,
                     amount: p.amount
@@ -1166,6 +1191,8 @@ const CURRENCY_SYMBOLS = {
                 ...res.data,
                 paidAmount: res.data.paidAmount !== undefined ? Number(res.data.paidAmount) : actualCollectedPaid,
                 balanceAmount: res.data.balanceAmount !== undefined ? Number(res.data.balanceAmount) : Math.max(0, finalPayable - actualCollectedPaid),
+                deliveryCharge: res.data.deliveryCharge !== undefined ? Number(res.data.deliveryCharge) : effectiveDelivery,
+                hasDeliveryCharge: res.data.hasDeliveryCharge !== undefined ? Boolean(res.data.hasDeliveryCharge) : deliveryChargeEnabled,
                 payments: res.data.payments && res.data.payments.length > 0 ? res.data.payments : finalPayments,
                 currencyCode,
                 currencySymbol,
@@ -1184,11 +1211,13 @@ const CURRENCY_SYMBOLS = {
             setCart([]);
             setSearch('');
             setRoundOff(0);
+            setDeliveryChargeEnabled(false);
+            setDeliveryCharge('');
             setSaleDescription('');
             setSalesmanId(cashier?.id || ''); // Reset to cashier
             fetchBusinessDate(activeBranchId ? parseInt(activeBranchId) : (user?.branchId || null));
             localStorage.removeItem(`pos_state_${user?.id}`);
-            
+
             // Refresh Products to update stock counts
             fetchData();
 
@@ -1297,8 +1326,8 @@ const CURRENCY_SYMBOLS = {
                             return (
                                 <div key={product.groupKey || product.id}
                                     className={`bg-white p-3 rounded-xl border border-slate-100 shadow-sm transition-all flex flex-col justify-between ${
-                                        isOutOfStock 
-                                            ? 'opacity-70 cursor-not-allowed border-slate-200' 
+                                        isOutOfStock
+                                            ? 'opacity-70 cursor-not-allowed border-slate-200'
                                             : 'hover:shadow-md cursor-pointer group active:scale-98'
                                     }`}
                                     onClick={() => {
@@ -1350,11 +1379,11 @@ const CURRENCY_SYMBOLS = {
                                         {product.hasSizes && product.variants && product.variants.length > 0 && (
                                             <div className="flex flex-wrap items-center gap-1 mb-2">
                                                 {product.variants.slice(0, 6).map(v => (
-                                                    <span 
-                                                        key={v.size} 
+                                                    <span
+                                                        key={v.size}
                                                         className={`text-[9px] px-1.5 py-0.5 rounded border font-medium ${
-                                                            v.stock > 0 
-                                                                ? 'bg-slate-50 border-slate-200 text-slate-700' 
+                                                            v.stock > 0
+                                                                ? 'bg-slate-50 border-slate-200 text-slate-700'
                                                                 : 'bg-red-50 border-red-200 text-red-500'
                                                         }`}
                                                         title={`${v.size}: ${v.stock} in stock`}
@@ -1439,7 +1468,7 @@ const CURRENCY_SYMBOLS = {
                                 <FiAlertCircle size={14} className="animate-pulse" />
                                 <span className="text-[10px] font-medium uppercase tracking-wider">Editing Mode</span>
                             </div>
-                            <button 
+                            <button
                                 onClick={() => {
                                     setEditingSaleId(null);
                                     setCart([]);
@@ -1516,8 +1545,8 @@ const CURRENCY_SYMBOLS = {
                                 <span className="text-[9px] font-bold text-emerald-600 uppercase tracking-widest">Advance: {currencySymbol}{availableAdvance.toFixed(2)}</span>
                                 <div className="flex items-center gap-1.5 scale-90 origin-right">
                                     <span className="text-[9px] font-bold text-slate-500 uppercase">Use Full</span>
-                                    <input 
-                                        type="checkbox" 
+                                    <input
+                                        type="checkbox"
                                         className="w-3.5 h-3.5 accent-emerald-500 cursor-pointer"
                                         checked={useFullAdvance}
                                         onChange={(e) => setUseFullAdvance(e.target.checked)}
@@ -1542,10 +1571,10 @@ const CURRENCY_SYMBOLS = {
                     )}
 
                     {/* Options Panel (More Compact) */}
-                    <div className="grid grid-cols-2 gap-2 h-7 mt-0.5">
-                        <div className="flex items-center gap-2">
-                             <select 
-                                className="w-full h-8 bg-slate-50 border border-slate-200 rounded px-1.5 text-[10px] font-bold text-slate-700 outline-none focus:border-primary transition-all"
+                    <div className="grid grid-cols-3 gap-1.5 mt-0.5">
+                        <div className="flex items-center">
+                             <select
+                                className="w-full h-8 bg-slate-50 border border-slate-200 rounded px-1 text-[10px] font-bold text-slate-700 outline-none focus:border-primary transition-all"
                                 value={currencyCode}
                                 onChange={(e) => {
                                     const code = e.target.value;
@@ -1560,12 +1589,13 @@ const CURRENCY_SYMBOLS = {
                                 <option value="EUR">EUR (€)</option>
                             </select>
                         </div>
-                        <div className="flex items-center gap-2">
-                            <button 
+                        <div className="flex items-center">
+                            <button
+                                type="button"
                                 onClick={() => setTaxEnabled(!taxEnabled)}
-                                className={`w-full h-8 rounded font-bold text-[9px] uppercase transition-all flex items-center justify-center gap-1.5 border ${
-                                    taxEnabled 
-                                    ? 'bg-primary/5 text-primary border-primary/20' 
+                                className={`w-full h-8 rounded font-bold text-[9px] uppercase transition-all flex items-center justify-center gap-1 border ${
+                                    taxEnabled
+                                    ? 'bg-primary/5 text-primary border-primary/20'
                                     : 'bg-slate-50 text-slate-400 border-slate-200'
                                 }`}
                             >
@@ -1573,7 +1603,45 @@ const CURRENCY_SYMBOLS = {
                                 TAX {taxEnabled ? 'ON' : 'OFF'}
                             </button>
                         </div>
+                        <div className="flex items-center">
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    const next = !deliveryChargeEnabled;
+                                    setDeliveryChargeEnabled(next);
+                                    if (!next) setDeliveryCharge('');
+                                }}
+                                className={`w-full h-8 rounded font-bold text-[9px] uppercase transition-all flex items-center justify-center gap-1 border ${
+                                    deliveryChargeEnabled
+                                    ? 'bg-primary/5 text-primary border-primary/20'
+                                    : 'bg-slate-50 text-slate-400 border-slate-200'
+                                }`}
+                            >
+                                <div className={`w-1.5 h-1.5 rounded-full ${deliveryChargeEnabled ? 'bg-primary' : 'bg-slate-300'}`}></div>
+                                DELIVERY {deliveryChargeEnabled ? 'ON' : 'OFF'}
+                            </button>
+                        </div>
                     </div>
+
+                    {deliveryChargeEnabled && (
+                        <div className="mt-1.5 flex items-center justify-between gap-2 px-2.5 py-1.5 bg-primary/5 border border-primary/20 rounded-lg">
+                            <label className="text-[10px] font-bold text-slate-700 uppercase tracking-tight flex items-center gap-1">
+                                Delivery Charge ({currencySymbol})
+                            </label>
+                            <div className="relative flex items-center">
+                                <span className="text-[11px] font-bold text-slate-400 mr-1">{currencySymbol}</span>
+                                <input
+                                    type="number"
+                                    step="0.01"
+                                    min="0"
+                                    placeholder="0.00"
+                                    value={deliveryCharge}
+                                    onChange={(e) => handleDeliveryChargeChange(e.target.value)}
+                                    className="w-20 h-6 px-1.5 text-right text-xs font-bold text-slate-800 bg-white border border-slate-200 rounded outline-none focus:border-primary"
+                                />
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 {/* Cart Headers */}
@@ -1624,7 +1692,7 @@ const CURRENCY_SYMBOLS = {
                                                 )}
                                                 <div className="flex items-center gap-1 mt-1">
                                                     <div className="flex items-center border border-slate-200 rounded overflow-hidden h-6 bg-slate-50">
-                                                        <input 
+                                                        <input
                                                             className="w-10 text-center text-[10px] bg-transparent outline-none focus:bg-white transition-colors"
                                                             placeholder="%"
                                                             value={item.discountPercent || ''}
@@ -1714,6 +1782,14 @@ const CURRENCY_SYMBOLS = {
                                 </span>
                             </div>
                         )}
+                        {(deliveryChargeEnabled || effectiveDelivery > 0) && (
+                            <div className="flex justify-between text-slate-500">
+                                <span className="font-medium text-[10px] uppercase">Delivery Charge</span>
+                                <span className="font-semibold text-blue-600">
+                                    +{currencyCode === 'AED' ? `${effectiveDelivery.toFixed(2)} ${currencySymbol}` : `${currencySymbol}${effectiveDelivery.toFixed(2)}`}
+                                </span>
+                            </div>
+                        )}
                         {parseFloat(advanceRedeemed || 0) > 0 && (
                             <div className="flex justify-between items-center text-orange-600">
                                 <span className="font-bold text-[10px] uppercase">Advance</span>
@@ -1762,7 +1838,7 @@ const CURRENCY_SYMBOLS = {
 
                     {/* Description / Notes - Compacted & Moved here */}
                     <div className="pt-1.5">
-                        <textarea 
+                        <textarea
                             className="w-full px-2 py-1.5 text-[10px] bg-white border border-slate-200 rounded outline-none focus:border-primary transition-all resize-none font-medium text-slate-500 placeholder:text-slate-300"
                             rows="1"
                             placeholder="Add sale notes..."
@@ -1900,12 +1976,12 @@ const CURRENCY_SYMBOLS = {
                                 <div className="mb-2 bg-slate-50 rounded-lg border border-slate-100 p-3">
                                     <div className="flex justify-between items-center mb-2">
                                         <p className="text-[10px] font-medium text-slate-400 uppercase">Split Payments</p>
-                                        <button 
+                                        <button
                                             onClick={() => {
                                                 const isEditing = Boolean(editingSaleId || (router.isReady && router.query?.editId));
                                                 setAddedPayments([]);
                                                 setPaymentData({ ...paymentData, paidAmount: isEditing ? '0.00' : finalPayable.toFixed(2) });
-                                            }} 
+                                            }}
                                             className="text-[10px] text-slate-400 hover:text-red-500 font-medium transition-colors"
                                         >
                                             Clear All
@@ -1949,15 +2025,15 @@ const CURRENCY_SYMBOLS = {
             {lastSale && (
                 <div style={{ display: 'none' }}>
                     <div ref={componentRef}>
-                        <ProfessionalInvoice 
+                        <ProfessionalInvoice
                             printData={{
-                                ...lastSale, 
+                                ...lastSale,
                                 settings: {
                                     ...(lastSale?.isReturn ? returnSettings : salesSettings),
                                     template: (lastSale?.isReturn ? returnSettings?.template : salesSettings?.template) || 'modern'
                                 }
-                            }} 
-                            companyProfile={companyProfile} 
+                            }}
+                            companyProfile={companyProfile}
                         />
                     </div>
                 </div>
@@ -2098,6 +2174,18 @@ const CURRENCY_SYMBOLS = {
                                             </tbody>
                                         </table>
 
+                                        {(parseFloat(selectedHistorySale.deliveryCharge || 0) > 0 || selectedHistorySale.hasDeliveryCharge) && (
+                                            <div className="flex justify-between items-center text-sm font-semibold text-slate-700 border-t pt-2">
+                                                <span>Delivery Charge</span>
+                                                <span>
+                                                    {(() => {
+                                                        const sym = CURRENCY_SYMBOLS[selectedHistorySale.currencyCode] || '₹';
+                                                        const val = parseFloat(selectedHistorySale.deliveryCharge || 0).toFixed(2);
+                                                        return selectedHistorySale.currencyCode === 'AED' ? `${val} ${sym}` : `${sym}${val}`;
+                                                    })()}
+                                                </span>
+                                            </div>
+                                        )}
                                         <div className="flex justify-between items-center text-xl font-bold text-slate-900 border-t pt-4">
                                             <span>Total Amount</span>
                                             <span>
@@ -2176,8 +2264,8 @@ const CURRENCY_SYMBOLS = {
                                     </span>
                                 </div>
                             </div>
-                            <button 
-                                onClick={() => setSizeModalProduct(null)} 
+                            <button
+                                onClick={() => setSizeModalProduct(null)}
                                 className="text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-200/50 transition-colors"
                             >
                                 <FiX size={18} />
@@ -2203,7 +2291,7 @@ const CURRENCY_SYMBOLS = {
                                                 setSizeModalProduct(null);
                                             }}
                                             className={`p-3 rounded-xl border text-left flex items-center justify-between transition-all select-none ${
-                                                isZeroStock 
+                                                isZeroStock
                                                     ? 'bg-slate-100/80 border-slate-200 text-slate-400 opacity-60 cursor-not-allowed shadow-none'
                                                     : 'bg-white hover:bg-primary/5 hover:border-primary/40 border-slate-200 text-slate-800 active:scale-98 shadow-xs cursor-pointer'
                                             }`}
@@ -2228,9 +2316,9 @@ const CURRENCY_SYMBOLS = {
 
                         {/* Footer */}
                         <div className="p-4 bg-slate-50 border-t border-slate-100 flex justify-end">
-                            <button 
-                                type="button" 
-                                className="px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-200/60 rounded-lg transition-colors" 
+                            <button
+                                type="button"
+                                className="px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-200/60 rounded-lg transition-colors"
                                 onClick={() => setSizeModalProduct(null)}
                             >
                                 Cancel

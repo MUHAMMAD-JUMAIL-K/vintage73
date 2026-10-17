@@ -25676,6 +25676,7 @@ export namespace Prisma {
     exchangeRate: Decimal | null
     discount: number | null
     advanceUsed: Decimal | null
+    deliveryCharge: Decimal | null
   }
 
   export type SaleSumAggregateOutputType = {
@@ -25696,6 +25697,7 @@ export namespace Prisma {
     exchangeRate: Decimal | null
     discount: number | null
     advanceUsed: Decimal | null
+    deliveryCharge: Decimal | null
   }
 
   export type SaleMinAggregateOutputType = {
@@ -25740,6 +25742,8 @@ export namespace Prisma {
     discount: number | null
     advanceUsed: Decimal | null
     description: string | null
+    deliveryCharge: Decimal | null
+    hasDeliveryCharge: boolean | null
   }
 
   export type SaleMaxAggregateOutputType = {
@@ -25784,6 +25788,8 @@ export namespace Prisma {
     discount: number | null
     advanceUsed: Decimal | null
     description: string | null
+    deliveryCharge: Decimal | null
+    hasDeliveryCharge: boolean | null
   }
 
   export type SaleCountAggregateOutputType = {
@@ -25828,6 +25834,8 @@ export namespace Prisma {
     discount: number
     advanceUsed: number
     description: number
+    deliveryCharge: number
+    hasDeliveryCharge: number
     _all: number
   }
 
@@ -25850,6 +25858,7 @@ export namespace Prisma {
     exchangeRate?: true
     discount?: true
     advanceUsed?: true
+    deliveryCharge?: true
   }
 
   export type SaleSumAggregateInputType = {
@@ -25870,6 +25879,7 @@ export namespace Prisma {
     exchangeRate?: true
     discount?: true
     advanceUsed?: true
+    deliveryCharge?: true
   }
 
   export type SaleMinAggregateInputType = {
@@ -25914,6 +25924,8 @@ export namespace Prisma {
     discount?: true
     advanceUsed?: true
     description?: true
+    deliveryCharge?: true
+    hasDeliveryCharge?: true
   }
 
   export type SaleMaxAggregateInputType = {
@@ -25958,6 +25970,8 @@ export namespace Prisma {
     discount?: true
     advanceUsed?: true
     description?: true
+    deliveryCharge?: true
+    hasDeliveryCharge?: true
   }
 
   export type SaleCountAggregateInputType = {
@@ -26002,6 +26016,8 @@ export namespace Prisma {
     discount?: true
     advanceUsed?: true
     description?: true
+    deliveryCharge?: true
+    hasDeliveryCharge?: true
     _all?: true
   }
 
@@ -26133,6 +26149,8 @@ export namespace Prisma {
     discount: number
     advanceUsed: Decimal
     description: string | null
+    deliveryCharge: Decimal
+    hasDeliveryCharge: boolean
     _count: SaleCountAggregateOutputType | null
     _avg: SaleAvgAggregateOutputType | null
     _sum: SaleSumAggregateOutputType | null
@@ -26196,6 +26214,8 @@ export namespace Prisma {
     discount?: boolean
     advanceUsed?: boolean
     description?: boolean
+    deliveryCharge?: boolean
+    hasDeliveryCharge?: boolean
     payments?: boolean | Sale$paymentsArgs<ExtArgs>
     branch?: boolean | BranchDefaultArgs<ExtArgs>
     customer?: boolean | Sale$customerArgs<ExtArgs>
@@ -26250,6 +26270,8 @@ export namespace Prisma {
     discount?: boolean
     advanceUsed?: boolean
     description?: boolean
+    deliveryCharge?: boolean
+    hasDeliveryCharge?: boolean
   }
 
   export type SaleInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -26321,6 +26343,8 @@ export namespace Prisma {
       discount: number
       advanceUsed: Prisma.Decimal
       description: string | null
+      deliveryCharge: Prisma.Decimal
+      hasDeliveryCharge: boolean
     }, ExtArgs["result"]["sale"]>
     composites: {}
   }
@@ -26773,6 +26797,8 @@ export namespace Prisma {
     readonly discount: FieldRef<"Sale", 'Float'>
     readonly advanceUsed: FieldRef<"Sale", 'Decimal'>
     readonly description: FieldRef<"Sale", 'String'>
+    readonly deliveryCharge: FieldRef<"Sale", 'Decimal'>
+    readonly hasDeliveryCharge: FieldRef<"Sale", 'Boolean'>
   }
     
 
@@ -79631,7 +79657,9 @@ export namespace Prisma {
     exchangeRate: 'exchangeRate',
     discount: 'discount',
     advanceUsed: 'advanceUsed',
-    description: 'description'
+    description: 'description',
+    deliveryCharge: 'deliveryCharge',
+    hasDeliveryCharge: 'hasDeliveryCharge'
   };
 
   export type SaleScalarFieldEnum = (typeof SaleScalarFieldEnum)[keyof typeof SaleScalarFieldEnum]
@@ -82279,6 +82307,8 @@ export namespace Prisma {
     discount?: FloatFilter<"Sale"> | number
     advanceUsed?: DecimalFilter<"Sale"> | Decimal | DecimalJsLike | number | string
     description?: StringNullableFilter<"Sale"> | string | null
+    deliveryCharge?: DecimalFilter<"Sale"> | Decimal | DecimalJsLike | number | string
+    hasDeliveryCharge?: BoolFilter<"Sale"> | boolean
     payments?: PaymentListRelationFilter
     branch?: XOR<BranchRelationFilter, BranchWhereInput>
     customer?: XOR<CustomerNullableRelationFilter, CustomerWhereInput> | null
@@ -82332,6 +82362,8 @@ export namespace Prisma {
     discount?: SortOrder
     advanceUsed?: SortOrder
     description?: SortOrderInput | SortOrder
+    deliveryCharge?: SortOrder
+    hasDeliveryCharge?: SortOrder
     payments?: PaymentOrderByRelationAggregateInput
     branch?: BranchOrderByWithRelationInput
     customer?: CustomerOrderByWithRelationInput
@@ -82389,6 +82421,8 @@ export namespace Prisma {
     discount?: FloatFilter<"Sale"> | number
     advanceUsed?: DecimalFilter<"Sale"> | Decimal | DecimalJsLike | number | string
     description?: StringNullableFilter<"Sale"> | string | null
+    deliveryCharge?: DecimalFilter<"Sale"> | Decimal | DecimalJsLike | number | string
+    hasDeliveryCharge?: BoolFilter<"Sale"> | boolean
     payments?: PaymentListRelationFilter
     branch?: XOR<BranchRelationFilter, BranchWhereInput>
     customer?: XOR<CustomerNullableRelationFilter, CustomerWhereInput> | null
@@ -82442,6 +82476,8 @@ export namespace Prisma {
     discount?: SortOrder
     advanceUsed?: SortOrder
     description?: SortOrderInput | SortOrder
+    deliveryCharge?: SortOrder
+    hasDeliveryCharge?: SortOrder
     _count?: SaleCountOrderByAggregateInput
     _avg?: SaleAvgOrderByAggregateInput
     _max?: SaleMaxOrderByAggregateInput
@@ -82494,6 +82530,8 @@ export namespace Prisma {
     discount?: FloatWithAggregatesFilter<"Sale"> | number
     advanceUsed?: DecimalWithAggregatesFilter<"Sale"> | Decimal | DecimalJsLike | number | string
     description?: StringNullableWithAggregatesFilter<"Sale"> | string | null
+    deliveryCharge?: DecimalWithAggregatesFilter<"Sale"> | Decimal | DecimalJsLike | number | string
+    hasDeliveryCharge?: BoolWithAggregatesFilter<"Sale"> | boolean
   }
 
   export type SaleItemWhereInput = {
@@ -88813,6 +88851,8 @@ export namespace Prisma {
     discount?: number
     advanceUsed?: Decimal | DecimalJsLike | number | string
     description?: string | null
+    deliveryCharge?: Decimal | DecimalJsLike | number | string
+    hasDeliveryCharge?: boolean
     payments?: PaymentCreateNestedManyWithoutSaleInput
     branch: BranchCreateNestedOneWithoutSalesInput
     customer?: CustomerCreateNestedOneWithoutSalesInput
@@ -88866,6 +88906,8 @@ export namespace Prisma {
     discount?: number
     advanceUsed?: Decimal | DecimalJsLike | number | string
     description?: string | null
+    deliveryCharge?: Decimal | DecimalJsLike | number | string
+    hasDeliveryCharge?: boolean
     payments?: PaymentUncheckedCreateNestedManyWithoutSaleInput
     items?: SaleItemUncheckedCreateNestedManyWithoutSaleInput
     lead?: LeadUncheckedCreateNestedOneWithoutSaleInput
@@ -88906,6 +88948,8 @@ export namespace Prisma {
     discount?: FloatFieldUpdateOperationsInput | number
     advanceUsed?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
     payments?: PaymentUpdateManyWithoutSaleNestedInput
     branch?: BranchUpdateOneRequiredWithoutSalesNestedInput
     customer?: CustomerUpdateOneWithoutSalesNestedInput
@@ -88959,6 +89003,8 @@ export namespace Prisma {
     discount?: FloatFieldUpdateOperationsInput | number
     advanceUsed?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
     payments?: PaymentUncheckedUpdateManyWithoutSaleNestedInput
     items?: SaleItemUncheckedUpdateManyWithoutSaleNestedInput
     lead?: LeadUncheckedUpdateOneWithoutSaleNestedInput
@@ -89006,6 +89052,8 @@ export namespace Prisma {
     discount?: number
     advanceUsed?: Decimal | DecimalJsLike | number | string
     description?: string | null
+    deliveryCharge?: Decimal | DecimalJsLike | number | string
+    hasDeliveryCharge?: boolean
   }
 
   export type SaleUpdateManyMutationInput = {
@@ -89043,6 +89091,8 @@ export namespace Prisma {
     discount?: FloatFieldUpdateOperationsInput | number
     advanceUsed?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
   }
 
   export type SaleUncheckedUpdateManyInput = {
@@ -89087,6 +89137,8 @@ export namespace Prisma {
     discount?: FloatFieldUpdateOperationsInput | number
     advanceUsed?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
   }
 
   export type SaleItemCreateInput = {
@@ -95435,6 +95487,8 @@ export namespace Prisma {
     discount?: SortOrder
     advanceUsed?: SortOrder
     description?: SortOrder
+    deliveryCharge?: SortOrder
+    hasDeliveryCharge?: SortOrder
   }
 
   export type SaleAvgOrderByAggregateInput = {
@@ -95455,6 +95509,7 @@ export namespace Prisma {
     exchangeRate?: SortOrder
     discount?: SortOrder
     advanceUsed?: SortOrder
+    deliveryCharge?: SortOrder
   }
 
   export type SaleMaxOrderByAggregateInput = {
@@ -95499,6 +95554,8 @@ export namespace Prisma {
     discount?: SortOrder
     advanceUsed?: SortOrder
     description?: SortOrder
+    deliveryCharge?: SortOrder
+    hasDeliveryCharge?: SortOrder
   }
 
   export type SaleMinOrderByAggregateInput = {
@@ -95543,6 +95600,8 @@ export namespace Prisma {
     discount?: SortOrder
     advanceUsed?: SortOrder
     description?: SortOrder
+    deliveryCharge?: SortOrder
+    hasDeliveryCharge?: SortOrder
   }
 
   export type SaleSumOrderByAggregateInput = {
@@ -95563,6 +95622,7 @@ export namespace Prisma {
     exchangeRate?: SortOrder
     discount?: SortOrder
     advanceUsed?: SortOrder
+    deliveryCharge?: SortOrder
   }
 
   export type DateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -106135,6 +106195,8 @@ export namespace Prisma {
     discount?: number
     advanceUsed?: Decimal | DecimalJsLike | number | string
     description?: string | null
+    deliveryCharge?: Decimal | DecimalJsLike | number | string
+    hasDeliveryCharge?: boolean
     payments?: PaymentCreateNestedManyWithoutSaleInput
     branch: BranchCreateNestedOneWithoutSalesInput
     customer?: CustomerCreateNestedOneWithoutSalesInput
@@ -106186,6 +106248,8 @@ export namespace Prisma {
     discount?: number
     advanceUsed?: Decimal | DecimalJsLike | number | string
     description?: string | null
+    deliveryCharge?: Decimal | DecimalJsLike | number | string
+    hasDeliveryCharge?: boolean
     payments?: PaymentUncheckedCreateNestedManyWithoutSaleInput
     items?: SaleItemUncheckedCreateNestedManyWithoutSaleInput
     lead?: LeadUncheckedCreateNestedOneWithoutSaleInput
@@ -107682,6 +107746,8 @@ export namespace Prisma {
     discount?: FloatFilter<"Sale"> | number
     advanceUsed?: DecimalFilter<"Sale"> | Decimal | DecimalJsLike | number | string
     description?: StringNullableFilter<"Sale"> | string | null
+    deliveryCharge?: DecimalFilter<"Sale"> | Decimal | DecimalJsLike | number | string
+    hasDeliveryCharge?: BoolFilter<"Sale"> | boolean
   }
 
   export type StockTransferUpsertWithWhereUniqueWithoutReceivedByInput = {
@@ -109004,6 +109070,8 @@ export namespace Prisma {
     discount?: number
     advanceUsed?: Decimal | DecimalJsLike | number | string
     description?: string | null
+    deliveryCharge?: Decimal | DecimalJsLike | number | string
+    hasDeliveryCharge?: boolean
     payments?: PaymentCreateNestedManyWithoutSaleInput
     customer?: CustomerCreateNestedOneWithoutSalesInput
     financialYear?: FinancialYearCreateNestedOneWithoutSalesInput
@@ -109055,6 +109123,8 @@ export namespace Prisma {
     discount?: number
     advanceUsed?: Decimal | DecimalJsLike | number | string
     description?: string | null
+    deliveryCharge?: Decimal | DecimalJsLike | number | string
+    hasDeliveryCharge?: boolean
     payments?: PaymentUncheckedCreateNestedManyWithoutSaleInput
     items?: SaleItemUncheckedCreateNestedManyWithoutSaleInput
     lead?: LeadUncheckedCreateNestedOneWithoutSaleInput
@@ -110443,6 +110513,8 @@ export namespace Prisma {
     discount?: number
     advanceUsed?: Decimal | DecimalJsLike | number | string
     description?: string | null
+    deliveryCharge?: Decimal | DecimalJsLike | number | string
+    hasDeliveryCharge?: boolean
     payments?: PaymentCreateNestedManyWithoutSaleInput
     branch: BranchCreateNestedOneWithoutSalesInput
     financialYear?: FinancialYearCreateNestedOneWithoutSalesInput
@@ -110494,6 +110566,8 @@ export namespace Prisma {
     discount?: number
     advanceUsed?: Decimal | DecimalJsLike | number | string
     description?: string | null
+    deliveryCharge?: Decimal | DecimalJsLike | number | string
+    hasDeliveryCharge?: boolean
     payments?: PaymentUncheckedCreateNestedManyWithoutSaleInput
     items?: SaleItemUncheckedCreateNestedManyWithoutSaleInput
     lead?: LeadUncheckedCreateNestedOneWithoutSaleInput
@@ -114567,6 +114641,8 @@ export namespace Prisma {
     discount?: number
     advanceUsed?: Decimal | DecimalJsLike | number | string
     description?: string | null
+    deliveryCharge?: Decimal | DecimalJsLike | number | string
+    hasDeliveryCharge?: boolean
     payments?: PaymentCreateNestedManyWithoutSaleInput
     branch: BranchCreateNestedOneWithoutSalesInput
     customer?: CustomerCreateNestedOneWithoutSalesInput
@@ -114619,6 +114695,8 @@ export namespace Prisma {
     discount?: number
     advanceUsed?: Decimal | DecimalJsLike | number | string
     description?: string | null
+    deliveryCharge?: Decimal | DecimalJsLike | number | string
+    hasDeliveryCharge?: boolean
     payments?: PaymentUncheckedCreateNestedManyWithoutSaleInput
     lead?: LeadUncheckedCreateNestedOneWithoutSaleInput
   }
@@ -114764,6 +114842,8 @@ export namespace Prisma {
     discount?: FloatFieldUpdateOperationsInput | number
     advanceUsed?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
     payments?: PaymentUpdateManyWithoutSaleNestedInput
     branch?: BranchUpdateOneRequiredWithoutSalesNestedInput
     customer?: CustomerUpdateOneWithoutSalesNestedInput
@@ -114816,6 +114896,8 @@ export namespace Prisma {
     discount?: FloatFieldUpdateOperationsInput | number
     advanceUsed?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
     payments?: PaymentUncheckedUpdateManyWithoutSaleNestedInput
     lead?: LeadUncheckedUpdateOneWithoutSaleNestedInput
   }
@@ -115209,6 +115291,8 @@ export namespace Prisma {
     discount?: number
     advanceUsed?: Decimal | DecimalJsLike | number | string
     description?: string | null
+    deliveryCharge?: Decimal | DecimalJsLike | number | string
+    hasDeliveryCharge?: boolean
     branch: BranchCreateNestedOneWithoutSalesInput
     customer?: CustomerCreateNestedOneWithoutSalesInput
     financialYear?: FinancialYearCreateNestedOneWithoutSalesInput
@@ -115261,6 +115345,8 @@ export namespace Prisma {
     discount?: number
     advanceUsed?: Decimal | DecimalJsLike | number | string
     description?: string | null
+    deliveryCharge?: Decimal | DecimalJsLike | number | string
+    hasDeliveryCharge?: boolean
     items?: SaleItemUncheckedCreateNestedManyWithoutSaleInput
     lead?: LeadUncheckedCreateNestedOneWithoutSaleInput
   }
@@ -115554,6 +115640,8 @@ export namespace Prisma {
     discount?: FloatFieldUpdateOperationsInput | number
     advanceUsed?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
     branch?: BranchUpdateOneRequiredWithoutSalesNestedInput
     customer?: CustomerUpdateOneWithoutSalesNestedInput
     financialYear?: FinancialYearUpdateOneWithoutSalesNestedInput
@@ -115606,6 +115694,8 @@ export namespace Prisma {
     discount?: FloatFieldUpdateOperationsInput | number
     advanceUsed?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
     items?: SaleItemUncheckedUpdateManyWithoutSaleNestedInput
     lead?: LeadUncheckedUpdateOneWithoutSaleNestedInput
   }
@@ -115945,6 +116035,8 @@ export namespace Prisma {
     discount?: number
     advanceUsed?: Decimal | DecimalJsLike | number | string
     description?: string | null
+    deliveryCharge?: Decimal | DecimalJsLike | number | string
+    hasDeliveryCharge?: boolean
     payments?: PaymentCreateNestedManyWithoutSaleInput
     branch: BranchCreateNestedOneWithoutSalesInput
     customer?: CustomerCreateNestedOneWithoutSalesInput
@@ -115996,6 +116088,8 @@ export namespace Prisma {
     discount?: number
     advanceUsed?: Decimal | DecimalJsLike | number | string
     description?: string | null
+    deliveryCharge?: Decimal | DecimalJsLike | number | string
+    hasDeliveryCharge?: boolean
     payments?: PaymentUncheckedCreateNestedManyWithoutSaleInput
     items?: SaleItemUncheckedCreateNestedManyWithoutSaleInput
     lead?: LeadUncheckedCreateNestedOneWithoutSaleInput
@@ -116366,6 +116460,8 @@ export namespace Prisma {
     discount?: FloatFieldUpdateOperationsInput | number
     advanceUsed?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
     payments?: PaymentUpdateManyWithoutSaleNestedInput
     branch?: BranchUpdateOneRequiredWithoutSalesNestedInput
     customer?: CustomerUpdateOneWithoutSalesNestedInput
@@ -116417,6 +116513,8 @@ export namespace Prisma {
     discount?: FloatFieldUpdateOperationsInput | number
     advanceUsed?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
     payments?: PaymentUncheckedUpdateManyWithoutSaleNestedInput
     items?: SaleItemUncheckedUpdateManyWithoutSaleNestedInput
     lead?: LeadUncheckedUpdateOneWithoutSaleNestedInput
@@ -120401,6 +120499,8 @@ export namespace Prisma {
     discount?: number
     advanceUsed?: Decimal | DecimalJsLike | number | string
     description?: string | null
+    deliveryCharge?: Decimal | DecimalJsLike | number | string
+    hasDeliveryCharge?: boolean
     payments?: PaymentCreateNestedManyWithoutSaleInput
     branch: BranchCreateNestedOneWithoutSalesInput
     customer?: CustomerCreateNestedOneWithoutSalesInput
@@ -120453,6 +120553,8 @@ export namespace Prisma {
     discount?: number
     advanceUsed?: Decimal | DecimalJsLike | number | string
     description?: string | null
+    deliveryCharge?: Decimal | DecimalJsLike | number | string
+    hasDeliveryCharge?: boolean
     payments?: PaymentUncheckedCreateNestedManyWithoutSaleInput
     items?: SaleItemUncheckedCreateNestedManyWithoutSaleInput
   }
@@ -121076,6 +121178,8 @@ export namespace Prisma {
     discount?: FloatFieldUpdateOperationsInput | number
     advanceUsed?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
     payments?: PaymentUpdateManyWithoutSaleNestedInput
     branch?: BranchUpdateOneRequiredWithoutSalesNestedInput
     customer?: CustomerUpdateOneWithoutSalesNestedInput
@@ -121128,6 +121232,8 @@ export namespace Prisma {
     discount?: FloatFieldUpdateOperationsInput | number
     advanceUsed?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
     payments?: PaymentUncheckedUpdateManyWithoutSaleNestedInput
     items?: SaleItemUncheckedUpdateManyWithoutSaleNestedInput
   }
@@ -125182,6 +125288,8 @@ export namespace Prisma {
     discount?: number
     advanceUsed?: Decimal | DecimalJsLike | number | string
     description?: string | null
+    deliveryCharge?: Decimal | DecimalJsLike | number | string
+    hasDeliveryCharge?: boolean
     payments?: PaymentCreateNestedManyWithoutSaleInput
     branch: BranchCreateNestedOneWithoutSalesInput
     customer?: CustomerCreateNestedOneWithoutSalesInput
@@ -125233,6 +125341,8 @@ export namespace Prisma {
     discount?: number
     advanceUsed?: Decimal | DecimalJsLike | number | string
     description?: string | null
+    deliveryCharge?: Decimal | DecimalJsLike | number | string
+    hasDeliveryCharge?: boolean
     payments?: PaymentUncheckedCreateNestedManyWithoutSaleInput
     items?: SaleItemUncheckedCreateNestedManyWithoutSaleInput
     lead?: LeadUncheckedCreateNestedOneWithoutSaleInput
@@ -126251,6 +126361,8 @@ export namespace Prisma {
     discount?: number
     advanceUsed?: Decimal | DecimalJsLike | number | string
     description?: string | null
+    deliveryCharge?: Decimal | DecimalJsLike | number | string
+    hasDeliveryCharge?: boolean
     payments?: PaymentCreateNestedManyWithoutSaleInput
     branch: BranchCreateNestedOneWithoutSalesInput
     customer?: CustomerCreateNestedOneWithoutSalesInput
@@ -126302,6 +126414,8 @@ export namespace Prisma {
     discount?: number
     advanceUsed?: Decimal | DecimalJsLike | number | string
     description?: string | null
+    deliveryCharge?: Decimal | DecimalJsLike | number | string
+    hasDeliveryCharge?: boolean
     payments?: PaymentUncheckedCreateNestedManyWithoutSaleInput
     items?: SaleItemUncheckedCreateNestedManyWithoutSaleInput
     lead?: LeadUncheckedCreateNestedOneWithoutSaleInput
@@ -131059,6 +131173,8 @@ export namespace Prisma {
     discount?: number
     advanceUsed?: Decimal | DecimalJsLike | number | string
     description?: string | null
+    deliveryCharge?: Decimal | DecimalJsLike | number | string
+    hasDeliveryCharge?: boolean
   }
 
   export type StockTransferCreateManyReceivedByInput = {
@@ -131877,6 +131993,8 @@ export namespace Prisma {
     discount?: FloatFieldUpdateOperationsInput | number
     advanceUsed?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
     payments?: PaymentUpdateManyWithoutSaleNestedInput
     branch?: BranchUpdateOneRequiredWithoutSalesNestedInput
     customer?: CustomerUpdateOneWithoutSalesNestedInput
@@ -131928,6 +132046,8 @@ export namespace Prisma {
     discount?: FloatFieldUpdateOperationsInput | number
     advanceUsed?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
     payments?: PaymentUncheckedUpdateManyWithoutSaleNestedInput
     items?: SaleItemUncheckedUpdateManyWithoutSaleNestedInput
     lead?: LeadUncheckedUpdateOneWithoutSaleNestedInput
@@ -131974,6 +132094,8 @@ export namespace Prisma {
     discount?: FloatFieldUpdateOperationsInput | number
     advanceUsed?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
   }
 
   export type StockTransferUpdateWithoutReceivedByInput = {
@@ -133165,6 +133287,8 @@ export namespace Prisma {
     discount?: number
     advanceUsed?: Decimal | DecimalJsLike | number | string
     description?: string | null
+    deliveryCharge?: Decimal | DecimalJsLike | number | string
+    hasDeliveryCharge?: boolean
   }
 
   export type StockTransferCreateManyFromBranchInput = {
@@ -133957,6 +134081,8 @@ export namespace Prisma {
     discount?: FloatFieldUpdateOperationsInput | number
     advanceUsed?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
     payments?: PaymentUpdateManyWithoutSaleNestedInput
     customer?: CustomerUpdateOneWithoutSalesNestedInput
     financialYear?: FinancialYearUpdateOneWithoutSalesNestedInput
@@ -134008,6 +134134,8 @@ export namespace Prisma {
     discount?: FloatFieldUpdateOperationsInput | number
     advanceUsed?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
     payments?: PaymentUncheckedUpdateManyWithoutSaleNestedInput
     items?: SaleItemUncheckedUpdateManyWithoutSaleNestedInput
     lead?: LeadUncheckedUpdateOneWithoutSaleNestedInput
@@ -134054,6 +134182,8 @@ export namespace Prisma {
     discount?: FloatFieldUpdateOperationsInput | number
     advanceUsed?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
   }
 
   export type StockTransferUpdateWithoutFromBranchInput = {
@@ -134634,6 +134764,8 @@ export namespace Prisma {
     discount?: number
     advanceUsed?: Decimal | DecimalJsLike | number | string
     description?: string | null
+    deliveryCharge?: Decimal | DecimalJsLike | number | string
+    hasDeliveryCharge?: boolean
   }
 
   export type TicketCreateManyCustomerInput = {
@@ -134902,6 +135034,8 @@ export namespace Prisma {
     discount?: FloatFieldUpdateOperationsInput | number
     advanceUsed?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
     payments?: PaymentUpdateManyWithoutSaleNestedInput
     branch?: BranchUpdateOneRequiredWithoutSalesNestedInput
     financialYear?: FinancialYearUpdateOneWithoutSalesNestedInput
@@ -134953,6 +135087,8 @@ export namespace Prisma {
     discount?: FloatFieldUpdateOperationsInput | number
     advanceUsed?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
     payments?: PaymentUncheckedUpdateManyWithoutSaleNestedInput
     items?: SaleItemUncheckedUpdateManyWithoutSaleNestedInput
     lead?: LeadUncheckedUpdateOneWithoutSaleNestedInput
@@ -134999,6 +135135,8 @@ export namespace Prisma {
     discount?: FloatFieldUpdateOperationsInput | number
     advanceUsed?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
   }
 
   export type TicketUpdateWithoutCustomerInput = {
@@ -137481,6 +137619,8 @@ export namespace Prisma {
     discount?: number
     advanceUsed?: Decimal | DecimalJsLike | number | string
     description?: string | null
+    deliveryCharge?: Decimal | DecimalJsLike | number | string
+    hasDeliveryCharge?: boolean
   }
 
   export type DeliveryChallanUpdateWithoutFinancialYearInput = {
@@ -137698,6 +137838,8 @@ export namespace Prisma {
     discount?: FloatFieldUpdateOperationsInput | number
     advanceUsed?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
     payments?: PaymentUpdateManyWithoutSaleNestedInput
     branch?: BranchUpdateOneRequiredWithoutSalesNestedInput
     customer?: CustomerUpdateOneWithoutSalesNestedInput
@@ -137749,6 +137891,8 @@ export namespace Prisma {
     discount?: FloatFieldUpdateOperationsInput | number
     advanceUsed?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
     payments?: PaymentUncheckedUpdateManyWithoutSaleNestedInput
     items?: SaleItemUncheckedUpdateManyWithoutSaleNestedInput
     lead?: LeadUncheckedUpdateOneWithoutSaleNestedInput
@@ -137795,6 +137939,8 @@ export namespace Prisma {
     discount?: FloatFieldUpdateOperationsInput | number
     advanceUsed?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
   }
 
   export type DeliveryChallanItemCreateManyChallanInput = {
@@ -137972,6 +138118,8 @@ export namespace Prisma {
     discount?: number
     advanceUsed?: Decimal | DecimalJsLike | number | string
     description?: string | null
+    deliveryCharge?: Decimal | DecimalJsLike | number | string
+    hasDeliveryCharge?: boolean
   }
 
   export type SaleUpdateWithoutTerminalInput = {
@@ -138009,6 +138157,8 @@ export namespace Prisma {
     discount?: FloatFieldUpdateOperationsInput | number
     advanceUsed?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
     payments?: PaymentUpdateManyWithoutSaleNestedInput
     branch?: BranchUpdateOneRequiredWithoutSalesNestedInput
     customer?: CustomerUpdateOneWithoutSalesNestedInput
@@ -138060,6 +138210,8 @@ export namespace Prisma {
     discount?: FloatFieldUpdateOperationsInput | number
     advanceUsed?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
     payments?: PaymentUncheckedUpdateManyWithoutSaleNestedInput
     items?: SaleItemUncheckedUpdateManyWithoutSaleNestedInput
     lead?: LeadUncheckedUpdateOneWithoutSaleNestedInput
@@ -138106,6 +138258,8 @@ export namespace Prisma {
     discount?: FloatFieldUpdateOperationsInput | number
     advanceUsed?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
+    deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
   }
 
   export type UserUpdateWithoutTerminalsInput = {
