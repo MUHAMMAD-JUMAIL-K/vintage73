@@ -120,7 +120,6 @@ const EXCHANGE_RATES = {
     const [voucherInput, setVoucherInput] = useState('');
     const [appliedVoucher, setAppliedVoucher] = useState(null);
     const [validatingVoucher, setValidatingVoucher] = useState(false);
-    const [earnedRewardVoucher, setEarnedRewardVoucher] = useState(null);
 
     // Fetch the authoritative active business date from Day Close API
     const fetchBusinessDate = async (branchId) => {
@@ -508,14 +507,20 @@ const EXCHANGE_RATES = {
                     setBranchSettings({
                         stockIncluded: isStockEnabled
                     });
-                    setSalesSettings({
-                        ...companyProfile?.invoiceSettings
-                    });
+                    if (companyProfile?.invoiceSettings && Object.keys(companyProfile.invoiceSettings).length > 0) {
+                        setSalesSettings(prev => ({
+                            ...(prev || {}),
+                            ...companyProfile.invoiceSettings
+                        }));
+                    }
                 } catch (err) {
                     console.error("Failed to fetch branch settings", err);
                 }
-            } else if (companyProfile) {
-                setSalesSettings(companyProfile.invoiceSettings);
+            } else if (companyProfile?.invoiceSettings && Object.keys(companyProfile.invoiceSettings).length > 0) {
+                setSalesSettings(prev => ({
+                    ...(prev || {}),
+                    ...companyProfile.invoiceSettings
+                }));
             }
         };
 
@@ -1254,6 +1259,7 @@ const EXCHANGE_RATES = {
                         quantity: item.quantity,
                         unitPrice: parseFloat(item.price || 0),
                         originalUnitPrice: item.originalPrice !== undefined ? parseFloat(item.originalPrice) : parseFloat(item.price || 0),
+                        mrp: item.originalPrice !== undefined ? parseFloat(item.originalPrice) : parseFloat(item.price || 0),
                         taxPercent: taxEnabled ? item.taxPercent : 0,
                         discountPercent: item.discountPercent,
                         discountAmount: parseFloat(item.discountAmount || 0),
@@ -1316,9 +1322,6 @@ const EXCHANGE_RATES = {
             // Delay print slightly to allow state update and DOM rasterization
             setTimeout(() => handlePrint(), 300);
 
-            if (res.data.issuedRewardVoucher) {
-                setEarnedRewardVoucher(res.data.issuedRewardVoucher);
-            }
             setAppliedVoucher(null);
             setVoucherInput('');
 
@@ -2557,44 +2560,6 @@ const EXCHANGE_RATES = {
                                 Cancel
                             </button>
                         </div>
-                    </div>
-                </div>
-            )}
-
-            {/* Reward Voucher Earned Celebration Modal */}
-            {earnedRewardVoucher && (
-                <div className="fixed inset-0 z-[100000] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-                    <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 text-center animate-in fade-in zoom-in-95 duration-200 border-2 border-emerald-500">
-                        <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl shadow-inner">
-                            🎉
-                        </div>
-                        <h3 className="text-xl font-black text-slate-800 uppercase tracking-tight">Reward Voucher Earned!</h3>
-                        <p className="text-xs text-slate-500 mt-1">This sale qualified for an exclusive purchase reward coupon for the customer.</p>
-
-                        <div className="my-5 p-4 bg-emerald-50 border-2 border-dashed border-emerald-400 rounded-xl relative">
-                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">COUPON CODE</span>
-                            <span className="text-2xl font-black font-mono tracking-wider text-emerald-700 select-all">{earnedRewardVoucher.code}</span>
-                            <div className="mt-2 text-sm font-bold text-slate-800">
-                                {earnedRewardVoucher.type === 'PERCENTAGE' ? `${earnedRewardVoucher.value}% OFF` : `${currencySymbol}${parseFloat(earnedRewardVoucher.value).toFixed(2)} OFF`}
-                            </div>
-                            {parseFloat(earnedRewardVoucher.minimumPurchaseAmount || 0) > 0 && (
-                                <div className="text-[11px] text-slate-500 mt-1">
-                                    Min. purchase: {currencySymbol}{parseFloat(earnedRewardVoucher.minimumPurchaseAmount).toFixed(2)}
-                                </div>
-                            )}
-                            {earnedRewardVoucher.expiryDate && (
-                                <div className="text-[11px] text-slate-400 mt-0.5">
-                                    Valid until: {new Date(earnedRewardVoucher.expiryDate).toLocaleDateString('en-GB')}
-                                </div>
-                            )}
-                        </div>
-
-                        <button
-                            onClick={() => setEarnedRewardVoucher(null)}
-                            className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-sm shadow-md shadow-emerald-600/30 transition-all"
-                        >
-                            Continue
-                        </button>
                     </div>
                 </div>
             )}

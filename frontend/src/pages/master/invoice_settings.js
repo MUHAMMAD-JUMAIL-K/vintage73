@@ -97,6 +97,7 @@ export default function InvoiceSettings() {
         return: defaultReturnSettings
     });
 
+    const [previewTemplate, setPreviewTemplate] = useState(null);
     const [previewCompanyProfile, setPreviewCompanyProfile] = useState(null);
     const [branches, setBranches] = useState([]);
     const [selectedBranchId, setSelectedBranchId] = useState('');
@@ -322,37 +323,46 @@ export default function InvoiceSettings() {
                                     </div>
                                     <div className="space-y-2.5">
                                         {TEMPLATES.map(t => {
+                                            const effectiveTpl = previewTemplate || currentConfig.template || 'modern';
                                             const isSelected = currentConfig.template === t.id;
+                                            const isPreviewing = effectiveTpl === t.id;
 
                                             return (
                                                 <div 
                                                     key={t.id}
-                                                    onClick={() => updateSetting('template', t.id)}
-                                                    className={`cursor-pointer rounded-xl border p-3 transition-all ${isSelected ? 'border-[#009262] bg-[#009262]/5 ring-1 ring-[#009262]' : 'border-slate-200 bg-white hover:border-slate-300'}`}
+                                                    onClick={() => {
+                                                        updateSetting('template', t.id);
+                                                        setPreviewTemplate(t.id);
+                                                    }}
+                                                    className={`cursor-pointer rounded-xl border p-3 transition-all ${isPreviewing ? 'border-[#009262] bg-[#009262]/5 ring-1 ring-[#009262]' : 'border-slate-200 bg-white hover:border-slate-300'}`}
                                                 >
                                                     <div className="flex items-start justify-between gap-2">
                                                         <div className="flex items-center gap-2">
                                                             <div className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center ${isSelected ? 'border-[#009262] bg-[#009262]' : 'border-slate-300'}`}>
                                                                 {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-white"></div>}
                                                             </div>
-                                                            <span className="text-xs font-semibold text-slate-800">{t.name}</span>
+                                                            <div>
+                                                                <span className="text-xs font-semibold text-slate-800">{t.name}</span>
+                                                                {isSelected && <span className="ml-2 text-[10px] font-medium text-[#009262] bg-[#009262]/10 px-1.5 py-0.5 rounded">Saved Default</span>}
+                                                            </div>
                                                         </div>
                                                         <button
                                                             type="button"
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
+                                                                setPreviewTemplate(t.id);
                                                                 updateSetting('template', t.id);
                                                             }}
-                                                            className={`text-[11px] px-2 py-0.5 rounded border flex items-center gap-1 font-medium transition-colors ${isSelected ? 'bg-[#009262] text-white border-[#009262]' : 'bg-white text-[#009262] border-[#009262]/30 hover:bg-[#009262]/10'}`}
+                                                            className={`text-[11px] px-2 py-0.5 rounded border flex items-center gap-1 font-medium transition-colors ${isPreviewing ? 'bg-[#009262] text-white border-[#009262]' : 'bg-white text-[#009262] border-[#009262]/30 hover:bg-[#009262]/10'}`}
                                                         >
-                                                            <FiMonitor size={11} /> Preview
+                                                            <FiMonitor size={11} /> {isPreviewing ? 'Active' : 'Preview'}
                                                         </button>
                                                     </div>
                                                 </div>
                                             );
                                         })}
                                     </div>
-                                    <p className="text-[10px] text-slate-400 mt-3 font-medium">Layout styles will update instantly.</p>
+                                    <p className="text-[10px] text-slate-400 mt-3 font-medium">Layout styles will update instantly in the preview canvas.</p>
                                 </div>
 
                                 {/* Page Size Section */}
@@ -489,7 +499,13 @@ export default function InvoiceSettings() {
                                         ref={previewCanvasRef}
                                         className={`transition-all duration-300 shadow-2xl origin-top mb-8 bg-white absolute top-0`}
                                         style={{
-                                            width: previewMode === 'Mobile' ? '360px' : ((currentConfig.template === 'boutique_a5' || currentConfig.pageSize === 'A5') ? '148mm' : (currentConfig.pageSize === 'A4' ? '210mm' : '148mm')),
+                                            width: previewMode === 'Mobile' 
+                                                ? '360px' 
+                                                : (currentConfig.pageSize === 'Thermal' 
+                                                    ? '80mm' 
+                                                    : ((previewTemplate || currentConfig.template) === 'boutique_a5' || currentConfig.pageSize === 'A5' 
+                                                        ? '148mm' 
+                                                        : '210mm')),
                                             transform: `scale(${previewScale})`,
                                             maxWidth: 'none'
                                         }}
@@ -511,23 +527,32 @@ export default function InvoiceSettings() {
                                                 currencySymbol: '₹',
                                                 currencyCode: 'INR',
                                                 exchangeRate: 1,
-                                                subTotal: 1000.00,
+                                                subTotal: 847.46,
                                                 discount: 152.54,
                                                 taxAmount: 152.54,
                                                 totalAmount: 1000.00,
                                                 roundOffAmount: 0,
+                                                paidAmount: 1000.00,
+                                                balanceAmount: 0.00,
                                                 currentBalance: 1250,
-                                                settings: currentConfig,
+                                                settings: {
+                                                    ...currentConfig,
+                                                    template: previewTemplate || currentConfig.template || 'modern'
+                                                },
                                                 items: [
                                                     {
                                                         name: 'PREMIUM ASIAN PAINTS - WHITE (1L)',
                                                         quantity: 2,
-                                                        unitPrice: 423.73,
+                                                        mrp: 500.00,
+                                                        originalUnitPrice: 500.00,
+                                                        unitPrice: 500.00,
+                                                        discountAmount: 0.00,
                                                         total: 1000.00,
                                                         taxAmount: 152.54,
                                                         taxRate: 18,
                                                         product: {
                                                             name: 'PREMIUM ASIAN PAINTS - WHITE (1L)',
+                                                            price: 500.00,
                                                             barcode: '890123456789',
                                                             hsnCode: '3208'
                                                         }
