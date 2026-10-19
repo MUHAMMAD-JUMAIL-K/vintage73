@@ -377,7 +377,9 @@ exports.Prisma.SaleScalarFieldEnum = {
   advanceUsed: 'advanceUsed',
   description: 'description',
   deliveryCharge: 'deliveryCharge',
-  hasDeliveryCharge: 'hasDeliveryCharge'
+  hasDeliveryCharge: 'hasDeliveryCharge',
+  voucherCode: 'voucherCode',
+  voucherDiscount: 'voucherDiscount'
 };
 
 exports.Prisma.SaleItemScalarFieldEnum = {
@@ -387,9 +389,11 @@ exports.Prisma.SaleItemScalarFieldEnum = {
   size: 'size',
   quantity: 'quantity',
   unitPrice: 'unitPrice',
+  originalUnitPrice: 'originalUnitPrice',
   total: 'total',
   discountAmount: 'discountAmount',
   discountPercent: 'discountPercent',
+  voucherDiscountAmount: 'voucherDiscountAmount',
   taxAmount: 'taxAmount',
   taxRate: 'taxRate',
   isTaxInclusive: 'isTaxInclusive'
@@ -1054,6 +1058,40 @@ exports.Prisma.StaffDayCloseScalarFieldEnum = {
   submittedAt: 'submittedAt'
 };
 
+exports.Prisma.CustomerVoucherScalarFieldEnum = {
+  id: 'id',
+  code: 'code',
+  name: 'name',
+  type: 'type',
+  value: 'value',
+  maximumDiscount: 'maximumDiscount',
+  minimumPurchaseAmount: 'minimumPurchaseAmount',
+  issueDate: 'issueDate',
+  expiryDate: 'expiryDate',
+  status: 'status',
+  customerId: 'customerId',
+  branchId: 'branchId',
+  issuedSaleId: 'issuedSaleId',
+  redeemedSaleId: 'redeemedSaleId',
+  redeemedAt: 'redeemedAt',
+  usageLimit: 'usageLimit',
+  usageCount: 'usageCount',
+  description: 'description',
+  createdBy: 'createdBy',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.CustomerVoucherRedemptionScalarFieldEnum = {
+  id: 'id',
+  voucherId: 'voucherId',
+  saleId: 'saleId',
+  customerId: 'customerId',
+  branchId: 'branchId',
+  discountAmount: 'discountAmount',
+  redeemedAt: 'redeemedAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -1150,7 +1188,9 @@ exports.Prisma.ModelName = {
   TicketClosureRequest: 'TicketClosureRequest',
   InvoiceSetting: 'InvoiceSetting',
   DayClose: 'DayClose',
-  StaffDayClose: 'StaffDayClose'
+  StaffDayClose: 'StaffDayClose',
+  CustomerVoucher: 'CustomerVoucher',
+  CustomerVoucherRedemption: 'CustomerVoucherRedemption'
 };
 
 /**

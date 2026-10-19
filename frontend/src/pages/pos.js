@@ -2,7 +2,7 @@
 import { useRouter } from 'next/router';
 import { useState, useEffect, useRef, useMemo } from 'react';
 import api from '@/lib/api';
-import { FiSearch, FiUser, FiX, FiPlus, FiTrash2, FiCreditCard, FiMonitor, FiShoppingCart, FiClock, FiCalendar, FiEdit2, FiAlertCircle } from 'react-icons/fi';
+import { FiSearch, FiUser, FiX, FiPlus, FiTrash2, FiCreditCard, FiMonitor, FiShoppingCart, FiClock, FiCalendar, FiEdit2, FiAlertCircle, FiTag, FiGift, FiLoader, FiCheckCircle } from 'react-icons/fi';
 import { useReactToPrint } from 'react-to-print';
 import { toast } from 'react-toastify';
 import { getTerminalId, checkTerminalAccess } from '@/lib/terminal';
@@ -116,6 +116,12 @@ const EXCHANGE_RATES = {
     const [currencySymbol, setCurrencySymbol] = useState('₹');
     const [exchangeRate, setExchangeRate] = useState(1);
 
+    // Promotional Voucher State
+    const [voucherInput, setVoucherInput] = useState('');
+    const [appliedVoucher, setAppliedVoucher] = useState(null);
+    const [validatingVoucher, setValidatingVoucher] = useState(false);
+    const [earnedRewardVoucher, setEarnedRewardVoucher] = useState(null);
+
     // Fetch the authoritative active business date from Day Close API
     const fetchBusinessDate = async (branchId) => {
         try {
@@ -168,6 +174,9 @@ const EXCHANGE_RATES = {
                     setCurrencySymbol(normalizeCurrencySymbol(parsed.currencySymbol || CURRENCY_SYMBOLS[restoredCode], restoredCode));
                     setExchangeRate(1);
                     setSaleDescription(parsed.saleDescription || '');
+                    if (parsed.appliedVoucher) {
+                        setAppliedVoucher(parsed.appliedVoucher);
+                    }
                 } catch (e) {
                     console.error('Failed to restore POS state:', e);
                 }
@@ -194,30 +203,39 @@ const EXCHANGE_RATES = {
                 currencySymbol,
                 exchangeRate,
                 advanceRedeemed,
-                saleDescription
+                saleDescription,
+                appliedVoucher
             };
             localStorage.setItem(`pos_state_${user.id}`, JSON.stringify(stateToStore));
         }
-    }, [cart, customerId, customerName, salesmanId, saleDate, roundOff, taxEnabled, deliveryChargeEnabled, deliveryCharge, advanceRedeemed, user?.id]);
+    }, [cart, customerId, customerName, salesmanId, saleDate, roundOff, taxEnabled, deliveryChargeEnabled, deliveryCharge, advanceRedeemed, appliedVoucher, user?.id]);
 
     // Calculations
     const calcResults = useMemo(() => {
-        return cart.reduce((acc, item) => {
+        const lineAllocations = appliedVoucher?.lineAllocations || {};
+        let totalCatalogPrice = 0;
+        let totalProductDiscount = 0;
+
+        const results = cart.reduce((acc, item, idx) => {
             const effectivePrice = parseFloat(item.price || 0);
+            const origPrice = item.originalPrice !== undefined ? parseFloat(item.originalPrice) : effectivePrice;
             const qty = parseFloat(item.quantity || 0);
             const effectiveDisc = parseFloat(item.discountAmount || 0);
+
+            totalCatalogPrice += (origPrice * qty);
+            totalProductDiscount += (effectiveDisc * qty);
 
             const rate = taxEnabled ? parseFloat(item.taxRate || 0) : 0;
             const isInc = item.isTaxInclusive === true;
 
-            // Net Price = Price - Discount
-            const netPricePerUnit = effectivePrice - effectiveDisc;
+            // Net Price before voucher = Price - Discount
+            const netPricePerUnit = Math.max(0, effectivePrice - effectiveDisc);
+            const linePayableBeforeVoucher = qty * netPricePerUnit;
+            const vAlloc = parseFloat(lineAllocations[idx] || 0);
+            const lineTotalPayable = Math.max(0, linePayableBeforeVoucher - vAlloc);
 
             let lineTax = 0;
-            let lineSubTotal = 0; // Exclusive of tax
-
-            // Total for line before splitting tax
-            const lineTotalPayable = qty * netPricePerUnit;
+            let lineSubTotal = 0; // Exclusive of tax (taxable base)
 
             if (isInc && rate > 0) {
                 const baseAmount = lineTotalPayable / (1 + (rate / 100));
@@ -236,7 +254,18 @@ const EXCHANGE_RATES = {
                 tax: acc.tax + lineTax
             };
         }, { subTotal: 0, tax: 0 });
-    }, [cart, taxEnabled]);
+
+        const voucherDiscount = appliedVoucher ? parseFloat(appliedVoucher.finalVoucherDiscount || 0) : 0;
+
+        return {
+            subTotal: results.subTotal,
+            tax: results.tax,
+            totalCatalogPrice,
+            totalProductDiscount,
+            voucherDiscount,
+            totalBeforeVoucher: Math.max(0, totalCatalogPrice - totalProductDiscount)
+        };
+    }, [cart, taxEnabled, appliedVoucher]);
 
     useEffect(() => {
         if (customerId) {
@@ -824,6 +853,7 @@ const EXCHANGE_RATES = {
             setCart(cart.map(item => ((item.cartItemId || `${item.id}_${item.brandId || 'nobrand'}_${item.selectedSize || 'nosize'}`) === cartKey) ? {
                 ...item,
                 quantity: item.quantity + 1,
+                originalPrice: item.originalPrice !== undefined ? item.originalPrice : freshPrice,
                 price: item.isPriceOverridden ? item.price : freshPrice,
                 taxRate: freshTaxRate,
                 isTaxInclusive: freshIsInclusive,
@@ -841,6 +871,7 @@ const EXCHANGE_RATES = {
                 selectedSize: selectedSize || null,
                 size: selectedSize || product.size || null,
                 stock: availableStock,
+                originalPrice: freshPrice,
                 price: freshPrice,
                 isPriceOverridden: false,
                 quantity: 1,
@@ -916,10 +947,84 @@ const EXCHANGE_RATES = {
         }
     };
 
-    // Calculations
+    // Promotional Voucher Application & Revalidation
+    const handleApplyVoucher = async () => {
+        if (!voucherInput.trim()) {
+            toast.error('Please enter a voucher code');
+            return;
+        }
+        if (cart.length === 0) {
+            toast.error('Please add products to cart first');
+            return;
+        }
+        setValidatingVoucher(true);
+        try {
+            const activeBranchId = (user?.role === 'admin' && !user?.branchId) ? selectedBranch : (user?.branchId || selectedBranch);
+            const res = await api.post('/customer-vouchers/validate', {
+                code: voucherInput.trim(),
+                customerId: customerId ? parseInt(customerId) : null,
+                branchId: activeBranchId ? parseInt(activeBranchId) : null,
+                items: cart.map(item => ({
+                    productId: item.id,
+                    price: parseFloat(item.price || 0),
+                    unitPrice: parseFloat(item.price || 0),
+                    quantity: parseFloat(item.quantity || 1),
+                    discountAmount: parseFloat(item.discountAmount || 0)
+                }))
+            });
 
+            if (res.data && res.data.valid) {
+                setAppliedVoucher(res.data);
+                toast.success(`Voucher "${res.data.voucher.code}" applied! Saved ${currencySymbol}${res.data.finalVoucherDiscount.toFixed(2)}`);
+                setVoucherInput('');
+            }
+        } catch (err) {
+            console.error('Voucher validation error:', err);
+            toast.error(err.response?.data?.message || 'Invalid or inapplicable voucher');
+        } finally {
+            setValidatingVoucher(false);
+        }
+    };
 
-    const { subTotal, tax } = calcResults;
+    const handleRemoveVoucher = () => {
+        setAppliedVoucher(null);
+        toast.info('Voucher removed');
+    };
+
+    // Auto-revalidate voucher whenever cart or customer changes
+    useEffect(() => {
+        if (!appliedVoucher?.voucher?.code) return;
+        if (cart.length === 0) {
+            setAppliedVoucher(null);
+            return;
+        }
+        const activeBranchId = (user?.role === 'admin' && !user?.branchId) ? selectedBranch : (user?.branchId || selectedBranch);
+        api.post('/customer-vouchers/validate', {
+            code: appliedVoucher.voucher.code,
+            customerId: customerId ? parseInt(customerId) : null,
+            branchId: activeBranchId ? parseInt(activeBranchId) : null,
+            items: cart.map(item => ({
+                productId: item.id,
+                price: parseFloat(item.price || 0),
+                unitPrice: parseFloat(item.price || 0),
+                quantity: parseFloat(item.quantity || 1),
+                discountAmount: parseFloat(item.discountAmount || 0)
+            }))
+        }).then(res => {
+            if (res.data && res.data.valid) {
+                setAppliedVoucher(res.data);
+            } else {
+                toast.warn(`Voucher removed: ${res.data?.message || 'Cart criteria not met'}`);
+                setAppliedVoucher(null);
+            }
+        }).catch(err => {
+            toast.warn(`Voucher removed: ${err.response?.data?.message || 'Cart criteria not met'}`);
+            setAppliedVoucher(null);
+        });
+    }, [cart, customerId]);
+
+    // Calculations Unpacking
+    const { subTotal, tax, totalCatalogPrice, totalProductDiscount, voucherDiscount, totalBeforeVoucher } = calcResults;
     const effectiveDelivery = deliveryChargeEnabled ? (parseFloat(deliveryCharge) || 0) : 0;
     const totalBeforeRound = subTotal + tax + effectiveDelivery;
     const redeemedAmount = parseFloat(advanceRedeemed || 0);
@@ -1141,12 +1246,14 @@ const EXCHANGE_RATES = {
                 customerName: customerName || 'Walk-in Customer',
                 branchId: activeBranchId ? parseInt(activeBranchId) : null,
                 saleDate,
+                voucherCode: appliedVoucher ? appliedVoucher.voucher.code : undefined,
                 items: cart.map(item => {
                     return {
                         productId: item.id,
                         size: item.selectedSize || item.size || null,
                         quantity: item.quantity,
                         unitPrice: parseFloat(item.price || 0),
+                        originalUnitPrice: item.originalPrice !== undefined ? parseFloat(item.originalPrice) : parseFloat(item.price || 0),
                         taxPercent: taxEnabled ? item.taxPercent : 0,
                         discountPercent: item.discountPercent,
                         discountAmount: parseFloat(item.discountAmount || 0),
@@ -1187,6 +1294,9 @@ const EXCHANGE_RATES = {
 
             setLastSale({
                 ...res.data,
+                voucherCode: res.data.voucherCode || (appliedVoucher ? appliedVoucher.voucher.code : null),
+                voucherDiscount: res.data.voucherDiscount !== undefined ? Number(res.data.voucherDiscount) : (appliedVoucher ? appliedVoucher.finalVoucherDiscount : 0),
+                issuedRewardVoucher: res.data.issuedRewardVoucher || null,
                 paidAmount: res.data.paidAmount !== undefined ? Number(res.data.paidAmount) : actualCollectedPaid,
                 balanceAmount: res.data.balanceAmount !== undefined ? Number(res.data.balanceAmount) : Math.max(0, finalPayable - actualCollectedPaid),
                 deliveryCharge: res.data.deliveryCharge !== undefined ? Number(res.data.deliveryCharge) : effectiveDelivery,
@@ -1205,6 +1315,12 @@ const EXCHANGE_RATES = {
             setPaymentData({ method: 'Cash', paidAmount: '0.00' });
             // Delay print slightly to allow state update and DOM rasterization
             setTimeout(() => handlePrint(), 300);
+
+            if (res.data.issuedRewardVoucher) {
+                setEarnedRewardVoucher(res.data.issuedRewardVoucher);
+            }
+            setAppliedVoucher(null);
+            setVoucherInput('');
 
             setCart([]);
             setSearch('');
@@ -1661,11 +1777,13 @@ const EXCHANGE_RATES = {
                         </div>
                     ) : (
                         <div className="divide-y divide-slate-50">
-                            {cart.map(item => {
+                            {cart.map((item, idx) => {
                                 const itemKey = item.cartItemId || `${item.id}_${item.selectedSize || 'nosize'}`;
                                 const effPrice = parseFloat(item.price || 0);
                                 const effDisc = parseFloat(item.discountAmount || 0);
-                                const lineTotal = (effPrice - effDisc) * (parseFloat(item.quantity) || 0);
+                                const lineAlloc = appliedVoucher?.lineAllocations?.[idx] || 0;
+                                const lineTotalBeforeVoucher = Math.max(0, (effPrice - effDisc) * (parseFloat(item.quantity) || 0));
+                                const lineFinalTotal = Math.max(0, lineTotalBeforeVoucher - lineAlloc);
 
                                 return (
                                     <div key={itemKey} className="px-4 py-3 hover:bg-slate-50 group transition-colors">
@@ -1673,20 +1791,23 @@ const EXCHANGE_RATES = {
                                             {/* Item & Disc */}
                                             <div className="flex-[3] pr-2">
                                                 <h4 className="font-medium text-slate-700 leading-tight mb-0.5">{item.name}</h4>
-                                                {(item.productTypeName || item.selectedSize) && (
-                                                    <div className="flex flex-wrap items-center gap-1 mb-1">
-                                                        {item.productTypeName && (
-                                                            <span className="text-[9px] px-1.5 py-0.2 rounded bg-indigo-50 text-indigo-700 font-semibold border border-indigo-100">
-                                                                {item.productTypeName}
-                                                            </span>
-                                                        )}
-                                                        {item.selectedSize && (
-                                                            <span className="text-[9px] px-1.5 py-0.2 rounded bg-slate-100 text-slate-700 font-bold border border-slate-200">
-                                                                Size: {item.selectedSize}
-                                                            </span>
-                                                        )}
-                                                    </div>
-                                                )}
+                                                <div className="flex flex-wrap items-center gap-1 mb-1">
+                                                    {item.productTypeName && (
+                                                        <span className="text-[9px] px-1.5 py-0.2 rounded bg-indigo-50 text-indigo-700 font-semibold border border-indigo-100">
+                                                            {item.productTypeName}
+                                                        </span>
+                                                    )}
+                                                    {item.selectedSize && (
+                                                        <span className="text-[9px] px-1.5 py-0.2 rounded bg-slate-100 text-slate-700 font-bold border border-slate-200">
+                                                            Size: {item.selectedSize}
+                                                        </span>
+                                                    )}
+                                                    {lineAlloc > 0 && (
+                                                        <span className="text-[9px] px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-800 font-bold border border-emerald-200">
+                                                            Voucher: -{currencySymbol}{lineAlloc.toFixed(2)}
+                                                        </span>
+                                                    )}
+                                                </div>
                                                 <div className="flex items-center gap-1 mt-1">
                                                     <div className="flex items-center border border-slate-200 rounded overflow-hidden h-6 bg-slate-50">
                                                         <input
@@ -1745,7 +1866,20 @@ const EXCHANGE_RATES = {
 
                                             {/* Total */}
                                             <div className="flex-[2] text-right font-medium text-slate-800">
-                                                {currencyCode === 'AED' ? `${lineTotal.toFixed(2)} ${currencySymbol}` : `${currencySymbol}${lineTotal.toFixed(2)}`}
+                                                {lineAlloc > 0 ? (
+                                                    <div>
+                                                        <div className="text-[10px] text-slate-400 line-through">
+                                                            {currencyCode === 'AED' ? `${lineTotalBeforeVoucher.toFixed(2)} ${currencySymbol}` : `${currencySymbol}${lineTotalBeforeVoucher.toFixed(2)}`}
+                                                        </div>
+                                                        <div className="font-bold text-emerald-700">
+                                                            {currencyCode === 'AED' ? `${lineFinalTotal.toFixed(2)} ${currencySymbol}` : `${currencySymbol}${lineFinalTotal.toFixed(2)}`}
+                                                        </div>
+                                                    </div>
+                                                ) : (
+                                                    <div>
+                                                        {currencyCode === 'AED' ? `${lineFinalTotal.toFixed(2)} ${currencySymbol}` : `${currencySymbol}${lineFinalTotal.toFixed(2)}`}
+                                                    </div>
+                                                )}
                                             </div>
 
                                             {/* Remove */}
@@ -1762,23 +1896,116 @@ const EXCHANGE_RATES = {
                     )}
                 </div>
 
+                {/* Promo Voucher Box */}
+                <div className="bg-slate-50 border-t border-slate-200 p-2.5">
+                    {appliedVoucher ? (
+                        <div className="flex items-center justify-between bg-emerald-50 border border-emerald-300 px-2.5 py-1.5 rounded-lg shadow-sm">
+                            <div className="flex items-center gap-2 overflow-hidden">
+                                <div className="w-6 h-6 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 shrink-0">
+                                    <FiTag size={12} />
+                                </div>
+                                <div className="truncate">
+                                    <div className="flex items-center gap-1.5">
+                                        <span className="font-black text-xs text-emerald-900 tracking-wide font-mono">{appliedVoucher.voucher.code}</span>
+                                        <span className="text-[9px] px-1 py-0.2 bg-emerald-200/80 text-emerald-800 font-bold rounded uppercase">
+                                            {appliedVoucher.voucher.type}
+                                        </span>
+                                    </div>
+                                    <div className="text-[10px] text-emerald-700 font-semibold">
+                                        Voucher Discount: -{currencySymbol}{appliedVoucher.finalVoucherDiscount.toFixed(2)}
+                                    </div>
+                                </div>
+                            </div>
+                            <button
+                                onClick={handleRemoveVoucher}
+                                className="w-6 h-6 flex items-center justify-center rounded-full text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors ml-2"
+                                title="Remove Voucher"
+                            >
+                                <FiX size={14} />
+                            </button>
+                        </div>
+                    ) : (
+                        <div className="flex gap-1.5 items-center">
+                            <div className="relative flex-1">
+                                <FiTag className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" size={13} />
+                                <input
+                                    type="text"
+                                    className="w-full pl-8 pr-2 py-1.5 text-xs font-mono uppercase bg-white border border-slate-200 rounded-lg outline-none focus:border-primary placeholder:font-sans placeholder:normal-case placeholder:text-slate-400 transition-all shadow-inner"
+                                    placeholder="Enter Voucher Code (e.g. SAVE50)"
+                                    value={voucherInput}
+                                    onChange={e => setVoucherInput(e.target.value.toUpperCase())}
+                                    onKeyDown={e => {
+                                        if (e.key === 'Enter') {
+                                            e.preventDefault();
+                                            handleApplyVoucher();
+                                        }
+                                    }}
+                                />
+                            </div>
+                            <button
+                                type="button"
+                                onClick={handleApplyVoucher}
+                                disabled={validatingVoucher || !voucherInput.trim() || cart.length === 0}
+                                className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-300 text-white rounded-lg text-xs font-bold transition-all shadow-sm flex items-center gap-1"
+                            >
+                                {validatingVoucher ? <FiLoader className="animate-spin" size={12} /> : 'Apply'}
+                            </button>
+                        </div>
+                    )}
+                </div>
+
                 {/* Totals & Actions - Compacted */}
                 <div className="bg-slate-50 border-t border-slate-200 p-3 space-y-1.5">
                     <div className="space-y-0.5 text-xs">
+                        {/* 1. Catalog Price Total */}
                         <div className="flex justify-between text-slate-500">
-                            <span className="font-medium text-[10px] uppercase">Subtotal</span>
+                            <span className="font-medium text-[10px] uppercase">Catalog Price</span>
+                            <span className="font-semibold text-slate-700">
+                                {currencyCode === 'AED' ? `${totalCatalogPrice.toFixed(2)} ${currencySymbol}` : `${currencySymbol}${totalCatalogPrice.toFixed(2)}`}
+                            </span>
+                        </div>
+
+                        {/* 2. Product Discount */}
+                        {totalProductDiscount > 0 && (
+                            <div className="flex justify-between text-slate-500">
+                                <span className="font-medium text-[10px] uppercase">Product Discount</span>
+                                <span className="font-semibold text-orange-600">
+                                    -{currencyCode === 'AED' ? `${totalProductDiscount.toFixed(2)} ${currencySymbol}` : `${currencySymbol}${totalProductDiscount.toFixed(2)}`}
+                                </span>
+                            </div>
+                        )}
+
+                        {/* 3. Voucher Discount */}
+                        {voucherDiscount > 0 && (
+                            <div className="flex justify-between items-center text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
+                                <span className="font-bold text-[10px] uppercase flex items-center gap-1">
+                                    <FiTag size={10} /> Voucher ({appliedVoucher?.voucher?.code})
+                                </span>
+                                <span className="font-black">
+                                    -{currencyCode === 'AED' ? `${voucherDiscount.toFixed(2)} ${currencySymbol}` : `${currencySymbol}${voucherDiscount.toFixed(2)}`}
+                                </span>
+                            </div>
+                        )}
+
+                        {/* 4. Taxable Subtotal */}
+                        <div className="flex justify-between text-slate-500">
+                            <span className="font-medium text-[10px] uppercase">Taxable Subtotal</span>
                             <span className="font-semibold text-slate-700">
                                 {currencyCode === 'AED' ? `${subTotal.toFixed(2)} ${currencySymbol}` : `${currencySymbol}${subTotal.toFixed(2)}`}
                             </span>
                         </div>
+
+                        {/* 5. Tax (GST) */}
                         {taxEnabled && (
                             <div className="flex justify-between text-slate-500">
-                                <span className="font-medium text-[10px] uppercase">Tax</span>
+                                <span className="font-medium text-[10px] uppercase">Tax (GST)</span>
                                 <span className="font-semibold text-emerald-600">
                                     +{currencyCode === 'AED' ? `${tax.toFixed(2)} ${currencySymbol}` : `${currencySymbol}${tax.toFixed(2)}`}
                                 </span>
                             </div>
                         )}
+
+                        {/* 6. Delivery Charge */}
                         {(deliveryChargeEnabled || effectiveDelivery > 0) && (
                             <div className="flex justify-between text-slate-500">
                                 <span className="font-medium text-[10px] uppercase">Delivery Charge</span>
@@ -1787,6 +2014,8 @@ const EXCHANGE_RATES = {
                                 </span>
                             </div>
                         )}
+
+                        {/* 7. Advance */}
                         {parseFloat(advanceRedeemed || 0) > 0 && (
                             <div className="flex justify-between items-center text-orange-600">
                                 <span className="font-bold text-[10px] uppercase">Advance</span>
@@ -1795,6 +2024,8 @@ const EXCHANGE_RATES = {
                                 </span>
                             </div>
                         )}
+
+                        {/* 8. Round Off */}
                         <div className="flex justify-between items-center text-slate-400 h-6">
                             <span className="flex items-center gap-1.5 text-[9px] uppercase font-bold">
                                 Round Off <button onClick={handleAutoRound} className="text-[8px] bg-slate-200 px-1 py-0 rounded hover:bg-slate-300 font-black text-slate-600">AUTO</button>
@@ -1874,6 +2105,11 @@ const EXCHANGE_RATES = {
                             <div className="text-center mb-8">
                                 <p className="text-sm font-semibold text-slate-400 uppercase tracking-widest mb-1">Total Payable</p>
                                 <span className="text-2xl font-extrabold text-slate-800">{currencySymbol}{finalPayable.toFixed(2)}</span>
+                                {voucherDiscount > 0 && (
+                                    <p className="text-[11px] text-emerald-600 font-bold mt-1">
+                                        (Voucher &quot;{appliedVoucher?.voucher?.code}&quot; applied: -{currencySymbol}{voucherDiscount.toFixed(2)})
+                                    </p>
+                                )}
                                 {redeemedAmount > 0 && (
                                     <p className="text-[10px] text-slate-400 mt-1 italic">(Gross: {currencySymbol}{total.toFixed(2)} - Adv: {currencySymbol}{redeemedAmount.toFixed(2)})</p>
                                 )}
@@ -2321,6 +2557,44 @@ const EXCHANGE_RATES = {
                                 Cancel
                             </button>
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Reward Voucher Earned Celebration Modal */}
+            {earnedRewardVoucher && (
+                <div className="fixed inset-0 z-[100000] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+                    <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 text-center animate-in fade-in zoom-in-95 duration-200 border-2 border-emerald-500">
+                        <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl shadow-inner">
+                            🎉
+                        </div>
+                        <h3 className="text-xl font-black text-slate-800 uppercase tracking-tight">Reward Voucher Earned!</h3>
+                        <p className="text-xs text-slate-500 mt-1">This sale qualified for an exclusive purchase reward coupon for the customer.</p>
+
+                        <div className="my-5 p-4 bg-emerald-50 border-2 border-dashed border-emerald-400 rounded-xl relative">
+                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">COUPON CODE</span>
+                            <span className="text-2xl font-black font-mono tracking-wider text-emerald-700 select-all">{earnedRewardVoucher.code}</span>
+                            <div className="mt-2 text-sm font-bold text-slate-800">
+                                {earnedRewardVoucher.type === 'PERCENTAGE' ? `${earnedRewardVoucher.value}% OFF` : `${currencySymbol}${parseFloat(earnedRewardVoucher.value).toFixed(2)} OFF`}
+                            </div>
+                            {parseFloat(earnedRewardVoucher.minimumPurchaseAmount || 0) > 0 && (
+                                <div className="text-[11px] text-slate-500 mt-1">
+                                    Min. purchase: {currencySymbol}{parseFloat(earnedRewardVoucher.minimumPurchaseAmount).toFixed(2)}
+                                </div>
+                            )}
+                            {earnedRewardVoucher.expiryDate && (
+                                <div className="text-[11px] text-slate-400 mt-0.5">
+                                    Valid until: {new Date(earnedRewardVoucher.expiryDate).toLocaleDateString('en-GB')}
+                                </div>
+                            )}
+                        </div>
+
+                        <button
+                            onClick={() => setEarnedRewardVoucher(null)}
+                            className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-sm shadow-md shadow-emerald-600/30 transition-all"
+                        >
+                            Continue
+                        </button>
                     </div>
                 </div>
             )}

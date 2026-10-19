@@ -103,6 +103,7 @@ export const MENU_STRUCTURE = [
       { name: 'Quotations', icon: FiFileText, path: '/sales/quotations' },
       { name: 'Product Advance', icon: FiDollarSign, path: '/sales/product-advance' },
       { name: 'Sales Return', icon: FiBox, path: '/sales-return' },
+      { name: 'Voucher Management', icon: TbReceipt, path: '/sales/vouchers' },
     ]
   },
   {

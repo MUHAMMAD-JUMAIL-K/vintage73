@@ -212,33 +212,57 @@ async function processSalePosting(tx, sale, userId) {
     const customerLedger = await ensureLedger(tx, customerName, 'Sundry Debtors');
     const salesLedger = await ensureLedger(tx, 'Sales Account', 'Sales Accounts');
 
-    const entries = [
-      { ledgerId: customerLedger.id, type: 'DEBIT', amount: grandTotal }
-    ];
-
+    const entries = [];
     const tax = parseFloat(String(taxAmount || 0));
     const sub = parseFloat((grandTotal - tax).toFixed(2));
+    const isReturn = sale.isReturn === true;
 
-    if (tax > 0) {
-      entries.push({ ledgerId: salesLedger.id, type: 'CREDIT', amount: sub });
-      const halfTax = parseFloat((tax / 2).toFixed(2));
-      const otherHalf = parseFloat((tax - halfTax).toFixed(2));
-      const cgstLedger = await ensureLedger(tx, 'Output CGST', 'Duties & Taxes');
-      const sgstLedger = await ensureLedger(tx, 'Output SGST', 'Duties & Taxes');
-      entries.push({ ledgerId: cgstLedger.id, type: 'CREDIT', amount: halfTax });
-      entries.push({ ledgerId: sgstLedger.id, type: 'CREDIT', amount: otherHalf });
+    if (isReturn) {
+      const returnLedger = await ensureLedger(tx, 'Sales Return Account', 'Sales Accounts');
+      entries.push({ ledgerId: returnLedger.id, type: 'DEBIT', amount: sub });
+      if (tax > 0) {
+        const halfTax = parseFloat((tax / 2).toFixed(2));
+        const otherHalf = parseFloat((tax - halfTax).toFixed(2));
+        const cgstLedger = await ensureLedger(tx, 'Output CGST', 'Duties & Taxes');
+        const sgstLedger = await ensureLedger(tx, 'Output SGST', 'Duties & Taxes');
+        entries.push({ ledgerId: cgstLedger.id, type: 'DEBIT', amount: halfTax });
+        entries.push({ ledgerId: sgstLedger.id, type: 'DEBIT', amount: otherHalf });
+      }
+      entries.push({ ledgerId: customerLedger.id, type: 'CREDIT', amount: grandTotal });
+
+      await postVoucher(tx, {
+        type: 'JOURNAL',
+        date: saleDate ? new Date(saleDate) : new Date(),
+        amount: grandTotal,
+        narration: `Sales Return Credit Note for #${invoiceNumber}${sale.originalInvoice ? ` (Orig: ${sale.originalInvoice})` : ''}`,
+        reference: invoiceNumber,
+        createdBy: userId
+      }, entries);
     } else {
-      entries.push({ ledgerId: salesLedger.id, type: 'CREDIT', amount: grandTotal });
-    }
+      entries.push({ ledgerId: customerLedger.id, type: 'DEBIT', amount: grandTotal });
 
-    await postVoucher(tx, {
-      type: 'SALES',
-      date: saleDate ? new Date(saleDate) : new Date(),
-      amount: grandTotal,
-      narration: `Sales Invoice #${invoiceNumber}`,
-      reference: invoiceNumber,
-      createdBy: userId
-    }, entries);
+      if (tax > 0) {
+        entries.push({ ledgerId: salesLedger.id, type: 'CREDIT', amount: sub });
+        const halfTax = parseFloat((tax / 2).toFixed(2));
+        const otherHalf = parseFloat((tax - halfTax).toFixed(2));
+        const cgstLedger = await ensureLedger(tx, 'Output CGST', 'Duties & Taxes');
+        const sgstLedger = await ensureLedger(tx, 'Output SGST', 'Duties & Taxes');
+        entries.push({ ledgerId: cgstLedger.id, type: 'CREDIT', amount: halfTax });
+        entries.push({ ledgerId: sgstLedger.id, type: 'CREDIT', amount: otherHalf });
+      } else {
+        entries.push({ ledgerId: salesLedger.id, type: 'CREDIT', amount: grandTotal });
+      }
+
+      const voucherNarration = sale.voucherCode ? ` [Voucher: ${sale.voucherCode} Discount: ${sale.voucherDiscount}]` : '';
+      await postVoucher(tx, {
+        type: 'SALES',
+        date: saleDate ? new Date(saleDate) : new Date(),
+        amount: grandTotal,
+        narration: `Sales Invoice #${invoiceNumber}${voucherNarration}`,
+        reference: invoiceNumber,
+        createdBy: userId
+      }, entries);
+    }
   }
 
   // 3. Handle Receipt if paid

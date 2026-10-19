@@ -3,6 +3,11 @@ const asyncHandler = require('../middleware/asyncHandler');
 const { processSalePosting } = require('../utils/accountingHelper');
 const { generateNextNumber } = require('../services/numberingService');
 const { getBranchActiveBusinessDate } = require('../utils/businessDateHelper');
+const {
+  validateVoucherForSale,
+  redeemVoucherInSale,
+  checkAndIssuePurchaseReward
+} = require('../services/voucherService');
 
 // Create new sale
 exports.createSale = asyncHandler(async (req, res) => {
@@ -10,7 +15,8 @@ exports.createSale = asyncHandler(async (req, res) => {
     customerId, items, paymentMethod, paidAmount, discount = 0, advanceRedeemed = 0, saleDate, salesmanId, 
     terminalId, isReturn = false, returnReason = '', originalInvoice = '',
     currencyCode = 'INR', exchangeRate = 1.0, description,
-    deliveryCharge = 0, hasDeliveryCharge = false
+    deliveryCharge = 0, hasDeliveryCharge = false,
+    voucherCode
   } = req.body;
   let { branchId } = req.body;
 
@@ -110,13 +116,30 @@ exports.createSale = asyncHandler(async (req, res) => {
     
     console.log(`[POS Stock Resolution] Branch: ${validBranchId}, Raw: ${fetchBranch?.stockIncluded}, Final Decision: ${stockIncluded ? 'VALIDATING' : 'SKIPPING STOCK CHECK'}`);
 
+    // Voucher Validation & Proportional Allocation
+    let voucherValidation = null;
+    if (voucherCode && !isReturn) {
+      voucherValidation = await validateVoucherForSale(tx, {
+        code: voucherCode,
+        customerId: customer?.id || customerId,
+        branchId: validBranchId,
+        items
+      });
+      if (!voucherValidation.valid) {
+        throw new Error(voucherValidation.message);
+      }
+    }
+    const finalVoucherDiscount = voucherValidation ? voucherValidation.finalVoucherDiscount : 0;
+    const lineAllocations = voucherValidation ? voucherValidation.lineAllocations : {};
+
     // 1. Calculate Totals
     let subTotal = 0;
     let taxAmount = 0;
     let totalItemsDiscount = 0;
     const saleItemsData = [];
 
-    for (const item of items) {
+    for (let itemIdx = 0; itemIdx < items.length; itemIdx++) {
+      const item = items[itemIdx];
       const productId = parseInt(item.productId);
       const product = await tx.product.findUnique({ where: { id: productId } });
       if (!product) throw new Error(`Product ${productId} not found.`);
@@ -164,12 +187,17 @@ exports.createSale = asyncHandler(async (req, res) => {
       }
 
       const unitPrice = parseFloat(item.unitPrice || item.price || 0);
+      const originalUnitPrice = item.originalUnitPrice !== undefined && item.originalUnitPrice !== null
+        ? parseFloat(item.originalUnitPrice)
+        : (product ? parseFloat(product.price || 0) : unitPrice);
       const discAmt = parseFloat(item.discountAmount || 0);
-      const netPrice = unitPrice - discAmt;
+      const netPrice = Math.max(0, unitPrice - discAmt);
       
       const taxRate = item.taxPercent !== undefined ? parseFloat(item.taxPercent) : parseFloat(product.taxRate || 0);
       const itemIsTaxInclusive = item.isTaxInclusive === true || item.isTaxInclusive === 'true';
-      const lineTotalPayable = item.quantity * netPrice;
+      const vAlloc = lineAllocations[itemIdx] || 0;
+      const lineTotalPayableBeforeVoucher = item.quantity * netPrice;
+      const lineTotalPayable = Math.max(0, lineTotalPayableBeforeVoucher - vAlloc);
       
       let lineTax = 0;
       let lineTotal = 0;
@@ -195,8 +223,10 @@ exports.createSale = asyncHandler(async (req, res) => {
         size: item.size || item.selectedSize || null,
         quantity: parseFloat(item.quantity || 1),
         unitPrice: parseFloat(unitPrice.toFixed(2)),
+        originalUnitPrice: parseFloat(originalUnitPrice.toFixed(2)),
         discountPercent: parseFloat(item.discountPercent || 0),
         discountAmount: parseFloat(discAmt.toFixed(2)),
+        voucherDiscountAmount: parseFloat(vAlloc.toFixed(2)),
         total: parseFloat((lineTotal + lineTax).toFixed(2)),
         taxRate: parseFloat(taxRate.toFixed(2)),
         taxAmount: parseFloat(lineTax.toFixed(2)),
@@ -307,6 +337,8 @@ exports.createSale = asyncHandler(async (req, res) => {
         roundOffAmount: finalRoundOffAmount,
         deliveryCharge: effectiveDeliveryCharge,
         hasDeliveryCharge: isDeliveryEnabled,
+        voucherCode: voucherValidation ? voucherValidation.voucher.code : null,
+        voucherDiscount: finalVoucherDiscount,
         advanceUsed: reqAdvanceUsed,
         paidAmount: finalPaidAmount,
         balanceAmount: finalBalanceAmount,
@@ -334,6 +366,23 @@ exports.createSale = asyncHandler(async (req, res) => {
         payments: true
       }
     });
+
+    // Voucher Redemption
+    if (voucherValidation) {
+      await redeemVoucherInSale(tx, {
+        voucherId: voucherValidation.voucher.id,
+        saleId: sale.id,
+        customerId: customer?.id || null,
+        branchId: validBranchId,
+        appliedDiscount: finalVoucherDiscount
+      });
+    }
+
+    // Purchase Reward Check & Issuance
+    let issuedRewardVoucher = null;
+    if (!isReturn) {
+      issuedRewardVoucher = await checkAndIssuePurchaseReward(tx, sale);
+    }
 
     // Accounting
     try {
@@ -428,7 +477,7 @@ exports.createSale = asyncHandler(async (req, res) => {
       }
     }
 
-    return sale;
+    return { ...sale, issuedRewardVoucher };
   });
 
   res.status(201).json(result);
@@ -474,6 +523,8 @@ exports.getAllSales = asyncHandler(async (req, res) => {
       ...s,
       discount: Number(s.discount || 0),
       advanceUsed: Number(s.advanceUsed || 0),
+      voucherDiscount: Number(s.voucherDiscount || 0),
+      voucherCode: s.voucherCode || null,
       paidAmount: paidAmt,
       balanceAmount: balAmt,
       payments: paymentsList,
@@ -527,6 +578,29 @@ exports.cancelSale = asyncHandler(async (req, res) => {
     }
     await tx.payment.deleteMany({ where: { saleId: parseInt(id) } });
     await tx.voucher.updateMany({ where: { reference: sale.invoiceNumber }, data: { status: 'CANCELLED' } });
+
+    // Restore redeemed CustomerVoucher if one was used
+    if (sale.voucherCode) {
+      const redeemedVoucher = await tx.customerVoucher.findUnique({ where: { code: sale.voucherCode } });
+      if (redeemedVoucher) {
+        await tx.customerVoucher.update({
+          where: { id: redeemedVoucher.id },
+          data: {
+            usageCount: Math.max(0, redeemedVoucher.usageCount - 1),
+            status: 'ACTIVE',
+            redeemedSaleId: null,
+            redeemedAt: null
+          }
+        });
+      }
+      await tx.customerVoucherRedemption.deleteMany({ where: { saleId: parseInt(id) } });
+    }
+
+    // Cancel any purchase rewards issued on this sale
+    await tx.customerVoucher.updateMany({
+      where: { issuedSaleId: parseInt(id) },
+      data: { status: 'CANCELLED' }
+    });
   });
   res.json({ message: 'Success' });
 });
@@ -687,7 +761,11 @@ exports.updateSale = asyncHandler(async (req, res) => {
       }
 
       const unitPrice = parseFloat(item.unitPrice || item.price || 0);
+      const originalUnitPrice = item.originalUnitPrice !== undefined && item.originalUnitPrice !== null
+        ? parseFloat(item.originalUnitPrice)
+        : (product ? parseFloat(product.price || 0) : unitPrice);
       const discAmt = parseFloat(item.discountAmount || 0);
+      const voucherDiscountAmount = parseFloat(item.voucherDiscountAmount || 0);
       const netPrice = unitPrice - discAmt;
       const taxRate = item.taxPercent !== undefined ? parseFloat(item.taxPercent) : parseFloat(product.taxRate || 0);
       
@@ -714,8 +792,10 @@ exports.updateSale = asyncHandler(async (req, res) => {
         size: item.size || item.selectedSize || null,
         quantity: parseFloat(item.quantity || 1),
         unitPrice: parseFloat(unitPrice.toFixed(2)),
+        originalUnitPrice: parseFloat(originalUnitPrice.toFixed(2)),
         discountPercent: parseFloat(item.discountPercent || 0),
         discountAmount: parseFloat(discAmt.toFixed(2)),
+        voucherDiscountAmount: parseFloat(voucherDiscountAmount.toFixed(2)),
         total: parseFloat((lineTotal + lineTax).toFixed(2)),
         taxAmount: parseFloat(lineTax.toFixed(2)),
         taxRate

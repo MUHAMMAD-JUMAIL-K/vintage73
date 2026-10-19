@@ -106,6 +106,9 @@ exports.createB2BInvoice = asyncHandler(async (req, res) => {
       }
 
       const unitPrice = parseFloat(item.unitPrice || product.price);
+      const originalUnitPrice = item.originalUnitPrice !== undefined && item.originalUnitPrice !== null
+        ? parseFloat(item.originalUnitPrice)
+        : (product ? parseFloat(product.price || 0) : unitPrice);
       const quantity = parseInt(item.quantity);
       const discountPercent = parseFloat(item.discountPercent || 0);
       const discountAmount = (unitPrice * discountPercent) / 100;
@@ -123,6 +126,7 @@ exports.createB2BInvoice = asyncHandler(async (req, res) => {
         productId,
         quantity,
         unitPrice,
+        originalUnitPrice,
         discountPercent,
         discountAmount: discountAmount * quantity,
         taxRate,
