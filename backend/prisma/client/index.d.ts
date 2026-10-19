@@ -338,6 +338,16 @@ export type DayClose = $Result.DefaultSelection<Prisma.$DayClosePayload>
  * 
  */
 export type StaffDayClose = $Result.DefaultSelection<Prisma.$StaffDayClosePayload>
+/**
+ * Model CustomerVoucher
+ * 
+ */
+export type CustomerVoucher = $Result.DefaultSelection<Prisma.$CustomerVoucherPayload>
+/**
+ * Model CustomerVoucherRedemption
+ * 
+ */
+export type CustomerVoucherRedemption = $Result.DefaultSelection<Prisma.$CustomerVoucherRedemptionPayload>
 
 /**
  * ##  Prisma Client ʲˢ
@@ -1110,6 +1120,26 @@ export class PrismaClient<
     * ```
     */
   get staffDayClose(): Prisma.StaffDayCloseDelegate<ExtArgs>;
+
+  /**
+   * `prisma.customerVoucher`: Exposes CRUD operations for the **CustomerVoucher** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more CustomerVouchers
+    * const customerVouchers = await prisma.customerVoucher.findMany()
+    * ```
+    */
+  get customerVoucher(): Prisma.CustomerVoucherDelegate<ExtArgs>;
+
+  /**
+   * `prisma.customerVoucherRedemption`: Exposes CRUD operations for the **CustomerVoucherRedemption** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more CustomerVoucherRedemptions
+    * const customerVoucherRedemptions = await prisma.customerVoucherRedemption.findMany()
+    * ```
+    */
+  get customerVoucherRedemption(): Prisma.CustomerVoucherRedemptionDelegate<ExtArgs>;
 }
 
 export namespace Prisma {
@@ -1644,7 +1674,9 @@ export namespace Prisma {
     TicketClosureRequest: 'TicketClosureRequest',
     InvoiceSetting: 'InvoiceSetting',
     DayClose: 'DayClose',
-    StaffDayClose: 'StaffDayClose'
+    StaffDayClose: 'StaffDayClose',
+    CustomerVoucher: 'CustomerVoucher',
+    CustomerVoucherRedemption: 'CustomerVoucherRedemption'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -1661,7 +1693,7 @@ export namespace Prisma {
 
   export type TypeMap<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     meta: {
-      modelProps: 'user' | 'branch' | 'companyProfile' | 'state' | 'customer' | 'advance' | 'advanceHistory' | 'supplier' | 'category' | 'productType' | 'brand' | 'product' | 'productStock' | 'purchase' | 'purchaseItem' | 'sale' | 'saleItem' | 'expense' | 'payment' | 'quotation' | 'quotationItem' | 'stockTransfer' | 'stockTransferItem' | 'barcodeSetting' | 'barcodeTemplate' | 'employeeProfile' | 'designation' | 'department' | 'attendance' | 'leaveRequest' | 'leaveType' | 'payroll' | 'lead' | 'referralPayment' | 'followUp' | 'leadActivity' | 'deal' | 'cRMTask' | 'missPunchRequest' | 'salaryAdvance' | 'accountGroup' | 'ledger' | 'transactionPosting' | 'voucher' | 'journalEntry' | 'financialYear' | 'gSTSettings' | 'deliveryChallan' | 'deliveryChallanItem' | 'bank' | 'whatsAppSetting' | 'whatsAppLog' | 'terminal' | 'systemSetting' | 'chatMessage' | 'notification' | 'workLog' | 'ticket' | 'ticketCategory' | 'ticketHistory' | 'ticketMessage' | 'ticketClosureRequest' | 'invoiceSetting' | 'dayClose' | 'staffDayClose'
+      modelProps: 'user' | 'branch' | 'companyProfile' | 'state' | 'customer' | 'advance' | 'advanceHistory' | 'supplier' | 'category' | 'productType' | 'brand' | 'product' | 'productStock' | 'purchase' | 'purchaseItem' | 'sale' | 'saleItem' | 'expense' | 'payment' | 'quotation' | 'quotationItem' | 'stockTransfer' | 'stockTransferItem' | 'barcodeSetting' | 'barcodeTemplate' | 'employeeProfile' | 'designation' | 'department' | 'attendance' | 'leaveRequest' | 'leaveType' | 'payroll' | 'lead' | 'referralPayment' | 'followUp' | 'leadActivity' | 'deal' | 'cRMTask' | 'missPunchRequest' | 'salaryAdvance' | 'accountGroup' | 'ledger' | 'transactionPosting' | 'voucher' | 'journalEntry' | 'financialYear' | 'gSTSettings' | 'deliveryChallan' | 'deliveryChallanItem' | 'bank' | 'whatsAppSetting' | 'whatsAppLog' | 'terminal' | 'systemSetting' | 'chatMessage' | 'notification' | 'workLog' | 'ticket' | 'ticketCategory' | 'ticketHistory' | 'ticketMessage' | 'ticketClosureRequest' | 'invoiceSetting' | 'dayClose' | 'staffDayClose' | 'customerVoucher' | 'customerVoucherRedemption'
       txIsolationLevel: Prisma.TransactionIsolationLevel
     },
     model: {
@@ -5955,6 +5987,138 @@ export namespace Prisma {
           }
         }
       }
+      CustomerVoucher: {
+        payload: Prisma.$CustomerVoucherPayload<ExtArgs>
+        fields: Prisma.CustomerVoucherFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.CustomerVoucherFindUniqueArgs<ExtArgs>,
+            result: $Utils.PayloadToResult<Prisma.$CustomerVoucherPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.CustomerVoucherFindUniqueOrThrowArgs<ExtArgs>,
+            result: $Utils.PayloadToResult<Prisma.$CustomerVoucherPayload>
+          }
+          findFirst: {
+            args: Prisma.CustomerVoucherFindFirstArgs<ExtArgs>,
+            result: $Utils.PayloadToResult<Prisma.$CustomerVoucherPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.CustomerVoucherFindFirstOrThrowArgs<ExtArgs>,
+            result: $Utils.PayloadToResult<Prisma.$CustomerVoucherPayload>
+          }
+          findMany: {
+            args: Prisma.CustomerVoucherFindManyArgs<ExtArgs>,
+            result: $Utils.PayloadToResult<Prisma.$CustomerVoucherPayload>[]
+          }
+          create: {
+            args: Prisma.CustomerVoucherCreateArgs<ExtArgs>,
+            result: $Utils.PayloadToResult<Prisma.$CustomerVoucherPayload>
+          }
+          createMany: {
+            args: Prisma.CustomerVoucherCreateManyArgs<ExtArgs>,
+            result: Prisma.BatchPayload
+          }
+          delete: {
+            args: Prisma.CustomerVoucherDeleteArgs<ExtArgs>,
+            result: $Utils.PayloadToResult<Prisma.$CustomerVoucherPayload>
+          }
+          update: {
+            args: Prisma.CustomerVoucherUpdateArgs<ExtArgs>,
+            result: $Utils.PayloadToResult<Prisma.$CustomerVoucherPayload>
+          }
+          deleteMany: {
+            args: Prisma.CustomerVoucherDeleteManyArgs<ExtArgs>,
+            result: Prisma.BatchPayload
+          }
+          updateMany: {
+            args: Prisma.CustomerVoucherUpdateManyArgs<ExtArgs>,
+            result: Prisma.BatchPayload
+          }
+          upsert: {
+            args: Prisma.CustomerVoucherUpsertArgs<ExtArgs>,
+            result: $Utils.PayloadToResult<Prisma.$CustomerVoucherPayload>
+          }
+          aggregate: {
+            args: Prisma.CustomerVoucherAggregateArgs<ExtArgs>,
+            result: $Utils.Optional<AggregateCustomerVoucher>
+          }
+          groupBy: {
+            args: Prisma.CustomerVoucherGroupByArgs<ExtArgs>,
+            result: $Utils.Optional<CustomerVoucherGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.CustomerVoucherCountArgs<ExtArgs>,
+            result: $Utils.Optional<CustomerVoucherCountAggregateOutputType> | number
+          }
+        }
+      }
+      CustomerVoucherRedemption: {
+        payload: Prisma.$CustomerVoucherRedemptionPayload<ExtArgs>
+        fields: Prisma.CustomerVoucherRedemptionFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.CustomerVoucherRedemptionFindUniqueArgs<ExtArgs>,
+            result: $Utils.PayloadToResult<Prisma.$CustomerVoucherRedemptionPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.CustomerVoucherRedemptionFindUniqueOrThrowArgs<ExtArgs>,
+            result: $Utils.PayloadToResult<Prisma.$CustomerVoucherRedemptionPayload>
+          }
+          findFirst: {
+            args: Prisma.CustomerVoucherRedemptionFindFirstArgs<ExtArgs>,
+            result: $Utils.PayloadToResult<Prisma.$CustomerVoucherRedemptionPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.CustomerVoucherRedemptionFindFirstOrThrowArgs<ExtArgs>,
+            result: $Utils.PayloadToResult<Prisma.$CustomerVoucherRedemptionPayload>
+          }
+          findMany: {
+            args: Prisma.CustomerVoucherRedemptionFindManyArgs<ExtArgs>,
+            result: $Utils.PayloadToResult<Prisma.$CustomerVoucherRedemptionPayload>[]
+          }
+          create: {
+            args: Prisma.CustomerVoucherRedemptionCreateArgs<ExtArgs>,
+            result: $Utils.PayloadToResult<Prisma.$CustomerVoucherRedemptionPayload>
+          }
+          createMany: {
+            args: Prisma.CustomerVoucherRedemptionCreateManyArgs<ExtArgs>,
+            result: Prisma.BatchPayload
+          }
+          delete: {
+            args: Prisma.CustomerVoucherRedemptionDeleteArgs<ExtArgs>,
+            result: $Utils.PayloadToResult<Prisma.$CustomerVoucherRedemptionPayload>
+          }
+          update: {
+            args: Prisma.CustomerVoucherRedemptionUpdateArgs<ExtArgs>,
+            result: $Utils.PayloadToResult<Prisma.$CustomerVoucherRedemptionPayload>
+          }
+          deleteMany: {
+            args: Prisma.CustomerVoucherRedemptionDeleteManyArgs<ExtArgs>,
+            result: Prisma.BatchPayload
+          }
+          updateMany: {
+            args: Prisma.CustomerVoucherRedemptionUpdateManyArgs<ExtArgs>,
+            result: Prisma.BatchPayload
+          }
+          upsert: {
+            args: Prisma.CustomerVoucherRedemptionUpsertArgs<ExtArgs>,
+            result: $Utils.PayloadToResult<Prisma.$CustomerVoucherRedemptionPayload>
+          }
+          aggregate: {
+            args: Prisma.CustomerVoucherRedemptionAggregateArgs<ExtArgs>,
+            result: $Utils.Optional<AggregateCustomerVoucherRedemption>
+          }
+          groupBy: {
+            args: Prisma.CustomerVoucherRedemptionGroupByArgs<ExtArgs>,
+            result: $Utils.Optional<CustomerVoucherRedemptionGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.CustomerVoucherRedemptionCountArgs<ExtArgs>,
+            result: $Utils.Optional<CustomerVoucherRedemptionCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -6470,6 +6634,7 @@ export namespace Prisma {
     leads: number
     users: number
     dayCloses: number
+    customerVouchers: number
   }
 
   export type BranchCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -6495,6 +6660,7 @@ export namespace Prisma {
     leads?: boolean | BranchCountOutputTypeCountLeadsArgs
     users?: boolean | BranchCountOutputTypeCountUsersArgs
     dayCloses?: boolean | BranchCountOutputTypeCountDayClosesArgs
+    customerVouchers?: boolean | BranchCountOutputTypeCountCustomerVouchersArgs
   }
 
   // Custom InputTypes
@@ -6686,6 +6852,14 @@ export namespace Prisma {
   }
 
 
+  /**
+   * BranchCountOutputType without action
+   */
+  export type BranchCountOutputTypeCountCustomerVouchersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: CustomerVoucherWhereInput
+  }
+
+
 
   /**
    * Count Type CustomerCountOutputType
@@ -6698,6 +6872,7 @@ export namespace Prisma {
     quotations: number
     sales: number
     tickets: number
+    customerVouchers: number
   }
 
   export type CustomerCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -6707,6 +6882,7 @@ export namespace Prisma {
     quotations?: boolean | CustomerCountOutputTypeCountQuotationsArgs
     sales?: boolean | CustomerCountOutputTypeCountSalesArgs
     tickets?: boolean | CustomerCountOutputTypeCountTicketsArgs
+    customerVouchers?: boolean | CustomerCountOutputTypeCountCustomerVouchersArgs
   }
 
   // Custom InputTypes
@@ -6767,6 +6943,14 @@ export namespace Prisma {
    */
   export type CustomerCountOutputTypeCountTicketsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: TicketWhereInput
+  }
+
+
+  /**
+   * CustomerCountOutputType without action
+   */
+  export type CustomerCountOutputTypeCountCustomerVouchersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: CustomerVoucherWhereInput
   }
 
 
@@ -7072,11 +7256,17 @@ export namespace Prisma {
   export type SaleCountOutputType = {
     payments: number
     items: number
+    customerVouchersIssued: number
+    customerVouchersRedeemed: number
+    customerVoucherRedemptions: number
   }
 
   export type SaleCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     payments?: boolean | SaleCountOutputTypeCountPaymentsArgs
     items?: boolean | SaleCountOutputTypeCountItemsArgs
+    customerVouchersIssued?: boolean | SaleCountOutputTypeCountCustomerVouchersIssuedArgs
+    customerVouchersRedeemed?: boolean | SaleCountOutputTypeCountCustomerVouchersRedeemedArgs
+    customerVoucherRedemptions?: boolean | SaleCountOutputTypeCountCustomerVoucherRedemptionsArgs
   }
 
   // Custom InputTypes
@@ -7105,6 +7295,30 @@ export namespace Prisma {
    */
   export type SaleCountOutputTypeCountItemsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: SaleItemWhereInput
+  }
+
+
+  /**
+   * SaleCountOutputType without action
+   */
+  export type SaleCountOutputTypeCountCustomerVouchersIssuedArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: CustomerVoucherWhereInput
+  }
+
+
+  /**
+   * SaleCountOutputType without action
+   */
+  export type SaleCountOutputTypeCountCustomerVouchersRedeemedArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: CustomerVoucherWhereInput
+  }
+
+
+  /**
+   * SaleCountOutputType without action
+   */
+  export type SaleCountOutputTypeCountCustomerVoucherRedemptionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: CustomerVoucherRedemptionWhereInput
   }
 
 
@@ -7911,6 +8125,40 @@ export namespace Prisma {
    */
   export type DayCloseCountOutputTypeCountStaffClosingsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: StaffDayCloseWhereInput
+  }
+
+
+
+  /**
+   * Count Type CustomerVoucherCountOutputType
+   */
+
+  export type CustomerVoucherCountOutputType = {
+    redemptions: number
+  }
+
+  export type CustomerVoucherCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    redemptions?: boolean | CustomerVoucherCountOutputTypeCountRedemptionsArgs
+  }
+
+  // Custom InputTypes
+
+  /**
+   * CustomerVoucherCountOutputType without action
+   */
+  export type CustomerVoucherCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CustomerVoucherCountOutputType
+     */
+    select?: CustomerVoucherCountOutputTypeSelect<ExtArgs> | null
+  }
+
+
+  /**
+   * CustomerVoucherCountOutputType without action
+   */
+  export type CustomerVoucherCountOutputTypeCountRedemptionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: CustomerVoucherRedemptionWhereInput
   }
 
 
@@ -10125,6 +10373,7 @@ export namespace Prisma {
     leads?: boolean | Branch$leadsArgs<ExtArgs>
     users?: boolean | Branch$usersArgs<ExtArgs>
     dayCloses?: boolean | Branch$dayClosesArgs<ExtArgs>
+    customerVouchers?: boolean | Branch$customerVouchersArgs<ExtArgs>
     _count?: boolean | BranchCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["branch"]>
 
@@ -10168,6 +10417,7 @@ export namespace Prisma {
     leads?: boolean | Branch$leadsArgs<ExtArgs>
     users?: boolean | Branch$usersArgs<ExtArgs>
     dayCloses?: boolean | Branch$dayClosesArgs<ExtArgs>
+    customerVouchers?: boolean | Branch$customerVouchersArgs<ExtArgs>
     _count?: boolean | BranchCountOutputTypeDefaultArgs<ExtArgs>
   }
 
@@ -10198,6 +10448,7 @@ export namespace Prisma {
       leads: Prisma.$LeadPayload<ExtArgs>[]
       users: Prisma.$UserPayload<ExtArgs>[]
       dayCloses: Prisma.$DayClosePayload<ExtArgs>[]
+      customerVouchers: Prisma.$CustomerVoucherPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
@@ -10623,6 +10874,8 @@ export namespace Prisma {
     users<T extends Branch$usersArgs<ExtArgs> = {}>(args?: Subset<T, Branch$usersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, 'findMany'> | Null>;
 
     dayCloses<T extends Branch$dayClosesArgs<ExtArgs> = {}>(args?: Subset<T, Branch$dayClosesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DayClosePayload<ExtArgs>, T, 'findMany'> | Null>;
+
+    customerVouchers<T extends Branch$customerVouchersArgs<ExtArgs> = {}>(args?: Subset<T, Branch$customerVouchersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CustomerVoucherPayload<ExtArgs>, T, 'findMany'> | Null>;
 
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -11451,6 +11704,27 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: DayCloseScalarFieldEnum | DayCloseScalarFieldEnum[]
+  }
+
+
+  /**
+   * Branch.customerVouchers
+   */
+  export type Branch$customerVouchersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CustomerVoucher
+     */
+    select?: CustomerVoucherSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well.
+     */
+    include?: CustomerVoucherInclude<ExtArgs> | null
+    where?: CustomerVoucherWhereInput
+    orderBy?: CustomerVoucherOrderByWithRelationInput | CustomerVoucherOrderByWithRelationInput[]
+    cursor?: CustomerVoucherWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: CustomerVoucherScalarFieldEnum | CustomerVoucherScalarFieldEnum[]
   }
 
 
@@ -13872,6 +14146,7 @@ export namespace Prisma {
     quotations?: boolean | Customer$quotationsArgs<ExtArgs>
     sales?: boolean | Customer$salesArgs<ExtArgs>
     tickets?: boolean | Customer$ticketsArgs<ExtArgs>
+    customerVouchers?: boolean | Customer$customerVouchersArgs<ExtArgs>
     _count?: boolean | CustomerCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["customer"]>
 
@@ -13905,6 +14180,7 @@ export namespace Prisma {
     quotations?: boolean | Customer$quotationsArgs<ExtArgs>
     sales?: boolean | Customer$salesArgs<ExtArgs>
     tickets?: boolean | Customer$ticketsArgs<ExtArgs>
+    customerVouchers?: boolean | Customer$customerVouchersArgs<ExtArgs>
     _count?: boolean | CustomerCountOutputTypeDefaultArgs<ExtArgs>
   }
 
@@ -13920,6 +14196,7 @@ export namespace Prisma {
       quotations: Prisma.$QuotationPayload<ExtArgs>[]
       sales: Prisma.$SalePayload<ExtArgs>[]
       tickets: Prisma.$TicketPayload<ExtArgs>[]
+      customerVouchers: Prisma.$CustomerVoucherPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
@@ -14320,6 +14597,8 @@ export namespace Prisma {
     sales<T extends Customer$salesArgs<ExtArgs> = {}>(args?: Subset<T, Customer$salesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SalePayload<ExtArgs>, T, 'findMany'> | Null>;
 
     tickets<T extends Customer$ticketsArgs<ExtArgs> = {}>(args?: Subset<T, Customer$ticketsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TicketPayload<ExtArgs>, T, 'findMany'> | Null>;
+
+    customerVouchers<T extends Customer$customerVouchersArgs<ExtArgs> = {}>(args?: Subset<T, Customer$customerVouchersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CustomerVoucherPayload<ExtArgs>, T, 'findMany'> | Null>;
 
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -14833,6 +15112,27 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: TicketScalarFieldEnum | TicketScalarFieldEnum[]
+  }
+
+
+  /**
+   * Customer.customerVouchers
+   */
+  export type Customer$customerVouchersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CustomerVoucher
+     */
+    select?: CustomerVoucherSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well.
+     */
+    include?: CustomerVoucherInclude<ExtArgs> | null
+    where?: CustomerVoucherWhereInput
+    orderBy?: CustomerVoucherOrderByWithRelationInput | CustomerVoucherOrderByWithRelationInput[]
+    cursor?: CustomerVoucherWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: CustomerVoucherScalarFieldEnum | CustomerVoucherScalarFieldEnum[]
   }
 
 
@@ -25677,6 +25977,7 @@ export namespace Prisma {
     discount: number | null
     advanceUsed: Decimal | null
     deliveryCharge: Decimal | null
+    voucherDiscount: Decimal | null
   }
 
   export type SaleSumAggregateOutputType = {
@@ -25698,6 +25999,7 @@ export namespace Prisma {
     discount: number | null
     advanceUsed: Decimal | null
     deliveryCharge: Decimal | null
+    voucherDiscount: Decimal | null
   }
 
   export type SaleMinAggregateOutputType = {
@@ -25744,6 +26046,8 @@ export namespace Prisma {
     description: string | null
     deliveryCharge: Decimal | null
     hasDeliveryCharge: boolean | null
+    voucherCode: string | null
+    voucherDiscount: Decimal | null
   }
 
   export type SaleMaxAggregateOutputType = {
@@ -25790,6 +26094,8 @@ export namespace Prisma {
     description: string | null
     deliveryCharge: Decimal | null
     hasDeliveryCharge: boolean | null
+    voucherCode: string | null
+    voucherDiscount: Decimal | null
   }
 
   export type SaleCountAggregateOutputType = {
@@ -25836,6 +26142,8 @@ export namespace Prisma {
     description: number
     deliveryCharge: number
     hasDeliveryCharge: number
+    voucherCode: number
+    voucherDiscount: number
     _all: number
   }
 
@@ -25859,6 +26167,7 @@ export namespace Prisma {
     discount?: true
     advanceUsed?: true
     deliveryCharge?: true
+    voucherDiscount?: true
   }
 
   export type SaleSumAggregateInputType = {
@@ -25880,6 +26189,7 @@ export namespace Prisma {
     discount?: true
     advanceUsed?: true
     deliveryCharge?: true
+    voucherDiscount?: true
   }
 
   export type SaleMinAggregateInputType = {
@@ -25926,6 +26236,8 @@ export namespace Prisma {
     description?: true
     deliveryCharge?: true
     hasDeliveryCharge?: true
+    voucherCode?: true
+    voucherDiscount?: true
   }
 
   export type SaleMaxAggregateInputType = {
@@ -25972,6 +26284,8 @@ export namespace Prisma {
     description?: true
     deliveryCharge?: true
     hasDeliveryCharge?: true
+    voucherCode?: true
+    voucherDiscount?: true
   }
 
   export type SaleCountAggregateInputType = {
@@ -26018,6 +26332,8 @@ export namespace Prisma {
     description?: true
     deliveryCharge?: true
     hasDeliveryCharge?: true
+    voucherCode?: true
+    voucherDiscount?: true
     _all?: true
   }
 
@@ -26151,6 +26467,8 @@ export namespace Prisma {
     description: string | null
     deliveryCharge: Decimal
     hasDeliveryCharge: boolean
+    voucherCode: string | null
+    voucherDiscount: Decimal
     _count: SaleCountAggregateOutputType | null
     _avg: SaleAvgAggregateOutputType | null
     _sum: SaleSumAggregateOutputType | null
@@ -26216,6 +26534,8 @@ export namespace Prisma {
     description?: boolean
     deliveryCharge?: boolean
     hasDeliveryCharge?: boolean
+    voucherCode?: boolean
+    voucherDiscount?: boolean
     payments?: boolean | Sale$paymentsArgs<ExtArgs>
     branch?: boolean | BranchDefaultArgs<ExtArgs>
     customer?: boolean | Sale$customerArgs<ExtArgs>
@@ -26225,6 +26545,9 @@ export namespace Prisma {
     terminal?: boolean | Sale$terminalArgs<ExtArgs>
     items?: boolean | Sale$itemsArgs<ExtArgs>
     lead?: boolean | Sale$leadArgs<ExtArgs>
+    customerVouchersIssued?: boolean | Sale$customerVouchersIssuedArgs<ExtArgs>
+    customerVouchersRedeemed?: boolean | Sale$customerVouchersRedeemedArgs<ExtArgs>
+    customerVoucherRedemptions?: boolean | Sale$customerVoucherRedemptionsArgs<ExtArgs>
     _count?: boolean | SaleCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["sale"]>
 
@@ -26272,6 +26595,8 @@ export namespace Prisma {
     description?: boolean
     deliveryCharge?: boolean
     hasDeliveryCharge?: boolean
+    voucherCode?: boolean
+    voucherDiscount?: boolean
   }
 
   export type SaleInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -26284,6 +26609,9 @@ export namespace Prisma {
     terminal?: boolean | Sale$terminalArgs<ExtArgs>
     items?: boolean | Sale$itemsArgs<ExtArgs>
     lead?: boolean | Sale$leadArgs<ExtArgs>
+    customerVouchersIssued?: boolean | Sale$customerVouchersIssuedArgs<ExtArgs>
+    customerVouchersRedeemed?: boolean | Sale$customerVouchersRedeemedArgs<ExtArgs>
+    customerVoucherRedemptions?: boolean | Sale$customerVoucherRedemptionsArgs<ExtArgs>
     _count?: boolean | SaleCountOutputTypeDefaultArgs<ExtArgs>
   }
 
@@ -26300,6 +26628,9 @@ export namespace Prisma {
       terminal: Prisma.$TerminalPayload<ExtArgs> | null
       items: Prisma.$SaleItemPayload<ExtArgs>[]
       lead: Prisma.$LeadPayload<ExtArgs> | null
+      customerVouchersIssued: Prisma.$CustomerVoucherPayload<ExtArgs>[]
+      customerVouchersRedeemed: Prisma.$CustomerVoucherPayload<ExtArgs>[]
+      customerVoucherRedemptions: Prisma.$CustomerVoucherRedemptionPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
@@ -26345,6 +26676,8 @@ export namespace Prisma {
       description: string | null
       deliveryCharge: Prisma.Decimal
       hasDeliveryCharge: boolean
+      voucherCode: string | null
+      voucherDiscount: Prisma.Decimal
     }, ExtArgs["result"]["sale"]>
     composites: {}
   }
@@ -26728,6 +27061,12 @@ export namespace Prisma {
 
     lead<T extends Sale$leadArgs<ExtArgs> = {}>(args?: Subset<T, Sale$leadArgs<ExtArgs>>): Prisma__LeadClient<$Result.GetResult<Prisma.$LeadPayload<ExtArgs>, T, 'findUniqueOrThrow'> | null, null, ExtArgs>;
 
+    customerVouchersIssued<T extends Sale$customerVouchersIssuedArgs<ExtArgs> = {}>(args?: Subset<T, Sale$customerVouchersIssuedArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CustomerVoucherPayload<ExtArgs>, T, 'findMany'> | Null>;
+
+    customerVouchersRedeemed<T extends Sale$customerVouchersRedeemedArgs<ExtArgs> = {}>(args?: Subset<T, Sale$customerVouchersRedeemedArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CustomerVoucherPayload<ExtArgs>, T, 'findMany'> | Null>;
+
+    customerVoucherRedemptions<T extends Sale$customerVoucherRedemptionsArgs<ExtArgs> = {}>(args?: Subset<T, Sale$customerVoucherRedemptionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CustomerVoucherRedemptionPayload<ExtArgs>, T, 'findMany'> | Null>;
+
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -26799,6 +27138,8 @@ export namespace Prisma {
     readonly description: FieldRef<"Sale", 'String'>
     readonly deliveryCharge: FieldRef<"Sale", 'Decimal'>
     readonly hasDeliveryCharge: FieldRef<"Sale", 'Boolean'>
+    readonly voucherCode: FieldRef<"Sale", 'String'>
+    readonly voucherDiscount: FieldRef<"Sale", 'Decimal'>
   }
     
 
@@ -27249,6 +27590,69 @@ export namespace Prisma {
 
 
   /**
+   * Sale.customerVouchersIssued
+   */
+  export type Sale$customerVouchersIssuedArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CustomerVoucher
+     */
+    select?: CustomerVoucherSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well.
+     */
+    include?: CustomerVoucherInclude<ExtArgs> | null
+    where?: CustomerVoucherWhereInput
+    orderBy?: CustomerVoucherOrderByWithRelationInput | CustomerVoucherOrderByWithRelationInput[]
+    cursor?: CustomerVoucherWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: CustomerVoucherScalarFieldEnum | CustomerVoucherScalarFieldEnum[]
+  }
+
+
+  /**
+   * Sale.customerVouchersRedeemed
+   */
+  export type Sale$customerVouchersRedeemedArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CustomerVoucher
+     */
+    select?: CustomerVoucherSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well.
+     */
+    include?: CustomerVoucherInclude<ExtArgs> | null
+    where?: CustomerVoucherWhereInput
+    orderBy?: CustomerVoucherOrderByWithRelationInput | CustomerVoucherOrderByWithRelationInput[]
+    cursor?: CustomerVoucherWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: CustomerVoucherScalarFieldEnum | CustomerVoucherScalarFieldEnum[]
+  }
+
+
+  /**
+   * Sale.customerVoucherRedemptions
+   */
+  export type Sale$customerVoucherRedemptionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CustomerVoucherRedemption
+     */
+    select?: CustomerVoucherRedemptionSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well.
+     */
+    include?: CustomerVoucherRedemptionInclude<ExtArgs> | null
+    where?: CustomerVoucherRedemptionWhereInput
+    orderBy?: CustomerVoucherRedemptionOrderByWithRelationInput | CustomerVoucherRedemptionOrderByWithRelationInput[]
+    cursor?: CustomerVoucherRedemptionWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: CustomerVoucherRedemptionScalarFieldEnum | CustomerVoucherRedemptionScalarFieldEnum[]
+  }
+
+
+  /**
    * Sale without action
    */
   export type SaleDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -27282,9 +27686,11 @@ export namespace Prisma {
     productId: number | null
     quantity: number | null
     unitPrice: Decimal | null
+    originalUnitPrice: Decimal | null
     total: Decimal | null
     discountAmount: Decimal | null
     discountPercent: Decimal | null
+    voucherDiscountAmount: Decimal | null
     taxAmount: Decimal | null
     taxRate: Decimal | null
   }
@@ -27295,9 +27701,11 @@ export namespace Prisma {
     productId: number | null
     quantity: number | null
     unitPrice: Decimal | null
+    originalUnitPrice: Decimal | null
     total: Decimal | null
     discountAmount: Decimal | null
     discountPercent: Decimal | null
+    voucherDiscountAmount: Decimal | null
     taxAmount: Decimal | null
     taxRate: Decimal | null
   }
@@ -27309,9 +27717,11 @@ export namespace Prisma {
     size: string | null
     quantity: number | null
     unitPrice: Decimal | null
+    originalUnitPrice: Decimal | null
     total: Decimal | null
     discountAmount: Decimal | null
     discountPercent: Decimal | null
+    voucherDiscountAmount: Decimal | null
     taxAmount: Decimal | null
     taxRate: Decimal | null
     isTaxInclusive: boolean | null
@@ -27324,9 +27734,11 @@ export namespace Prisma {
     size: string | null
     quantity: number | null
     unitPrice: Decimal | null
+    originalUnitPrice: Decimal | null
     total: Decimal | null
     discountAmount: Decimal | null
     discountPercent: Decimal | null
+    voucherDiscountAmount: Decimal | null
     taxAmount: Decimal | null
     taxRate: Decimal | null
     isTaxInclusive: boolean | null
@@ -27339,9 +27751,11 @@ export namespace Prisma {
     size: number
     quantity: number
     unitPrice: number
+    originalUnitPrice: number
     total: number
     discountAmount: number
     discountPercent: number
+    voucherDiscountAmount: number
     taxAmount: number
     taxRate: number
     isTaxInclusive: number
@@ -27355,9 +27769,11 @@ export namespace Prisma {
     productId?: true
     quantity?: true
     unitPrice?: true
+    originalUnitPrice?: true
     total?: true
     discountAmount?: true
     discountPercent?: true
+    voucherDiscountAmount?: true
     taxAmount?: true
     taxRate?: true
   }
@@ -27368,9 +27784,11 @@ export namespace Prisma {
     productId?: true
     quantity?: true
     unitPrice?: true
+    originalUnitPrice?: true
     total?: true
     discountAmount?: true
     discountPercent?: true
+    voucherDiscountAmount?: true
     taxAmount?: true
     taxRate?: true
   }
@@ -27382,9 +27800,11 @@ export namespace Prisma {
     size?: true
     quantity?: true
     unitPrice?: true
+    originalUnitPrice?: true
     total?: true
     discountAmount?: true
     discountPercent?: true
+    voucherDiscountAmount?: true
     taxAmount?: true
     taxRate?: true
     isTaxInclusive?: true
@@ -27397,9 +27817,11 @@ export namespace Prisma {
     size?: true
     quantity?: true
     unitPrice?: true
+    originalUnitPrice?: true
     total?: true
     discountAmount?: true
     discountPercent?: true
+    voucherDiscountAmount?: true
     taxAmount?: true
     taxRate?: true
     isTaxInclusive?: true
@@ -27412,9 +27834,11 @@ export namespace Prisma {
     size?: true
     quantity?: true
     unitPrice?: true
+    originalUnitPrice?: true
     total?: true
     discountAmount?: true
     discountPercent?: true
+    voucherDiscountAmount?: true
     taxAmount?: true
     taxRate?: true
     isTaxInclusive?: true
@@ -27514,9 +27938,11 @@ export namespace Prisma {
     size: string | null
     quantity: number
     unitPrice: Decimal
+    originalUnitPrice: Decimal | null
     total: Decimal
     discountAmount: Decimal
     discountPercent: Decimal
+    voucherDiscountAmount: Decimal
     taxAmount: Decimal
     taxRate: Decimal
     isTaxInclusive: boolean
@@ -27548,9 +27974,11 @@ export namespace Prisma {
     size?: boolean
     quantity?: boolean
     unitPrice?: boolean
+    originalUnitPrice?: boolean
     total?: boolean
     discountAmount?: boolean
     discountPercent?: boolean
+    voucherDiscountAmount?: boolean
     taxAmount?: boolean
     taxRate?: boolean
     isTaxInclusive?: boolean
@@ -27565,9 +27993,11 @@ export namespace Prisma {
     size?: boolean
     quantity?: boolean
     unitPrice?: boolean
+    originalUnitPrice?: boolean
     total?: boolean
     discountAmount?: boolean
     discountPercent?: boolean
+    voucherDiscountAmount?: boolean
     taxAmount?: boolean
     taxRate?: boolean
     isTaxInclusive?: boolean
@@ -27592,9 +28022,11 @@ export namespace Prisma {
       size: string | null
       quantity: number
       unitPrice: Prisma.Decimal
+      originalUnitPrice: Prisma.Decimal | null
       total: Prisma.Decimal
       discountAmount: Prisma.Decimal
       discountPercent: Prisma.Decimal
+      voucherDiscountAmount: Prisma.Decimal
       taxAmount: Prisma.Decimal
       taxRate: Prisma.Decimal
       isTaxInclusive: boolean
@@ -28001,9 +28433,11 @@ export namespace Prisma {
     readonly size: FieldRef<"SaleItem", 'String'>
     readonly quantity: FieldRef<"SaleItem", 'Int'>
     readonly unitPrice: FieldRef<"SaleItem", 'Decimal'>
+    readonly originalUnitPrice: FieldRef<"SaleItem", 'Decimal'>
     readonly total: FieldRef<"SaleItem", 'Decimal'>
     readonly discountAmount: FieldRef<"SaleItem", 'Decimal'>
     readonly discountPercent: FieldRef<"SaleItem", 'Decimal'>
+    readonly voucherDiscountAmount: FieldRef<"SaleItem", 'Decimal'>
     readonly taxAmount: FieldRef<"SaleItem", 'Decimal'>
     readonly taxRate: FieldRef<"SaleItem", 'Decimal'>
     readonly isTaxInclusive: FieldRef<"SaleItem", 'Boolean'>
@@ -79331,6 +79765,2280 @@ export namespace Prisma {
 
 
   /**
+   * Model CustomerVoucher
+   */
+
+  export type AggregateCustomerVoucher = {
+    _count: CustomerVoucherCountAggregateOutputType | null
+    _avg: CustomerVoucherAvgAggregateOutputType | null
+    _sum: CustomerVoucherSumAggregateOutputType | null
+    _min: CustomerVoucherMinAggregateOutputType | null
+    _max: CustomerVoucherMaxAggregateOutputType | null
+  }
+
+  export type CustomerVoucherAvgAggregateOutputType = {
+    id: number | null
+    value: Decimal | null
+    maximumDiscount: Decimal | null
+    minimumPurchaseAmount: Decimal | null
+    customerId: number | null
+    branchId: number | null
+    issuedSaleId: number | null
+    redeemedSaleId: number | null
+    usageLimit: number | null
+    usageCount: number | null
+    createdBy: number | null
+  }
+
+  export type CustomerVoucherSumAggregateOutputType = {
+    id: number | null
+    value: Decimal | null
+    maximumDiscount: Decimal | null
+    minimumPurchaseAmount: Decimal | null
+    customerId: number | null
+    branchId: number | null
+    issuedSaleId: number | null
+    redeemedSaleId: number | null
+    usageLimit: number | null
+    usageCount: number | null
+    createdBy: number | null
+  }
+
+  export type CustomerVoucherMinAggregateOutputType = {
+    id: number | null
+    code: string | null
+    name: string | null
+    type: string | null
+    value: Decimal | null
+    maximumDiscount: Decimal | null
+    minimumPurchaseAmount: Decimal | null
+    issueDate: Date | null
+    expiryDate: Date | null
+    status: string | null
+    customerId: number | null
+    branchId: number | null
+    issuedSaleId: number | null
+    redeemedSaleId: number | null
+    redeemedAt: Date | null
+    usageLimit: number | null
+    usageCount: number | null
+    description: string | null
+    createdBy: number | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type CustomerVoucherMaxAggregateOutputType = {
+    id: number | null
+    code: string | null
+    name: string | null
+    type: string | null
+    value: Decimal | null
+    maximumDiscount: Decimal | null
+    minimumPurchaseAmount: Decimal | null
+    issueDate: Date | null
+    expiryDate: Date | null
+    status: string | null
+    customerId: number | null
+    branchId: number | null
+    issuedSaleId: number | null
+    redeemedSaleId: number | null
+    redeemedAt: Date | null
+    usageLimit: number | null
+    usageCount: number | null
+    description: string | null
+    createdBy: number | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type CustomerVoucherCountAggregateOutputType = {
+    id: number
+    code: number
+    name: number
+    type: number
+    value: number
+    maximumDiscount: number
+    minimumPurchaseAmount: number
+    issueDate: number
+    expiryDate: number
+    status: number
+    customerId: number
+    branchId: number
+    issuedSaleId: number
+    redeemedSaleId: number
+    redeemedAt: number
+    usageLimit: number
+    usageCount: number
+    description: number
+    createdBy: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type CustomerVoucherAvgAggregateInputType = {
+    id?: true
+    value?: true
+    maximumDiscount?: true
+    minimumPurchaseAmount?: true
+    customerId?: true
+    branchId?: true
+    issuedSaleId?: true
+    redeemedSaleId?: true
+    usageLimit?: true
+    usageCount?: true
+    createdBy?: true
+  }
+
+  export type CustomerVoucherSumAggregateInputType = {
+    id?: true
+    value?: true
+    maximumDiscount?: true
+    minimumPurchaseAmount?: true
+    customerId?: true
+    branchId?: true
+    issuedSaleId?: true
+    redeemedSaleId?: true
+    usageLimit?: true
+    usageCount?: true
+    createdBy?: true
+  }
+
+  export type CustomerVoucherMinAggregateInputType = {
+    id?: true
+    code?: true
+    name?: true
+    type?: true
+    value?: true
+    maximumDiscount?: true
+    minimumPurchaseAmount?: true
+    issueDate?: true
+    expiryDate?: true
+    status?: true
+    customerId?: true
+    branchId?: true
+    issuedSaleId?: true
+    redeemedSaleId?: true
+    redeemedAt?: true
+    usageLimit?: true
+    usageCount?: true
+    description?: true
+    createdBy?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type CustomerVoucherMaxAggregateInputType = {
+    id?: true
+    code?: true
+    name?: true
+    type?: true
+    value?: true
+    maximumDiscount?: true
+    minimumPurchaseAmount?: true
+    issueDate?: true
+    expiryDate?: true
+    status?: true
+    customerId?: true
+    branchId?: true
+    issuedSaleId?: true
+    redeemedSaleId?: true
+    redeemedAt?: true
+    usageLimit?: true
+    usageCount?: true
+    description?: true
+    createdBy?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type CustomerVoucherCountAggregateInputType = {
+    id?: true
+    code?: true
+    name?: true
+    type?: true
+    value?: true
+    maximumDiscount?: true
+    minimumPurchaseAmount?: true
+    issueDate?: true
+    expiryDate?: true
+    status?: true
+    customerId?: true
+    branchId?: true
+    issuedSaleId?: true
+    redeemedSaleId?: true
+    redeemedAt?: true
+    usageLimit?: true
+    usageCount?: true
+    description?: true
+    createdBy?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type CustomerVoucherAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which CustomerVoucher to aggregate.
+     */
+    where?: CustomerVoucherWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of CustomerVouchers to fetch.
+     */
+    orderBy?: CustomerVoucherOrderByWithRelationInput | CustomerVoucherOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: CustomerVoucherWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` CustomerVouchers from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` CustomerVouchers.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned CustomerVouchers
+    **/
+    _count?: true | CustomerVoucherCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: CustomerVoucherAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: CustomerVoucherSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: CustomerVoucherMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: CustomerVoucherMaxAggregateInputType
+  }
+
+  export type GetCustomerVoucherAggregateType<T extends CustomerVoucherAggregateArgs> = {
+        [P in keyof T & keyof AggregateCustomerVoucher]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateCustomerVoucher[P]>
+      : GetScalarType<T[P], AggregateCustomerVoucher[P]>
+  }
+
+
+
+
+  export type CustomerVoucherGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: CustomerVoucherWhereInput
+    orderBy?: CustomerVoucherOrderByWithAggregationInput | CustomerVoucherOrderByWithAggregationInput[]
+    by: CustomerVoucherScalarFieldEnum[] | CustomerVoucherScalarFieldEnum
+    having?: CustomerVoucherScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: CustomerVoucherCountAggregateInputType | true
+    _avg?: CustomerVoucherAvgAggregateInputType
+    _sum?: CustomerVoucherSumAggregateInputType
+    _min?: CustomerVoucherMinAggregateInputType
+    _max?: CustomerVoucherMaxAggregateInputType
+  }
+
+  export type CustomerVoucherGroupByOutputType = {
+    id: number
+    code: string
+    name: string
+    type: string
+    value: Decimal
+    maximumDiscount: Decimal | null
+    minimumPurchaseAmount: Decimal
+    issueDate: Date
+    expiryDate: Date | null
+    status: string
+    customerId: number | null
+    branchId: number | null
+    issuedSaleId: number | null
+    redeemedSaleId: number | null
+    redeemedAt: Date | null
+    usageLimit: number
+    usageCount: number
+    description: string | null
+    createdBy: number | null
+    createdAt: Date
+    updatedAt: Date
+    _count: CustomerVoucherCountAggregateOutputType | null
+    _avg: CustomerVoucherAvgAggregateOutputType | null
+    _sum: CustomerVoucherSumAggregateOutputType | null
+    _min: CustomerVoucherMinAggregateOutputType | null
+    _max: CustomerVoucherMaxAggregateOutputType | null
+  }
+
+  type GetCustomerVoucherGroupByPayload<T extends CustomerVoucherGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<CustomerVoucherGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof CustomerVoucherGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], CustomerVoucherGroupByOutputType[P]>
+            : GetScalarType<T[P], CustomerVoucherGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type CustomerVoucherSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    code?: boolean
+    name?: boolean
+    type?: boolean
+    value?: boolean
+    maximumDiscount?: boolean
+    minimumPurchaseAmount?: boolean
+    issueDate?: boolean
+    expiryDate?: boolean
+    status?: boolean
+    customerId?: boolean
+    branchId?: boolean
+    issuedSaleId?: boolean
+    redeemedSaleId?: boolean
+    redeemedAt?: boolean
+    usageLimit?: boolean
+    usageCount?: boolean
+    description?: boolean
+    createdBy?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    customer?: boolean | CustomerVoucher$customerArgs<ExtArgs>
+    branch?: boolean | CustomerVoucher$branchArgs<ExtArgs>
+    issuedSale?: boolean | CustomerVoucher$issuedSaleArgs<ExtArgs>
+    redeemedSale?: boolean | CustomerVoucher$redeemedSaleArgs<ExtArgs>
+    redemptions?: boolean | CustomerVoucher$redemptionsArgs<ExtArgs>
+    _count?: boolean | CustomerVoucherCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["customerVoucher"]>
+
+  export type CustomerVoucherSelectScalar = {
+    id?: boolean
+    code?: boolean
+    name?: boolean
+    type?: boolean
+    value?: boolean
+    maximumDiscount?: boolean
+    minimumPurchaseAmount?: boolean
+    issueDate?: boolean
+    expiryDate?: boolean
+    status?: boolean
+    customerId?: boolean
+    branchId?: boolean
+    issuedSaleId?: boolean
+    redeemedSaleId?: boolean
+    redeemedAt?: boolean
+    usageLimit?: boolean
+    usageCount?: boolean
+    description?: boolean
+    createdBy?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type CustomerVoucherInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    customer?: boolean | CustomerVoucher$customerArgs<ExtArgs>
+    branch?: boolean | CustomerVoucher$branchArgs<ExtArgs>
+    issuedSale?: boolean | CustomerVoucher$issuedSaleArgs<ExtArgs>
+    redeemedSale?: boolean | CustomerVoucher$redeemedSaleArgs<ExtArgs>
+    redemptions?: boolean | CustomerVoucher$redemptionsArgs<ExtArgs>
+    _count?: boolean | CustomerVoucherCountOutputTypeDefaultArgs<ExtArgs>
+  }
+
+
+  export type $CustomerVoucherPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "CustomerVoucher"
+    objects: {
+      customer: Prisma.$CustomerPayload<ExtArgs> | null
+      branch: Prisma.$BranchPayload<ExtArgs> | null
+      issuedSale: Prisma.$SalePayload<ExtArgs> | null
+      redeemedSale: Prisma.$SalePayload<ExtArgs> | null
+      redemptions: Prisma.$CustomerVoucherRedemptionPayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      code: string
+      name: string
+      type: string
+      value: Prisma.Decimal
+      maximumDiscount: Prisma.Decimal | null
+      minimumPurchaseAmount: Prisma.Decimal
+      issueDate: Date
+      expiryDate: Date | null
+      status: string
+      customerId: number | null
+      branchId: number | null
+      issuedSaleId: number | null
+      redeemedSaleId: number | null
+      redeemedAt: Date | null
+      usageLimit: number
+      usageCount: number
+      description: string | null
+      createdBy: number | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["customerVoucher"]>
+    composites: {}
+  }
+
+
+  type CustomerVoucherGetPayload<S extends boolean | null | undefined | CustomerVoucherDefaultArgs> = $Result.GetResult<Prisma.$CustomerVoucherPayload, S>
+
+  type CustomerVoucherCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<CustomerVoucherFindManyArgs, 'select' | 'include' | 'distinct'> & {
+      select?: CustomerVoucherCountAggregateInputType | true
+    }
+
+  export interface CustomerVoucherDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['CustomerVoucher'], meta: { name: 'CustomerVoucher' } }
+    /**
+     * Find zero or one CustomerVoucher that matches the filter.
+     * @param {CustomerVoucherFindUniqueArgs} args - Arguments to find a CustomerVoucher
+     * @example
+     * // Get one CustomerVoucher
+     * const customerVoucher = await prisma.customerVoucher.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+    **/
+    findUnique<T extends CustomerVoucherFindUniqueArgs<ExtArgs>>(
+      args: SelectSubset<T, CustomerVoucherFindUniqueArgs<ExtArgs>>
+    ): Prisma__CustomerVoucherClient<$Result.GetResult<Prisma.$CustomerVoucherPayload<ExtArgs>, T, 'findUnique'> | null, null, ExtArgs>
+
+    /**
+     * Find one CustomerVoucher that matches the filter or throw an error  with `error.code='P2025'` 
+     *     if no matches were found.
+     * @param {CustomerVoucherFindUniqueOrThrowArgs} args - Arguments to find a CustomerVoucher
+     * @example
+     * // Get one CustomerVoucher
+     * const customerVoucher = await prisma.customerVoucher.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+    **/
+    findUniqueOrThrow<T extends CustomerVoucherFindUniqueOrThrowArgs<ExtArgs>>(
+      args?: SelectSubset<T, CustomerVoucherFindUniqueOrThrowArgs<ExtArgs>>
+    ): Prisma__CustomerVoucherClient<$Result.GetResult<Prisma.$CustomerVoucherPayload<ExtArgs>, T, 'findUniqueOrThrow'>, never, ExtArgs>
+
+    /**
+     * Find the first CustomerVoucher that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CustomerVoucherFindFirstArgs} args - Arguments to find a CustomerVoucher
+     * @example
+     * // Get one CustomerVoucher
+     * const customerVoucher = await prisma.customerVoucher.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+    **/
+    findFirst<T extends CustomerVoucherFindFirstArgs<ExtArgs>>(
+      args?: SelectSubset<T, CustomerVoucherFindFirstArgs<ExtArgs>>
+    ): Prisma__CustomerVoucherClient<$Result.GetResult<Prisma.$CustomerVoucherPayload<ExtArgs>, T, 'findFirst'> | null, null, ExtArgs>
+
+    /**
+     * Find the first CustomerVoucher that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CustomerVoucherFindFirstOrThrowArgs} args - Arguments to find a CustomerVoucher
+     * @example
+     * // Get one CustomerVoucher
+     * const customerVoucher = await prisma.customerVoucher.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+    **/
+    findFirstOrThrow<T extends CustomerVoucherFindFirstOrThrowArgs<ExtArgs>>(
+      args?: SelectSubset<T, CustomerVoucherFindFirstOrThrowArgs<ExtArgs>>
+    ): Prisma__CustomerVoucherClient<$Result.GetResult<Prisma.$CustomerVoucherPayload<ExtArgs>, T, 'findFirstOrThrow'>, never, ExtArgs>
+
+    /**
+     * Find zero or more CustomerVouchers that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CustomerVoucherFindManyArgs=} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all CustomerVouchers
+     * const customerVouchers = await prisma.customerVoucher.findMany()
+     * 
+     * // Get first 10 CustomerVouchers
+     * const customerVouchers = await prisma.customerVoucher.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const customerVoucherWithIdOnly = await prisma.customerVoucher.findMany({ select: { id: true } })
+     * 
+    **/
+    findMany<T extends CustomerVoucherFindManyArgs<ExtArgs>>(
+      args?: SelectSubset<T, CustomerVoucherFindManyArgs<ExtArgs>>
+    ): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CustomerVoucherPayload<ExtArgs>, T, 'findMany'>>
+
+    /**
+     * Create a CustomerVoucher.
+     * @param {CustomerVoucherCreateArgs} args - Arguments to create a CustomerVoucher.
+     * @example
+     * // Create one CustomerVoucher
+     * const CustomerVoucher = await prisma.customerVoucher.create({
+     *   data: {
+     *     // ... data to create a CustomerVoucher
+     *   }
+     * })
+     * 
+    **/
+    create<T extends CustomerVoucherCreateArgs<ExtArgs>>(
+      args: SelectSubset<T, CustomerVoucherCreateArgs<ExtArgs>>
+    ): Prisma__CustomerVoucherClient<$Result.GetResult<Prisma.$CustomerVoucherPayload<ExtArgs>, T, 'create'>, never, ExtArgs>
+
+    /**
+     * Create many CustomerVouchers.
+     *     @param {CustomerVoucherCreateManyArgs} args - Arguments to create many CustomerVouchers.
+     *     @example
+     *     // Create many CustomerVouchers
+     *     const customerVoucher = await prisma.customerVoucher.createMany({
+     *       data: {
+     *         // ... provide data here
+     *       }
+     *     })
+     *     
+    **/
+    createMany<T extends CustomerVoucherCreateManyArgs<ExtArgs>>(
+      args?: SelectSubset<T, CustomerVoucherCreateManyArgs<ExtArgs>>
+    ): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Delete a CustomerVoucher.
+     * @param {CustomerVoucherDeleteArgs} args - Arguments to delete one CustomerVoucher.
+     * @example
+     * // Delete one CustomerVoucher
+     * const CustomerVoucher = await prisma.customerVoucher.delete({
+     *   where: {
+     *     // ... filter to delete one CustomerVoucher
+     *   }
+     * })
+     * 
+    **/
+    delete<T extends CustomerVoucherDeleteArgs<ExtArgs>>(
+      args: SelectSubset<T, CustomerVoucherDeleteArgs<ExtArgs>>
+    ): Prisma__CustomerVoucherClient<$Result.GetResult<Prisma.$CustomerVoucherPayload<ExtArgs>, T, 'delete'>, never, ExtArgs>
+
+    /**
+     * Update one CustomerVoucher.
+     * @param {CustomerVoucherUpdateArgs} args - Arguments to update one CustomerVoucher.
+     * @example
+     * // Update one CustomerVoucher
+     * const customerVoucher = await prisma.customerVoucher.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+    **/
+    update<T extends CustomerVoucherUpdateArgs<ExtArgs>>(
+      args: SelectSubset<T, CustomerVoucherUpdateArgs<ExtArgs>>
+    ): Prisma__CustomerVoucherClient<$Result.GetResult<Prisma.$CustomerVoucherPayload<ExtArgs>, T, 'update'>, never, ExtArgs>
+
+    /**
+     * Delete zero or more CustomerVouchers.
+     * @param {CustomerVoucherDeleteManyArgs} args - Arguments to filter CustomerVouchers to delete.
+     * @example
+     * // Delete a few CustomerVouchers
+     * const { count } = await prisma.customerVoucher.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+    **/
+    deleteMany<T extends CustomerVoucherDeleteManyArgs<ExtArgs>>(
+      args?: SelectSubset<T, CustomerVoucherDeleteManyArgs<ExtArgs>>
+    ): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more CustomerVouchers.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CustomerVoucherUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many CustomerVouchers
+     * const customerVoucher = await prisma.customerVoucher.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+    **/
+    updateMany<T extends CustomerVoucherUpdateManyArgs<ExtArgs>>(
+      args: SelectSubset<T, CustomerVoucherUpdateManyArgs<ExtArgs>>
+    ): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one CustomerVoucher.
+     * @param {CustomerVoucherUpsertArgs} args - Arguments to update or create a CustomerVoucher.
+     * @example
+     * // Update or create a CustomerVoucher
+     * const customerVoucher = await prisma.customerVoucher.upsert({
+     *   create: {
+     *     // ... data to create a CustomerVoucher
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the CustomerVoucher we want to update
+     *   }
+     * })
+    **/
+    upsert<T extends CustomerVoucherUpsertArgs<ExtArgs>>(
+      args: SelectSubset<T, CustomerVoucherUpsertArgs<ExtArgs>>
+    ): Prisma__CustomerVoucherClient<$Result.GetResult<Prisma.$CustomerVoucherPayload<ExtArgs>, T, 'upsert'>, never, ExtArgs>
+
+    /**
+     * Count the number of CustomerVouchers.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CustomerVoucherCountArgs} args - Arguments to filter CustomerVouchers to count.
+     * @example
+     * // Count the number of CustomerVouchers
+     * const count = await prisma.customerVoucher.count({
+     *   where: {
+     *     // ... the filter for the CustomerVouchers we want to count
+     *   }
+     * })
+    **/
+    count<T extends CustomerVoucherCountArgs>(
+      args?: Subset<T, CustomerVoucherCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], CustomerVoucherCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a CustomerVoucher.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CustomerVoucherAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends CustomerVoucherAggregateArgs>(args: Subset<T, CustomerVoucherAggregateArgs>): Prisma.PrismaPromise<GetCustomerVoucherAggregateType<T>>
+
+    /**
+     * Group by CustomerVoucher.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CustomerVoucherGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends CustomerVoucherGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: CustomerVoucherGroupByArgs['orderBy'] }
+        : { orderBy?: CustomerVoucherGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, CustomerVoucherGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetCustomerVoucherGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the CustomerVoucher model
+   */
+  readonly fields: CustomerVoucherFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for CustomerVoucher.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__CustomerVoucherClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: 'PrismaPromise';
+
+    customer<T extends CustomerVoucher$customerArgs<ExtArgs> = {}>(args?: Subset<T, CustomerVoucher$customerArgs<ExtArgs>>): Prisma__CustomerClient<$Result.GetResult<Prisma.$CustomerPayload<ExtArgs>, T, 'findUniqueOrThrow'> | null, null, ExtArgs>;
+
+    branch<T extends CustomerVoucher$branchArgs<ExtArgs> = {}>(args?: Subset<T, CustomerVoucher$branchArgs<ExtArgs>>): Prisma__BranchClient<$Result.GetResult<Prisma.$BranchPayload<ExtArgs>, T, 'findUniqueOrThrow'> | null, null, ExtArgs>;
+
+    issuedSale<T extends CustomerVoucher$issuedSaleArgs<ExtArgs> = {}>(args?: Subset<T, CustomerVoucher$issuedSaleArgs<ExtArgs>>): Prisma__SaleClient<$Result.GetResult<Prisma.$SalePayload<ExtArgs>, T, 'findUniqueOrThrow'> | null, null, ExtArgs>;
+
+    redeemedSale<T extends CustomerVoucher$redeemedSaleArgs<ExtArgs> = {}>(args?: Subset<T, CustomerVoucher$redeemedSaleArgs<ExtArgs>>): Prisma__SaleClient<$Result.GetResult<Prisma.$SalePayload<ExtArgs>, T, 'findUniqueOrThrow'> | null, null, ExtArgs>;
+
+    redemptions<T extends CustomerVoucher$redemptionsArgs<ExtArgs> = {}>(args?: Subset<T, CustomerVoucher$redemptionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CustomerVoucherRedemptionPayload<ExtArgs>, T, 'findMany'> | Null>;
+
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>;
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>;
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>;
+  }
+
+
+
+  /**
+   * Fields of the CustomerVoucher model
+   */ 
+  interface CustomerVoucherFieldRefs {
+    readonly id: FieldRef<"CustomerVoucher", 'Int'>
+    readonly code: FieldRef<"CustomerVoucher", 'String'>
+    readonly name: FieldRef<"CustomerVoucher", 'String'>
+    readonly type: FieldRef<"CustomerVoucher", 'String'>
+    readonly value: FieldRef<"CustomerVoucher", 'Decimal'>
+    readonly maximumDiscount: FieldRef<"CustomerVoucher", 'Decimal'>
+    readonly minimumPurchaseAmount: FieldRef<"CustomerVoucher", 'Decimal'>
+    readonly issueDate: FieldRef<"CustomerVoucher", 'DateTime'>
+    readonly expiryDate: FieldRef<"CustomerVoucher", 'DateTime'>
+    readonly status: FieldRef<"CustomerVoucher", 'String'>
+    readonly customerId: FieldRef<"CustomerVoucher", 'Int'>
+    readonly branchId: FieldRef<"CustomerVoucher", 'Int'>
+    readonly issuedSaleId: FieldRef<"CustomerVoucher", 'Int'>
+    readonly redeemedSaleId: FieldRef<"CustomerVoucher", 'Int'>
+    readonly redeemedAt: FieldRef<"CustomerVoucher", 'DateTime'>
+    readonly usageLimit: FieldRef<"CustomerVoucher", 'Int'>
+    readonly usageCount: FieldRef<"CustomerVoucher", 'Int'>
+    readonly description: FieldRef<"CustomerVoucher", 'String'>
+    readonly createdBy: FieldRef<"CustomerVoucher", 'Int'>
+    readonly createdAt: FieldRef<"CustomerVoucher", 'DateTime'>
+    readonly updatedAt: FieldRef<"CustomerVoucher", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+
+  /**
+   * CustomerVoucher findUnique
+   */
+  export type CustomerVoucherFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CustomerVoucher
+     */
+    select?: CustomerVoucherSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well.
+     */
+    include?: CustomerVoucherInclude<ExtArgs> | null
+    /**
+     * Filter, which CustomerVoucher to fetch.
+     */
+    where: CustomerVoucherWhereUniqueInput
+  }
+
+
+  /**
+   * CustomerVoucher findUniqueOrThrow
+   */
+  export type CustomerVoucherFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CustomerVoucher
+     */
+    select?: CustomerVoucherSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well.
+     */
+    include?: CustomerVoucherInclude<ExtArgs> | null
+    /**
+     * Filter, which CustomerVoucher to fetch.
+     */
+    where: CustomerVoucherWhereUniqueInput
+  }
+
+
+  /**
+   * CustomerVoucher findFirst
+   */
+  export type CustomerVoucherFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CustomerVoucher
+     */
+    select?: CustomerVoucherSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well.
+     */
+    include?: CustomerVoucherInclude<ExtArgs> | null
+    /**
+     * Filter, which CustomerVoucher to fetch.
+     */
+    where?: CustomerVoucherWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of CustomerVouchers to fetch.
+     */
+    orderBy?: CustomerVoucherOrderByWithRelationInput | CustomerVoucherOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for CustomerVouchers.
+     */
+    cursor?: CustomerVoucherWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` CustomerVouchers from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` CustomerVouchers.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of CustomerVouchers.
+     */
+    distinct?: CustomerVoucherScalarFieldEnum | CustomerVoucherScalarFieldEnum[]
+  }
+
+
+  /**
+   * CustomerVoucher findFirstOrThrow
+   */
+  export type CustomerVoucherFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CustomerVoucher
+     */
+    select?: CustomerVoucherSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well.
+     */
+    include?: CustomerVoucherInclude<ExtArgs> | null
+    /**
+     * Filter, which CustomerVoucher to fetch.
+     */
+    where?: CustomerVoucherWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of CustomerVouchers to fetch.
+     */
+    orderBy?: CustomerVoucherOrderByWithRelationInput | CustomerVoucherOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for CustomerVouchers.
+     */
+    cursor?: CustomerVoucherWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` CustomerVouchers from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` CustomerVouchers.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of CustomerVouchers.
+     */
+    distinct?: CustomerVoucherScalarFieldEnum | CustomerVoucherScalarFieldEnum[]
+  }
+
+
+  /**
+   * CustomerVoucher findMany
+   */
+  export type CustomerVoucherFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CustomerVoucher
+     */
+    select?: CustomerVoucherSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well.
+     */
+    include?: CustomerVoucherInclude<ExtArgs> | null
+    /**
+     * Filter, which CustomerVouchers to fetch.
+     */
+    where?: CustomerVoucherWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of CustomerVouchers to fetch.
+     */
+    orderBy?: CustomerVoucherOrderByWithRelationInput | CustomerVoucherOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing CustomerVouchers.
+     */
+    cursor?: CustomerVoucherWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` CustomerVouchers from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` CustomerVouchers.
+     */
+    skip?: number
+    distinct?: CustomerVoucherScalarFieldEnum | CustomerVoucherScalarFieldEnum[]
+  }
+
+
+  /**
+   * CustomerVoucher create
+   */
+  export type CustomerVoucherCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CustomerVoucher
+     */
+    select?: CustomerVoucherSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well.
+     */
+    include?: CustomerVoucherInclude<ExtArgs> | null
+    /**
+     * The data needed to create a CustomerVoucher.
+     */
+    data: XOR<CustomerVoucherCreateInput, CustomerVoucherUncheckedCreateInput>
+  }
+
+
+  /**
+   * CustomerVoucher createMany
+   */
+  export type CustomerVoucherCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many CustomerVouchers.
+     */
+    data: CustomerVoucherCreateManyInput | CustomerVoucherCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+
+  /**
+   * CustomerVoucher update
+   */
+  export type CustomerVoucherUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CustomerVoucher
+     */
+    select?: CustomerVoucherSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well.
+     */
+    include?: CustomerVoucherInclude<ExtArgs> | null
+    /**
+     * The data needed to update a CustomerVoucher.
+     */
+    data: XOR<CustomerVoucherUpdateInput, CustomerVoucherUncheckedUpdateInput>
+    /**
+     * Choose, which CustomerVoucher to update.
+     */
+    where: CustomerVoucherWhereUniqueInput
+  }
+
+
+  /**
+   * CustomerVoucher updateMany
+   */
+  export type CustomerVoucherUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update CustomerVouchers.
+     */
+    data: XOR<CustomerVoucherUpdateManyMutationInput, CustomerVoucherUncheckedUpdateManyInput>
+    /**
+     * Filter which CustomerVouchers to update
+     */
+    where?: CustomerVoucherWhereInput
+  }
+
+
+  /**
+   * CustomerVoucher upsert
+   */
+  export type CustomerVoucherUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CustomerVoucher
+     */
+    select?: CustomerVoucherSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well.
+     */
+    include?: CustomerVoucherInclude<ExtArgs> | null
+    /**
+     * The filter to search for the CustomerVoucher to update in case it exists.
+     */
+    where: CustomerVoucherWhereUniqueInput
+    /**
+     * In case the CustomerVoucher found by the `where` argument doesn't exist, create a new CustomerVoucher with this data.
+     */
+    create: XOR<CustomerVoucherCreateInput, CustomerVoucherUncheckedCreateInput>
+    /**
+     * In case the CustomerVoucher was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<CustomerVoucherUpdateInput, CustomerVoucherUncheckedUpdateInput>
+  }
+
+
+  /**
+   * CustomerVoucher delete
+   */
+  export type CustomerVoucherDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CustomerVoucher
+     */
+    select?: CustomerVoucherSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well.
+     */
+    include?: CustomerVoucherInclude<ExtArgs> | null
+    /**
+     * Filter which CustomerVoucher to delete.
+     */
+    where: CustomerVoucherWhereUniqueInput
+  }
+
+
+  /**
+   * CustomerVoucher deleteMany
+   */
+  export type CustomerVoucherDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which CustomerVouchers to delete
+     */
+    where?: CustomerVoucherWhereInput
+  }
+
+
+  /**
+   * CustomerVoucher.customer
+   */
+  export type CustomerVoucher$customerArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Customer
+     */
+    select?: CustomerSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well.
+     */
+    include?: CustomerInclude<ExtArgs> | null
+    where?: CustomerWhereInput
+  }
+
+
+  /**
+   * CustomerVoucher.branch
+   */
+  export type CustomerVoucher$branchArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Branch
+     */
+    select?: BranchSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well.
+     */
+    include?: BranchInclude<ExtArgs> | null
+    where?: BranchWhereInput
+  }
+
+
+  /**
+   * CustomerVoucher.issuedSale
+   */
+  export type CustomerVoucher$issuedSaleArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Sale
+     */
+    select?: SaleSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well.
+     */
+    include?: SaleInclude<ExtArgs> | null
+    where?: SaleWhereInput
+  }
+
+
+  /**
+   * CustomerVoucher.redeemedSale
+   */
+  export type CustomerVoucher$redeemedSaleArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Sale
+     */
+    select?: SaleSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well.
+     */
+    include?: SaleInclude<ExtArgs> | null
+    where?: SaleWhereInput
+  }
+
+
+  /**
+   * CustomerVoucher.redemptions
+   */
+  export type CustomerVoucher$redemptionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CustomerVoucherRedemption
+     */
+    select?: CustomerVoucherRedemptionSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well.
+     */
+    include?: CustomerVoucherRedemptionInclude<ExtArgs> | null
+    where?: CustomerVoucherRedemptionWhereInput
+    orderBy?: CustomerVoucherRedemptionOrderByWithRelationInput | CustomerVoucherRedemptionOrderByWithRelationInput[]
+    cursor?: CustomerVoucherRedemptionWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: CustomerVoucherRedemptionScalarFieldEnum | CustomerVoucherRedemptionScalarFieldEnum[]
+  }
+
+
+  /**
+   * CustomerVoucher without action
+   */
+  export type CustomerVoucherDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CustomerVoucher
+     */
+    select?: CustomerVoucherSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well.
+     */
+    include?: CustomerVoucherInclude<ExtArgs> | null
+  }
+
+
+
+  /**
+   * Model CustomerVoucherRedemption
+   */
+
+  export type AggregateCustomerVoucherRedemption = {
+    _count: CustomerVoucherRedemptionCountAggregateOutputType | null
+    _avg: CustomerVoucherRedemptionAvgAggregateOutputType | null
+    _sum: CustomerVoucherRedemptionSumAggregateOutputType | null
+    _min: CustomerVoucherRedemptionMinAggregateOutputType | null
+    _max: CustomerVoucherRedemptionMaxAggregateOutputType | null
+  }
+
+  export type CustomerVoucherRedemptionAvgAggregateOutputType = {
+    id: number | null
+    voucherId: number | null
+    saleId: number | null
+    customerId: number | null
+    branchId: number | null
+    discountAmount: Decimal | null
+  }
+
+  export type CustomerVoucherRedemptionSumAggregateOutputType = {
+    id: number | null
+    voucherId: number | null
+    saleId: number | null
+    customerId: number | null
+    branchId: number | null
+    discountAmount: Decimal | null
+  }
+
+  export type CustomerVoucherRedemptionMinAggregateOutputType = {
+    id: number | null
+    voucherId: number | null
+    saleId: number | null
+    customerId: number | null
+    branchId: number | null
+    discountAmount: Decimal | null
+    redeemedAt: Date | null
+  }
+
+  export type CustomerVoucherRedemptionMaxAggregateOutputType = {
+    id: number | null
+    voucherId: number | null
+    saleId: number | null
+    customerId: number | null
+    branchId: number | null
+    discountAmount: Decimal | null
+    redeemedAt: Date | null
+  }
+
+  export type CustomerVoucherRedemptionCountAggregateOutputType = {
+    id: number
+    voucherId: number
+    saleId: number
+    customerId: number
+    branchId: number
+    discountAmount: number
+    redeemedAt: number
+    _all: number
+  }
+
+
+  export type CustomerVoucherRedemptionAvgAggregateInputType = {
+    id?: true
+    voucherId?: true
+    saleId?: true
+    customerId?: true
+    branchId?: true
+    discountAmount?: true
+  }
+
+  export type CustomerVoucherRedemptionSumAggregateInputType = {
+    id?: true
+    voucherId?: true
+    saleId?: true
+    customerId?: true
+    branchId?: true
+    discountAmount?: true
+  }
+
+  export type CustomerVoucherRedemptionMinAggregateInputType = {
+    id?: true
+    voucherId?: true
+    saleId?: true
+    customerId?: true
+    branchId?: true
+    discountAmount?: true
+    redeemedAt?: true
+  }
+
+  export type CustomerVoucherRedemptionMaxAggregateInputType = {
+    id?: true
+    voucherId?: true
+    saleId?: true
+    customerId?: true
+    branchId?: true
+    discountAmount?: true
+    redeemedAt?: true
+  }
+
+  export type CustomerVoucherRedemptionCountAggregateInputType = {
+    id?: true
+    voucherId?: true
+    saleId?: true
+    customerId?: true
+    branchId?: true
+    discountAmount?: true
+    redeemedAt?: true
+    _all?: true
+  }
+
+  export type CustomerVoucherRedemptionAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which CustomerVoucherRedemption to aggregate.
+     */
+    where?: CustomerVoucherRedemptionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of CustomerVoucherRedemptions to fetch.
+     */
+    orderBy?: CustomerVoucherRedemptionOrderByWithRelationInput | CustomerVoucherRedemptionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: CustomerVoucherRedemptionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` CustomerVoucherRedemptions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` CustomerVoucherRedemptions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned CustomerVoucherRedemptions
+    **/
+    _count?: true | CustomerVoucherRedemptionCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: CustomerVoucherRedemptionAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: CustomerVoucherRedemptionSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: CustomerVoucherRedemptionMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: CustomerVoucherRedemptionMaxAggregateInputType
+  }
+
+  export type GetCustomerVoucherRedemptionAggregateType<T extends CustomerVoucherRedemptionAggregateArgs> = {
+        [P in keyof T & keyof AggregateCustomerVoucherRedemption]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateCustomerVoucherRedemption[P]>
+      : GetScalarType<T[P], AggregateCustomerVoucherRedemption[P]>
+  }
+
+
+
+
+  export type CustomerVoucherRedemptionGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: CustomerVoucherRedemptionWhereInput
+    orderBy?: CustomerVoucherRedemptionOrderByWithAggregationInput | CustomerVoucherRedemptionOrderByWithAggregationInput[]
+    by: CustomerVoucherRedemptionScalarFieldEnum[] | CustomerVoucherRedemptionScalarFieldEnum
+    having?: CustomerVoucherRedemptionScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: CustomerVoucherRedemptionCountAggregateInputType | true
+    _avg?: CustomerVoucherRedemptionAvgAggregateInputType
+    _sum?: CustomerVoucherRedemptionSumAggregateInputType
+    _min?: CustomerVoucherRedemptionMinAggregateInputType
+    _max?: CustomerVoucherRedemptionMaxAggregateInputType
+  }
+
+  export type CustomerVoucherRedemptionGroupByOutputType = {
+    id: number
+    voucherId: number
+    saleId: number
+    customerId: number | null
+    branchId: number
+    discountAmount: Decimal
+    redeemedAt: Date
+    _count: CustomerVoucherRedemptionCountAggregateOutputType | null
+    _avg: CustomerVoucherRedemptionAvgAggregateOutputType | null
+    _sum: CustomerVoucherRedemptionSumAggregateOutputType | null
+    _min: CustomerVoucherRedemptionMinAggregateOutputType | null
+    _max: CustomerVoucherRedemptionMaxAggregateOutputType | null
+  }
+
+  type GetCustomerVoucherRedemptionGroupByPayload<T extends CustomerVoucherRedemptionGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<CustomerVoucherRedemptionGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof CustomerVoucherRedemptionGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], CustomerVoucherRedemptionGroupByOutputType[P]>
+            : GetScalarType<T[P], CustomerVoucherRedemptionGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type CustomerVoucherRedemptionSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    voucherId?: boolean
+    saleId?: boolean
+    customerId?: boolean
+    branchId?: boolean
+    discountAmount?: boolean
+    redeemedAt?: boolean
+    voucher?: boolean | CustomerVoucherDefaultArgs<ExtArgs>
+    sale?: boolean | SaleDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["customerVoucherRedemption"]>
+
+  export type CustomerVoucherRedemptionSelectScalar = {
+    id?: boolean
+    voucherId?: boolean
+    saleId?: boolean
+    customerId?: boolean
+    branchId?: boolean
+    discountAmount?: boolean
+    redeemedAt?: boolean
+  }
+
+  export type CustomerVoucherRedemptionInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    voucher?: boolean | CustomerVoucherDefaultArgs<ExtArgs>
+    sale?: boolean | SaleDefaultArgs<ExtArgs>
+  }
+
+
+  export type $CustomerVoucherRedemptionPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "CustomerVoucherRedemption"
+    objects: {
+      voucher: Prisma.$CustomerVoucherPayload<ExtArgs>
+      sale: Prisma.$SalePayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      voucherId: number
+      saleId: number
+      customerId: number | null
+      branchId: number
+      discountAmount: Prisma.Decimal
+      redeemedAt: Date
+    }, ExtArgs["result"]["customerVoucherRedemption"]>
+    composites: {}
+  }
+
+
+  type CustomerVoucherRedemptionGetPayload<S extends boolean | null | undefined | CustomerVoucherRedemptionDefaultArgs> = $Result.GetResult<Prisma.$CustomerVoucherRedemptionPayload, S>
+
+  type CustomerVoucherRedemptionCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<CustomerVoucherRedemptionFindManyArgs, 'select' | 'include' | 'distinct'> & {
+      select?: CustomerVoucherRedemptionCountAggregateInputType | true
+    }
+
+  export interface CustomerVoucherRedemptionDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['CustomerVoucherRedemption'], meta: { name: 'CustomerVoucherRedemption' } }
+    /**
+     * Find zero or one CustomerVoucherRedemption that matches the filter.
+     * @param {CustomerVoucherRedemptionFindUniqueArgs} args - Arguments to find a CustomerVoucherRedemption
+     * @example
+     * // Get one CustomerVoucherRedemption
+     * const customerVoucherRedemption = await prisma.customerVoucherRedemption.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+    **/
+    findUnique<T extends CustomerVoucherRedemptionFindUniqueArgs<ExtArgs>>(
+      args: SelectSubset<T, CustomerVoucherRedemptionFindUniqueArgs<ExtArgs>>
+    ): Prisma__CustomerVoucherRedemptionClient<$Result.GetResult<Prisma.$CustomerVoucherRedemptionPayload<ExtArgs>, T, 'findUnique'> | null, null, ExtArgs>
+
+    /**
+     * Find one CustomerVoucherRedemption that matches the filter or throw an error  with `error.code='P2025'` 
+     *     if no matches were found.
+     * @param {CustomerVoucherRedemptionFindUniqueOrThrowArgs} args - Arguments to find a CustomerVoucherRedemption
+     * @example
+     * // Get one CustomerVoucherRedemption
+     * const customerVoucherRedemption = await prisma.customerVoucherRedemption.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+    **/
+    findUniqueOrThrow<T extends CustomerVoucherRedemptionFindUniqueOrThrowArgs<ExtArgs>>(
+      args?: SelectSubset<T, CustomerVoucherRedemptionFindUniqueOrThrowArgs<ExtArgs>>
+    ): Prisma__CustomerVoucherRedemptionClient<$Result.GetResult<Prisma.$CustomerVoucherRedemptionPayload<ExtArgs>, T, 'findUniqueOrThrow'>, never, ExtArgs>
+
+    /**
+     * Find the first CustomerVoucherRedemption that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CustomerVoucherRedemptionFindFirstArgs} args - Arguments to find a CustomerVoucherRedemption
+     * @example
+     * // Get one CustomerVoucherRedemption
+     * const customerVoucherRedemption = await prisma.customerVoucherRedemption.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+    **/
+    findFirst<T extends CustomerVoucherRedemptionFindFirstArgs<ExtArgs>>(
+      args?: SelectSubset<T, CustomerVoucherRedemptionFindFirstArgs<ExtArgs>>
+    ): Prisma__CustomerVoucherRedemptionClient<$Result.GetResult<Prisma.$CustomerVoucherRedemptionPayload<ExtArgs>, T, 'findFirst'> | null, null, ExtArgs>
+
+    /**
+     * Find the first CustomerVoucherRedemption that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CustomerVoucherRedemptionFindFirstOrThrowArgs} args - Arguments to find a CustomerVoucherRedemption
+     * @example
+     * // Get one CustomerVoucherRedemption
+     * const customerVoucherRedemption = await prisma.customerVoucherRedemption.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+    **/
+    findFirstOrThrow<T extends CustomerVoucherRedemptionFindFirstOrThrowArgs<ExtArgs>>(
+      args?: SelectSubset<T, CustomerVoucherRedemptionFindFirstOrThrowArgs<ExtArgs>>
+    ): Prisma__CustomerVoucherRedemptionClient<$Result.GetResult<Prisma.$CustomerVoucherRedemptionPayload<ExtArgs>, T, 'findFirstOrThrow'>, never, ExtArgs>
+
+    /**
+     * Find zero or more CustomerVoucherRedemptions that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CustomerVoucherRedemptionFindManyArgs=} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all CustomerVoucherRedemptions
+     * const customerVoucherRedemptions = await prisma.customerVoucherRedemption.findMany()
+     * 
+     * // Get first 10 CustomerVoucherRedemptions
+     * const customerVoucherRedemptions = await prisma.customerVoucherRedemption.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const customerVoucherRedemptionWithIdOnly = await prisma.customerVoucherRedemption.findMany({ select: { id: true } })
+     * 
+    **/
+    findMany<T extends CustomerVoucherRedemptionFindManyArgs<ExtArgs>>(
+      args?: SelectSubset<T, CustomerVoucherRedemptionFindManyArgs<ExtArgs>>
+    ): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CustomerVoucherRedemptionPayload<ExtArgs>, T, 'findMany'>>
+
+    /**
+     * Create a CustomerVoucherRedemption.
+     * @param {CustomerVoucherRedemptionCreateArgs} args - Arguments to create a CustomerVoucherRedemption.
+     * @example
+     * // Create one CustomerVoucherRedemption
+     * const CustomerVoucherRedemption = await prisma.customerVoucherRedemption.create({
+     *   data: {
+     *     // ... data to create a CustomerVoucherRedemption
+     *   }
+     * })
+     * 
+    **/
+    create<T extends CustomerVoucherRedemptionCreateArgs<ExtArgs>>(
+      args: SelectSubset<T, CustomerVoucherRedemptionCreateArgs<ExtArgs>>
+    ): Prisma__CustomerVoucherRedemptionClient<$Result.GetResult<Prisma.$CustomerVoucherRedemptionPayload<ExtArgs>, T, 'create'>, never, ExtArgs>
+
+    /**
+     * Create many CustomerVoucherRedemptions.
+     *     @param {CustomerVoucherRedemptionCreateManyArgs} args - Arguments to create many CustomerVoucherRedemptions.
+     *     @example
+     *     // Create many CustomerVoucherRedemptions
+     *     const customerVoucherRedemption = await prisma.customerVoucherRedemption.createMany({
+     *       data: {
+     *         // ... provide data here
+     *       }
+     *     })
+     *     
+    **/
+    createMany<T extends CustomerVoucherRedemptionCreateManyArgs<ExtArgs>>(
+      args?: SelectSubset<T, CustomerVoucherRedemptionCreateManyArgs<ExtArgs>>
+    ): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Delete a CustomerVoucherRedemption.
+     * @param {CustomerVoucherRedemptionDeleteArgs} args - Arguments to delete one CustomerVoucherRedemption.
+     * @example
+     * // Delete one CustomerVoucherRedemption
+     * const CustomerVoucherRedemption = await prisma.customerVoucherRedemption.delete({
+     *   where: {
+     *     // ... filter to delete one CustomerVoucherRedemption
+     *   }
+     * })
+     * 
+    **/
+    delete<T extends CustomerVoucherRedemptionDeleteArgs<ExtArgs>>(
+      args: SelectSubset<T, CustomerVoucherRedemptionDeleteArgs<ExtArgs>>
+    ): Prisma__CustomerVoucherRedemptionClient<$Result.GetResult<Prisma.$CustomerVoucherRedemptionPayload<ExtArgs>, T, 'delete'>, never, ExtArgs>
+
+    /**
+     * Update one CustomerVoucherRedemption.
+     * @param {CustomerVoucherRedemptionUpdateArgs} args - Arguments to update one CustomerVoucherRedemption.
+     * @example
+     * // Update one CustomerVoucherRedemption
+     * const customerVoucherRedemption = await prisma.customerVoucherRedemption.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+    **/
+    update<T extends CustomerVoucherRedemptionUpdateArgs<ExtArgs>>(
+      args: SelectSubset<T, CustomerVoucherRedemptionUpdateArgs<ExtArgs>>
+    ): Prisma__CustomerVoucherRedemptionClient<$Result.GetResult<Prisma.$CustomerVoucherRedemptionPayload<ExtArgs>, T, 'update'>, never, ExtArgs>
+
+    /**
+     * Delete zero or more CustomerVoucherRedemptions.
+     * @param {CustomerVoucherRedemptionDeleteManyArgs} args - Arguments to filter CustomerVoucherRedemptions to delete.
+     * @example
+     * // Delete a few CustomerVoucherRedemptions
+     * const { count } = await prisma.customerVoucherRedemption.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+    **/
+    deleteMany<T extends CustomerVoucherRedemptionDeleteManyArgs<ExtArgs>>(
+      args?: SelectSubset<T, CustomerVoucherRedemptionDeleteManyArgs<ExtArgs>>
+    ): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more CustomerVoucherRedemptions.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CustomerVoucherRedemptionUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many CustomerVoucherRedemptions
+     * const customerVoucherRedemption = await prisma.customerVoucherRedemption.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+    **/
+    updateMany<T extends CustomerVoucherRedemptionUpdateManyArgs<ExtArgs>>(
+      args: SelectSubset<T, CustomerVoucherRedemptionUpdateManyArgs<ExtArgs>>
+    ): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one CustomerVoucherRedemption.
+     * @param {CustomerVoucherRedemptionUpsertArgs} args - Arguments to update or create a CustomerVoucherRedemption.
+     * @example
+     * // Update or create a CustomerVoucherRedemption
+     * const customerVoucherRedemption = await prisma.customerVoucherRedemption.upsert({
+     *   create: {
+     *     // ... data to create a CustomerVoucherRedemption
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the CustomerVoucherRedemption we want to update
+     *   }
+     * })
+    **/
+    upsert<T extends CustomerVoucherRedemptionUpsertArgs<ExtArgs>>(
+      args: SelectSubset<T, CustomerVoucherRedemptionUpsertArgs<ExtArgs>>
+    ): Prisma__CustomerVoucherRedemptionClient<$Result.GetResult<Prisma.$CustomerVoucherRedemptionPayload<ExtArgs>, T, 'upsert'>, never, ExtArgs>
+
+    /**
+     * Count the number of CustomerVoucherRedemptions.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CustomerVoucherRedemptionCountArgs} args - Arguments to filter CustomerVoucherRedemptions to count.
+     * @example
+     * // Count the number of CustomerVoucherRedemptions
+     * const count = await prisma.customerVoucherRedemption.count({
+     *   where: {
+     *     // ... the filter for the CustomerVoucherRedemptions we want to count
+     *   }
+     * })
+    **/
+    count<T extends CustomerVoucherRedemptionCountArgs>(
+      args?: Subset<T, CustomerVoucherRedemptionCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], CustomerVoucherRedemptionCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a CustomerVoucherRedemption.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CustomerVoucherRedemptionAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends CustomerVoucherRedemptionAggregateArgs>(args: Subset<T, CustomerVoucherRedemptionAggregateArgs>): Prisma.PrismaPromise<GetCustomerVoucherRedemptionAggregateType<T>>
+
+    /**
+     * Group by CustomerVoucherRedemption.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CustomerVoucherRedemptionGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends CustomerVoucherRedemptionGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: CustomerVoucherRedemptionGroupByArgs['orderBy'] }
+        : { orderBy?: CustomerVoucherRedemptionGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, CustomerVoucherRedemptionGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetCustomerVoucherRedemptionGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the CustomerVoucherRedemption model
+   */
+  readonly fields: CustomerVoucherRedemptionFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for CustomerVoucherRedemption.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__CustomerVoucherRedemptionClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: 'PrismaPromise';
+
+    voucher<T extends CustomerVoucherDefaultArgs<ExtArgs> = {}>(args?: Subset<T, CustomerVoucherDefaultArgs<ExtArgs>>): Prisma__CustomerVoucherClient<$Result.GetResult<Prisma.$CustomerVoucherPayload<ExtArgs>, T, 'findUniqueOrThrow'> | Null, Null, ExtArgs>;
+
+    sale<T extends SaleDefaultArgs<ExtArgs> = {}>(args?: Subset<T, SaleDefaultArgs<ExtArgs>>): Prisma__SaleClient<$Result.GetResult<Prisma.$SalePayload<ExtArgs>, T, 'findUniqueOrThrow'> | Null, Null, ExtArgs>;
+
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>;
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>;
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>;
+  }
+
+
+
+  /**
+   * Fields of the CustomerVoucherRedemption model
+   */ 
+  interface CustomerVoucherRedemptionFieldRefs {
+    readonly id: FieldRef<"CustomerVoucherRedemption", 'Int'>
+    readonly voucherId: FieldRef<"CustomerVoucherRedemption", 'Int'>
+    readonly saleId: FieldRef<"CustomerVoucherRedemption", 'Int'>
+    readonly customerId: FieldRef<"CustomerVoucherRedemption", 'Int'>
+    readonly branchId: FieldRef<"CustomerVoucherRedemption", 'Int'>
+    readonly discountAmount: FieldRef<"CustomerVoucherRedemption", 'Decimal'>
+    readonly redeemedAt: FieldRef<"CustomerVoucherRedemption", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+
+  /**
+   * CustomerVoucherRedemption findUnique
+   */
+  export type CustomerVoucherRedemptionFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CustomerVoucherRedemption
+     */
+    select?: CustomerVoucherRedemptionSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well.
+     */
+    include?: CustomerVoucherRedemptionInclude<ExtArgs> | null
+    /**
+     * Filter, which CustomerVoucherRedemption to fetch.
+     */
+    where: CustomerVoucherRedemptionWhereUniqueInput
+  }
+
+
+  /**
+   * CustomerVoucherRedemption findUniqueOrThrow
+   */
+  export type CustomerVoucherRedemptionFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CustomerVoucherRedemption
+     */
+    select?: CustomerVoucherRedemptionSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well.
+     */
+    include?: CustomerVoucherRedemptionInclude<ExtArgs> | null
+    /**
+     * Filter, which CustomerVoucherRedemption to fetch.
+     */
+    where: CustomerVoucherRedemptionWhereUniqueInput
+  }
+
+
+  /**
+   * CustomerVoucherRedemption findFirst
+   */
+  export type CustomerVoucherRedemptionFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CustomerVoucherRedemption
+     */
+    select?: CustomerVoucherRedemptionSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well.
+     */
+    include?: CustomerVoucherRedemptionInclude<ExtArgs> | null
+    /**
+     * Filter, which CustomerVoucherRedemption to fetch.
+     */
+    where?: CustomerVoucherRedemptionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of CustomerVoucherRedemptions to fetch.
+     */
+    orderBy?: CustomerVoucherRedemptionOrderByWithRelationInput | CustomerVoucherRedemptionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for CustomerVoucherRedemptions.
+     */
+    cursor?: CustomerVoucherRedemptionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` CustomerVoucherRedemptions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` CustomerVoucherRedemptions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of CustomerVoucherRedemptions.
+     */
+    distinct?: CustomerVoucherRedemptionScalarFieldEnum | CustomerVoucherRedemptionScalarFieldEnum[]
+  }
+
+
+  /**
+   * CustomerVoucherRedemption findFirstOrThrow
+   */
+  export type CustomerVoucherRedemptionFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CustomerVoucherRedemption
+     */
+    select?: CustomerVoucherRedemptionSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well.
+     */
+    include?: CustomerVoucherRedemptionInclude<ExtArgs> | null
+    /**
+     * Filter, which CustomerVoucherRedemption to fetch.
+     */
+    where?: CustomerVoucherRedemptionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of CustomerVoucherRedemptions to fetch.
+     */
+    orderBy?: CustomerVoucherRedemptionOrderByWithRelationInput | CustomerVoucherRedemptionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for CustomerVoucherRedemptions.
+     */
+    cursor?: CustomerVoucherRedemptionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` CustomerVoucherRedemptions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` CustomerVoucherRedemptions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of CustomerVoucherRedemptions.
+     */
+    distinct?: CustomerVoucherRedemptionScalarFieldEnum | CustomerVoucherRedemptionScalarFieldEnum[]
+  }
+
+
+  /**
+   * CustomerVoucherRedemption findMany
+   */
+  export type CustomerVoucherRedemptionFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CustomerVoucherRedemption
+     */
+    select?: CustomerVoucherRedemptionSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well.
+     */
+    include?: CustomerVoucherRedemptionInclude<ExtArgs> | null
+    /**
+     * Filter, which CustomerVoucherRedemptions to fetch.
+     */
+    where?: CustomerVoucherRedemptionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of CustomerVoucherRedemptions to fetch.
+     */
+    orderBy?: CustomerVoucherRedemptionOrderByWithRelationInput | CustomerVoucherRedemptionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing CustomerVoucherRedemptions.
+     */
+    cursor?: CustomerVoucherRedemptionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` CustomerVoucherRedemptions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` CustomerVoucherRedemptions.
+     */
+    skip?: number
+    distinct?: CustomerVoucherRedemptionScalarFieldEnum | CustomerVoucherRedemptionScalarFieldEnum[]
+  }
+
+
+  /**
+   * CustomerVoucherRedemption create
+   */
+  export type CustomerVoucherRedemptionCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CustomerVoucherRedemption
+     */
+    select?: CustomerVoucherRedemptionSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well.
+     */
+    include?: CustomerVoucherRedemptionInclude<ExtArgs> | null
+    /**
+     * The data needed to create a CustomerVoucherRedemption.
+     */
+    data: XOR<CustomerVoucherRedemptionCreateInput, CustomerVoucherRedemptionUncheckedCreateInput>
+  }
+
+
+  /**
+   * CustomerVoucherRedemption createMany
+   */
+  export type CustomerVoucherRedemptionCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many CustomerVoucherRedemptions.
+     */
+    data: CustomerVoucherRedemptionCreateManyInput | CustomerVoucherRedemptionCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+
+  /**
+   * CustomerVoucherRedemption update
+   */
+  export type CustomerVoucherRedemptionUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CustomerVoucherRedemption
+     */
+    select?: CustomerVoucherRedemptionSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well.
+     */
+    include?: CustomerVoucherRedemptionInclude<ExtArgs> | null
+    /**
+     * The data needed to update a CustomerVoucherRedemption.
+     */
+    data: XOR<CustomerVoucherRedemptionUpdateInput, CustomerVoucherRedemptionUncheckedUpdateInput>
+    /**
+     * Choose, which CustomerVoucherRedemption to update.
+     */
+    where: CustomerVoucherRedemptionWhereUniqueInput
+  }
+
+
+  /**
+   * CustomerVoucherRedemption updateMany
+   */
+  export type CustomerVoucherRedemptionUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update CustomerVoucherRedemptions.
+     */
+    data: XOR<CustomerVoucherRedemptionUpdateManyMutationInput, CustomerVoucherRedemptionUncheckedUpdateManyInput>
+    /**
+     * Filter which CustomerVoucherRedemptions to update
+     */
+    where?: CustomerVoucherRedemptionWhereInput
+  }
+
+
+  /**
+   * CustomerVoucherRedemption upsert
+   */
+  export type CustomerVoucherRedemptionUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CustomerVoucherRedemption
+     */
+    select?: CustomerVoucherRedemptionSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well.
+     */
+    include?: CustomerVoucherRedemptionInclude<ExtArgs> | null
+    /**
+     * The filter to search for the CustomerVoucherRedemption to update in case it exists.
+     */
+    where: CustomerVoucherRedemptionWhereUniqueInput
+    /**
+     * In case the CustomerVoucherRedemption found by the `where` argument doesn't exist, create a new CustomerVoucherRedemption with this data.
+     */
+    create: XOR<CustomerVoucherRedemptionCreateInput, CustomerVoucherRedemptionUncheckedCreateInput>
+    /**
+     * In case the CustomerVoucherRedemption was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<CustomerVoucherRedemptionUpdateInput, CustomerVoucherRedemptionUncheckedUpdateInput>
+  }
+
+
+  /**
+   * CustomerVoucherRedemption delete
+   */
+  export type CustomerVoucherRedemptionDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CustomerVoucherRedemption
+     */
+    select?: CustomerVoucherRedemptionSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well.
+     */
+    include?: CustomerVoucherRedemptionInclude<ExtArgs> | null
+    /**
+     * Filter which CustomerVoucherRedemption to delete.
+     */
+    where: CustomerVoucherRedemptionWhereUniqueInput
+  }
+
+
+  /**
+   * CustomerVoucherRedemption deleteMany
+   */
+  export type CustomerVoucherRedemptionDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which CustomerVoucherRedemptions to delete
+     */
+    where?: CustomerVoucherRedemptionWhereInput
+  }
+
+
+  /**
+   * CustomerVoucherRedemption without action
+   */
+  export type CustomerVoucherRedemptionDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CustomerVoucherRedemption
+     */
+    select?: CustomerVoucherRedemptionSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well.
+     */
+    include?: CustomerVoucherRedemptionInclude<ExtArgs> | null
+  }
+
+
+
+  /**
    * Enums
    */
 
@@ -79659,7 +82367,9 @@ export namespace Prisma {
     advanceUsed: 'advanceUsed',
     description: 'description',
     deliveryCharge: 'deliveryCharge',
-    hasDeliveryCharge: 'hasDeliveryCharge'
+    hasDeliveryCharge: 'hasDeliveryCharge',
+    voucherCode: 'voucherCode',
+    voucherDiscount: 'voucherDiscount'
   };
 
   export type SaleScalarFieldEnum = (typeof SaleScalarFieldEnum)[keyof typeof SaleScalarFieldEnum]
@@ -79672,9 +82382,11 @@ export namespace Prisma {
     size: 'size',
     quantity: 'quantity',
     unitPrice: 'unitPrice',
+    originalUnitPrice: 'originalUnitPrice',
     total: 'total',
     discountAmount: 'discountAmount',
     discountPercent: 'discountPercent',
+    voucherDiscountAmount: 'voucherDiscountAmount',
     taxAmount: 'taxAmount',
     taxRate: 'taxRate',
     isTaxInclusive: 'isTaxInclusive'
@@ -80486,6 +83198,46 @@ export namespace Prisma {
   export type StaffDayCloseScalarFieldEnum = (typeof StaffDayCloseScalarFieldEnum)[keyof typeof StaffDayCloseScalarFieldEnum]
 
 
+  export const CustomerVoucherScalarFieldEnum: {
+    id: 'id',
+    code: 'code',
+    name: 'name',
+    type: 'type',
+    value: 'value',
+    maximumDiscount: 'maximumDiscount',
+    minimumPurchaseAmount: 'minimumPurchaseAmount',
+    issueDate: 'issueDate',
+    expiryDate: 'expiryDate',
+    status: 'status',
+    customerId: 'customerId',
+    branchId: 'branchId',
+    issuedSaleId: 'issuedSaleId',
+    redeemedSaleId: 'redeemedSaleId',
+    redeemedAt: 'redeemedAt',
+    usageLimit: 'usageLimit',
+    usageCount: 'usageCount',
+    description: 'description',
+    createdBy: 'createdBy',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type CustomerVoucherScalarFieldEnum = (typeof CustomerVoucherScalarFieldEnum)[keyof typeof CustomerVoucherScalarFieldEnum]
+
+
+  export const CustomerVoucherRedemptionScalarFieldEnum: {
+    id: 'id',
+    voucherId: 'voucherId',
+    saleId: 'saleId',
+    customerId: 'customerId',
+    branchId: 'branchId',
+    discountAmount: 'discountAmount',
+    redeemedAt: 'redeemedAt'
+  };
+
+  export type CustomerVoucherRedemptionScalarFieldEnum = (typeof CustomerVoucherRedemptionScalarFieldEnum)[keyof typeof CustomerVoucherRedemptionScalarFieldEnum]
+
+
   export const SortOrder: {
     asc: 'asc',
     desc: 'desc'
@@ -80867,6 +83619,7 @@ export namespace Prisma {
     leads?: LeadListRelationFilter
     users?: UserListRelationFilter
     dayCloses?: DayCloseListRelationFilter
+    customerVouchers?: CustomerVoucherListRelationFilter
   }
 
   export type BranchOrderByWithRelationInput = {
@@ -80906,6 +83659,7 @@ export namespace Prisma {
     leads?: LeadOrderByRelationAggregateInput
     users?: UserOrderByRelationAggregateInput
     dayCloses?: DayCloseOrderByRelationAggregateInput
+    customerVouchers?: CustomerVoucherOrderByRelationAggregateInput
   }
 
   export type BranchWhereUniqueInput = Prisma.AtLeast<{
@@ -80948,6 +83702,7 @@ export namespace Prisma {
     leads?: LeadListRelationFilter
     users?: UserListRelationFilter
     dayCloses?: DayCloseListRelationFilter
+    customerVouchers?: CustomerVoucherListRelationFilter
   }, "id">
 
   export type BranchOrderByWithAggregationInput = {
@@ -81231,6 +83986,7 @@ export namespace Prisma {
     quotations?: QuotationListRelationFilter
     sales?: SaleListRelationFilter
     tickets?: TicketListRelationFilter
+    customerVouchers?: CustomerVoucherListRelationFilter
   }
 
   export type CustomerOrderByWithRelationInput = {
@@ -81260,6 +84016,7 @@ export namespace Prisma {
     quotations?: QuotationOrderByRelationAggregateInput
     sales?: SaleOrderByRelationAggregateInput
     tickets?: TicketOrderByRelationAggregateInput
+    customerVouchers?: CustomerVoucherOrderByRelationAggregateInput
   }
 
   export type CustomerWhereUniqueInput = Prisma.AtLeast<{
@@ -81292,6 +84049,7 @@ export namespace Prisma {
     quotations?: QuotationListRelationFilter
     sales?: SaleListRelationFilter
     tickets?: TicketListRelationFilter
+    customerVouchers?: CustomerVoucherListRelationFilter
   }, "id" | "phone" | "username">
 
   export type CustomerOrderByWithAggregationInput = {
@@ -82309,6 +85067,8 @@ export namespace Prisma {
     description?: StringNullableFilter<"Sale"> | string | null
     deliveryCharge?: DecimalFilter<"Sale"> | Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: BoolFilter<"Sale"> | boolean
+    voucherCode?: StringNullableFilter<"Sale"> | string | null
+    voucherDiscount?: DecimalFilter<"Sale"> | Decimal | DecimalJsLike | number | string
     payments?: PaymentListRelationFilter
     branch?: XOR<BranchRelationFilter, BranchWhereInput>
     customer?: XOR<CustomerNullableRelationFilter, CustomerWhereInput> | null
@@ -82318,6 +85078,9 @@ export namespace Prisma {
     terminal?: XOR<TerminalNullableRelationFilter, TerminalWhereInput> | null
     items?: SaleItemListRelationFilter
     lead?: XOR<LeadNullableRelationFilter, LeadWhereInput> | null
+    customerVouchersIssued?: CustomerVoucherListRelationFilter
+    customerVouchersRedeemed?: CustomerVoucherListRelationFilter
+    customerVoucherRedemptions?: CustomerVoucherRedemptionListRelationFilter
   }
 
   export type SaleOrderByWithRelationInput = {
@@ -82364,6 +85127,8 @@ export namespace Prisma {
     description?: SortOrderInput | SortOrder
     deliveryCharge?: SortOrder
     hasDeliveryCharge?: SortOrder
+    voucherCode?: SortOrderInput | SortOrder
+    voucherDiscount?: SortOrder
     payments?: PaymentOrderByRelationAggregateInput
     branch?: BranchOrderByWithRelationInput
     customer?: CustomerOrderByWithRelationInput
@@ -82373,6 +85138,9 @@ export namespace Prisma {
     terminal?: TerminalOrderByWithRelationInput
     items?: SaleItemOrderByRelationAggregateInput
     lead?: LeadOrderByWithRelationInput
+    customerVouchersIssued?: CustomerVoucherOrderByRelationAggregateInput
+    customerVouchersRedeemed?: CustomerVoucherOrderByRelationAggregateInput
+    customerVoucherRedemptions?: CustomerVoucherRedemptionOrderByRelationAggregateInput
   }
 
   export type SaleWhereUniqueInput = Prisma.AtLeast<{
@@ -82423,6 +85191,8 @@ export namespace Prisma {
     description?: StringNullableFilter<"Sale"> | string | null
     deliveryCharge?: DecimalFilter<"Sale"> | Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: BoolFilter<"Sale"> | boolean
+    voucherCode?: StringNullableFilter<"Sale"> | string | null
+    voucherDiscount?: DecimalFilter<"Sale"> | Decimal | DecimalJsLike | number | string
     payments?: PaymentListRelationFilter
     branch?: XOR<BranchRelationFilter, BranchWhereInput>
     customer?: XOR<CustomerNullableRelationFilter, CustomerWhereInput> | null
@@ -82432,6 +85202,9 @@ export namespace Prisma {
     terminal?: XOR<TerminalNullableRelationFilter, TerminalWhereInput> | null
     items?: SaleItemListRelationFilter
     lead?: XOR<LeadNullableRelationFilter, LeadWhereInput> | null
+    customerVouchersIssued?: CustomerVoucherListRelationFilter
+    customerVouchersRedeemed?: CustomerVoucherListRelationFilter
+    customerVoucherRedemptions?: CustomerVoucherRedemptionListRelationFilter
   }, "id" | "quotationId" | "branchId_invoiceNumber_financialYearId">
 
   export type SaleOrderByWithAggregationInput = {
@@ -82478,6 +85251,8 @@ export namespace Prisma {
     description?: SortOrderInput | SortOrder
     deliveryCharge?: SortOrder
     hasDeliveryCharge?: SortOrder
+    voucherCode?: SortOrderInput | SortOrder
+    voucherDiscount?: SortOrder
     _count?: SaleCountOrderByAggregateInput
     _avg?: SaleAvgOrderByAggregateInput
     _max?: SaleMaxOrderByAggregateInput
@@ -82532,6 +85307,8 @@ export namespace Prisma {
     description?: StringNullableWithAggregatesFilter<"Sale"> | string | null
     deliveryCharge?: DecimalWithAggregatesFilter<"Sale"> | Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: BoolWithAggregatesFilter<"Sale"> | boolean
+    voucherCode?: StringNullableWithAggregatesFilter<"Sale"> | string | null
+    voucherDiscount?: DecimalWithAggregatesFilter<"Sale"> | Decimal | DecimalJsLike | number | string
   }
 
   export type SaleItemWhereInput = {
@@ -82544,9 +85321,11 @@ export namespace Prisma {
     size?: StringNullableFilter<"SaleItem"> | string | null
     quantity?: IntFilter<"SaleItem"> | number
     unitPrice?: DecimalFilter<"SaleItem"> | Decimal | DecimalJsLike | number | string
+    originalUnitPrice?: DecimalNullableFilter<"SaleItem"> | Decimal | DecimalJsLike | number | string | null
     total?: DecimalFilter<"SaleItem"> | Decimal | DecimalJsLike | number | string
     discountAmount?: DecimalFilter<"SaleItem"> | Decimal | DecimalJsLike | number | string
     discountPercent?: DecimalFilter<"SaleItem"> | Decimal | DecimalJsLike | number | string
+    voucherDiscountAmount?: DecimalFilter<"SaleItem"> | Decimal | DecimalJsLike | number | string
     taxAmount?: DecimalFilter<"SaleItem"> | Decimal | DecimalJsLike | number | string
     taxRate?: DecimalFilter<"SaleItem"> | Decimal | DecimalJsLike | number | string
     isTaxInclusive?: BoolFilter<"SaleItem"> | boolean
@@ -82561,9 +85340,11 @@ export namespace Prisma {
     size?: SortOrderInput | SortOrder
     quantity?: SortOrder
     unitPrice?: SortOrder
+    originalUnitPrice?: SortOrderInput | SortOrder
     total?: SortOrder
     discountAmount?: SortOrder
     discountPercent?: SortOrder
+    voucherDiscountAmount?: SortOrder
     taxAmount?: SortOrder
     taxRate?: SortOrder
     isTaxInclusive?: SortOrder
@@ -82581,9 +85362,11 @@ export namespace Prisma {
     size?: StringNullableFilter<"SaleItem"> | string | null
     quantity?: IntFilter<"SaleItem"> | number
     unitPrice?: DecimalFilter<"SaleItem"> | Decimal | DecimalJsLike | number | string
+    originalUnitPrice?: DecimalNullableFilter<"SaleItem"> | Decimal | DecimalJsLike | number | string | null
     total?: DecimalFilter<"SaleItem"> | Decimal | DecimalJsLike | number | string
     discountAmount?: DecimalFilter<"SaleItem"> | Decimal | DecimalJsLike | number | string
     discountPercent?: DecimalFilter<"SaleItem"> | Decimal | DecimalJsLike | number | string
+    voucherDiscountAmount?: DecimalFilter<"SaleItem"> | Decimal | DecimalJsLike | number | string
     taxAmount?: DecimalFilter<"SaleItem"> | Decimal | DecimalJsLike | number | string
     taxRate?: DecimalFilter<"SaleItem"> | Decimal | DecimalJsLike | number | string
     isTaxInclusive?: BoolFilter<"SaleItem"> | boolean
@@ -82598,9 +85381,11 @@ export namespace Prisma {
     size?: SortOrderInput | SortOrder
     quantity?: SortOrder
     unitPrice?: SortOrder
+    originalUnitPrice?: SortOrderInput | SortOrder
     total?: SortOrder
     discountAmount?: SortOrder
     discountPercent?: SortOrder
+    voucherDiscountAmount?: SortOrder
     taxAmount?: SortOrder
     taxRate?: SortOrder
     isTaxInclusive?: SortOrder
@@ -82621,9 +85406,11 @@ export namespace Prisma {
     size?: StringNullableWithAggregatesFilter<"SaleItem"> | string | null
     quantity?: IntWithAggregatesFilter<"SaleItem"> | number
     unitPrice?: DecimalWithAggregatesFilter<"SaleItem"> | Decimal | DecimalJsLike | number | string
+    originalUnitPrice?: DecimalNullableWithAggregatesFilter<"SaleItem"> | Decimal | DecimalJsLike | number | string | null
     total?: DecimalWithAggregatesFilter<"SaleItem"> | Decimal | DecimalJsLike | number | string
     discountAmount?: DecimalWithAggregatesFilter<"SaleItem"> | Decimal | DecimalJsLike | number | string
     discountPercent?: DecimalWithAggregatesFilter<"SaleItem"> | Decimal | DecimalJsLike | number | string
+    voucherDiscountAmount?: DecimalWithAggregatesFilter<"SaleItem"> | Decimal | DecimalJsLike | number | string
     taxAmount?: DecimalWithAggregatesFilter<"SaleItem"> | Decimal | DecimalJsLike | number | string
     taxRate?: DecimalWithAggregatesFilter<"SaleItem"> | Decimal | DecimalJsLike | number | string
     isTaxInclusive?: BoolWithAggregatesFilter<"SaleItem"> | boolean
@@ -86977,6 +89764,225 @@ export namespace Prisma {
     submittedAt?: DateTimeWithAggregatesFilter<"StaffDayClose"> | Date | string
   }
 
+  export type CustomerVoucherWhereInput = {
+    AND?: CustomerVoucherWhereInput | CustomerVoucherWhereInput[]
+    OR?: CustomerVoucherWhereInput[]
+    NOT?: CustomerVoucherWhereInput | CustomerVoucherWhereInput[]
+    id?: IntFilter<"CustomerVoucher"> | number
+    code?: StringFilter<"CustomerVoucher"> | string
+    name?: StringFilter<"CustomerVoucher"> | string
+    type?: StringFilter<"CustomerVoucher"> | string
+    value?: DecimalFilter<"CustomerVoucher"> | Decimal | DecimalJsLike | number | string
+    maximumDiscount?: DecimalNullableFilter<"CustomerVoucher"> | Decimal | DecimalJsLike | number | string | null
+    minimumPurchaseAmount?: DecimalFilter<"CustomerVoucher"> | Decimal | DecimalJsLike | number | string
+    issueDate?: DateTimeFilter<"CustomerVoucher"> | Date | string
+    expiryDate?: DateTimeNullableFilter<"CustomerVoucher"> | Date | string | null
+    status?: StringFilter<"CustomerVoucher"> | string
+    customerId?: IntNullableFilter<"CustomerVoucher"> | number | null
+    branchId?: IntNullableFilter<"CustomerVoucher"> | number | null
+    issuedSaleId?: IntNullableFilter<"CustomerVoucher"> | number | null
+    redeemedSaleId?: IntNullableFilter<"CustomerVoucher"> | number | null
+    redeemedAt?: DateTimeNullableFilter<"CustomerVoucher"> | Date | string | null
+    usageLimit?: IntFilter<"CustomerVoucher"> | number
+    usageCount?: IntFilter<"CustomerVoucher"> | number
+    description?: StringNullableFilter<"CustomerVoucher"> | string | null
+    createdBy?: IntNullableFilter<"CustomerVoucher"> | number | null
+    createdAt?: DateTimeFilter<"CustomerVoucher"> | Date | string
+    updatedAt?: DateTimeFilter<"CustomerVoucher"> | Date | string
+    customer?: XOR<CustomerNullableRelationFilter, CustomerWhereInput> | null
+    branch?: XOR<BranchNullableRelationFilter, BranchWhereInput> | null
+    issuedSale?: XOR<SaleNullableRelationFilter, SaleWhereInput> | null
+    redeemedSale?: XOR<SaleNullableRelationFilter, SaleWhereInput> | null
+    redemptions?: CustomerVoucherRedemptionListRelationFilter
+  }
+
+  export type CustomerVoucherOrderByWithRelationInput = {
+    id?: SortOrder
+    code?: SortOrder
+    name?: SortOrder
+    type?: SortOrder
+    value?: SortOrder
+    maximumDiscount?: SortOrderInput | SortOrder
+    minimumPurchaseAmount?: SortOrder
+    issueDate?: SortOrder
+    expiryDate?: SortOrderInput | SortOrder
+    status?: SortOrder
+    customerId?: SortOrderInput | SortOrder
+    branchId?: SortOrderInput | SortOrder
+    issuedSaleId?: SortOrderInput | SortOrder
+    redeemedSaleId?: SortOrderInput | SortOrder
+    redeemedAt?: SortOrderInput | SortOrder
+    usageLimit?: SortOrder
+    usageCount?: SortOrder
+    description?: SortOrderInput | SortOrder
+    createdBy?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    customer?: CustomerOrderByWithRelationInput
+    branch?: BranchOrderByWithRelationInput
+    issuedSale?: SaleOrderByWithRelationInput
+    redeemedSale?: SaleOrderByWithRelationInput
+    redemptions?: CustomerVoucherRedemptionOrderByRelationAggregateInput
+  }
+
+  export type CustomerVoucherWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    code?: string
+    AND?: CustomerVoucherWhereInput | CustomerVoucherWhereInput[]
+    OR?: CustomerVoucherWhereInput[]
+    NOT?: CustomerVoucherWhereInput | CustomerVoucherWhereInput[]
+    name?: StringFilter<"CustomerVoucher"> | string
+    type?: StringFilter<"CustomerVoucher"> | string
+    value?: DecimalFilter<"CustomerVoucher"> | Decimal | DecimalJsLike | number | string
+    maximumDiscount?: DecimalNullableFilter<"CustomerVoucher"> | Decimal | DecimalJsLike | number | string | null
+    minimumPurchaseAmount?: DecimalFilter<"CustomerVoucher"> | Decimal | DecimalJsLike | number | string
+    issueDate?: DateTimeFilter<"CustomerVoucher"> | Date | string
+    expiryDate?: DateTimeNullableFilter<"CustomerVoucher"> | Date | string | null
+    status?: StringFilter<"CustomerVoucher"> | string
+    customerId?: IntNullableFilter<"CustomerVoucher"> | number | null
+    branchId?: IntNullableFilter<"CustomerVoucher"> | number | null
+    issuedSaleId?: IntNullableFilter<"CustomerVoucher"> | number | null
+    redeemedSaleId?: IntNullableFilter<"CustomerVoucher"> | number | null
+    redeemedAt?: DateTimeNullableFilter<"CustomerVoucher"> | Date | string | null
+    usageLimit?: IntFilter<"CustomerVoucher"> | number
+    usageCount?: IntFilter<"CustomerVoucher"> | number
+    description?: StringNullableFilter<"CustomerVoucher"> | string | null
+    createdBy?: IntNullableFilter<"CustomerVoucher"> | number | null
+    createdAt?: DateTimeFilter<"CustomerVoucher"> | Date | string
+    updatedAt?: DateTimeFilter<"CustomerVoucher"> | Date | string
+    customer?: XOR<CustomerNullableRelationFilter, CustomerWhereInput> | null
+    branch?: XOR<BranchNullableRelationFilter, BranchWhereInput> | null
+    issuedSale?: XOR<SaleNullableRelationFilter, SaleWhereInput> | null
+    redeemedSale?: XOR<SaleNullableRelationFilter, SaleWhereInput> | null
+    redemptions?: CustomerVoucherRedemptionListRelationFilter
+  }, "id" | "code">
+
+  export type CustomerVoucherOrderByWithAggregationInput = {
+    id?: SortOrder
+    code?: SortOrder
+    name?: SortOrder
+    type?: SortOrder
+    value?: SortOrder
+    maximumDiscount?: SortOrderInput | SortOrder
+    minimumPurchaseAmount?: SortOrder
+    issueDate?: SortOrder
+    expiryDate?: SortOrderInput | SortOrder
+    status?: SortOrder
+    customerId?: SortOrderInput | SortOrder
+    branchId?: SortOrderInput | SortOrder
+    issuedSaleId?: SortOrderInput | SortOrder
+    redeemedSaleId?: SortOrderInput | SortOrder
+    redeemedAt?: SortOrderInput | SortOrder
+    usageLimit?: SortOrder
+    usageCount?: SortOrder
+    description?: SortOrderInput | SortOrder
+    createdBy?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: CustomerVoucherCountOrderByAggregateInput
+    _avg?: CustomerVoucherAvgOrderByAggregateInput
+    _max?: CustomerVoucherMaxOrderByAggregateInput
+    _min?: CustomerVoucherMinOrderByAggregateInput
+    _sum?: CustomerVoucherSumOrderByAggregateInput
+  }
+
+  export type CustomerVoucherScalarWhereWithAggregatesInput = {
+    AND?: CustomerVoucherScalarWhereWithAggregatesInput | CustomerVoucherScalarWhereWithAggregatesInput[]
+    OR?: CustomerVoucherScalarWhereWithAggregatesInput[]
+    NOT?: CustomerVoucherScalarWhereWithAggregatesInput | CustomerVoucherScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"CustomerVoucher"> | number
+    code?: StringWithAggregatesFilter<"CustomerVoucher"> | string
+    name?: StringWithAggregatesFilter<"CustomerVoucher"> | string
+    type?: StringWithAggregatesFilter<"CustomerVoucher"> | string
+    value?: DecimalWithAggregatesFilter<"CustomerVoucher"> | Decimal | DecimalJsLike | number | string
+    maximumDiscount?: DecimalNullableWithAggregatesFilter<"CustomerVoucher"> | Decimal | DecimalJsLike | number | string | null
+    minimumPurchaseAmount?: DecimalWithAggregatesFilter<"CustomerVoucher"> | Decimal | DecimalJsLike | number | string
+    issueDate?: DateTimeWithAggregatesFilter<"CustomerVoucher"> | Date | string
+    expiryDate?: DateTimeNullableWithAggregatesFilter<"CustomerVoucher"> | Date | string | null
+    status?: StringWithAggregatesFilter<"CustomerVoucher"> | string
+    customerId?: IntNullableWithAggregatesFilter<"CustomerVoucher"> | number | null
+    branchId?: IntNullableWithAggregatesFilter<"CustomerVoucher"> | number | null
+    issuedSaleId?: IntNullableWithAggregatesFilter<"CustomerVoucher"> | number | null
+    redeemedSaleId?: IntNullableWithAggregatesFilter<"CustomerVoucher"> | number | null
+    redeemedAt?: DateTimeNullableWithAggregatesFilter<"CustomerVoucher"> | Date | string | null
+    usageLimit?: IntWithAggregatesFilter<"CustomerVoucher"> | number
+    usageCount?: IntWithAggregatesFilter<"CustomerVoucher"> | number
+    description?: StringNullableWithAggregatesFilter<"CustomerVoucher"> | string | null
+    createdBy?: IntNullableWithAggregatesFilter<"CustomerVoucher"> | number | null
+    createdAt?: DateTimeWithAggregatesFilter<"CustomerVoucher"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"CustomerVoucher"> | Date | string
+  }
+
+  export type CustomerVoucherRedemptionWhereInput = {
+    AND?: CustomerVoucherRedemptionWhereInput | CustomerVoucherRedemptionWhereInput[]
+    OR?: CustomerVoucherRedemptionWhereInput[]
+    NOT?: CustomerVoucherRedemptionWhereInput | CustomerVoucherRedemptionWhereInput[]
+    id?: IntFilter<"CustomerVoucherRedemption"> | number
+    voucherId?: IntFilter<"CustomerVoucherRedemption"> | number
+    saleId?: IntFilter<"CustomerVoucherRedemption"> | number
+    customerId?: IntNullableFilter<"CustomerVoucherRedemption"> | number | null
+    branchId?: IntFilter<"CustomerVoucherRedemption"> | number
+    discountAmount?: DecimalFilter<"CustomerVoucherRedemption"> | Decimal | DecimalJsLike | number | string
+    redeemedAt?: DateTimeFilter<"CustomerVoucherRedemption"> | Date | string
+    voucher?: XOR<CustomerVoucherRelationFilter, CustomerVoucherWhereInput>
+    sale?: XOR<SaleRelationFilter, SaleWhereInput>
+  }
+
+  export type CustomerVoucherRedemptionOrderByWithRelationInput = {
+    id?: SortOrder
+    voucherId?: SortOrder
+    saleId?: SortOrder
+    customerId?: SortOrderInput | SortOrder
+    branchId?: SortOrder
+    discountAmount?: SortOrder
+    redeemedAt?: SortOrder
+    voucher?: CustomerVoucherOrderByWithRelationInput
+    sale?: SaleOrderByWithRelationInput
+  }
+
+  export type CustomerVoucherRedemptionWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    AND?: CustomerVoucherRedemptionWhereInput | CustomerVoucherRedemptionWhereInput[]
+    OR?: CustomerVoucherRedemptionWhereInput[]
+    NOT?: CustomerVoucherRedemptionWhereInput | CustomerVoucherRedemptionWhereInput[]
+    voucherId?: IntFilter<"CustomerVoucherRedemption"> | number
+    saleId?: IntFilter<"CustomerVoucherRedemption"> | number
+    customerId?: IntNullableFilter<"CustomerVoucherRedemption"> | number | null
+    branchId?: IntFilter<"CustomerVoucherRedemption"> | number
+    discountAmount?: DecimalFilter<"CustomerVoucherRedemption"> | Decimal | DecimalJsLike | number | string
+    redeemedAt?: DateTimeFilter<"CustomerVoucherRedemption"> | Date | string
+    voucher?: XOR<CustomerVoucherRelationFilter, CustomerVoucherWhereInput>
+    sale?: XOR<SaleRelationFilter, SaleWhereInput>
+  }, "id">
+
+  export type CustomerVoucherRedemptionOrderByWithAggregationInput = {
+    id?: SortOrder
+    voucherId?: SortOrder
+    saleId?: SortOrder
+    customerId?: SortOrderInput | SortOrder
+    branchId?: SortOrder
+    discountAmount?: SortOrder
+    redeemedAt?: SortOrder
+    _count?: CustomerVoucherRedemptionCountOrderByAggregateInput
+    _avg?: CustomerVoucherRedemptionAvgOrderByAggregateInput
+    _max?: CustomerVoucherRedemptionMaxOrderByAggregateInput
+    _min?: CustomerVoucherRedemptionMinOrderByAggregateInput
+    _sum?: CustomerVoucherRedemptionSumOrderByAggregateInput
+  }
+
+  export type CustomerVoucherRedemptionScalarWhereWithAggregatesInput = {
+    AND?: CustomerVoucherRedemptionScalarWhereWithAggregatesInput | CustomerVoucherRedemptionScalarWhereWithAggregatesInput[]
+    OR?: CustomerVoucherRedemptionScalarWhereWithAggregatesInput[]
+    NOT?: CustomerVoucherRedemptionScalarWhereWithAggregatesInput | CustomerVoucherRedemptionScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"CustomerVoucherRedemption"> | number
+    voucherId?: IntWithAggregatesFilter<"CustomerVoucherRedemption"> | number
+    saleId?: IntWithAggregatesFilter<"CustomerVoucherRedemption"> | number
+    customerId?: IntNullableWithAggregatesFilter<"CustomerVoucherRedemption"> | number | null
+    branchId?: IntWithAggregatesFilter<"CustomerVoucherRedemption"> | number
+    discountAmount?: DecimalWithAggregatesFilter<"CustomerVoucherRedemption"> | Decimal | DecimalJsLike | number | string
+    redeemedAt?: DateTimeWithAggregatesFilter<"CustomerVoucherRedemption"> | Date | string
+  }
+
   export type UserCreateInput = {
     username: string
     password: string
@@ -87255,6 +90261,7 @@ export namespace Prisma {
     leads?: LeadCreateNestedManyWithoutBranchInput
     users?: UserCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseCreateNestedManyWithoutBranchInput
+    customerVouchers?: CustomerVoucherCreateNestedManyWithoutBranchInput
   }
 
   export type BranchUncheckedCreateInput = {
@@ -87294,6 +90301,7 @@ export namespace Prisma {
     leads?: LeadUncheckedCreateNestedManyWithoutBranchInput
     users?: UserUncheckedCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseUncheckedCreateNestedManyWithoutBranchInput
+    customerVouchers?: CustomerVoucherUncheckedCreateNestedManyWithoutBranchInput
   }
 
   export type BranchUpdateInput = {
@@ -87332,6 +90340,7 @@ export namespace Prisma {
     leads?: LeadUpdateManyWithoutBranchNestedInput
     users?: UserUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUpdateManyWithoutBranchNestedInput
+    customerVouchers?: CustomerVoucherUpdateManyWithoutBranchNestedInput
   }
 
   export type BranchUncheckedUpdateInput = {
@@ -87371,6 +90380,7 @@ export namespace Prisma {
     leads?: LeadUncheckedUpdateManyWithoutBranchNestedInput
     users?: UserUncheckedUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUncheckedUpdateManyWithoutBranchNestedInput
+    customerVouchers?: CustomerVoucherUncheckedUpdateManyWithoutBranchNestedInput
   }
 
   export type BranchCreateManyInput = {
@@ -87690,6 +90700,7 @@ export namespace Prisma {
     quotations?: QuotationCreateNestedManyWithoutCustomerInput
     sales?: SaleCreateNestedManyWithoutCustomerInput
     tickets?: TicketCreateNestedManyWithoutCustomerInput
+    customerVouchers?: CustomerVoucherCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerUncheckedCreateInput = {
@@ -87718,6 +90729,7 @@ export namespace Prisma {
     quotations?: QuotationUncheckedCreateNestedManyWithoutCustomerInput
     sales?: SaleUncheckedCreateNestedManyWithoutCustomerInput
     tickets?: TicketUncheckedCreateNestedManyWithoutCustomerInput
+    customerVouchers?: CustomerVoucherUncheckedCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerUpdateInput = {
@@ -87745,6 +90757,7 @@ export namespace Prisma {
     quotations?: QuotationUpdateManyWithoutCustomerNestedInput
     sales?: SaleUpdateManyWithoutCustomerNestedInput
     tickets?: TicketUpdateManyWithoutCustomerNestedInput
+    customerVouchers?: CustomerVoucherUpdateManyWithoutCustomerNestedInput
   }
 
   export type CustomerUncheckedUpdateInput = {
@@ -87773,6 +90786,7 @@ export namespace Prisma {
     quotations?: QuotationUncheckedUpdateManyWithoutCustomerNestedInput
     sales?: SaleUncheckedUpdateManyWithoutCustomerNestedInput
     tickets?: TicketUncheckedUpdateManyWithoutCustomerNestedInput
+    customerVouchers?: CustomerVoucherUncheckedUpdateManyWithoutCustomerNestedInput
   }
 
   export type CustomerCreateManyInput = {
@@ -88853,6 +91867,8 @@ export namespace Prisma {
     description?: string | null
     deliveryCharge?: Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: boolean
+    voucherCode?: string | null
+    voucherDiscount?: Decimal | DecimalJsLike | number | string
     payments?: PaymentCreateNestedManyWithoutSaleInput
     branch: BranchCreateNestedOneWithoutSalesInput
     customer?: CustomerCreateNestedOneWithoutSalesInput
@@ -88862,6 +91878,9 @@ export namespace Prisma {
     terminal?: TerminalCreateNestedOneWithoutSalesInput
     items?: SaleItemCreateNestedManyWithoutSaleInput
     lead?: LeadCreateNestedOneWithoutSaleInput
+    customerVouchersIssued?: CustomerVoucherCreateNestedManyWithoutIssuedSaleInput
+    customerVouchersRedeemed?: CustomerVoucherCreateNestedManyWithoutRedeemedSaleInput
+    customerVoucherRedemptions?: CustomerVoucherRedemptionCreateNestedManyWithoutSaleInput
   }
 
   export type SaleUncheckedCreateInput = {
@@ -88908,9 +91927,14 @@ export namespace Prisma {
     description?: string | null
     deliveryCharge?: Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: boolean
+    voucherCode?: string | null
+    voucherDiscount?: Decimal | DecimalJsLike | number | string
     payments?: PaymentUncheckedCreateNestedManyWithoutSaleInput
     items?: SaleItemUncheckedCreateNestedManyWithoutSaleInput
     lead?: LeadUncheckedCreateNestedOneWithoutSaleInput
+    customerVouchersIssued?: CustomerVoucherUncheckedCreateNestedManyWithoutIssuedSaleInput
+    customerVouchersRedeemed?: CustomerVoucherUncheckedCreateNestedManyWithoutRedeemedSaleInput
+    customerVoucherRedemptions?: CustomerVoucherRedemptionUncheckedCreateNestedManyWithoutSaleInput
   }
 
   export type SaleUpdateInput = {
@@ -88950,6 +91974,8 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
+    voucherCode?: NullableStringFieldUpdateOperationsInput | string | null
+    voucherDiscount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     payments?: PaymentUpdateManyWithoutSaleNestedInput
     branch?: BranchUpdateOneRequiredWithoutSalesNestedInput
     customer?: CustomerUpdateOneWithoutSalesNestedInput
@@ -88959,6 +91985,9 @@ export namespace Prisma {
     terminal?: TerminalUpdateOneWithoutSalesNestedInput
     items?: SaleItemUpdateManyWithoutSaleNestedInput
     lead?: LeadUpdateOneWithoutSaleNestedInput
+    customerVouchersIssued?: CustomerVoucherUpdateManyWithoutIssuedSaleNestedInput
+    customerVouchersRedeemed?: CustomerVoucherUpdateManyWithoutRedeemedSaleNestedInput
+    customerVoucherRedemptions?: CustomerVoucherRedemptionUpdateManyWithoutSaleNestedInput
   }
 
   export type SaleUncheckedUpdateInput = {
@@ -89005,9 +92034,14 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
+    voucherCode?: NullableStringFieldUpdateOperationsInput | string | null
+    voucherDiscount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     payments?: PaymentUncheckedUpdateManyWithoutSaleNestedInput
     items?: SaleItemUncheckedUpdateManyWithoutSaleNestedInput
     lead?: LeadUncheckedUpdateOneWithoutSaleNestedInput
+    customerVouchersIssued?: CustomerVoucherUncheckedUpdateManyWithoutIssuedSaleNestedInput
+    customerVouchersRedeemed?: CustomerVoucherUncheckedUpdateManyWithoutRedeemedSaleNestedInput
+    customerVoucherRedemptions?: CustomerVoucherRedemptionUncheckedUpdateManyWithoutSaleNestedInput
   }
 
   export type SaleCreateManyInput = {
@@ -89054,6 +92088,8 @@ export namespace Prisma {
     description?: string | null
     deliveryCharge?: Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: boolean
+    voucherCode?: string | null
+    voucherDiscount?: Decimal | DecimalJsLike | number | string
   }
 
   export type SaleUpdateManyMutationInput = {
@@ -89093,6 +92129,8 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
+    voucherCode?: NullableStringFieldUpdateOperationsInput | string | null
+    voucherDiscount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
   }
 
   export type SaleUncheckedUpdateManyInput = {
@@ -89139,15 +92177,19 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
+    voucherCode?: NullableStringFieldUpdateOperationsInput | string | null
+    voucherDiscount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
   }
 
   export type SaleItemCreateInput = {
     size?: string | null
     quantity: number
     unitPrice: Decimal | DecimalJsLike | number | string
+    originalUnitPrice?: Decimal | DecimalJsLike | number | string | null
     total: Decimal | DecimalJsLike | number | string
     discountAmount?: Decimal | DecimalJsLike | number | string
     discountPercent?: Decimal | DecimalJsLike | number | string
+    voucherDiscountAmount?: Decimal | DecimalJsLike | number | string
     taxAmount?: Decimal | DecimalJsLike | number | string
     taxRate?: Decimal | DecimalJsLike | number | string
     isTaxInclusive?: boolean
@@ -89162,9 +92204,11 @@ export namespace Prisma {
     size?: string | null
     quantity: number
     unitPrice: Decimal | DecimalJsLike | number | string
+    originalUnitPrice?: Decimal | DecimalJsLike | number | string | null
     total: Decimal | DecimalJsLike | number | string
     discountAmount?: Decimal | DecimalJsLike | number | string
     discountPercent?: Decimal | DecimalJsLike | number | string
+    voucherDiscountAmount?: Decimal | DecimalJsLike | number | string
     taxAmount?: Decimal | DecimalJsLike | number | string
     taxRate?: Decimal | DecimalJsLike | number | string
     isTaxInclusive?: boolean
@@ -89174,9 +92218,11 @@ export namespace Prisma {
     size?: NullableStringFieldUpdateOperationsInput | string | null
     quantity?: IntFieldUpdateOperationsInput | number
     unitPrice?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    originalUnitPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     total?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     discountAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     discountPercent?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    voucherDiscountAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     taxAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     taxRate?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     isTaxInclusive?: BoolFieldUpdateOperationsInput | boolean
@@ -89191,9 +92237,11 @@ export namespace Prisma {
     size?: NullableStringFieldUpdateOperationsInput | string | null
     quantity?: IntFieldUpdateOperationsInput | number
     unitPrice?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    originalUnitPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     total?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     discountAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     discountPercent?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    voucherDiscountAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     taxAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     taxRate?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     isTaxInclusive?: BoolFieldUpdateOperationsInput | boolean
@@ -89206,9 +92254,11 @@ export namespace Prisma {
     size?: string | null
     quantity: number
     unitPrice: Decimal | DecimalJsLike | number | string
+    originalUnitPrice?: Decimal | DecimalJsLike | number | string | null
     total: Decimal | DecimalJsLike | number | string
     discountAmount?: Decimal | DecimalJsLike | number | string
     discountPercent?: Decimal | DecimalJsLike | number | string
+    voucherDiscountAmount?: Decimal | DecimalJsLike | number | string
     taxAmount?: Decimal | DecimalJsLike | number | string
     taxRate?: Decimal | DecimalJsLike | number | string
     isTaxInclusive?: boolean
@@ -89218,9 +92268,11 @@ export namespace Prisma {
     size?: NullableStringFieldUpdateOperationsInput | string | null
     quantity?: IntFieldUpdateOperationsInput | number
     unitPrice?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    originalUnitPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     total?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     discountAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     discountPercent?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    voucherDiscountAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     taxAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     taxRate?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     isTaxInclusive?: BoolFieldUpdateOperationsInput | boolean
@@ -89233,9 +92285,11 @@ export namespace Prisma {
     size?: NullableStringFieldUpdateOperationsInput | string | null
     quantity?: IntFieldUpdateOperationsInput | number
     unitPrice?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    originalUnitPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     total?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     discountAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     discountPercent?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    voucherDiscountAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     taxAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     taxRate?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     isTaxInclusive?: BoolFieldUpdateOperationsInput | boolean
@@ -93785,6 +96839,236 @@ export namespace Prisma {
     submittedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type CustomerVoucherCreateInput = {
+    code: string
+    name: string
+    type: string
+    value: Decimal | DecimalJsLike | number | string
+    maximumDiscount?: Decimal | DecimalJsLike | number | string | null
+    minimumPurchaseAmount?: Decimal | DecimalJsLike | number | string
+    issueDate?: Date | string
+    expiryDate?: Date | string | null
+    status?: string
+    redeemedAt?: Date | string | null
+    usageLimit?: number
+    usageCount?: number
+    description?: string | null
+    createdBy?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    customer?: CustomerCreateNestedOneWithoutCustomerVouchersInput
+    branch?: BranchCreateNestedOneWithoutCustomerVouchersInput
+    issuedSale?: SaleCreateNestedOneWithoutCustomerVouchersIssuedInput
+    redeemedSale?: SaleCreateNestedOneWithoutCustomerVouchersRedeemedInput
+    redemptions?: CustomerVoucherRedemptionCreateNestedManyWithoutVoucherInput
+  }
+
+  export type CustomerVoucherUncheckedCreateInput = {
+    id?: number
+    code: string
+    name: string
+    type: string
+    value: Decimal | DecimalJsLike | number | string
+    maximumDiscount?: Decimal | DecimalJsLike | number | string | null
+    minimumPurchaseAmount?: Decimal | DecimalJsLike | number | string
+    issueDate?: Date | string
+    expiryDate?: Date | string | null
+    status?: string
+    customerId?: number | null
+    branchId?: number | null
+    issuedSaleId?: number | null
+    redeemedSaleId?: number | null
+    redeemedAt?: Date | string | null
+    usageLimit?: number
+    usageCount?: number
+    description?: string | null
+    createdBy?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    redemptions?: CustomerVoucherRedemptionUncheckedCreateNestedManyWithoutVoucherInput
+  }
+
+  export type CustomerVoucherUpdateInput = {
+    code?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    value?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    maximumDiscount?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    minimumPurchaseAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    issueDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiryDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    redeemedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    usageLimit?: IntFieldUpdateOperationsInput | number
+    usageCount?: IntFieldUpdateOperationsInput | number
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    customer?: CustomerUpdateOneWithoutCustomerVouchersNestedInput
+    branch?: BranchUpdateOneWithoutCustomerVouchersNestedInput
+    issuedSale?: SaleUpdateOneWithoutCustomerVouchersIssuedNestedInput
+    redeemedSale?: SaleUpdateOneWithoutCustomerVouchersRedeemedNestedInput
+    redemptions?: CustomerVoucherRedemptionUpdateManyWithoutVoucherNestedInput
+  }
+
+  export type CustomerVoucherUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    code?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    value?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    maximumDiscount?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    minimumPurchaseAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    issueDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiryDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    customerId?: NullableIntFieldUpdateOperationsInput | number | null
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
+    issuedSaleId?: NullableIntFieldUpdateOperationsInput | number | null
+    redeemedSaleId?: NullableIntFieldUpdateOperationsInput | number | null
+    redeemedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    usageLimit?: IntFieldUpdateOperationsInput | number
+    usageCount?: IntFieldUpdateOperationsInput | number
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    redemptions?: CustomerVoucherRedemptionUncheckedUpdateManyWithoutVoucherNestedInput
+  }
+
+  export type CustomerVoucherCreateManyInput = {
+    id?: number
+    code: string
+    name: string
+    type: string
+    value: Decimal | DecimalJsLike | number | string
+    maximumDiscount?: Decimal | DecimalJsLike | number | string | null
+    minimumPurchaseAmount?: Decimal | DecimalJsLike | number | string
+    issueDate?: Date | string
+    expiryDate?: Date | string | null
+    status?: string
+    customerId?: number | null
+    branchId?: number | null
+    issuedSaleId?: number | null
+    redeemedSaleId?: number | null
+    redeemedAt?: Date | string | null
+    usageLimit?: number
+    usageCount?: number
+    description?: string | null
+    createdBy?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type CustomerVoucherUpdateManyMutationInput = {
+    code?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    value?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    maximumDiscount?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    minimumPurchaseAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    issueDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiryDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    redeemedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    usageLimit?: IntFieldUpdateOperationsInput | number
+    usageCount?: IntFieldUpdateOperationsInput | number
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type CustomerVoucherUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    code?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    value?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    maximumDiscount?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    minimumPurchaseAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    issueDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiryDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    customerId?: NullableIntFieldUpdateOperationsInput | number | null
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
+    issuedSaleId?: NullableIntFieldUpdateOperationsInput | number | null
+    redeemedSaleId?: NullableIntFieldUpdateOperationsInput | number | null
+    redeemedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    usageLimit?: IntFieldUpdateOperationsInput | number
+    usageCount?: IntFieldUpdateOperationsInput | number
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type CustomerVoucherRedemptionCreateInput = {
+    customerId?: number | null
+    branchId: number
+    discountAmount: Decimal | DecimalJsLike | number | string
+    redeemedAt?: Date | string
+    voucher: CustomerVoucherCreateNestedOneWithoutRedemptionsInput
+    sale: SaleCreateNestedOneWithoutCustomerVoucherRedemptionsInput
+  }
+
+  export type CustomerVoucherRedemptionUncheckedCreateInput = {
+    id?: number
+    voucherId: number
+    saleId: number
+    customerId?: number | null
+    branchId: number
+    discountAmount: Decimal | DecimalJsLike | number | string
+    redeemedAt?: Date | string
+  }
+
+  export type CustomerVoucherRedemptionUpdateInput = {
+    customerId?: NullableIntFieldUpdateOperationsInput | number | null
+    branchId?: IntFieldUpdateOperationsInput | number
+    discountAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    redeemedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    voucher?: CustomerVoucherUpdateOneRequiredWithoutRedemptionsNestedInput
+    sale?: SaleUpdateOneRequiredWithoutCustomerVoucherRedemptionsNestedInput
+  }
+
+  export type CustomerVoucherRedemptionUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    voucherId?: IntFieldUpdateOperationsInput | number
+    saleId?: IntFieldUpdateOperationsInput | number
+    customerId?: NullableIntFieldUpdateOperationsInput | number | null
+    branchId?: IntFieldUpdateOperationsInput | number
+    discountAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    redeemedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type CustomerVoucherRedemptionCreateManyInput = {
+    id?: number
+    voucherId: number
+    saleId: number
+    customerId?: number | null
+    branchId: number
+    discountAmount: Decimal | DecimalJsLike | number | string
+    redeemedAt?: Date | string
+  }
+
+  export type CustomerVoucherRedemptionUpdateManyMutationInput = {
+    customerId?: NullableIntFieldUpdateOperationsInput | number | null
+    branchId?: IntFieldUpdateOperationsInput | number
+    discountAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    redeemedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type CustomerVoucherRedemptionUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    voucherId?: IntFieldUpdateOperationsInput | number
+    saleId?: IntFieldUpdateOperationsInput | number
+    customerId?: NullableIntFieldUpdateOperationsInput | number | null
+    branchId?: IntFieldUpdateOperationsInput | number
+    discountAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    redeemedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type IntFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel>
     in?: number[] | ListIntFieldRefInput<$PrismaModel>
@@ -94373,6 +97657,12 @@ export namespace Prisma {
     none?: QuotationWhereInput
   }
 
+  export type CustomerVoucherListRelationFilter = {
+    every?: CustomerVoucherWhereInput
+    some?: CustomerVoucherWhereInput
+    none?: CustomerVoucherWhereInput
+  }
+
   export type CustomerOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
@@ -94402,6 +97692,10 @@ export namespace Prisma {
   }
 
   export type QuotationOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type CustomerVoucherOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -95439,6 +98733,16 @@ export namespace Prisma {
     isNot?: LeadWhereInput | null
   }
 
+  export type CustomerVoucherRedemptionListRelationFilter = {
+    every?: CustomerVoucherRedemptionWhereInput
+    some?: CustomerVoucherRedemptionWhereInput
+    none?: CustomerVoucherRedemptionWhereInput
+  }
+
+  export type CustomerVoucherRedemptionOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
   export type SaleBranchIdInvoiceNumberFinancialYearIdCompoundUniqueInput = {
     branchId: number
     invoiceNumber: string
@@ -95489,6 +98793,8 @@ export namespace Prisma {
     description?: SortOrder
     deliveryCharge?: SortOrder
     hasDeliveryCharge?: SortOrder
+    voucherCode?: SortOrder
+    voucherDiscount?: SortOrder
   }
 
   export type SaleAvgOrderByAggregateInput = {
@@ -95510,6 +98816,7 @@ export namespace Prisma {
     discount?: SortOrder
     advanceUsed?: SortOrder
     deliveryCharge?: SortOrder
+    voucherDiscount?: SortOrder
   }
 
   export type SaleMaxOrderByAggregateInput = {
@@ -95556,6 +98863,8 @@ export namespace Prisma {
     description?: SortOrder
     deliveryCharge?: SortOrder
     hasDeliveryCharge?: SortOrder
+    voucherCode?: SortOrder
+    voucherDiscount?: SortOrder
   }
 
   export type SaleMinOrderByAggregateInput = {
@@ -95602,6 +98911,8 @@ export namespace Prisma {
     description?: SortOrder
     deliveryCharge?: SortOrder
     hasDeliveryCharge?: SortOrder
+    voucherCode?: SortOrder
+    voucherDiscount?: SortOrder
   }
 
   export type SaleSumOrderByAggregateInput = {
@@ -95623,6 +98934,7 @@ export namespace Prisma {
     discount?: SortOrder
     advanceUsed?: SortOrder
     deliveryCharge?: SortOrder
+    voucherDiscount?: SortOrder
   }
 
   export type DateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -95667,9 +98979,11 @@ export namespace Prisma {
     size?: SortOrder
     quantity?: SortOrder
     unitPrice?: SortOrder
+    originalUnitPrice?: SortOrder
     total?: SortOrder
     discountAmount?: SortOrder
     discountPercent?: SortOrder
+    voucherDiscountAmount?: SortOrder
     taxAmount?: SortOrder
     taxRate?: SortOrder
     isTaxInclusive?: SortOrder
@@ -95681,9 +98995,11 @@ export namespace Prisma {
     productId?: SortOrder
     quantity?: SortOrder
     unitPrice?: SortOrder
+    originalUnitPrice?: SortOrder
     total?: SortOrder
     discountAmount?: SortOrder
     discountPercent?: SortOrder
+    voucherDiscountAmount?: SortOrder
     taxAmount?: SortOrder
     taxRate?: SortOrder
   }
@@ -95695,9 +99011,11 @@ export namespace Prisma {
     size?: SortOrder
     quantity?: SortOrder
     unitPrice?: SortOrder
+    originalUnitPrice?: SortOrder
     total?: SortOrder
     discountAmount?: SortOrder
     discountPercent?: SortOrder
+    voucherDiscountAmount?: SortOrder
     taxAmount?: SortOrder
     taxRate?: SortOrder
     isTaxInclusive?: SortOrder
@@ -95710,9 +99028,11 @@ export namespace Prisma {
     size?: SortOrder
     quantity?: SortOrder
     unitPrice?: SortOrder
+    originalUnitPrice?: SortOrder
     total?: SortOrder
     discountAmount?: SortOrder
     discountPercent?: SortOrder
+    voucherDiscountAmount?: SortOrder
     taxAmount?: SortOrder
     taxRate?: SortOrder
     isTaxInclusive?: SortOrder
@@ -95724,9 +99044,11 @@ export namespace Prisma {
     productId?: SortOrder
     quantity?: SortOrder
     unitPrice?: SortOrder
+    originalUnitPrice?: SortOrder
     total?: SortOrder
     discountAmount?: SortOrder
     discountPercent?: SortOrder
+    voucherDiscountAmount?: SortOrder
     taxAmount?: SortOrder
     taxRate?: SortOrder
   }
@@ -98669,6 +101991,159 @@ export namespace Prisma {
     cashDifference?: SortOrder
   }
 
+  export type CustomerVoucherCountOrderByAggregateInput = {
+    id?: SortOrder
+    code?: SortOrder
+    name?: SortOrder
+    type?: SortOrder
+    value?: SortOrder
+    maximumDiscount?: SortOrder
+    minimumPurchaseAmount?: SortOrder
+    issueDate?: SortOrder
+    expiryDate?: SortOrder
+    status?: SortOrder
+    customerId?: SortOrder
+    branchId?: SortOrder
+    issuedSaleId?: SortOrder
+    redeemedSaleId?: SortOrder
+    redeemedAt?: SortOrder
+    usageLimit?: SortOrder
+    usageCount?: SortOrder
+    description?: SortOrder
+    createdBy?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type CustomerVoucherAvgOrderByAggregateInput = {
+    id?: SortOrder
+    value?: SortOrder
+    maximumDiscount?: SortOrder
+    minimumPurchaseAmount?: SortOrder
+    customerId?: SortOrder
+    branchId?: SortOrder
+    issuedSaleId?: SortOrder
+    redeemedSaleId?: SortOrder
+    usageLimit?: SortOrder
+    usageCount?: SortOrder
+    createdBy?: SortOrder
+  }
+
+  export type CustomerVoucherMaxOrderByAggregateInput = {
+    id?: SortOrder
+    code?: SortOrder
+    name?: SortOrder
+    type?: SortOrder
+    value?: SortOrder
+    maximumDiscount?: SortOrder
+    minimumPurchaseAmount?: SortOrder
+    issueDate?: SortOrder
+    expiryDate?: SortOrder
+    status?: SortOrder
+    customerId?: SortOrder
+    branchId?: SortOrder
+    issuedSaleId?: SortOrder
+    redeemedSaleId?: SortOrder
+    redeemedAt?: SortOrder
+    usageLimit?: SortOrder
+    usageCount?: SortOrder
+    description?: SortOrder
+    createdBy?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type CustomerVoucherMinOrderByAggregateInput = {
+    id?: SortOrder
+    code?: SortOrder
+    name?: SortOrder
+    type?: SortOrder
+    value?: SortOrder
+    maximumDiscount?: SortOrder
+    minimumPurchaseAmount?: SortOrder
+    issueDate?: SortOrder
+    expiryDate?: SortOrder
+    status?: SortOrder
+    customerId?: SortOrder
+    branchId?: SortOrder
+    issuedSaleId?: SortOrder
+    redeemedSaleId?: SortOrder
+    redeemedAt?: SortOrder
+    usageLimit?: SortOrder
+    usageCount?: SortOrder
+    description?: SortOrder
+    createdBy?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type CustomerVoucherSumOrderByAggregateInput = {
+    id?: SortOrder
+    value?: SortOrder
+    maximumDiscount?: SortOrder
+    minimumPurchaseAmount?: SortOrder
+    customerId?: SortOrder
+    branchId?: SortOrder
+    issuedSaleId?: SortOrder
+    redeemedSaleId?: SortOrder
+    usageLimit?: SortOrder
+    usageCount?: SortOrder
+    createdBy?: SortOrder
+  }
+
+  export type CustomerVoucherRelationFilter = {
+    is?: CustomerVoucherWhereInput
+    isNot?: CustomerVoucherWhereInput
+  }
+
+  export type CustomerVoucherRedemptionCountOrderByAggregateInput = {
+    id?: SortOrder
+    voucherId?: SortOrder
+    saleId?: SortOrder
+    customerId?: SortOrder
+    branchId?: SortOrder
+    discountAmount?: SortOrder
+    redeemedAt?: SortOrder
+  }
+
+  export type CustomerVoucherRedemptionAvgOrderByAggregateInput = {
+    id?: SortOrder
+    voucherId?: SortOrder
+    saleId?: SortOrder
+    customerId?: SortOrder
+    branchId?: SortOrder
+    discountAmount?: SortOrder
+  }
+
+  export type CustomerVoucherRedemptionMaxOrderByAggregateInput = {
+    id?: SortOrder
+    voucherId?: SortOrder
+    saleId?: SortOrder
+    customerId?: SortOrder
+    branchId?: SortOrder
+    discountAmount?: SortOrder
+    redeemedAt?: SortOrder
+  }
+
+  export type CustomerVoucherRedemptionMinOrderByAggregateInput = {
+    id?: SortOrder
+    voucherId?: SortOrder
+    saleId?: SortOrder
+    customerId?: SortOrder
+    branchId?: SortOrder
+    discountAmount?: SortOrder
+    redeemedAt?: SortOrder
+  }
+
+  export type CustomerVoucherRedemptionSumOrderByAggregateInput = {
+    id?: SortOrder
+    voucherId?: SortOrder
+    saleId?: SortOrder
+    customerId?: SortOrder
+    branchId?: SortOrder
+    discountAmount?: SortOrder
+  }
+
   export type AttendanceCreateNestedManyWithoutUserInput = {
     create?: XOR<AttendanceCreateWithoutUserInput, AttendanceUncheckedCreateWithoutUserInput> | AttendanceCreateWithoutUserInput[] | AttendanceUncheckedCreateWithoutUserInput[]
     connectOrCreate?: AttendanceCreateOrConnectWithoutUserInput | AttendanceCreateOrConnectWithoutUserInput[]
@@ -100231,6 +103706,13 @@ export namespace Prisma {
     connect?: DayCloseWhereUniqueInput | DayCloseWhereUniqueInput[]
   }
 
+  export type CustomerVoucherCreateNestedManyWithoutBranchInput = {
+    create?: XOR<CustomerVoucherCreateWithoutBranchInput, CustomerVoucherUncheckedCreateWithoutBranchInput> | CustomerVoucherCreateWithoutBranchInput[] | CustomerVoucherUncheckedCreateWithoutBranchInput[]
+    connectOrCreate?: CustomerVoucherCreateOrConnectWithoutBranchInput | CustomerVoucherCreateOrConnectWithoutBranchInput[]
+    createMany?: CustomerVoucherCreateManyBranchInputEnvelope
+    connect?: CustomerVoucherWhereUniqueInput | CustomerVoucherWhereUniqueInput[]
+  }
+
   export type AttendanceUncheckedCreateNestedManyWithoutBranchInput = {
     create?: XOR<AttendanceCreateWithoutBranchInput, AttendanceUncheckedCreateWithoutBranchInput> | AttendanceCreateWithoutBranchInput[] | AttendanceUncheckedCreateWithoutBranchInput[]
     connectOrCreate?: AttendanceCreateOrConnectWithoutBranchInput | AttendanceCreateOrConnectWithoutBranchInput[]
@@ -100389,6 +103871,13 @@ export namespace Prisma {
     connectOrCreate?: DayCloseCreateOrConnectWithoutBranchInput | DayCloseCreateOrConnectWithoutBranchInput[]
     createMany?: DayCloseCreateManyBranchInputEnvelope
     connect?: DayCloseWhereUniqueInput | DayCloseWhereUniqueInput[]
+  }
+
+  export type CustomerVoucherUncheckedCreateNestedManyWithoutBranchInput = {
+    create?: XOR<CustomerVoucherCreateWithoutBranchInput, CustomerVoucherUncheckedCreateWithoutBranchInput> | CustomerVoucherCreateWithoutBranchInput[] | CustomerVoucherUncheckedCreateWithoutBranchInput[]
+    connectOrCreate?: CustomerVoucherCreateOrConnectWithoutBranchInput | CustomerVoucherCreateOrConnectWithoutBranchInput[]
+    createMany?: CustomerVoucherCreateManyBranchInputEnvelope
+    connect?: CustomerVoucherWhereUniqueInput | CustomerVoucherWhereUniqueInput[]
   }
 
   export type AttendanceUpdateManyWithoutBranchNestedInput = {
@@ -100709,6 +104198,20 @@ export namespace Prisma {
     deleteMany?: DayCloseScalarWhereInput | DayCloseScalarWhereInput[]
   }
 
+  export type CustomerVoucherUpdateManyWithoutBranchNestedInput = {
+    create?: XOR<CustomerVoucherCreateWithoutBranchInput, CustomerVoucherUncheckedCreateWithoutBranchInput> | CustomerVoucherCreateWithoutBranchInput[] | CustomerVoucherUncheckedCreateWithoutBranchInput[]
+    connectOrCreate?: CustomerVoucherCreateOrConnectWithoutBranchInput | CustomerVoucherCreateOrConnectWithoutBranchInput[]
+    upsert?: CustomerVoucherUpsertWithWhereUniqueWithoutBranchInput | CustomerVoucherUpsertWithWhereUniqueWithoutBranchInput[]
+    createMany?: CustomerVoucherCreateManyBranchInputEnvelope
+    set?: CustomerVoucherWhereUniqueInput | CustomerVoucherWhereUniqueInput[]
+    disconnect?: CustomerVoucherWhereUniqueInput | CustomerVoucherWhereUniqueInput[]
+    delete?: CustomerVoucherWhereUniqueInput | CustomerVoucherWhereUniqueInput[]
+    connect?: CustomerVoucherWhereUniqueInput | CustomerVoucherWhereUniqueInput[]
+    update?: CustomerVoucherUpdateWithWhereUniqueWithoutBranchInput | CustomerVoucherUpdateWithWhereUniqueWithoutBranchInput[]
+    updateMany?: CustomerVoucherUpdateManyWithWhereWithoutBranchInput | CustomerVoucherUpdateManyWithWhereWithoutBranchInput[]
+    deleteMany?: CustomerVoucherScalarWhereInput | CustomerVoucherScalarWhereInput[]
+  }
+
   export type AttendanceUncheckedUpdateManyWithoutBranchNestedInput = {
     create?: XOR<AttendanceCreateWithoutBranchInput, AttendanceUncheckedCreateWithoutBranchInput> | AttendanceCreateWithoutBranchInput[] | AttendanceUncheckedCreateWithoutBranchInput[]
     connectOrCreate?: AttendanceCreateOrConnectWithoutBranchInput | AttendanceCreateOrConnectWithoutBranchInput[]
@@ -101027,6 +104530,20 @@ export namespace Prisma {
     deleteMany?: DayCloseScalarWhereInput | DayCloseScalarWhereInput[]
   }
 
+  export type CustomerVoucherUncheckedUpdateManyWithoutBranchNestedInput = {
+    create?: XOR<CustomerVoucherCreateWithoutBranchInput, CustomerVoucherUncheckedCreateWithoutBranchInput> | CustomerVoucherCreateWithoutBranchInput[] | CustomerVoucherUncheckedCreateWithoutBranchInput[]
+    connectOrCreate?: CustomerVoucherCreateOrConnectWithoutBranchInput | CustomerVoucherCreateOrConnectWithoutBranchInput[]
+    upsert?: CustomerVoucherUpsertWithWhereUniqueWithoutBranchInput | CustomerVoucherUpsertWithWhereUniqueWithoutBranchInput[]
+    createMany?: CustomerVoucherCreateManyBranchInputEnvelope
+    set?: CustomerVoucherWhereUniqueInput | CustomerVoucherWhereUniqueInput[]
+    disconnect?: CustomerVoucherWhereUniqueInput | CustomerVoucherWhereUniqueInput[]
+    delete?: CustomerVoucherWhereUniqueInput | CustomerVoucherWhereUniqueInput[]
+    connect?: CustomerVoucherWhereUniqueInput | CustomerVoucherWhereUniqueInput[]
+    update?: CustomerVoucherUpdateWithWhereUniqueWithoutBranchInput | CustomerVoucherUpdateWithWhereUniqueWithoutBranchInput[]
+    updateMany?: CustomerVoucherUpdateManyWithWhereWithoutBranchInput | CustomerVoucherUpdateManyWithWhereWithoutBranchInput[]
+    deleteMany?: CustomerVoucherScalarWhereInput | CustomerVoucherScalarWhereInput[]
+  }
+
   export type BankCreateNestedOneWithoutCompanyProfilesInput = {
     create?: XOR<BankCreateWithoutCompanyProfilesInput, BankUncheckedCreateWithoutCompanyProfilesInput>
     connectOrCreate?: BankCreateOrConnectWithoutCompanyProfilesInput
@@ -101097,6 +104614,13 @@ export namespace Prisma {
     connect?: TicketWhereUniqueInput | TicketWhereUniqueInput[]
   }
 
+  export type CustomerVoucherCreateNestedManyWithoutCustomerInput = {
+    create?: XOR<CustomerVoucherCreateWithoutCustomerInput, CustomerVoucherUncheckedCreateWithoutCustomerInput> | CustomerVoucherCreateWithoutCustomerInput[] | CustomerVoucherUncheckedCreateWithoutCustomerInput[]
+    connectOrCreate?: CustomerVoucherCreateOrConnectWithoutCustomerInput | CustomerVoucherCreateOrConnectWithoutCustomerInput[]
+    createMany?: CustomerVoucherCreateManyCustomerInputEnvelope
+    connect?: CustomerVoucherWhereUniqueInput | CustomerVoucherWhereUniqueInput[]
+  }
+
   export type AdvanceUncheckedCreateNestedOneWithoutCustomerInput = {
     create?: XOR<AdvanceCreateWithoutCustomerInput, AdvanceUncheckedCreateWithoutCustomerInput>
     connectOrCreate?: AdvanceCreateOrConnectWithoutCustomerInput
@@ -101143,6 +104667,13 @@ export namespace Prisma {
     connectOrCreate?: TicketCreateOrConnectWithoutCustomerInput | TicketCreateOrConnectWithoutCustomerInput[]
     createMany?: TicketCreateManyCustomerInputEnvelope
     connect?: TicketWhereUniqueInput | TicketWhereUniqueInput[]
+  }
+
+  export type CustomerVoucherUncheckedCreateNestedManyWithoutCustomerInput = {
+    create?: XOR<CustomerVoucherCreateWithoutCustomerInput, CustomerVoucherUncheckedCreateWithoutCustomerInput> | CustomerVoucherCreateWithoutCustomerInput[] | CustomerVoucherUncheckedCreateWithoutCustomerInput[]
+    connectOrCreate?: CustomerVoucherCreateOrConnectWithoutCustomerInput | CustomerVoucherCreateOrConnectWithoutCustomerInput[]
+    createMany?: CustomerVoucherCreateManyCustomerInputEnvelope
+    connect?: CustomerVoucherWhereUniqueInput | CustomerVoucherWhereUniqueInput[]
   }
 
   export type AdvanceUpdateOneWithoutCustomerNestedInput = {
@@ -101249,6 +104780,20 @@ export namespace Prisma {
     deleteMany?: TicketScalarWhereInput | TicketScalarWhereInput[]
   }
 
+  export type CustomerVoucherUpdateManyWithoutCustomerNestedInput = {
+    create?: XOR<CustomerVoucherCreateWithoutCustomerInput, CustomerVoucherUncheckedCreateWithoutCustomerInput> | CustomerVoucherCreateWithoutCustomerInput[] | CustomerVoucherUncheckedCreateWithoutCustomerInput[]
+    connectOrCreate?: CustomerVoucherCreateOrConnectWithoutCustomerInput | CustomerVoucherCreateOrConnectWithoutCustomerInput[]
+    upsert?: CustomerVoucherUpsertWithWhereUniqueWithoutCustomerInput | CustomerVoucherUpsertWithWhereUniqueWithoutCustomerInput[]
+    createMany?: CustomerVoucherCreateManyCustomerInputEnvelope
+    set?: CustomerVoucherWhereUniqueInput | CustomerVoucherWhereUniqueInput[]
+    disconnect?: CustomerVoucherWhereUniqueInput | CustomerVoucherWhereUniqueInput[]
+    delete?: CustomerVoucherWhereUniqueInput | CustomerVoucherWhereUniqueInput[]
+    connect?: CustomerVoucherWhereUniqueInput | CustomerVoucherWhereUniqueInput[]
+    update?: CustomerVoucherUpdateWithWhereUniqueWithoutCustomerInput | CustomerVoucherUpdateWithWhereUniqueWithoutCustomerInput[]
+    updateMany?: CustomerVoucherUpdateManyWithWhereWithoutCustomerInput | CustomerVoucherUpdateManyWithWhereWithoutCustomerInput[]
+    deleteMany?: CustomerVoucherScalarWhereInput | CustomerVoucherScalarWhereInput[]
+  }
+
   export type AdvanceUncheckedUpdateOneWithoutCustomerNestedInput = {
     create?: XOR<AdvanceCreateWithoutCustomerInput, AdvanceUncheckedCreateWithoutCustomerInput>
     connectOrCreate?: AdvanceCreateOrConnectWithoutCustomerInput
@@ -101341,6 +104886,20 @@ export namespace Prisma {
     update?: TicketUpdateWithWhereUniqueWithoutCustomerInput | TicketUpdateWithWhereUniqueWithoutCustomerInput[]
     updateMany?: TicketUpdateManyWithWhereWithoutCustomerInput | TicketUpdateManyWithWhereWithoutCustomerInput[]
     deleteMany?: TicketScalarWhereInput | TicketScalarWhereInput[]
+  }
+
+  export type CustomerVoucherUncheckedUpdateManyWithoutCustomerNestedInput = {
+    create?: XOR<CustomerVoucherCreateWithoutCustomerInput, CustomerVoucherUncheckedCreateWithoutCustomerInput> | CustomerVoucherCreateWithoutCustomerInput[] | CustomerVoucherUncheckedCreateWithoutCustomerInput[]
+    connectOrCreate?: CustomerVoucherCreateOrConnectWithoutCustomerInput | CustomerVoucherCreateOrConnectWithoutCustomerInput[]
+    upsert?: CustomerVoucherUpsertWithWhereUniqueWithoutCustomerInput | CustomerVoucherUpsertWithWhereUniqueWithoutCustomerInput[]
+    createMany?: CustomerVoucherCreateManyCustomerInputEnvelope
+    set?: CustomerVoucherWhereUniqueInput | CustomerVoucherWhereUniqueInput[]
+    disconnect?: CustomerVoucherWhereUniqueInput | CustomerVoucherWhereUniqueInput[]
+    delete?: CustomerVoucherWhereUniqueInput | CustomerVoucherWhereUniqueInput[]
+    connect?: CustomerVoucherWhereUniqueInput | CustomerVoucherWhereUniqueInput[]
+    update?: CustomerVoucherUpdateWithWhereUniqueWithoutCustomerInput | CustomerVoucherUpdateWithWhereUniqueWithoutCustomerInput[]
+    updateMany?: CustomerVoucherUpdateManyWithWhereWithoutCustomerInput | CustomerVoucherUpdateManyWithWhereWithoutCustomerInput[]
+    deleteMany?: CustomerVoucherScalarWhereInput | CustomerVoucherScalarWhereInput[]
   }
 
   export type CustomerCreateNestedOneWithoutAdvancesInput = {
@@ -102261,6 +105820,27 @@ export namespace Prisma {
     connect?: LeadWhereUniqueInput
   }
 
+  export type CustomerVoucherCreateNestedManyWithoutIssuedSaleInput = {
+    create?: XOR<CustomerVoucherCreateWithoutIssuedSaleInput, CustomerVoucherUncheckedCreateWithoutIssuedSaleInput> | CustomerVoucherCreateWithoutIssuedSaleInput[] | CustomerVoucherUncheckedCreateWithoutIssuedSaleInput[]
+    connectOrCreate?: CustomerVoucherCreateOrConnectWithoutIssuedSaleInput | CustomerVoucherCreateOrConnectWithoutIssuedSaleInput[]
+    createMany?: CustomerVoucherCreateManyIssuedSaleInputEnvelope
+    connect?: CustomerVoucherWhereUniqueInput | CustomerVoucherWhereUniqueInput[]
+  }
+
+  export type CustomerVoucherCreateNestedManyWithoutRedeemedSaleInput = {
+    create?: XOR<CustomerVoucherCreateWithoutRedeemedSaleInput, CustomerVoucherUncheckedCreateWithoutRedeemedSaleInput> | CustomerVoucherCreateWithoutRedeemedSaleInput[] | CustomerVoucherUncheckedCreateWithoutRedeemedSaleInput[]
+    connectOrCreate?: CustomerVoucherCreateOrConnectWithoutRedeemedSaleInput | CustomerVoucherCreateOrConnectWithoutRedeemedSaleInput[]
+    createMany?: CustomerVoucherCreateManyRedeemedSaleInputEnvelope
+    connect?: CustomerVoucherWhereUniqueInput | CustomerVoucherWhereUniqueInput[]
+  }
+
+  export type CustomerVoucherRedemptionCreateNestedManyWithoutSaleInput = {
+    create?: XOR<CustomerVoucherRedemptionCreateWithoutSaleInput, CustomerVoucherRedemptionUncheckedCreateWithoutSaleInput> | CustomerVoucherRedemptionCreateWithoutSaleInput[] | CustomerVoucherRedemptionUncheckedCreateWithoutSaleInput[]
+    connectOrCreate?: CustomerVoucherRedemptionCreateOrConnectWithoutSaleInput | CustomerVoucherRedemptionCreateOrConnectWithoutSaleInput[]
+    createMany?: CustomerVoucherRedemptionCreateManySaleInputEnvelope
+    connect?: CustomerVoucherRedemptionWhereUniqueInput | CustomerVoucherRedemptionWhereUniqueInput[]
+  }
+
   export type PaymentUncheckedCreateNestedManyWithoutSaleInput = {
     create?: XOR<PaymentCreateWithoutSaleInput, PaymentUncheckedCreateWithoutSaleInput> | PaymentCreateWithoutSaleInput[] | PaymentUncheckedCreateWithoutSaleInput[]
     connectOrCreate?: PaymentCreateOrConnectWithoutSaleInput | PaymentCreateOrConnectWithoutSaleInput[]
@@ -102279,6 +105859,27 @@ export namespace Prisma {
     create?: XOR<LeadCreateWithoutSaleInput, LeadUncheckedCreateWithoutSaleInput>
     connectOrCreate?: LeadCreateOrConnectWithoutSaleInput
     connect?: LeadWhereUniqueInput
+  }
+
+  export type CustomerVoucherUncheckedCreateNestedManyWithoutIssuedSaleInput = {
+    create?: XOR<CustomerVoucherCreateWithoutIssuedSaleInput, CustomerVoucherUncheckedCreateWithoutIssuedSaleInput> | CustomerVoucherCreateWithoutIssuedSaleInput[] | CustomerVoucherUncheckedCreateWithoutIssuedSaleInput[]
+    connectOrCreate?: CustomerVoucherCreateOrConnectWithoutIssuedSaleInput | CustomerVoucherCreateOrConnectWithoutIssuedSaleInput[]
+    createMany?: CustomerVoucherCreateManyIssuedSaleInputEnvelope
+    connect?: CustomerVoucherWhereUniqueInput | CustomerVoucherWhereUniqueInput[]
+  }
+
+  export type CustomerVoucherUncheckedCreateNestedManyWithoutRedeemedSaleInput = {
+    create?: XOR<CustomerVoucherCreateWithoutRedeemedSaleInput, CustomerVoucherUncheckedCreateWithoutRedeemedSaleInput> | CustomerVoucherCreateWithoutRedeemedSaleInput[] | CustomerVoucherUncheckedCreateWithoutRedeemedSaleInput[]
+    connectOrCreate?: CustomerVoucherCreateOrConnectWithoutRedeemedSaleInput | CustomerVoucherCreateOrConnectWithoutRedeemedSaleInput[]
+    createMany?: CustomerVoucherCreateManyRedeemedSaleInputEnvelope
+    connect?: CustomerVoucherWhereUniqueInput | CustomerVoucherWhereUniqueInput[]
+  }
+
+  export type CustomerVoucherRedemptionUncheckedCreateNestedManyWithoutSaleInput = {
+    create?: XOR<CustomerVoucherRedemptionCreateWithoutSaleInput, CustomerVoucherRedemptionUncheckedCreateWithoutSaleInput> | CustomerVoucherRedemptionCreateWithoutSaleInput[] | CustomerVoucherRedemptionUncheckedCreateWithoutSaleInput[]
+    connectOrCreate?: CustomerVoucherRedemptionCreateOrConnectWithoutSaleInput | CustomerVoucherRedemptionCreateOrConnectWithoutSaleInput[]
+    createMany?: CustomerVoucherRedemptionCreateManySaleInputEnvelope
+    connect?: CustomerVoucherRedemptionWhereUniqueInput | CustomerVoucherRedemptionWhereUniqueInput[]
   }
 
   export type NullableDateTimeFieldUpdateOperationsInput = {
@@ -102389,6 +105990,48 @@ export namespace Prisma {
     update?: XOR<XOR<LeadUpdateToOneWithWhereWithoutSaleInput, LeadUpdateWithoutSaleInput>, LeadUncheckedUpdateWithoutSaleInput>
   }
 
+  export type CustomerVoucherUpdateManyWithoutIssuedSaleNestedInput = {
+    create?: XOR<CustomerVoucherCreateWithoutIssuedSaleInput, CustomerVoucherUncheckedCreateWithoutIssuedSaleInput> | CustomerVoucherCreateWithoutIssuedSaleInput[] | CustomerVoucherUncheckedCreateWithoutIssuedSaleInput[]
+    connectOrCreate?: CustomerVoucherCreateOrConnectWithoutIssuedSaleInput | CustomerVoucherCreateOrConnectWithoutIssuedSaleInput[]
+    upsert?: CustomerVoucherUpsertWithWhereUniqueWithoutIssuedSaleInput | CustomerVoucherUpsertWithWhereUniqueWithoutIssuedSaleInput[]
+    createMany?: CustomerVoucherCreateManyIssuedSaleInputEnvelope
+    set?: CustomerVoucherWhereUniqueInput | CustomerVoucherWhereUniqueInput[]
+    disconnect?: CustomerVoucherWhereUniqueInput | CustomerVoucherWhereUniqueInput[]
+    delete?: CustomerVoucherWhereUniqueInput | CustomerVoucherWhereUniqueInput[]
+    connect?: CustomerVoucherWhereUniqueInput | CustomerVoucherWhereUniqueInput[]
+    update?: CustomerVoucherUpdateWithWhereUniqueWithoutIssuedSaleInput | CustomerVoucherUpdateWithWhereUniqueWithoutIssuedSaleInput[]
+    updateMany?: CustomerVoucherUpdateManyWithWhereWithoutIssuedSaleInput | CustomerVoucherUpdateManyWithWhereWithoutIssuedSaleInput[]
+    deleteMany?: CustomerVoucherScalarWhereInput | CustomerVoucherScalarWhereInput[]
+  }
+
+  export type CustomerVoucherUpdateManyWithoutRedeemedSaleNestedInput = {
+    create?: XOR<CustomerVoucherCreateWithoutRedeemedSaleInput, CustomerVoucherUncheckedCreateWithoutRedeemedSaleInput> | CustomerVoucherCreateWithoutRedeemedSaleInput[] | CustomerVoucherUncheckedCreateWithoutRedeemedSaleInput[]
+    connectOrCreate?: CustomerVoucherCreateOrConnectWithoutRedeemedSaleInput | CustomerVoucherCreateOrConnectWithoutRedeemedSaleInput[]
+    upsert?: CustomerVoucherUpsertWithWhereUniqueWithoutRedeemedSaleInput | CustomerVoucherUpsertWithWhereUniqueWithoutRedeemedSaleInput[]
+    createMany?: CustomerVoucherCreateManyRedeemedSaleInputEnvelope
+    set?: CustomerVoucherWhereUniqueInput | CustomerVoucherWhereUniqueInput[]
+    disconnect?: CustomerVoucherWhereUniqueInput | CustomerVoucherWhereUniqueInput[]
+    delete?: CustomerVoucherWhereUniqueInput | CustomerVoucherWhereUniqueInput[]
+    connect?: CustomerVoucherWhereUniqueInput | CustomerVoucherWhereUniqueInput[]
+    update?: CustomerVoucherUpdateWithWhereUniqueWithoutRedeemedSaleInput | CustomerVoucherUpdateWithWhereUniqueWithoutRedeemedSaleInput[]
+    updateMany?: CustomerVoucherUpdateManyWithWhereWithoutRedeemedSaleInput | CustomerVoucherUpdateManyWithWhereWithoutRedeemedSaleInput[]
+    deleteMany?: CustomerVoucherScalarWhereInput | CustomerVoucherScalarWhereInput[]
+  }
+
+  export type CustomerVoucherRedemptionUpdateManyWithoutSaleNestedInput = {
+    create?: XOR<CustomerVoucherRedemptionCreateWithoutSaleInput, CustomerVoucherRedemptionUncheckedCreateWithoutSaleInput> | CustomerVoucherRedemptionCreateWithoutSaleInput[] | CustomerVoucherRedemptionUncheckedCreateWithoutSaleInput[]
+    connectOrCreate?: CustomerVoucherRedemptionCreateOrConnectWithoutSaleInput | CustomerVoucherRedemptionCreateOrConnectWithoutSaleInput[]
+    upsert?: CustomerVoucherRedemptionUpsertWithWhereUniqueWithoutSaleInput | CustomerVoucherRedemptionUpsertWithWhereUniqueWithoutSaleInput[]
+    createMany?: CustomerVoucherRedemptionCreateManySaleInputEnvelope
+    set?: CustomerVoucherRedemptionWhereUniqueInput | CustomerVoucherRedemptionWhereUniqueInput[]
+    disconnect?: CustomerVoucherRedemptionWhereUniqueInput | CustomerVoucherRedemptionWhereUniqueInput[]
+    delete?: CustomerVoucherRedemptionWhereUniqueInput | CustomerVoucherRedemptionWhereUniqueInput[]
+    connect?: CustomerVoucherRedemptionWhereUniqueInput | CustomerVoucherRedemptionWhereUniqueInput[]
+    update?: CustomerVoucherRedemptionUpdateWithWhereUniqueWithoutSaleInput | CustomerVoucherRedemptionUpdateWithWhereUniqueWithoutSaleInput[]
+    updateMany?: CustomerVoucherRedemptionUpdateManyWithWhereWithoutSaleInput | CustomerVoucherRedemptionUpdateManyWithWhereWithoutSaleInput[]
+    deleteMany?: CustomerVoucherRedemptionScalarWhereInput | CustomerVoucherRedemptionScalarWhereInput[]
+  }
+
   export type PaymentUncheckedUpdateManyWithoutSaleNestedInput = {
     create?: XOR<PaymentCreateWithoutSaleInput, PaymentUncheckedCreateWithoutSaleInput> | PaymentCreateWithoutSaleInput[] | PaymentUncheckedCreateWithoutSaleInput[]
     connectOrCreate?: PaymentCreateOrConnectWithoutSaleInput | PaymentCreateOrConnectWithoutSaleInput[]
@@ -102425,6 +106068,48 @@ export namespace Prisma {
     delete?: LeadWhereInput | boolean
     connect?: LeadWhereUniqueInput
     update?: XOR<XOR<LeadUpdateToOneWithWhereWithoutSaleInput, LeadUpdateWithoutSaleInput>, LeadUncheckedUpdateWithoutSaleInput>
+  }
+
+  export type CustomerVoucherUncheckedUpdateManyWithoutIssuedSaleNestedInput = {
+    create?: XOR<CustomerVoucherCreateWithoutIssuedSaleInput, CustomerVoucherUncheckedCreateWithoutIssuedSaleInput> | CustomerVoucherCreateWithoutIssuedSaleInput[] | CustomerVoucherUncheckedCreateWithoutIssuedSaleInput[]
+    connectOrCreate?: CustomerVoucherCreateOrConnectWithoutIssuedSaleInput | CustomerVoucherCreateOrConnectWithoutIssuedSaleInput[]
+    upsert?: CustomerVoucherUpsertWithWhereUniqueWithoutIssuedSaleInput | CustomerVoucherUpsertWithWhereUniqueWithoutIssuedSaleInput[]
+    createMany?: CustomerVoucherCreateManyIssuedSaleInputEnvelope
+    set?: CustomerVoucherWhereUniqueInput | CustomerVoucherWhereUniqueInput[]
+    disconnect?: CustomerVoucherWhereUniqueInput | CustomerVoucherWhereUniqueInput[]
+    delete?: CustomerVoucherWhereUniqueInput | CustomerVoucherWhereUniqueInput[]
+    connect?: CustomerVoucherWhereUniqueInput | CustomerVoucherWhereUniqueInput[]
+    update?: CustomerVoucherUpdateWithWhereUniqueWithoutIssuedSaleInput | CustomerVoucherUpdateWithWhereUniqueWithoutIssuedSaleInput[]
+    updateMany?: CustomerVoucherUpdateManyWithWhereWithoutIssuedSaleInput | CustomerVoucherUpdateManyWithWhereWithoutIssuedSaleInput[]
+    deleteMany?: CustomerVoucherScalarWhereInput | CustomerVoucherScalarWhereInput[]
+  }
+
+  export type CustomerVoucherUncheckedUpdateManyWithoutRedeemedSaleNestedInput = {
+    create?: XOR<CustomerVoucherCreateWithoutRedeemedSaleInput, CustomerVoucherUncheckedCreateWithoutRedeemedSaleInput> | CustomerVoucherCreateWithoutRedeemedSaleInput[] | CustomerVoucherUncheckedCreateWithoutRedeemedSaleInput[]
+    connectOrCreate?: CustomerVoucherCreateOrConnectWithoutRedeemedSaleInput | CustomerVoucherCreateOrConnectWithoutRedeemedSaleInput[]
+    upsert?: CustomerVoucherUpsertWithWhereUniqueWithoutRedeemedSaleInput | CustomerVoucherUpsertWithWhereUniqueWithoutRedeemedSaleInput[]
+    createMany?: CustomerVoucherCreateManyRedeemedSaleInputEnvelope
+    set?: CustomerVoucherWhereUniqueInput | CustomerVoucherWhereUniqueInput[]
+    disconnect?: CustomerVoucherWhereUniqueInput | CustomerVoucherWhereUniqueInput[]
+    delete?: CustomerVoucherWhereUniqueInput | CustomerVoucherWhereUniqueInput[]
+    connect?: CustomerVoucherWhereUniqueInput | CustomerVoucherWhereUniqueInput[]
+    update?: CustomerVoucherUpdateWithWhereUniqueWithoutRedeemedSaleInput | CustomerVoucherUpdateWithWhereUniqueWithoutRedeemedSaleInput[]
+    updateMany?: CustomerVoucherUpdateManyWithWhereWithoutRedeemedSaleInput | CustomerVoucherUpdateManyWithWhereWithoutRedeemedSaleInput[]
+    deleteMany?: CustomerVoucherScalarWhereInput | CustomerVoucherScalarWhereInput[]
+  }
+
+  export type CustomerVoucherRedemptionUncheckedUpdateManyWithoutSaleNestedInput = {
+    create?: XOR<CustomerVoucherRedemptionCreateWithoutSaleInput, CustomerVoucherRedemptionUncheckedCreateWithoutSaleInput> | CustomerVoucherRedemptionCreateWithoutSaleInput[] | CustomerVoucherRedemptionUncheckedCreateWithoutSaleInput[]
+    connectOrCreate?: CustomerVoucherRedemptionCreateOrConnectWithoutSaleInput | CustomerVoucherRedemptionCreateOrConnectWithoutSaleInput[]
+    upsert?: CustomerVoucherRedemptionUpsertWithWhereUniqueWithoutSaleInput | CustomerVoucherRedemptionUpsertWithWhereUniqueWithoutSaleInput[]
+    createMany?: CustomerVoucherRedemptionCreateManySaleInputEnvelope
+    set?: CustomerVoucherRedemptionWhereUniqueInput | CustomerVoucherRedemptionWhereUniqueInput[]
+    disconnect?: CustomerVoucherRedemptionWhereUniqueInput | CustomerVoucherRedemptionWhereUniqueInput[]
+    delete?: CustomerVoucherRedemptionWhereUniqueInput | CustomerVoucherRedemptionWhereUniqueInput[]
+    connect?: CustomerVoucherRedemptionWhereUniqueInput | CustomerVoucherRedemptionWhereUniqueInput[]
+    update?: CustomerVoucherRedemptionUpdateWithWhereUniqueWithoutSaleInput | CustomerVoucherRedemptionUpdateWithWhereUniqueWithoutSaleInput[]
+    updateMany?: CustomerVoucherRedemptionUpdateManyWithWhereWithoutSaleInput | CustomerVoucherRedemptionUpdateManyWithWhereWithoutSaleInput[]
+    deleteMany?: CustomerVoucherRedemptionScalarWhereInput | CustomerVoucherRedemptionScalarWhereInput[]
   }
 
   export type ProductCreateNestedOneWithoutSaleItemsInput = {
@@ -105321,6 +109006,140 @@ export namespace Prisma {
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutStaffDayClosingsInput, UserUpdateWithoutStaffDayClosingsInput>, UserUncheckedUpdateWithoutStaffDayClosingsInput>
   }
 
+  export type CustomerCreateNestedOneWithoutCustomerVouchersInput = {
+    create?: XOR<CustomerCreateWithoutCustomerVouchersInput, CustomerUncheckedCreateWithoutCustomerVouchersInput>
+    connectOrCreate?: CustomerCreateOrConnectWithoutCustomerVouchersInput
+    connect?: CustomerWhereUniqueInput
+  }
+
+  export type BranchCreateNestedOneWithoutCustomerVouchersInput = {
+    create?: XOR<BranchCreateWithoutCustomerVouchersInput, BranchUncheckedCreateWithoutCustomerVouchersInput>
+    connectOrCreate?: BranchCreateOrConnectWithoutCustomerVouchersInput
+    connect?: BranchWhereUniqueInput
+  }
+
+  export type SaleCreateNestedOneWithoutCustomerVouchersIssuedInput = {
+    create?: XOR<SaleCreateWithoutCustomerVouchersIssuedInput, SaleUncheckedCreateWithoutCustomerVouchersIssuedInput>
+    connectOrCreate?: SaleCreateOrConnectWithoutCustomerVouchersIssuedInput
+    connect?: SaleWhereUniqueInput
+  }
+
+  export type SaleCreateNestedOneWithoutCustomerVouchersRedeemedInput = {
+    create?: XOR<SaleCreateWithoutCustomerVouchersRedeemedInput, SaleUncheckedCreateWithoutCustomerVouchersRedeemedInput>
+    connectOrCreate?: SaleCreateOrConnectWithoutCustomerVouchersRedeemedInput
+    connect?: SaleWhereUniqueInput
+  }
+
+  export type CustomerVoucherRedemptionCreateNestedManyWithoutVoucherInput = {
+    create?: XOR<CustomerVoucherRedemptionCreateWithoutVoucherInput, CustomerVoucherRedemptionUncheckedCreateWithoutVoucherInput> | CustomerVoucherRedemptionCreateWithoutVoucherInput[] | CustomerVoucherRedemptionUncheckedCreateWithoutVoucherInput[]
+    connectOrCreate?: CustomerVoucherRedemptionCreateOrConnectWithoutVoucherInput | CustomerVoucherRedemptionCreateOrConnectWithoutVoucherInput[]
+    createMany?: CustomerVoucherRedemptionCreateManyVoucherInputEnvelope
+    connect?: CustomerVoucherRedemptionWhereUniqueInput | CustomerVoucherRedemptionWhereUniqueInput[]
+  }
+
+  export type CustomerVoucherRedemptionUncheckedCreateNestedManyWithoutVoucherInput = {
+    create?: XOR<CustomerVoucherRedemptionCreateWithoutVoucherInput, CustomerVoucherRedemptionUncheckedCreateWithoutVoucherInput> | CustomerVoucherRedemptionCreateWithoutVoucherInput[] | CustomerVoucherRedemptionUncheckedCreateWithoutVoucherInput[]
+    connectOrCreate?: CustomerVoucherRedemptionCreateOrConnectWithoutVoucherInput | CustomerVoucherRedemptionCreateOrConnectWithoutVoucherInput[]
+    createMany?: CustomerVoucherRedemptionCreateManyVoucherInputEnvelope
+    connect?: CustomerVoucherRedemptionWhereUniqueInput | CustomerVoucherRedemptionWhereUniqueInput[]
+  }
+
+  export type CustomerUpdateOneWithoutCustomerVouchersNestedInput = {
+    create?: XOR<CustomerCreateWithoutCustomerVouchersInput, CustomerUncheckedCreateWithoutCustomerVouchersInput>
+    connectOrCreate?: CustomerCreateOrConnectWithoutCustomerVouchersInput
+    upsert?: CustomerUpsertWithoutCustomerVouchersInput
+    disconnect?: CustomerWhereInput | boolean
+    delete?: CustomerWhereInput | boolean
+    connect?: CustomerWhereUniqueInput
+    update?: XOR<XOR<CustomerUpdateToOneWithWhereWithoutCustomerVouchersInput, CustomerUpdateWithoutCustomerVouchersInput>, CustomerUncheckedUpdateWithoutCustomerVouchersInput>
+  }
+
+  export type BranchUpdateOneWithoutCustomerVouchersNestedInput = {
+    create?: XOR<BranchCreateWithoutCustomerVouchersInput, BranchUncheckedCreateWithoutCustomerVouchersInput>
+    connectOrCreate?: BranchCreateOrConnectWithoutCustomerVouchersInput
+    upsert?: BranchUpsertWithoutCustomerVouchersInput
+    disconnect?: BranchWhereInput | boolean
+    delete?: BranchWhereInput | boolean
+    connect?: BranchWhereUniqueInput
+    update?: XOR<XOR<BranchUpdateToOneWithWhereWithoutCustomerVouchersInput, BranchUpdateWithoutCustomerVouchersInput>, BranchUncheckedUpdateWithoutCustomerVouchersInput>
+  }
+
+  export type SaleUpdateOneWithoutCustomerVouchersIssuedNestedInput = {
+    create?: XOR<SaleCreateWithoutCustomerVouchersIssuedInput, SaleUncheckedCreateWithoutCustomerVouchersIssuedInput>
+    connectOrCreate?: SaleCreateOrConnectWithoutCustomerVouchersIssuedInput
+    upsert?: SaleUpsertWithoutCustomerVouchersIssuedInput
+    disconnect?: SaleWhereInput | boolean
+    delete?: SaleWhereInput | boolean
+    connect?: SaleWhereUniqueInput
+    update?: XOR<XOR<SaleUpdateToOneWithWhereWithoutCustomerVouchersIssuedInput, SaleUpdateWithoutCustomerVouchersIssuedInput>, SaleUncheckedUpdateWithoutCustomerVouchersIssuedInput>
+  }
+
+  export type SaleUpdateOneWithoutCustomerVouchersRedeemedNestedInput = {
+    create?: XOR<SaleCreateWithoutCustomerVouchersRedeemedInput, SaleUncheckedCreateWithoutCustomerVouchersRedeemedInput>
+    connectOrCreate?: SaleCreateOrConnectWithoutCustomerVouchersRedeemedInput
+    upsert?: SaleUpsertWithoutCustomerVouchersRedeemedInput
+    disconnect?: SaleWhereInput | boolean
+    delete?: SaleWhereInput | boolean
+    connect?: SaleWhereUniqueInput
+    update?: XOR<XOR<SaleUpdateToOneWithWhereWithoutCustomerVouchersRedeemedInput, SaleUpdateWithoutCustomerVouchersRedeemedInput>, SaleUncheckedUpdateWithoutCustomerVouchersRedeemedInput>
+  }
+
+  export type CustomerVoucherRedemptionUpdateManyWithoutVoucherNestedInput = {
+    create?: XOR<CustomerVoucherRedemptionCreateWithoutVoucherInput, CustomerVoucherRedemptionUncheckedCreateWithoutVoucherInput> | CustomerVoucherRedemptionCreateWithoutVoucherInput[] | CustomerVoucherRedemptionUncheckedCreateWithoutVoucherInput[]
+    connectOrCreate?: CustomerVoucherRedemptionCreateOrConnectWithoutVoucherInput | CustomerVoucherRedemptionCreateOrConnectWithoutVoucherInput[]
+    upsert?: CustomerVoucherRedemptionUpsertWithWhereUniqueWithoutVoucherInput | CustomerVoucherRedemptionUpsertWithWhereUniqueWithoutVoucherInput[]
+    createMany?: CustomerVoucherRedemptionCreateManyVoucherInputEnvelope
+    set?: CustomerVoucherRedemptionWhereUniqueInput | CustomerVoucherRedemptionWhereUniqueInput[]
+    disconnect?: CustomerVoucherRedemptionWhereUniqueInput | CustomerVoucherRedemptionWhereUniqueInput[]
+    delete?: CustomerVoucherRedemptionWhereUniqueInput | CustomerVoucherRedemptionWhereUniqueInput[]
+    connect?: CustomerVoucherRedemptionWhereUniqueInput | CustomerVoucherRedemptionWhereUniqueInput[]
+    update?: CustomerVoucherRedemptionUpdateWithWhereUniqueWithoutVoucherInput | CustomerVoucherRedemptionUpdateWithWhereUniqueWithoutVoucherInput[]
+    updateMany?: CustomerVoucherRedemptionUpdateManyWithWhereWithoutVoucherInput | CustomerVoucherRedemptionUpdateManyWithWhereWithoutVoucherInput[]
+    deleteMany?: CustomerVoucherRedemptionScalarWhereInput | CustomerVoucherRedemptionScalarWhereInput[]
+  }
+
+  export type CustomerVoucherRedemptionUncheckedUpdateManyWithoutVoucherNestedInput = {
+    create?: XOR<CustomerVoucherRedemptionCreateWithoutVoucherInput, CustomerVoucherRedemptionUncheckedCreateWithoutVoucherInput> | CustomerVoucherRedemptionCreateWithoutVoucherInput[] | CustomerVoucherRedemptionUncheckedCreateWithoutVoucherInput[]
+    connectOrCreate?: CustomerVoucherRedemptionCreateOrConnectWithoutVoucherInput | CustomerVoucherRedemptionCreateOrConnectWithoutVoucherInput[]
+    upsert?: CustomerVoucherRedemptionUpsertWithWhereUniqueWithoutVoucherInput | CustomerVoucherRedemptionUpsertWithWhereUniqueWithoutVoucherInput[]
+    createMany?: CustomerVoucherRedemptionCreateManyVoucherInputEnvelope
+    set?: CustomerVoucherRedemptionWhereUniqueInput | CustomerVoucherRedemptionWhereUniqueInput[]
+    disconnect?: CustomerVoucherRedemptionWhereUniqueInput | CustomerVoucherRedemptionWhereUniqueInput[]
+    delete?: CustomerVoucherRedemptionWhereUniqueInput | CustomerVoucherRedemptionWhereUniqueInput[]
+    connect?: CustomerVoucherRedemptionWhereUniqueInput | CustomerVoucherRedemptionWhereUniqueInput[]
+    update?: CustomerVoucherRedemptionUpdateWithWhereUniqueWithoutVoucherInput | CustomerVoucherRedemptionUpdateWithWhereUniqueWithoutVoucherInput[]
+    updateMany?: CustomerVoucherRedemptionUpdateManyWithWhereWithoutVoucherInput | CustomerVoucherRedemptionUpdateManyWithWhereWithoutVoucherInput[]
+    deleteMany?: CustomerVoucherRedemptionScalarWhereInput | CustomerVoucherRedemptionScalarWhereInput[]
+  }
+
+  export type CustomerVoucherCreateNestedOneWithoutRedemptionsInput = {
+    create?: XOR<CustomerVoucherCreateWithoutRedemptionsInput, CustomerVoucherUncheckedCreateWithoutRedemptionsInput>
+    connectOrCreate?: CustomerVoucherCreateOrConnectWithoutRedemptionsInput
+    connect?: CustomerVoucherWhereUniqueInput
+  }
+
+  export type SaleCreateNestedOneWithoutCustomerVoucherRedemptionsInput = {
+    create?: XOR<SaleCreateWithoutCustomerVoucherRedemptionsInput, SaleUncheckedCreateWithoutCustomerVoucherRedemptionsInput>
+    connectOrCreate?: SaleCreateOrConnectWithoutCustomerVoucherRedemptionsInput
+    connect?: SaleWhereUniqueInput
+  }
+
+  export type CustomerVoucherUpdateOneRequiredWithoutRedemptionsNestedInput = {
+    create?: XOR<CustomerVoucherCreateWithoutRedemptionsInput, CustomerVoucherUncheckedCreateWithoutRedemptionsInput>
+    connectOrCreate?: CustomerVoucherCreateOrConnectWithoutRedemptionsInput
+    upsert?: CustomerVoucherUpsertWithoutRedemptionsInput
+    connect?: CustomerVoucherWhereUniqueInput
+    update?: XOR<XOR<CustomerVoucherUpdateToOneWithWhereWithoutRedemptionsInput, CustomerVoucherUpdateWithoutRedemptionsInput>, CustomerVoucherUncheckedUpdateWithoutRedemptionsInput>
+  }
+
+  export type SaleUpdateOneRequiredWithoutCustomerVoucherRedemptionsNestedInput = {
+    create?: XOR<SaleCreateWithoutCustomerVoucherRedemptionsInput, SaleUncheckedCreateWithoutCustomerVoucherRedemptionsInput>
+    connectOrCreate?: SaleCreateOrConnectWithoutCustomerVoucherRedemptionsInput
+    upsert?: SaleUpsertWithoutCustomerVoucherRedemptionsInput
+    connect?: SaleWhereUniqueInput
+    update?: XOR<XOR<SaleUpdateToOneWithWhereWithoutCustomerVoucherRedemptionsInput, SaleUpdateWithoutCustomerVoucherRedemptionsInput>, SaleUncheckedUpdateWithoutCustomerVoucherRedemptionsInput>
+  }
+
   export type NestedIntFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel>
     in?: number[] | ListIntFieldRefInput<$PrismaModel>
@@ -106197,6 +110016,8 @@ export namespace Prisma {
     description?: string | null
     deliveryCharge?: Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: boolean
+    voucherCode?: string | null
+    voucherDiscount?: Decimal | DecimalJsLike | number | string
     payments?: PaymentCreateNestedManyWithoutSaleInput
     branch: BranchCreateNestedOneWithoutSalesInput
     customer?: CustomerCreateNestedOneWithoutSalesInput
@@ -106205,6 +110026,9 @@ export namespace Prisma {
     terminal?: TerminalCreateNestedOneWithoutSalesInput
     items?: SaleItemCreateNestedManyWithoutSaleInput
     lead?: LeadCreateNestedOneWithoutSaleInput
+    customerVouchersIssued?: CustomerVoucherCreateNestedManyWithoutIssuedSaleInput
+    customerVouchersRedeemed?: CustomerVoucherCreateNestedManyWithoutRedeemedSaleInput
+    customerVoucherRedemptions?: CustomerVoucherRedemptionCreateNestedManyWithoutSaleInput
   }
 
   export type SaleUncheckedCreateWithoutSalesmanInput = {
@@ -106250,9 +110074,14 @@ export namespace Prisma {
     description?: string | null
     deliveryCharge?: Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: boolean
+    voucherCode?: string | null
+    voucherDiscount?: Decimal | DecimalJsLike | number | string
     payments?: PaymentUncheckedCreateNestedManyWithoutSaleInput
     items?: SaleItemUncheckedCreateNestedManyWithoutSaleInput
     lead?: LeadUncheckedCreateNestedOneWithoutSaleInput
+    customerVouchersIssued?: CustomerVoucherUncheckedCreateNestedManyWithoutIssuedSaleInput
+    customerVouchersRedeemed?: CustomerVoucherUncheckedCreateNestedManyWithoutRedeemedSaleInput
+    customerVoucherRedemptions?: CustomerVoucherRedemptionUncheckedCreateNestedManyWithoutSaleInput
   }
 
   export type SaleCreateOrConnectWithoutSalesmanInput = {
@@ -107131,6 +110960,7 @@ export namespace Prisma {
     workLogs?: WorkLogCreateNestedManyWithoutBranchInput
     leads?: LeadCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseCreateNestedManyWithoutBranchInput
+    customerVouchers?: CustomerVoucherCreateNestedManyWithoutBranchInput
   }
 
   export type BranchUncheckedCreateWithoutUsersInput = {
@@ -107169,6 +110999,7 @@ export namespace Prisma {
     workLogs?: WorkLogUncheckedCreateNestedManyWithoutBranchInput
     leads?: LeadUncheckedCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseUncheckedCreateNestedManyWithoutBranchInput
+    customerVouchers?: CustomerVoucherUncheckedCreateNestedManyWithoutBranchInput
   }
 
   export type BranchCreateOrConnectWithoutUsersInput = {
@@ -107748,6 +111579,8 @@ export namespace Prisma {
     description?: StringNullableFilter<"Sale"> | string | null
     deliveryCharge?: DecimalFilter<"Sale"> | Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: BoolFilter<"Sale"> | boolean
+    voucherCode?: StringNullableFilter<"Sale"> | string | null
+    voucherDiscount?: DecimalFilter<"Sale"> | Decimal | DecimalJsLike | number | string
   }
 
   export type StockTransferUpsertWithWhereUniqueWithoutReceivedByInput = {
@@ -108293,6 +112126,7 @@ export namespace Prisma {
     workLogs?: WorkLogUpdateManyWithoutBranchNestedInput
     leads?: LeadUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUpdateManyWithoutBranchNestedInput
+    customerVouchers?: CustomerVoucherUpdateManyWithoutBranchNestedInput
   }
 
   export type BranchUncheckedUpdateWithoutUsersInput = {
@@ -108331,6 +112165,7 @@ export namespace Prisma {
     workLogs?: WorkLogUncheckedUpdateManyWithoutBranchNestedInput
     leads?: LeadUncheckedUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUncheckedUpdateManyWithoutBranchNestedInput
+    customerVouchers?: CustomerVoucherUncheckedUpdateManyWithoutBranchNestedInput
   }
 
   export type TerminalUpsertWithWhereUniqueWithoutUsersInput = {
@@ -108535,6 +112370,7 @@ export namespace Prisma {
     quotations?: QuotationCreateNestedManyWithoutCustomerInput
     sales?: SaleCreateNestedManyWithoutCustomerInput
     tickets?: TicketCreateNestedManyWithoutCustomerInput
+    customerVouchers?: CustomerVoucherCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerUncheckedCreateWithoutBranchInput = {
@@ -108562,6 +112398,7 @@ export namespace Prisma {
     quotations?: QuotationUncheckedCreateNestedManyWithoutCustomerInput
     sales?: SaleUncheckedCreateNestedManyWithoutCustomerInput
     tickets?: TicketUncheckedCreateNestedManyWithoutCustomerInput
+    customerVouchers?: CustomerVoucherUncheckedCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerCreateOrConnectWithoutBranchInput = {
@@ -109072,6 +112909,8 @@ export namespace Prisma {
     description?: string | null
     deliveryCharge?: Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: boolean
+    voucherCode?: string | null
+    voucherDiscount?: Decimal | DecimalJsLike | number | string
     payments?: PaymentCreateNestedManyWithoutSaleInput
     customer?: CustomerCreateNestedOneWithoutSalesInput
     financialYear?: FinancialYearCreateNestedOneWithoutSalesInput
@@ -109080,6 +112919,9 @@ export namespace Prisma {
     terminal?: TerminalCreateNestedOneWithoutSalesInput
     items?: SaleItemCreateNestedManyWithoutSaleInput
     lead?: LeadCreateNestedOneWithoutSaleInput
+    customerVouchersIssued?: CustomerVoucherCreateNestedManyWithoutIssuedSaleInput
+    customerVouchersRedeemed?: CustomerVoucherCreateNestedManyWithoutRedeemedSaleInput
+    customerVoucherRedemptions?: CustomerVoucherRedemptionCreateNestedManyWithoutSaleInput
   }
 
   export type SaleUncheckedCreateWithoutBranchInput = {
@@ -109125,9 +112967,14 @@ export namespace Prisma {
     description?: string | null
     deliveryCharge?: Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: boolean
+    voucherCode?: string | null
+    voucherDiscount?: Decimal | DecimalJsLike | number | string
     payments?: PaymentUncheckedCreateNestedManyWithoutSaleInput
     items?: SaleItemUncheckedCreateNestedManyWithoutSaleInput
     lead?: LeadUncheckedCreateNestedOneWithoutSaleInput
+    customerVouchersIssued?: CustomerVoucherUncheckedCreateNestedManyWithoutIssuedSaleInput
+    customerVouchersRedeemed?: CustomerVoucherUncheckedCreateNestedManyWithoutRedeemedSaleInput
+    customerVoucherRedemptions?: CustomerVoucherRedemptionUncheckedCreateNestedManyWithoutSaleInput
   }
 
   export type SaleCreateOrConnectWithoutBranchInput = {
@@ -109558,6 +113405,63 @@ export namespace Prisma {
 
   export type DayCloseCreateManyBranchInputEnvelope = {
     data: DayCloseCreateManyBranchInput | DayCloseCreateManyBranchInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type CustomerVoucherCreateWithoutBranchInput = {
+    code: string
+    name: string
+    type: string
+    value: Decimal | DecimalJsLike | number | string
+    maximumDiscount?: Decimal | DecimalJsLike | number | string | null
+    minimumPurchaseAmount?: Decimal | DecimalJsLike | number | string
+    issueDate?: Date | string
+    expiryDate?: Date | string | null
+    status?: string
+    redeemedAt?: Date | string | null
+    usageLimit?: number
+    usageCount?: number
+    description?: string | null
+    createdBy?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    customer?: CustomerCreateNestedOneWithoutCustomerVouchersInput
+    issuedSale?: SaleCreateNestedOneWithoutCustomerVouchersIssuedInput
+    redeemedSale?: SaleCreateNestedOneWithoutCustomerVouchersRedeemedInput
+    redemptions?: CustomerVoucherRedemptionCreateNestedManyWithoutVoucherInput
+  }
+
+  export type CustomerVoucherUncheckedCreateWithoutBranchInput = {
+    id?: number
+    code: string
+    name: string
+    type: string
+    value: Decimal | DecimalJsLike | number | string
+    maximumDiscount?: Decimal | DecimalJsLike | number | string | null
+    minimumPurchaseAmount?: Decimal | DecimalJsLike | number | string
+    issueDate?: Date | string
+    expiryDate?: Date | string | null
+    status?: string
+    customerId?: number | null
+    issuedSaleId?: number | null
+    redeemedSaleId?: number | null
+    redeemedAt?: Date | string | null
+    usageLimit?: number
+    usageCount?: number
+    description?: string | null
+    createdBy?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    redemptions?: CustomerVoucherRedemptionUncheckedCreateNestedManyWithoutVoucherInput
+  }
+
+  export type CustomerVoucherCreateOrConnectWithoutBranchInput = {
+    where: CustomerVoucherWhereUniqueInput
+    create: XOR<CustomerVoucherCreateWithoutBranchInput, CustomerVoucherUncheckedCreateWithoutBranchInput>
+  }
+
+  export type CustomerVoucherCreateManyBranchInputEnvelope = {
+    data: CustomerVoucherCreateManyBranchInput | CustomerVoucherCreateManyBranchInput[]
     skipDuplicates?: boolean
   }
 
@@ -110130,6 +114034,49 @@ export namespace Prisma {
     data: XOR<DayCloseUpdateManyMutationInput, DayCloseUncheckedUpdateManyWithoutBranchInput>
   }
 
+  export type CustomerVoucherUpsertWithWhereUniqueWithoutBranchInput = {
+    where: CustomerVoucherWhereUniqueInput
+    update: XOR<CustomerVoucherUpdateWithoutBranchInput, CustomerVoucherUncheckedUpdateWithoutBranchInput>
+    create: XOR<CustomerVoucherCreateWithoutBranchInput, CustomerVoucherUncheckedCreateWithoutBranchInput>
+  }
+
+  export type CustomerVoucherUpdateWithWhereUniqueWithoutBranchInput = {
+    where: CustomerVoucherWhereUniqueInput
+    data: XOR<CustomerVoucherUpdateWithoutBranchInput, CustomerVoucherUncheckedUpdateWithoutBranchInput>
+  }
+
+  export type CustomerVoucherUpdateManyWithWhereWithoutBranchInput = {
+    where: CustomerVoucherScalarWhereInput
+    data: XOR<CustomerVoucherUpdateManyMutationInput, CustomerVoucherUncheckedUpdateManyWithoutBranchInput>
+  }
+
+  export type CustomerVoucherScalarWhereInput = {
+    AND?: CustomerVoucherScalarWhereInput | CustomerVoucherScalarWhereInput[]
+    OR?: CustomerVoucherScalarWhereInput[]
+    NOT?: CustomerVoucherScalarWhereInput | CustomerVoucherScalarWhereInput[]
+    id?: IntFilter<"CustomerVoucher"> | number
+    code?: StringFilter<"CustomerVoucher"> | string
+    name?: StringFilter<"CustomerVoucher"> | string
+    type?: StringFilter<"CustomerVoucher"> | string
+    value?: DecimalFilter<"CustomerVoucher"> | Decimal | DecimalJsLike | number | string
+    maximumDiscount?: DecimalNullableFilter<"CustomerVoucher"> | Decimal | DecimalJsLike | number | string | null
+    minimumPurchaseAmount?: DecimalFilter<"CustomerVoucher"> | Decimal | DecimalJsLike | number | string
+    issueDate?: DateTimeFilter<"CustomerVoucher"> | Date | string
+    expiryDate?: DateTimeNullableFilter<"CustomerVoucher"> | Date | string | null
+    status?: StringFilter<"CustomerVoucher"> | string
+    customerId?: IntNullableFilter<"CustomerVoucher"> | number | null
+    branchId?: IntNullableFilter<"CustomerVoucher"> | number | null
+    issuedSaleId?: IntNullableFilter<"CustomerVoucher"> | number | null
+    redeemedSaleId?: IntNullableFilter<"CustomerVoucher"> | number | null
+    redeemedAt?: DateTimeNullableFilter<"CustomerVoucher"> | Date | string | null
+    usageLimit?: IntFilter<"CustomerVoucher"> | number
+    usageCount?: IntFilter<"CustomerVoucher"> | number
+    description?: StringNullableFilter<"CustomerVoucher"> | string | null
+    createdBy?: IntNullableFilter<"CustomerVoucher"> | number | null
+    createdAt?: DateTimeFilter<"CustomerVoucher"> | Date | string
+    updatedAt?: DateTimeFilter<"CustomerVoucher"> | Date | string
+  }
+
   export type BankCreateWithoutCompanyProfilesInput = {
     name: string
     accountNumber?: string | null
@@ -110284,6 +114231,7 @@ export namespace Prisma {
     leads?: LeadCreateNestedManyWithoutBranchInput
     users?: UserCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseCreateNestedManyWithoutBranchInput
+    customerVouchers?: CustomerVoucherCreateNestedManyWithoutBranchInput
   }
 
   export type BranchUncheckedCreateWithoutCustomersInput = {
@@ -110322,6 +114270,7 @@ export namespace Prisma {
     leads?: LeadUncheckedCreateNestedManyWithoutBranchInput
     users?: UserUncheckedCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseUncheckedCreateNestedManyWithoutBranchInput
+    customerVouchers?: CustomerVoucherUncheckedCreateNestedManyWithoutBranchInput
   }
 
   export type BranchCreateOrConnectWithoutCustomersInput = {
@@ -110515,6 +114464,8 @@ export namespace Prisma {
     description?: string | null
     deliveryCharge?: Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: boolean
+    voucherCode?: string | null
+    voucherDiscount?: Decimal | DecimalJsLike | number | string
     payments?: PaymentCreateNestedManyWithoutSaleInput
     branch: BranchCreateNestedOneWithoutSalesInput
     financialYear?: FinancialYearCreateNestedOneWithoutSalesInput
@@ -110523,6 +114474,9 @@ export namespace Prisma {
     terminal?: TerminalCreateNestedOneWithoutSalesInput
     items?: SaleItemCreateNestedManyWithoutSaleInput
     lead?: LeadCreateNestedOneWithoutSaleInput
+    customerVouchersIssued?: CustomerVoucherCreateNestedManyWithoutIssuedSaleInput
+    customerVouchersRedeemed?: CustomerVoucherCreateNestedManyWithoutRedeemedSaleInput
+    customerVoucherRedemptions?: CustomerVoucherRedemptionCreateNestedManyWithoutSaleInput
   }
 
   export type SaleUncheckedCreateWithoutCustomerInput = {
@@ -110568,9 +114522,14 @@ export namespace Prisma {
     description?: string | null
     deliveryCharge?: Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: boolean
+    voucherCode?: string | null
+    voucherDiscount?: Decimal | DecimalJsLike | number | string
     payments?: PaymentUncheckedCreateNestedManyWithoutSaleInput
     items?: SaleItemUncheckedCreateNestedManyWithoutSaleInput
     lead?: LeadUncheckedCreateNestedOneWithoutSaleInput
+    customerVouchersIssued?: CustomerVoucherUncheckedCreateNestedManyWithoutIssuedSaleInput
+    customerVouchersRedeemed?: CustomerVoucherUncheckedCreateNestedManyWithoutRedeemedSaleInput
+    customerVoucherRedemptions?: CustomerVoucherRedemptionUncheckedCreateNestedManyWithoutSaleInput
   }
 
   export type SaleCreateOrConnectWithoutCustomerInput = {
@@ -110642,6 +114601,63 @@ export namespace Prisma {
 
   export type TicketCreateManyCustomerInputEnvelope = {
     data: TicketCreateManyCustomerInput | TicketCreateManyCustomerInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type CustomerVoucherCreateWithoutCustomerInput = {
+    code: string
+    name: string
+    type: string
+    value: Decimal | DecimalJsLike | number | string
+    maximumDiscount?: Decimal | DecimalJsLike | number | string | null
+    minimumPurchaseAmount?: Decimal | DecimalJsLike | number | string
+    issueDate?: Date | string
+    expiryDate?: Date | string | null
+    status?: string
+    redeemedAt?: Date | string | null
+    usageLimit?: number
+    usageCount?: number
+    description?: string | null
+    createdBy?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    branch?: BranchCreateNestedOneWithoutCustomerVouchersInput
+    issuedSale?: SaleCreateNestedOneWithoutCustomerVouchersIssuedInput
+    redeemedSale?: SaleCreateNestedOneWithoutCustomerVouchersRedeemedInput
+    redemptions?: CustomerVoucherRedemptionCreateNestedManyWithoutVoucherInput
+  }
+
+  export type CustomerVoucherUncheckedCreateWithoutCustomerInput = {
+    id?: number
+    code: string
+    name: string
+    type: string
+    value: Decimal | DecimalJsLike | number | string
+    maximumDiscount?: Decimal | DecimalJsLike | number | string | null
+    minimumPurchaseAmount?: Decimal | DecimalJsLike | number | string
+    issueDate?: Date | string
+    expiryDate?: Date | string | null
+    status?: string
+    branchId?: number | null
+    issuedSaleId?: number | null
+    redeemedSaleId?: number | null
+    redeemedAt?: Date | string | null
+    usageLimit?: number
+    usageCount?: number
+    description?: string | null
+    createdBy?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    redemptions?: CustomerVoucherRedemptionUncheckedCreateNestedManyWithoutVoucherInput
+  }
+
+  export type CustomerVoucherCreateOrConnectWithoutCustomerInput = {
+    where: CustomerVoucherWhereUniqueInput
+    create: XOR<CustomerVoucherCreateWithoutCustomerInput, CustomerVoucherUncheckedCreateWithoutCustomerInput>
+  }
+
+  export type CustomerVoucherCreateManyCustomerInputEnvelope = {
+    data: CustomerVoucherCreateManyCustomerInput | CustomerVoucherCreateManyCustomerInput[]
     skipDuplicates?: boolean
   }
 
@@ -110753,6 +114769,7 @@ export namespace Prisma {
     leads?: LeadUpdateManyWithoutBranchNestedInput
     users?: UserUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUpdateManyWithoutBranchNestedInput
+    customerVouchers?: CustomerVoucherUpdateManyWithoutBranchNestedInput
   }
 
   export type BranchUncheckedUpdateWithoutCustomersInput = {
@@ -110791,6 +114808,7 @@ export namespace Prisma {
     leads?: LeadUncheckedUpdateManyWithoutBranchNestedInput
     users?: UserUncheckedUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUncheckedUpdateManyWithoutBranchNestedInput
+    customerVouchers?: CustomerVoucherUncheckedUpdateManyWithoutBranchNestedInput
   }
 
   export type DeliveryChallanUpsertWithWhereUniqueWithoutCustomerInput = {
@@ -110873,6 +114891,22 @@ export namespace Prisma {
     data: XOR<TicketUpdateManyMutationInput, TicketUncheckedUpdateManyWithoutCustomerInput>
   }
 
+  export type CustomerVoucherUpsertWithWhereUniqueWithoutCustomerInput = {
+    where: CustomerVoucherWhereUniqueInput
+    update: XOR<CustomerVoucherUpdateWithoutCustomerInput, CustomerVoucherUncheckedUpdateWithoutCustomerInput>
+    create: XOR<CustomerVoucherCreateWithoutCustomerInput, CustomerVoucherUncheckedCreateWithoutCustomerInput>
+  }
+
+  export type CustomerVoucherUpdateWithWhereUniqueWithoutCustomerInput = {
+    where: CustomerVoucherWhereUniqueInput
+    data: XOR<CustomerVoucherUpdateWithoutCustomerInput, CustomerVoucherUncheckedUpdateWithoutCustomerInput>
+  }
+
+  export type CustomerVoucherUpdateManyWithWhereWithoutCustomerInput = {
+    where: CustomerVoucherScalarWhereInput
+    data: XOR<CustomerVoucherUpdateManyMutationInput, CustomerVoucherUncheckedUpdateManyWithoutCustomerInput>
+  }
+
   export type CustomerCreateWithoutAdvancesInput = {
     name: string
     phone?: string | null
@@ -110897,6 +114931,7 @@ export namespace Prisma {
     quotations?: QuotationCreateNestedManyWithoutCustomerInput
     sales?: SaleCreateNestedManyWithoutCustomerInput
     tickets?: TicketCreateNestedManyWithoutCustomerInput
+    customerVouchers?: CustomerVoucherCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerUncheckedCreateWithoutAdvancesInput = {
@@ -110924,6 +114959,7 @@ export namespace Prisma {
     quotations?: QuotationUncheckedCreateNestedManyWithoutCustomerInput
     sales?: SaleUncheckedCreateNestedManyWithoutCustomerInput
     tickets?: TicketUncheckedCreateNestedManyWithoutCustomerInput
+    customerVouchers?: CustomerVoucherUncheckedCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerCreateOrConnectWithoutAdvancesInput = {
@@ -110966,6 +115002,7 @@ export namespace Prisma {
     quotations?: QuotationUpdateManyWithoutCustomerNestedInput
     sales?: SaleUpdateManyWithoutCustomerNestedInput
     tickets?: TicketUpdateManyWithoutCustomerNestedInput
+    customerVouchers?: CustomerVoucherUpdateManyWithoutCustomerNestedInput
   }
 
   export type CustomerUncheckedUpdateWithoutAdvancesInput = {
@@ -110993,6 +115030,7 @@ export namespace Prisma {
     quotations?: QuotationUncheckedUpdateManyWithoutCustomerNestedInput
     sales?: SaleUncheckedUpdateManyWithoutCustomerNestedInput
     tickets?: TicketUncheckedUpdateManyWithoutCustomerNestedInput
+    customerVouchers?: CustomerVoucherUncheckedUpdateManyWithoutCustomerNestedInput
   }
 
   export type CustomerCreateWithoutAdvanceHistoryInput = {
@@ -111019,6 +115057,7 @@ export namespace Prisma {
     quotations?: QuotationCreateNestedManyWithoutCustomerInput
     sales?: SaleCreateNestedManyWithoutCustomerInput
     tickets?: TicketCreateNestedManyWithoutCustomerInput
+    customerVouchers?: CustomerVoucherCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerUncheckedCreateWithoutAdvanceHistoryInput = {
@@ -111046,6 +115085,7 @@ export namespace Prisma {
     quotations?: QuotationUncheckedCreateNestedManyWithoutCustomerInput
     sales?: SaleUncheckedCreateNestedManyWithoutCustomerInput
     tickets?: TicketUncheckedCreateNestedManyWithoutCustomerInput
+    customerVouchers?: CustomerVoucherUncheckedCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerCreateOrConnectWithoutAdvanceHistoryInput = {
@@ -111088,6 +115128,7 @@ export namespace Prisma {
     quotations?: QuotationUpdateManyWithoutCustomerNestedInput
     sales?: SaleUpdateManyWithoutCustomerNestedInput
     tickets?: TicketUpdateManyWithoutCustomerNestedInput
+    customerVouchers?: CustomerVoucherUpdateManyWithoutCustomerNestedInput
   }
 
   export type CustomerUncheckedUpdateWithoutAdvanceHistoryInput = {
@@ -111115,6 +115156,7 @@ export namespace Prisma {
     quotations?: QuotationUncheckedUpdateManyWithoutCustomerNestedInput
     sales?: SaleUncheckedUpdateManyWithoutCustomerNestedInput
     tickets?: TicketUncheckedUpdateManyWithoutCustomerNestedInput
+    customerVouchers?: CustomerVoucherUncheckedUpdateManyWithoutCustomerNestedInput
   }
 
   export type PaymentCreateWithoutSupplierInput = {
@@ -112071,9 +116113,11 @@ export namespace Prisma {
     size?: string | null
     quantity: number
     unitPrice: Decimal | DecimalJsLike | number | string
+    originalUnitPrice?: Decimal | DecimalJsLike | number | string | null
     total: Decimal | DecimalJsLike | number | string
     discountAmount?: Decimal | DecimalJsLike | number | string
     discountPercent?: Decimal | DecimalJsLike | number | string
+    voucherDiscountAmount?: Decimal | DecimalJsLike | number | string
     taxAmount?: Decimal | DecimalJsLike | number | string
     taxRate?: Decimal | DecimalJsLike | number | string
     isTaxInclusive?: boolean
@@ -112086,9 +116130,11 @@ export namespace Prisma {
     size?: string | null
     quantity: number
     unitPrice: Decimal | DecimalJsLike | number | string
+    originalUnitPrice?: Decimal | DecimalJsLike | number | string | null
     total: Decimal | DecimalJsLike | number | string
     discountAmount?: Decimal | DecimalJsLike | number | string
     discountPercent?: Decimal | DecimalJsLike | number | string
+    voucherDiscountAmount?: Decimal | DecimalJsLike | number | string
     taxAmount?: Decimal | DecimalJsLike | number | string
     taxRate?: Decimal | DecimalJsLike | number | string
     isTaxInclusive?: boolean
@@ -112443,9 +116489,11 @@ export namespace Prisma {
     size?: StringNullableFilter<"SaleItem"> | string | null
     quantity?: IntFilter<"SaleItem"> | number
     unitPrice?: DecimalFilter<"SaleItem"> | Decimal | DecimalJsLike | number | string
+    originalUnitPrice?: DecimalNullableFilter<"SaleItem"> | Decimal | DecimalJsLike | number | string | null
     total?: DecimalFilter<"SaleItem"> | Decimal | DecimalJsLike | number | string
     discountAmount?: DecimalFilter<"SaleItem"> | Decimal | DecimalJsLike | number | string
     discountPercent?: DecimalFilter<"SaleItem"> | Decimal | DecimalJsLike | number | string
+    voucherDiscountAmount?: DecimalFilter<"SaleItem"> | Decimal | DecimalJsLike | number | string
     taxAmount?: DecimalFilter<"SaleItem"> | Decimal | DecimalJsLike | number | string
     taxRate?: DecimalFilter<"SaleItem"> | Decimal | DecimalJsLike | number | string
     isTaxInclusive?: BoolFilter<"SaleItem"> | boolean
@@ -112532,6 +116580,7 @@ export namespace Prisma {
     leads?: LeadCreateNestedManyWithoutBranchInput
     users?: UserCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseCreateNestedManyWithoutBranchInput
+    customerVouchers?: CustomerVoucherCreateNestedManyWithoutBranchInput
   }
 
   export type BranchUncheckedCreateWithoutProductStocksInput = {
@@ -112570,6 +116619,7 @@ export namespace Prisma {
     leads?: LeadUncheckedCreateNestedManyWithoutBranchInput
     users?: UserUncheckedCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseUncheckedCreateNestedManyWithoutBranchInput
+    customerVouchers?: CustomerVoucherUncheckedCreateNestedManyWithoutBranchInput
   }
 
   export type BranchCreateOrConnectWithoutProductStocksInput = {
@@ -112707,6 +116757,7 @@ export namespace Prisma {
     leads?: LeadUpdateManyWithoutBranchNestedInput
     users?: UserUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUpdateManyWithoutBranchNestedInput
+    customerVouchers?: CustomerVoucherUpdateManyWithoutBranchNestedInput
   }
 
   export type BranchUncheckedUpdateWithoutProductStocksInput = {
@@ -112745,6 +116796,7 @@ export namespace Prisma {
     leads?: LeadUncheckedUpdateManyWithoutBranchNestedInput
     users?: UserUncheckedUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUncheckedUpdateManyWithoutBranchNestedInput
+    customerVouchers?: CustomerVoucherUncheckedUpdateManyWithoutBranchNestedInput
   }
 
   export type ProductUpsertWithoutStocksInput = {
@@ -112872,6 +116924,7 @@ export namespace Prisma {
     leads?: LeadCreateNestedManyWithoutBranchInput
     users?: UserCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseCreateNestedManyWithoutBranchInput
+    customerVouchers?: CustomerVoucherCreateNestedManyWithoutBranchInput
   }
 
   export type BranchUncheckedCreateWithoutPurchasesInput = {
@@ -112910,6 +116963,7 @@ export namespace Prisma {
     leads?: LeadUncheckedCreateNestedManyWithoutBranchInput
     users?: UserUncheckedCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseUncheckedCreateNestedManyWithoutBranchInput
+    customerVouchers?: CustomerVoucherUncheckedCreateNestedManyWithoutBranchInput
   }
 
   export type BranchCreateOrConnectWithoutPurchasesInput = {
@@ -113072,6 +117126,7 @@ export namespace Prisma {
     leads?: LeadUpdateManyWithoutBranchNestedInput
     users?: UserUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUpdateManyWithoutBranchNestedInput
+    customerVouchers?: CustomerVoucherUpdateManyWithoutBranchNestedInput
   }
 
   export type BranchUncheckedUpdateWithoutPurchasesInput = {
@@ -113110,6 +117165,7 @@ export namespace Prisma {
     leads?: LeadUncheckedUpdateManyWithoutBranchNestedInput
     users?: UserUncheckedUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUncheckedUpdateManyWithoutBranchNestedInput
+    customerVouchers?: CustomerVoucherUncheckedUpdateManyWithoutBranchNestedInput
   }
 
   export type FinancialYearUpsertWithoutPurchasesInput = {
@@ -113558,6 +117614,7 @@ export namespace Prisma {
     leads?: LeadCreateNestedManyWithoutBranchInput
     users?: UserCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseCreateNestedManyWithoutBranchInput
+    customerVouchers?: CustomerVoucherCreateNestedManyWithoutBranchInput
   }
 
   export type BranchUncheckedCreateWithoutSalesInput = {
@@ -113596,6 +117653,7 @@ export namespace Prisma {
     leads?: LeadUncheckedCreateNestedManyWithoutBranchInput
     users?: UserUncheckedCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseUncheckedCreateNestedManyWithoutBranchInput
+    customerVouchers?: CustomerVoucherUncheckedCreateNestedManyWithoutBranchInput
   }
 
   export type BranchCreateOrConnectWithoutSalesInput = {
@@ -113627,6 +117685,7 @@ export namespace Prisma {
     payments?: PaymentCreateNestedManyWithoutCustomerInput
     quotations?: QuotationCreateNestedManyWithoutCustomerInput
     tickets?: TicketCreateNestedManyWithoutCustomerInput
+    customerVouchers?: CustomerVoucherCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerUncheckedCreateWithoutSalesInput = {
@@ -113654,6 +117713,7 @@ export namespace Prisma {
     payments?: PaymentUncheckedCreateNestedManyWithoutCustomerInput
     quotations?: QuotationUncheckedCreateNestedManyWithoutCustomerInput
     tickets?: TicketUncheckedCreateNestedManyWithoutCustomerInput
+    customerVouchers?: CustomerVoucherUncheckedCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerCreateOrConnectWithoutSalesInput = {
@@ -113895,9 +117955,11 @@ export namespace Prisma {
     size?: string | null
     quantity: number
     unitPrice: Decimal | DecimalJsLike | number | string
+    originalUnitPrice?: Decimal | DecimalJsLike | number | string | null
     total: Decimal | DecimalJsLike | number | string
     discountAmount?: Decimal | DecimalJsLike | number | string
     discountPercent?: Decimal | DecimalJsLike | number | string
+    voucherDiscountAmount?: Decimal | DecimalJsLike | number | string
     taxAmount?: Decimal | DecimalJsLike | number | string
     taxRate?: Decimal | DecimalJsLike | number | string
     isTaxInclusive?: boolean
@@ -113910,9 +117972,11 @@ export namespace Prisma {
     size?: string | null
     quantity: number
     unitPrice: Decimal | DecimalJsLike | number | string
+    originalUnitPrice?: Decimal | DecimalJsLike | number | string | null
     total: Decimal | DecimalJsLike | number | string
     discountAmount?: Decimal | DecimalJsLike | number | string
     discountPercent?: Decimal | DecimalJsLike | number | string
+    voucherDiscountAmount?: Decimal | DecimalJsLike | number | string
     taxAmount?: Decimal | DecimalJsLike | number | string
     taxRate?: Decimal | DecimalJsLike | number | string
     isTaxInclusive?: boolean
@@ -114004,6 +118068,147 @@ export namespace Prisma {
     create: XOR<LeadCreateWithoutSaleInput, LeadUncheckedCreateWithoutSaleInput>
   }
 
+  export type CustomerVoucherCreateWithoutIssuedSaleInput = {
+    code: string
+    name: string
+    type: string
+    value: Decimal | DecimalJsLike | number | string
+    maximumDiscount?: Decimal | DecimalJsLike | number | string | null
+    minimumPurchaseAmount?: Decimal | DecimalJsLike | number | string
+    issueDate?: Date | string
+    expiryDate?: Date | string | null
+    status?: string
+    redeemedAt?: Date | string | null
+    usageLimit?: number
+    usageCount?: number
+    description?: string | null
+    createdBy?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    customer?: CustomerCreateNestedOneWithoutCustomerVouchersInput
+    branch?: BranchCreateNestedOneWithoutCustomerVouchersInput
+    redeemedSale?: SaleCreateNestedOneWithoutCustomerVouchersRedeemedInput
+    redemptions?: CustomerVoucherRedemptionCreateNestedManyWithoutVoucherInput
+  }
+
+  export type CustomerVoucherUncheckedCreateWithoutIssuedSaleInput = {
+    id?: number
+    code: string
+    name: string
+    type: string
+    value: Decimal | DecimalJsLike | number | string
+    maximumDiscount?: Decimal | DecimalJsLike | number | string | null
+    minimumPurchaseAmount?: Decimal | DecimalJsLike | number | string
+    issueDate?: Date | string
+    expiryDate?: Date | string | null
+    status?: string
+    customerId?: number | null
+    branchId?: number | null
+    redeemedSaleId?: number | null
+    redeemedAt?: Date | string | null
+    usageLimit?: number
+    usageCount?: number
+    description?: string | null
+    createdBy?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    redemptions?: CustomerVoucherRedemptionUncheckedCreateNestedManyWithoutVoucherInput
+  }
+
+  export type CustomerVoucherCreateOrConnectWithoutIssuedSaleInput = {
+    where: CustomerVoucherWhereUniqueInput
+    create: XOR<CustomerVoucherCreateWithoutIssuedSaleInput, CustomerVoucherUncheckedCreateWithoutIssuedSaleInput>
+  }
+
+  export type CustomerVoucherCreateManyIssuedSaleInputEnvelope = {
+    data: CustomerVoucherCreateManyIssuedSaleInput | CustomerVoucherCreateManyIssuedSaleInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type CustomerVoucherCreateWithoutRedeemedSaleInput = {
+    code: string
+    name: string
+    type: string
+    value: Decimal | DecimalJsLike | number | string
+    maximumDiscount?: Decimal | DecimalJsLike | number | string | null
+    minimumPurchaseAmount?: Decimal | DecimalJsLike | number | string
+    issueDate?: Date | string
+    expiryDate?: Date | string | null
+    status?: string
+    redeemedAt?: Date | string | null
+    usageLimit?: number
+    usageCount?: number
+    description?: string | null
+    createdBy?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    customer?: CustomerCreateNestedOneWithoutCustomerVouchersInput
+    branch?: BranchCreateNestedOneWithoutCustomerVouchersInput
+    issuedSale?: SaleCreateNestedOneWithoutCustomerVouchersIssuedInput
+    redemptions?: CustomerVoucherRedemptionCreateNestedManyWithoutVoucherInput
+  }
+
+  export type CustomerVoucherUncheckedCreateWithoutRedeemedSaleInput = {
+    id?: number
+    code: string
+    name: string
+    type: string
+    value: Decimal | DecimalJsLike | number | string
+    maximumDiscount?: Decimal | DecimalJsLike | number | string | null
+    minimumPurchaseAmount?: Decimal | DecimalJsLike | number | string
+    issueDate?: Date | string
+    expiryDate?: Date | string | null
+    status?: string
+    customerId?: number | null
+    branchId?: number | null
+    issuedSaleId?: number | null
+    redeemedAt?: Date | string | null
+    usageLimit?: number
+    usageCount?: number
+    description?: string | null
+    createdBy?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    redemptions?: CustomerVoucherRedemptionUncheckedCreateNestedManyWithoutVoucherInput
+  }
+
+  export type CustomerVoucherCreateOrConnectWithoutRedeemedSaleInput = {
+    where: CustomerVoucherWhereUniqueInput
+    create: XOR<CustomerVoucherCreateWithoutRedeemedSaleInput, CustomerVoucherUncheckedCreateWithoutRedeemedSaleInput>
+  }
+
+  export type CustomerVoucherCreateManyRedeemedSaleInputEnvelope = {
+    data: CustomerVoucherCreateManyRedeemedSaleInput | CustomerVoucherCreateManyRedeemedSaleInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type CustomerVoucherRedemptionCreateWithoutSaleInput = {
+    customerId?: number | null
+    branchId: number
+    discountAmount: Decimal | DecimalJsLike | number | string
+    redeemedAt?: Date | string
+    voucher: CustomerVoucherCreateNestedOneWithoutRedemptionsInput
+  }
+
+  export type CustomerVoucherRedemptionUncheckedCreateWithoutSaleInput = {
+    id?: number
+    voucherId: number
+    customerId?: number | null
+    branchId: number
+    discountAmount: Decimal | DecimalJsLike | number | string
+    redeemedAt?: Date | string
+  }
+
+  export type CustomerVoucherRedemptionCreateOrConnectWithoutSaleInput = {
+    where: CustomerVoucherRedemptionWhereUniqueInput
+    create: XOR<CustomerVoucherRedemptionCreateWithoutSaleInput, CustomerVoucherRedemptionUncheckedCreateWithoutSaleInput>
+  }
+
+  export type CustomerVoucherRedemptionCreateManySaleInputEnvelope = {
+    data: CustomerVoucherRedemptionCreateManySaleInput | CustomerVoucherRedemptionCreateManySaleInput[]
+    skipDuplicates?: boolean
+  }
+
   export type PaymentUpsertWithWhereUniqueWithoutSaleInput = {
     where: PaymentWhereUniqueInput
     update: XOR<PaymentUpdateWithoutSaleInput, PaymentUncheckedUpdateWithoutSaleInput>
@@ -114066,6 +118271,7 @@ export namespace Prisma {
     leads?: LeadUpdateManyWithoutBranchNestedInput
     users?: UserUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUpdateManyWithoutBranchNestedInput
+    customerVouchers?: CustomerVoucherUpdateManyWithoutBranchNestedInput
   }
 
   export type BranchUncheckedUpdateWithoutSalesInput = {
@@ -114104,6 +118310,7 @@ export namespace Prisma {
     leads?: LeadUncheckedUpdateManyWithoutBranchNestedInput
     users?: UserUncheckedUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUncheckedUpdateManyWithoutBranchNestedInput
+    customerVouchers?: CustomerVoucherUncheckedUpdateManyWithoutBranchNestedInput
   }
 
   export type CustomerUpsertWithoutSalesInput = {
@@ -114141,6 +118348,7 @@ export namespace Prisma {
     payments?: PaymentUpdateManyWithoutCustomerNestedInput
     quotations?: QuotationUpdateManyWithoutCustomerNestedInput
     tickets?: TicketUpdateManyWithoutCustomerNestedInput
+    customerVouchers?: CustomerVoucherUpdateManyWithoutCustomerNestedInput
   }
 
   export type CustomerUncheckedUpdateWithoutSalesInput = {
@@ -114168,6 +118376,7 @@ export namespace Prisma {
     payments?: PaymentUncheckedUpdateManyWithoutCustomerNestedInput
     quotations?: QuotationUncheckedUpdateManyWithoutCustomerNestedInput
     tickets?: TicketUncheckedUpdateManyWithoutCustomerNestedInput
+    customerVouchers?: CustomerVoucherUncheckedUpdateManyWithoutCustomerNestedInput
   }
 
   export type FinancialYearUpsertWithoutSalesInput = {
@@ -114522,6 +118731,67 @@ export namespace Prisma {
     referralPayments?: ReferralPaymentUncheckedUpdateManyWithoutLeadNestedInput
   }
 
+  export type CustomerVoucherUpsertWithWhereUniqueWithoutIssuedSaleInput = {
+    where: CustomerVoucherWhereUniqueInput
+    update: XOR<CustomerVoucherUpdateWithoutIssuedSaleInput, CustomerVoucherUncheckedUpdateWithoutIssuedSaleInput>
+    create: XOR<CustomerVoucherCreateWithoutIssuedSaleInput, CustomerVoucherUncheckedCreateWithoutIssuedSaleInput>
+  }
+
+  export type CustomerVoucherUpdateWithWhereUniqueWithoutIssuedSaleInput = {
+    where: CustomerVoucherWhereUniqueInput
+    data: XOR<CustomerVoucherUpdateWithoutIssuedSaleInput, CustomerVoucherUncheckedUpdateWithoutIssuedSaleInput>
+  }
+
+  export type CustomerVoucherUpdateManyWithWhereWithoutIssuedSaleInput = {
+    where: CustomerVoucherScalarWhereInput
+    data: XOR<CustomerVoucherUpdateManyMutationInput, CustomerVoucherUncheckedUpdateManyWithoutIssuedSaleInput>
+  }
+
+  export type CustomerVoucherUpsertWithWhereUniqueWithoutRedeemedSaleInput = {
+    where: CustomerVoucherWhereUniqueInput
+    update: XOR<CustomerVoucherUpdateWithoutRedeemedSaleInput, CustomerVoucherUncheckedUpdateWithoutRedeemedSaleInput>
+    create: XOR<CustomerVoucherCreateWithoutRedeemedSaleInput, CustomerVoucherUncheckedCreateWithoutRedeemedSaleInput>
+  }
+
+  export type CustomerVoucherUpdateWithWhereUniqueWithoutRedeemedSaleInput = {
+    where: CustomerVoucherWhereUniqueInput
+    data: XOR<CustomerVoucherUpdateWithoutRedeemedSaleInput, CustomerVoucherUncheckedUpdateWithoutRedeemedSaleInput>
+  }
+
+  export type CustomerVoucherUpdateManyWithWhereWithoutRedeemedSaleInput = {
+    where: CustomerVoucherScalarWhereInput
+    data: XOR<CustomerVoucherUpdateManyMutationInput, CustomerVoucherUncheckedUpdateManyWithoutRedeemedSaleInput>
+  }
+
+  export type CustomerVoucherRedemptionUpsertWithWhereUniqueWithoutSaleInput = {
+    where: CustomerVoucherRedemptionWhereUniqueInput
+    update: XOR<CustomerVoucherRedemptionUpdateWithoutSaleInput, CustomerVoucherRedemptionUncheckedUpdateWithoutSaleInput>
+    create: XOR<CustomerVoucherRedemptionCreateWithoutSaleInput, CustomerVoucherRedemptionUncheckedCreateWithoutSaleInput>
+  }
+
+  export type CustomerVoucherRedemptionUpdateWithWhereUniqueWithoutSaleInput = {
+    where: CustomerVoucherRedemptionWhereUniqueInput
+    data: XOR<CustomerVoucherRedemptionUpdateWithoutSaleInput, CustomerVoucherRedemptionUncheckedUpdateWithoutSaleInput>
+  }
+
+  export type CustomerVoucherRedemptionUpdateManyWithWhereWithoutSaleInput = {
+    where: CustomerVoucherRedemptionScalarWhereInput
+    data: XOR<CustomerVoucherRedemptionUpdateManyMutationInput, CustomerVoucherRedemptionUncheckedUpdateManyWithoutSaleInput>
+  }
+
+  export type CustomerVoucherRedemptionScalarWhereInput = {
+    AND?: CustomerVoucherRedemptionScalarWhereInput | CustomerVoucherRedemptionScalarWhereInput[]
+    OR?: CustomerVoucherRedemptionScalarWhereInput[]
+    NOT?: CustomerVoucherRedemptionScalarWhereInput | CustomerVoucherRedemptionScalarWhereInput[]
+    id?: IntFilter<"CustomerVoucherRedemption"> | number
+    voucherId?: IntFilter<"CustomerVoucherRedemption"> | number
+    saleId?: IntFilter<"CustomerVoucherRedemption"> | number
+    customerId?: IntNullableFilter<"CustomerVoucherRedemption"> | number | null
+    branchId?: IntFilter<"CustomerVoucherRedemption"> | number
+    discountAmount?: DecimalFilter<"CustomerVoucherRedemption"> | Decimal | DecimalJsLike | number | string
+    redeemedAt?: DateTimeFilter<"CustomerVoucherRedemption"> | Date | string
+  }
+
   export type ProductCreateWithoutSaleItemsInput = {
     name: string
     brandName?: string | null
@@ -114643,6 +118913,8 @@ export namespace Prisma {
     description?: string | null
     deliveryCharge?: Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: boolean
+    voucherCode?: string | null
+    voucherDiscount?: Decimal | DecimalJsLike | number | string
     payments?: PaymentCreateNestedManyWithoutSaleInput
     branch: BranchCreateNestedOneWithoutSalesInput
     customer?: CustomerCreateNestedOneWithoutSalesInput
@@ -114651,6 +118923,9 @@ export namespace Prisma {
     salesman?: UserCreateNestedOneWithoutSalesInput
     terminal?: TerminalCreateNestedOneWithoutSalesInput
     lead?: LeadCreateNestedOneWithoutSaleInput
+    customerVouchersIssued?: CustomerVoucherCreateNestedManyWithoutIssuedSaleInput
+    customerVouchersRedeemed?: CustomerVoucherCreateNestedManyWithoutRedeemedSaleInput
+    customerVoucherRedemptions?: CustomerVoucherRedemptionCreateNestedManyWithoutSaleInput
   }
 
   export type SaleUncheckedCreateWithoutItemsInput = {
@@ -114697,8 +118972,13 @@ export namespace Prisma {
     description?: string | null
     deliveryCharge?: Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: boolean
+    voucherCode?: string | null
+    voucherDiscount?: Decimal | DecimalJsLike | number | string
     payments?: PaymentUncheckedCreateNestedManyWithoutSaleInput
     lead?: LeadUncheckedCreateNestedOneWithoutSaleInput
+    customerVouchersIssued?: CustomerVoucherUncheckedCreateNestedManyWithoutIssuedSaleInput
+    customerVouchersRedeemed?: CustomerVoucherUncheckedCreateNestedManyWithoutRedeemedSaleInput
+    customerVoucherRedemptions?: CustomerVoucherRedemptionUncheckedCreateNestedManyWithoutSaleInput
   }
 
   export type SaleCreateOrConnectWithoutItemsInput = {
@@ -114844,6 +119124,8 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
+    voucherCode?: NullableStringFieldUpdateOperationsInput | string | null
+    voucherDiscount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     payments?: PaymentUpdateManyWithoutSaleNestedInput
     branch?: BranchUpdateOneRequiredWithoutSalesNestedInput
     customer?: CustomerUpdateOneWithoutSalesNestedInput
@@ -114852,6 +119134,9 @@ export namespace Prisma {
     salesman?: UserUpdateOneWithoutSalesNestedInput
     terminal?: TerminalUpdateOneWithoutSalesNestedInput
     lead?: LeadUpdateOneWithoutSaleNestedInput
+    customerVouchersIssued?: CustomerVoucherUpdateManyWithoutIssuedSaleNestedInput
+    customerVouchersRedeemed?: CustomerVoucherUpdateManyWithoutRedeemedSaleNestedInput
+    customerVoucherRedemptions?: CustomerVoucherRedemptionUpdateManyWithoutSaleNestedInput
   }
 
   export type SaleUncheckedUpdateWithoutItemsInput = {
@@ -114898,8 +119183,13 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
+    voucherCode?: NullableStringFieldUpdateOperationsInput | string | null
+    voucherDiscount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     payments?: PaymentUncheckedUpdateManyWithoutSaleNestedInput
     lead?: LeadUncheckedUpdateOneWithoutSaleNestedInput
+    customerVouchersIssued?: CustomerVoucherUncheckedUpdateManyWithoutIssuedSaleNestedInput
+    customerVouchersRedeemed?: CustomerVoucherUncheckedUpdateManyWithoutRedeemedSaleNestedInput
+    customerVoucherRedemptions?: CustomerVoucherRedemptionUncheckedUpdateManyWithoutSaleNestedInput
   }
 
   export type BranchCreateWithoutExpensesInput = {
@@ -114937,6 +119227,7 @@ export namespace Prisma {
     leads?: LeadCreateNestedManyWithoutBranchInput
     users?: UserCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseCreateNestedManyWithoutBranchInput
+    customerVouchers?: CustomerVoucherCreateNestedManyWithoutBranchInput
   }
 
   export type BranchUncheckedCreateWithoutExpensesInput = {
@@ -114975,6 +119266,7 @@ export namespace Prisma {
     leads?: LeadUncheckedCreateNestedManyWithoutBranchInput
     users?: UserUncheckedCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseUncheckedCreateNestedManyWithoutBranchInput
+    customerVouchers?: CustomerVoucherUncheckedCreateNestedManyWithoutBranchInput
   }
 
   export type BranchCreateOrConnectWithoutExpensesInput = {
@@ -115028,6 +119320,7 @@ export namespace Prisma {
     leads?: LeadUpdateManyWithoutBranchNestedInput
     users?: UserUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUpdateManyWithoutBranchNestedInput
+    customerVouchers?: CustomerVoucherUpdateManyWithoutBranchNestedInput
   }
 
   export type BranchUncheckedUpdateWithoutExpensesInput = {
@@ -115066,6 +119359,7 @@ export namespace Prisma {
     leads?: LeadUncheckedUpdateManyWithoutBranchNestedInput
     users?: UserUncheckedUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUncheckedUpdateManyWithoutBranchNestedInput
+    customerVouchers?: CustomerVoucherUncheckedUpdateManyWithoutBranchNestedInput
   }
 
   export type BranchCreateWithoutPaymentsInput = {
@@ -115103,6 +119397,7 @@ export namespace Prisma {
     leads?: LeadCreateNestedManyWithoutBranchInput
     users?: UserCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseCreateNestedManyWithoutBranchInput
+    customerVouchers?: CustomerVoucherCreateNestedManyWithoutBranchInput
   }
 
   export type BranchUncheckedCreateWithoutPaymentsInput = {
@@ -115141,6 +119436,7 @@ export namespace Prisma {
     leads?: LeadUncheckedCreateNestedManyWithoutBranchInput
     users?: UserUncheckedCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseUncheckedCreateNestedManyWithoutBranchInput
+    customerVouchers?: CustomerVoucherUncheckedCreateNestedManyWithoutBranchInput
   }
 
   export type BranchCreateOrConnectWithoutPaymentsInput = {
@@ -115172,6 +119468,7 @@ export namespace Prisma {
     quotations?: QuotationCreateNestedManyWithoutCustomerInput
     sales?: SaleCreateNestedManyWithoutCustomerInput
     tickets?: TicketCreateNestedManyWithoutCustomerInput
+    customerVouchers?: CustomerVoucherCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerUncheckedCreateWithoutPaymentsInput = {
@@ -115199,6 +119496,7 @@ export namespace Prisma {
     quotations?: QuotationUncheckedCreateNestedManyWithoutCustomerInput
     sales?: SaleUncheckedCreateNestedManyWithoutCustomerInput
     tickets?: TicketUncheckedCreateNestedManyWithoutCustomerInput
+    customerVouchers?: CustomerVoucherUncheckedCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerCreateOrConnectWithoutPaymentsInput = {
@@ -115293,6 +119591,8 @@ export namespace Prisma {
     description?: string | null
     deliveryCharge?: Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: boolean
+    voucherCode?: string | null
+    voucherDiscount?: Decimal | DecimalJsLike | number | string
     branch: BranchCreateNestedOneWithoutSalesInput
     customer?: CustomerCreateNestedOneWithoutSalesInput
     financialYear?: FinancialYearCreateNestedOneWithoutSalesInput
@@ -115301,6 +119601,9 @@ export namespace Prisma {
     terminal?: TerminalCreateNestedOneWithoutSalesInput
     items?: SaleItemCreateNestedManyWithoutSaleInput
     lead?: LeadCreateNestedOneWithoutSaleInput
+    customerVouchersIssued?: CustomerVoucherCreateNestedManyWithoutIssuedSaleInput
+    customerVouchersRedeemed?: CustomerVoucherCreateNestedManyWithoutRedeemedSaleInput
+    customerVoucherRedemptions?: CustomerVoucherRedemptionCreateNestedManyWithoutSaleInput
   }
 
   export type SaleUncheckedCreateWithoutPaymentsInput = {
@@ -115347,8 +119650,13 @@ export namespace Prisma {
     description?: string | null
     deliveryCharge?: Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: boolean
+    voucherCode?: string | null
+    voucherDiscount?: Decimal | DecimalJsLike | number | string
     items?: SaleItemUncheckedCreateNestedManyWithoutSaleInput
     lead?: LeadUncheckedCreateNestedOneWithoutSaleInput
+    customerVouchersIssued?: CustomerVoucherUncheckedCreateNestedManyWithoutIssuedSaleInput
+    customerVouchersRedeemed?: CustomerVoucherUncheckedCreateNestedManyWithoutRedeemedSaleInput
+    customerVoucherRedemptions?: CustomerVoucherRedemptionUncheckedCreateNestedManyWithoutSaleInput
   }
 
   export type SaleCreateOrConnectWithoutPaymentsInput = {
@@ -115434,6 +119742,7 @@ export namespace Prisma {
     leads?: LeadUpdateManyWithoutBranchNestedInput
     users?: UserUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUpdateManyWithoutBranchNestedInput
+    customerVouchers?: CustomerVoucherUpdateManyWithoutBranchNestedInput
   }
 
   export type BranchUncheckedUpdateWithoutPaymentsInput = {
@@ -115472,6 +119781,7 @@ export namespace Prisma {
     leads?: LeadUncheckedUpdateManyWithoutBranchNestedInput
     users?: UserUncheckedUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUncheckedUpdateManyWithoutBranchNestedInput
+    customerVouchers?: CustomerVoucherUncheckedUpdateManyWithoutBranchNestedInput
   }
 
   export type CustomerUpsertWithoutPaymentsInput = {
@@ -115509,6 +119819,7 @@ export namespace Prisma {
     quotations?: QuotationUpdateManyWithoutCustomerNestedInput
     sales?: SaleUpdateManyWithoutCustomerNestedInput
     tickets?: TicketUpdateManyWithoutCustomerNestedInput
+    customerVouchers?: CustomerVoucherUpdateManyWithoutCustomerNestedInput
   }
 
   export type CustomerUncheckedUpdateWithoutPaymentsInput = {
@@ -115536,6 +119847,7 @@ export namespace Prisma {
     quotations?: QuotationUncheckedUpdateManyWithoutCustomerNestedInput
     sales?: SaleUncheckedUpdateManyWithoutCustomerNestedInput
     tickets?: TicketUncheckedUpdateManyWithoutCustomerNestedInput
+    customerVouchers?: CustomerVoucherUncheckedUpdateManyWithoutCustomerNestedInput
   }
 
   export type QuotationUpsertWithoutPaymentsInput = {
@@ -115642,6 +119954,8 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
+    voucherCode?: NullableStringFieldUpdateOperationsInput | string | null
+    voucherDiscount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     branch?: BranchUpdateOneRequiredWithoutSalesNestedInput
     customer?: CustomerUpdateOneWithoutSalesNestedInput
     financialYear?: FinancialYearUpdateOneWithoutSalesNestedInput
@@ -115650,6 +119964,9 @@ export namespace Prisma {
     terminal?: TerminalUpdateOneWithoutSalesNestedInput
     items?: SaleItemUpdateManyWithoutSaleNestedInput
     lead?: LeadUpdateOneWithoutSaleNestedInput
+    customerVouchersIssued?: CustomerVoucherUpdateManyWithoutIssuedSaleNestedInput
+    customerVouchersRedeemed?: CustomerVoucherUpdateManyWithoutRedeemedSaleNestedInput
+    customerVoucherRedemptions?: CustomerVoucherRedemptionUpdateManyWithoutSaleNestedInput
   }
 
   export type SaleUncheckedUpdateWithoutPaymentsInput = {
@@ -115696,8 +120013,13 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
+    voucherCode?: NullableStringFieldUpdateOperationsInput | string | null
+    voucherDiscount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     items?: SaleItemUncheckedUpdateManyWithoutSaleNestedInput
     lead?: LeadUncheckedUpdateOneWithoutSaleNestedInput
+    customerVouchersIssued?: CustomerVoucherUncheckedUpdateManyWithoutIssuedSaleNestedInput
+    customerVouchersRedeemed?: CustomerVoucherUncheckedUpdateManyWithoutRedeemedSaleNestedInput
+    customerVoucherRedemptions?: CustomerVoucherRedemptionUncheckedUpdateManyWithoutSaleNestedInput
   }
 
   export type SupplierUpsertWithoutPaymentsInput = {
@@ -115814,6 +120136,7 @@ export namespace Prisma {
     leads?: LeadCreateNestedManyWithoutBranchInput
     users?: UserCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseCreateNestedManyWithoutBranchInput
+    customerVouchers?: CustomerVoucherCreateNestedManyWithoutBranchInput
   }
 
   export type BranchUncheckedCreateWithoutQuotationsInput = {
@@ -115852,6 +120175,7 @@ export namespace Prisma {
     leads?: LeadUncheckedCreateNestedManyWithoutBranchInput
     users?: UserUncheckedCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseUncheckedCreateNestedManyWithoutBranchInput
+    customerVouchers?: CustomerVoucherUncheckedCreateNestedManyWithoutBranchInput
   }
 
   export type BranchCreateOrConnectWithoutQuotationsInput = {
@@ -115883,6 +120207,7 @@ export namespace Prisma {
     payments?: PaymentCreateNestedManyWithoutCustomerInput
     sales?: SaleCreateNestedManyWithoutCustomerInput
     tickets?: TicketCreateNestedManyWithoutCustomerInput
+    customerVouchers?: CustomerVoucherCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerUncheckedCreateWithoutQuotationsInput = {
@@ -115910,6 +120235,7 @@ export namespace Prisma {
     payments?: PaymentUncheckedCreateNestedManyWithoutCustomerInput
     sales?: SaleUncheckedCreateNestedManyWithoutCustomerInput
     tickets?: TicketUncheckedCreateNestedManyWithoutCustomerInput
+    customerVouchers?: CustomerVoucherUncheckedCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerCreateOrConnectWithoutQuotationsInput = {
@@ -116037,6 +120363,8 @@ export namespace Prisma {
     description?: string | null
     deliveryCharge?: Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: boolean
+    voucherCode?: string | null
+    voucherDiscount?: Decimal | DecimalJsLike | number | string
     payments?: PaymentCreateNestedManyWithoutSaleInput
     branch: BranchCreateNestedOneWithoutSalesInput
     customer?: CustomerCreateNestedOneWithoutSalesInput
@@ -116045,6 +120373,9 @@ export namespace Prisma {
     terminal?: TerminalCreateNestedOneWithoutSalesInput
     items?: SaleItemCreateNestedManyWithoutSaleInput
     lead?: LeadCreateNestedOneWithoutSaleInput
+    customerVouchersIssued?: CustomerVoucherCreateNestedManyWithoutIssuedSaleInput
+    customerVouchersRedeemed?: CustomerVoucherCreateNestedManyWithoutRedeemedSaleInput
+    customerVoucherRedemptions?: CustomerVoucherRedemptionCreateNestedManyWithoutSaleInput
   }
 
   export type SaleUncheckedCreateWithoutQuotationInput = {
@@ -116090,9 +120421,14 @@ export namespace Prisma {
     description?: string | null
     deliveryCharge?: Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: boolean
+    voucherCode?: string | null
+    voucherDiscount?: Decimal | DecimalJsLike | number | string
     payments?: PaymentUncheckedCreateNestedManyWithoutSaleInput
     items?: SaleItemUncheckedCreateNestedManyWithoutSaleInput
     lead?: LeadUncheckedCreateNestedOneWithoutSaleInput
+    customerVouchersIssued?: CustomerVoucherUncheckedCreateNestedManyWithoutIssuedSaleInput
+    customerVouchersRedeemed?: CustomerVoucherUncheckedCreateNestedManyWithoutRedeemedSaleInput
+    customerVoucherRedemptions?: CustomerVoucherRedemptionUncheckedCreateNestedManyWithoutSaleInput
   }
 
   export type SaleCreateOrConnectWithoutQuotationInput = {
@@ -116238,6 +120574,7 @@ export namespace Prisma {
     leads?: LeadUpdateManyWithoutBranchNestedInput
     users?: UserUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUpdateManyWithoutBranchNestedInput
+    customerVouchers?: CustomerVoucherUpdateManyWithoutBranchNestedInput
   }
 
   export type BranchUncheckedUpdateWithoutQuotationsInput = {
@@ -116276,6 +120613,7 @@ export namespace Prisma {
     leads?: LeadUncheckedUpdateManyWithoutBranchNestedInput
     users?: UserUncheckedUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUncheckedUpdateManyWithoutBranchNestedInput
+    customerVouchers?: CustomerVoucherUncheckedUpdateManyWithoutBranchNestedInput
   }
 
   export type CustomerUpsertWithoutQuotationsInput = {
@@ -116313,6 +120651,7 @@ export namespace Prisma {
     payments?: PaymentUpdateManyWithoutCustomerNestedInput
     sales?: SaleUpdateManyWithoutCustomerNestedInput
     tickets?: TicketUpdateManyWithoutCustomerNestedInput
+    customerVouchers?: CustomerVoucherUpdateManyWithoutCustomerNestedInput
   }
 
   export type CustomerUncheckedUpdateWithoutQuotationsInput = {
@@ -116340,6 +120679,7 @@ export namespace Prisma {
     payments?: PaymentUncheckedUpdateManyWithoutCustomerNestedInput
     sales?: SaleUncheckedUpdateManyWithoutCustomerNestedInput
     tickets?: TicketUncheckedUpdateManyWithoutCustomerNestedInput
+    customerVouchers?: CustomerVoucherUncheckedUpdateManyWithoutCustomerNestedInput
   }
 
   export type FinancialYearUpsertWithoutQuotationsInput = {
@@ -116462,6 +120802,8 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
+    voucherCode?: NullableStringFieldUpdateOperationsInput | string | null
+    voucherDiscount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     payments?: PaymentUpdateManyWithoutSaleNestedInput
     branch?: BranchUpdateOneRequiredWithoutSalesNestedInput
     customer?: CustomerUpdateOneWithoutSalesNestedInput
@@ -116470,6 +120812,9 @@ export namespace Prisma {
     terminal?: TerminalUpdateOneWithoutSalesNestedInput
     items?: SaleItemUpdateManyWithoutSaleNestedInput
     lead?: LeadUpdateOneWithoutSaleNestedInput
+    customerVouchersIssued?: CustomerVoucherUpdateManyWithoutIssuedSaleNestedInput
+    customerVouchersRedeemed?: CustomerVoucherUpdateManyWithoutRedeemedSaleNestedInput
+    customerVoucherRedemptions?: CustomerVoucherRedemptionUpdateManyWithoutSaleNestedInput
   }
 
   export type SaleUncheckedUpdateWithoutQuotationInput = {
@@ -116515,9 +120860,14 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
+    voucherCode?: NullableStringFieldUpdateOperationsInput | string | null
+    voucherDiscount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     payments?: PaymentUncheckedUpdateManyWithoutSaleNestedInput
     items?: SaleItemUncheckedUpdateManyWithoutSaleNestedInput
     lead?: LeadUncheckedUpdateOneWithoutSaleNestedInput
+    customerVouchersIssued?: CustomerVoucherUncheckedUpdateManyWithoutIssuedSaleNestedInput
+    customerVouchersRedeemed?: CustomerVoucherUncheckedUpdateManyWithoutRedeemedSaleNestedInput
+    customerVoucherRedemptions?: CustomerVoucherRedemptionUncheckedUpdateManyWithoutSaleNestedInput
   }
 
   export type LeadUpsertWithoutQuotationInput = {
@@ -116917,6 +121267,7 @@ export namespace Prisma {
     leads?: LeadCreateNestedManyWithoutBranchInput
     users?: UserCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseCreateNestedManyWithoutBranchInput
+    customerVouchers?: CustomerVoucherCreateNestedManyWithoutBranchInput
   }
 
   export type BranchUncheckedCreateWithoutOutgoingTransfersInput = {
@@ -116955,6 +121306,7 @@ export namespace Prisma {
     leads?: LeadUncheckedCreateNestedManyWithoutBranchInput
     users?: UserUncheckedCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseUncheckedCreateNestedManyWithoutBranchInput
+    customerVouchers?: CustomerVoucherUncheckedCreateNestedManyWithoutBranchInput
   }
 
   export type BranchCreateOrConnectWithoutOutgoingTransfersInput = {
@@ -117097,6 +121449,7 @@ export namespace Prisma {
     leads?: LeadCreateNestedManyWithoutBranchInput
     users?: UserCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseCreateNestedManyWithoutBranchInput
+    customerVouchers?: CustomerVoucherCreateNestedManyWithoutBranchInput
   }
 
   export type BranchUncheckedCreateWithoutIncomingTransfersInput = {
@@ -117135,6 +121488,7 @@ export namespace Prisma {
     leads?: LeadUncheckedCreateNestedManyWithoutBranchInput
     users?: UserUncheckedCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseUncheckedCreateNestedManyWithoutBranchInput
+    customerVouchers?: CustomerVoucherUncheckedCreateNestedManyWithoutBranchInput
   }
 
   export type BranchCreateOrConnectWithoutIncomingTransfersInput = {
@@ -117217,6 +121571,7 @@ export namespace Prisma {
     leads?: LeadUpdateManyWithoutBranchNestedInput
     users?: UserUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUpdateManyWithoutBranchNestedInput
+    customerVouchers?: CustomerVoucherUpdateManyWithoutBranchNestedInput
   }
 
   export type BranchUncheckedUpdateWithoutOutgoingTransfersInput = {
@@ -117255,6 +121610,7 @@ export namespace Prisma {
     leads?: LeadUncheckedUpdateManyWithoutBranchNestedInput
     users?: UserUncheckedUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUncheckedUpdateManyWithoutBranchNestedInput
+    customerVouchers?: CustomerVoucherUncheckedUpdateManyWithoutBranchNestedInput
   }
 
   export type UserUpsertWithoutReceivedTransfersInput = {
@@ -117409,6 +121765,7 @@ export namespace Prisma {
     leads?: LeadUpdateManyWithoutBranchNestedInput
     users?: UserUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUpdateManyWithoutBranchNestedInput
+    customerVouchers?: CustomerVoucherUpdateManyWithoutBranchNestedInput
   }
 
   export type BranchUncheckedUpdateWithoutIncomingTransfersInput = {
@@ -117447,6 +121804,7 @@ export namespace Prisma {
     leads?: LeadUncheckedUpdateManyWithoutBranchNestedInput
     users?: UserUncheckedUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUncheckedUpdateManyWithoutBranchNestedInput
+    customerVouchers?: CustomerVoucherUncheckedUpdateManyWithoutBranchNestedInput
   }
 
   export type StockTransferItemUpsertWithWhereUniqueWithoutTransferInput = {
@@ -117740,6 +122098,7 @@ export namespace Prisma {
     leads?: LeadCreateNestedManyWithoutBranchInput
     users?: UserCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseCreateNestedManyWithoutBranchInput
+    customerVouchers?: CustomerVoucherCreateNestedManyWithoutBranchInput
   }
 
   export type BranchUncheckedCreateWithoutBarcodeSettingInput = {
@@ -117778,6 +122137,7 @@ export namespace Prisma {
     leads?: LeadUncheckedCreateNestedManyWithoutBranchInput
     users?: UserUncheckedCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseUncheckedCreateNestedManyWithoutBranchInput
+    customerVouchers?: CustomerVoucherUncheckedCreateNestedManyWithoutBranchInput
   }
 
   export type BranchCreateOrConnectWithoutBarcodeSettingInput = {
@@ -117831,6 +122191,7 @@ export namespace Prisma {
     leads?: LeadUpdateManyWithoutBranchNestedInput
     users?: UserUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUpdateManyWithoutBranchNestedInput
+    customerVouchers?: CustomerVoucherUpdateManyWithoutBranchNestedInput
   }
 
   export type BranchUncheckedUpdateWithoutBarcodeSettingInput = {
@@ -117869,6 +122230,7 @@ export namespace Prisma {
     leads?: LeadUncheckedUpdateManyWithoutBranchNestedInput
     users?: UserUncheckedUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUncheckedUpdateManyWithoutBranchNestedInput
+    customerVouchers?: CustomerVoucherUncheckedUpdateManyWithoutBranchNestedInput
   }
 
   export type CategoryCreateWithoutDefaultLabelDesignInput = {
@@ -118391,6 +122753,7 @@ export namespace Prisma {
     leads?: LeadCreateNestedManyWithoutBranchInput
     users?: UserCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseCreateNestedManyWithoutBranchInput
+    customerVouchers?: CustomerVoucherCreateNestedManyWithoutBranchInput
   }
 
   export type BranchUncheckedCreateWithoutAttendanceInput = {
@@ -118429,6 +122792,7 @@ export namespace Prisma {
     leads?: LeadUncheckedCreateNestedManyWithoutBranchInput
     users?: UserUncheckedCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseUncheckedCreateNestedManyWithoutBranchInput
+    customerVouchers?: CustomerVoucherUncheckedCreateNestedManyWithoutBranchInput
   }
 
   export type BranchCreateOrConnectWithoutAttendanceInput = {
@@ -118582,6 +122946,7 @@ export namespace Prisma {
     leads?: LeadUpdateManyWithoutBranchNestedInput
     users?: UserUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUpdateManyWithoutBranchNestedInput
+    customerVouchers?: CustomerVoucherUpdateManyWithoutBranchNestedInput
   }
 
   export type BranchUncheckedUpdateWithoutAttendanceInput = {
@@ -118620,6 +122985,7 @@ export namespace Prisma {
     leads?: LeadUncheckedUpdateManyWithoutBranchNestedInput
     users?: UserUncheckedUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUncheckedUpdateManyWithoutBranchNestedInput
+    customerVouchers?: CustomerVoucherUncheckedUpdateManyWithoutBranchNestedInput
   }
 
   export type UserUpsertWithoutAttendanceInput = {
@@ -118863,6 +123229,7 @@ export namespace Prisma {
     leads?: LeadCreateNestedManyWithoutBranchInput
     users?: UserCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseCreateNestedManyWithoutBranchInput
+    customerVouchers?: CustomerVoucherCreateNestedManyWithoutBranchInput
   }
 
   export type BranchUncheckedCreateWithoutLeaveRequestsInput = {
@@ -118901,6 +123268,7 @@ export namespace Prisma {
     leads?: LeadUncheckedCreateNestedManyWithoutBranchInput
     users?: UserUncheckedCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseUncheckedCreateNestedManyWithoutBranchInput
+    customerVouchers?: CustomerVoucherUncheckedCreateNestedManyWithoutBranchInput
   }
 
   export type BranchCreateOrConnectWithoutLeaveRequestsInput = {
@@ -119186,6 +123554,7 @@ export namespace Prisma {
     leads?: LeadUpdateManyWithoutBranchNestedInput
     users?: UserUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUpdateManyWithoutBranchNestedInput
+    customerVouchers?: CustomerVoucherUpdateManyWithoutBranchNestedInput
   }
 
   export type BranchUncheckedUpdateWithoutLeaveRequestsInput = {
@@ -119224,6 +123593,7 @@ export namespace Prisma {
     leads?: LeadUncheckedUpdateManyWithoutBranchNestedInput
     users?: UserUncheckedUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUncheckedUpdateManyWithoutBranchNestedInput
+    customerVouchers?: CustomerVoucherUncheckedUpdateManyWithoutBranchNestedInput
   }
 
   export type LeaveTypeUpsertWithoutRequestsInput = {
@@ -119452,6 +123822,7 @@ export namespace Prisma {
     leads?: LeadCreateNestedManyWithoutBranchInput
     users?: UserCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseCreateNestedManyWithoutBranchInput
+    customerVouchers?: CustomerVoucherCreateNestedManyWithoutBranchInput
   }
 
   export type BranchUncheckedCreateWithoutPayrollsInput = {
@@ -119490,6 +123861,7 @@ export namespace Prisma {
     leads?: LeadUncheckedCreateNestedManyWithoutBranchInput
     users?: UserUncheckedCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseUncheckedCreateNestedManyWithoutBranchInput
+    customerVouchers?: CustomerVoucherUncheckedCreateNestedManyWithoutBranchInput
   }
 
   export type BranchCreateOrConnectWithoutPayrollsInput = {
@@ -119720,6 +124092,7 @@ export namespace Prisma {
     leads?: LeadUpdateManyWithoutBranchNestedInput
     users?: UserUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUpdateManyWithoutBranchNestedInput
+    customerVouchers?: CustomerVoucherUpdateManyWithoutBranchNestedInput
   }
 
   export type BranchUncheckedUpdateWithoutPayrollsInput = {
@@ -119758,6 +124131,7 @@ export namespace Prisma {
     leads?: LeadUncheckedUpdateManyWithoutBranchNestedInput
     users?: UserUncheckedUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUncheckedUpdateManyWithoutBranchNestedInput
+    customerVouchers?: CustomerVoucherUncheckedUpdateManyWithoutBranchNestedInput
   }
 
   export type UserUpsertWithoutPayrollsInput = {
@@ -120185,6 +124559,7 @@ export namespace Prisma {
     workLogs?: WorkLogCreateNestedManyWithoutBranchInput
     users?: UserCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseCreateNestedManyWithoutBranchInput
+    customerVouchers?: CustomerVoucherCreateNestedManyWithoutBranchInput
   }
 
   export type BranchUncheckedCreateWithoutLeadsInput = {
@@ -120223,6 +124598,7 @@ export namespace Prisma {
     workLogs?: WorkLogUncheckedCreateNestedManyWithoutBranchInput
     users?: UserUncheckedCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseUncheckedCreateNestedManyWithoutBranchInput
+    customerVouchers?: CustomerVoucherUncheckedCreateNestedManyWithoutBranchInput
   }
 
   export type BranchCreateOrConnectWithoutLeadsInput = {
@@ -120501,6 +124877,8 @@ export namespace Prisma {
     description?: string | null
     deliveryCharge?: Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: boolean
+    voucherCode?: string | null
+    voucherDiscount?: Decimal | DecimalJsLike | number | string
     payments?: PaymentCreateNestedManyWithoutSaleInput
     branch: BranchCreateNestedOneWithoutSalesInput
     customer?: CustomerCreateNestedOneWithoutSalesInput
@@ -120509,6 +124887,9 @@ export namespace Prisma {
     salesman?: UserCreateNestedOneWithoutSalesInput
     terminal?: TerminalCreateNestedOneWithoutSalesInput
     items?: SaleItemCreateNestedManyWithoutSaleInput
+    customerVouchersIssued?: CustomerVoucherCreateNestedManyWithoutIssuedSaleInput
+    customerVouchersRedeemed?: CustomerVoucherCreateNestedManyWithoutRedeemedSaleInput
+    customerVoucherRedemptions?: CustomerVoucherRedemptionCreateNestedManyWithoutSaleInput
   }
 
   export type SaleUncheckedCreateWithoutLeadInput = {
@@ -120555,8 +124936,13 @@ export namespace Prisma {
     description?: string | null
     deliveryCharge?: Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: boolean
+    voucherCode?: string | null
+    voucherDiscount?: Decimal | DecimalJsLike | number | string
     payments?: PaymentUncheckedCreateNestedManyWithoutSaleInput
     items?: SaleItemUncheckedCreateNestedManyWithoutSaleInput
+    customerVouchersIssued?: CustomerVoucherUncheckedCreateNestedManyWithoutIssuedSaleInput
+    customerVouchersRedeemed?: CustomerVoucherUncheckedCreateNestedManyWithoutRedeemedSaleInput
+    customerVoucherRedemptions?: CustomerVoucherRedemptionUncheckedCreateNestedManyWithoutSaleInput
   }
 
   export type SaleCreateOrConnectWithoutLeadInput = {
@@ -120840,6 +125226,7 @@ export namespace Prisma {
     workLogs?: WorkLogUpdateManyWithoutBranchNestedInput
     users?: UserUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUpdateManyWithoutBranchNestedInput
+    customerVouchers?: CustomerVoucherUpdateManyWithoutBranchNestedInput
   }
 
   export type BranchUncheckedUpdateWithoutLeadsInput = {
@@ -120878,6 +125265,7 @@ export namespace Prisma {
     workLogs?: WorkLogUncheckedUpdateManyWithoutBranchNestedInput
     users?: UserUncheckedUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUncheckedUpdateManyWithoutBranchNestedInput
+    customerVouchers?: CustomerVoucherUncheckedUpdateManyWithoutBranchNestedInput
   }
 
   export type ProductUpsertWithoutLeadsInput = {
@@ -121180,6 +125568,8 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
+    voucherCode?: NullableStringFieldUpdateOperationsInput | string | null
+    voucherDiscount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     payments?: PaymentUpdateManyWithoutSaleNestedInput
     branch?: BranchUpdateOneRequiredWithoutSalesNestedInput
     customer?: CustomerUpdateOneWithoutSalesNestedInput
@@ -121188,6 +125578,9 @@ export namespace Prisma {
     salesman?: UserUpdateOneWithoutSalesNestedInput
     terminal?: TerminalUpdateOneWithoutSalesNestedInput
     items?: SaleItemUpdateManyWithoutSaleNestedInput
+    customerVouchersIssued?: CustomerVoucherUpdateManyWithoutIssuedSaleNestedInput
+    customerVouchersRedeemed?: CustomerVoucherUpdateManyWithoutRedeemedSaleNestedInput
+    customerVoucherRedemptions?: CustomerVoucherRedemptionUpdateManyWithoutSaleNestedInput
   }
 
   export type SaleUncheckedUpdateWithoutLeadInput = {
@@ -121234,8 +125627,13 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
+    voucherCode?: NullableStringFieldUpdateOperationsInput | string | null
+    voucherDiscount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     payments?: PaymentUncheckedUpdateManyWithoutSaleNestedInput
     items?: SaleItemUncheckedUpdateManyWithoutSaleNestedInput
+    customerVouchersIssued?: CustomerVoucherUncheckedUpdateManyWithoutIssuedSaleNestedInput
+    customerVouchersRedeemed?: CustomerVoucherUncheckedUpdateManyWithoutRedeemedSaleNestedInput
+    customerVoucherRedemptions?: CustomerVoucherRedemptionUncheckedUpdateManyWithoutSaleNestedInput
   }
 
   export type ReferralPaymentUpsertWithWhereUniqueWithoutLeadInput = {
@@ -122624,6 +127022,7 @@ export namespace Prisma {
     leads?: LeadCreateNestedManyWithoutBranchInput
     users?: UserCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseCreateNestedManyWithoutBranchInput
+    customerVouchers?: CustomerVoucherCreateNestedManyWithoutBranchInput
   }
 
   export type BranchUncheckedCreateWithoutMissPunchRequestsInput = {
@@ -122662,6 +127061,7 @@ export namespace Prisma {
     leads?: LeadUncheckedCreateNestedManyWithoutBranchInput
     users?: UserUncheckedCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseUncheckedCreateNestedManyWithoutBranchInput
+    customerVouchers?: CustomerVoucherUncheckedCreateNestedManyWithoutBranchInput
   }
 
   export type BranchCreateOrConnectWithoutMissPunchRequestsInput = {
@@ -122915,6 +127315,7 @@ export namespace Prisma {
     leads?: LeadUpdateManyWithoutBranchNestedInput
     users?: UserUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUpdateManyWithoutBranchNestedInput
+    customerVouchers?: CustomerVoucherUpdateManyWithoutBranchNestedInput
   }
 
   export type BranchUncheckedUpdateWithoutMissPunchRequestsInput = {
@@ -122953,6 +127354,7 @@ export namespace Prisma {
     leads?: LeadUncheckedUpdateManyWithoutBranchNestedInput
     users?: UserUncheckedUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUncheckedUpdateManyWithoutBranchNestedInput
+    customerVouchers?: CustomerVoucherUncheckedUpdateManyWithoutBranchNestedInput
   }
 
   export type UserUpsertWithoutReviewedMissPunchesInput = {
@@ -123302,6 +127704,7 @@ export namespace Prisma {
     leads?: LeadCreateNestedManyWithoutBranchInput
     users?: UserCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseCreateNestedManyWithoutBranchInput
+    customerVouchers?: CustomerVoucherCreateNestedManyWithoutBranchInput
   }
 
   export type BranchUncheckedCreateWithoutSalaryAdvancesInput = {
@@ -123340,6 +127743,7 @@ export namespace Prisma {
     leads?: LeadUncheckedCreateNestedManyWithoutBranchInput
     users?: UserUncheckedCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseUncheckedCreateNestedManyWithoutBranchInput
+    customerVouchers?: CustomerVoucherUncheckedCreateNestedManyWithoutBranchInput
   }
 
   export type BranchCreateOrConnectWithoutSalaryAdvancesInput = {
@@ -123675,6 +128079,7 @@ export namespace Prisma {
     leads?: LeadUpdateManyWithoutBranchNestedInput
     users?: UserUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUpdateManyWithoutBranchNestedInput
+    customerVouchers?: CustomerVoucherUpdateManyWithoutBranchNestedInput
   }
 
   export type BranchUncheckedUpdateWithoutSalaryAdvancesInput = {
@@ -123713,6 +128118,7 @@ export namespace Prisma {
     leads?: LeadUncheckedUpdateManyWithoutBranchNestedInput
     users?: UserUncheckedUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUncheckedUpdateManyWithoutBranchNestedInput
+    customerVouchers?: CustomerVoucherUncheckedUpdateManyWithoutBranchNestedInput
   }
 
   export type PayrollUpsertWithoutSalaryAdvancesInput = {
@@ -125108,6 +129514,7 @@ export namespace Prisma {
     leads?: LeadCreateNestedManyWithoutBranchInput
     users?: UserCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseCreateNestedManyWithoutBranchInput
+    customerVouchers?: CustomerVoucherCreateNestedManyWithoutBranchInput
   }
 
   export type BranchUncheckedCreateWithoutFinancialYearsInput = {
@@ -125146,6 +129553,7 @@ export namespace Prisma {
     leads?: LeadUncheckedCreateNestedManyWithoutBranchInput
     users?: UserUncheckedCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseUncheckedCreateNestedManyWithoutBranchInput
+    customerVouchers?: CustomerVoucherUncheckedCreateNestedManyWithoutBranchInput
   }
 
   export type BranchCreateOrConnectWithoutFinancialYearsInput = {
@@ -125290,6 +129698,8 @@ export namespace Prisma {
     description?: string | null
     deliveryCharge?: Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: boolean
+    voucherCode?: string | null
+    voucherDiscount?: Decimal | DecimalJsLike | number | string
     payments?: PaymentCreateNestedManyWithoutSaleInput
     branch: BranchCreateNestedOneWithoutSalesInput
     customer?: CustomerCreateNestedOneWithoutSalesInput
@@ -125298,6 +129708,9 @@ export namespace Prisma {
     terminal?: TerminalCreateNestedOneWithoutSalesInput
     items?: SaleItemCreateNestedManyWithoutSaleInput
     lead?: LeadCreateNestedOneWithoutSaleInput
+    customerVouchersIssued?: CustomerVoucherCreateNestedManyWithoutIssuedSaleInput
+    customerVouchersRedeemed?: CustomerVoucherCreateNestedManyWithoutRedeemedSaleInput
+    customerVoucherRedemptions?: CustomerVoucherRedemptionCreateNestedManyWithoutSaleInput
   }
 
   export type SaleUncheckedCreateWithoutFinancialYearInput = {
@@ -125343,9 +129756,14 @@ export namespace Prisma {
     description?: string | null
     deliveryCharge?: Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: boolean
+    voucherCode?: string | null
+    voucherDiscount?: Decimal | DecimalJsLike | number | string
     payments?: PaymentUncheckedCreateNestedManyWithoutSaleInput
     items?: SaleItemUncheckedCreateNestedManyWithoutSaleInput
     lead?: LeadUncheckedCreateNestedOneWithoutSaleInput
+    customerVouchersIssued?: CustomerVoucherUncheckedCreateNestedManyWithoutIssuedSaleInput
+    customerVouchersRedeemed?: CustomerVoucherUncheckedCreateNestedManyWithoutRedeemedSaleInput
+    customerVoucherRedemptions?: CustomerVoucherRedemptionUncheckedCreateNestedManyWithoutSaleInput
   }
 
   export type SaleCreateOrConnectWithoutFinancialYearInput = {
@@ -125420,6 +129838,7 @@ export namespace Prisma {
     leads?: LeadUpdateManyWithoutBranchNestedInput
     users?: UserUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUpdateManyWithoutBranchNestedInput
+    customerVouchers?: CustomerVoucherUpdateManyWithoutBranchNestedInput
   }
 
   export type BranchUncheckedUpdateWithoutFinancialYearsInput = {
@@ -125458,6 +129877,7 @@ export namespace Prisma {
     leads?: LeadUncheckedUpdateManyWithoutBranchNestedInput
     users?: UserUncheckedUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUncheckedUpdateManyWithoutBranchNestedInput
+    customerVouchers?: CustomerVoucherUncheckedUpdateManyWithoutBranchNestedInput
   }
 
   export type PurchaseUpsertWithWhereUniqueWithoutFinancialYearInput = {
@@ -125543,6 +129963,7 @@ export namespace Prisma {
     leads?: LeadCreateNestedManyWithoutBranchInput
     users?: UserCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseCreateNestedManyWithoutBranchInput
+    customerVouchers?: CustomerVoucherCreateNestedManyWithoutBranchInput
   }
 
   export type BranchUncheckedCreateWithoutChallansInput = {
@@ -125581,6 +130002,7 @@ export namespace Prisma {
     leads?: LeadUncheckedCreateNestedManyWithoutBranchInput
     users?: UserUncheckedCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseUncheckedCreateNestedManyWithoutBranchInput
+    customerVouchers?: CustomerVoucherUncheckedCreateNestedManyWithoutBranchInput
   }
 
   export type BranchCreateOrConnectWithoutChallansInput = {
@@ -125612,6 +130034,7 @@ export namespace Prisma {
     quotations?: QuotationCreateNestedManyWithoutCustomerInput
     sales?: SaleCreateNestedManyWithoutCustomerInput
     tickets?: TicketCreateNestedManyWithoutCustomerInput
+    customerVouchers?: CustomerVoucherCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerUncheckedCreateWithoutChallansInput = {
@@ -125639,6 +130062,7 @@ export namespace Prisma {
     quotations?: QuotationUncheckedCreateNestedManyWithoutCustomerInput
     sales?: SaleUncheckedCreateNestedManyWithoutCustomerInput
     tickets?: TicketUncheckedCreateNestedManyWithoutCustomerInput
+    customerVouchers?: CustomerVoucherUncheckedCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerCreateOrConnectWithoutChallansInput = {
@@ -125767,6 +130191,7 @@ export namespace Prisma {
     leads?: LeadUpdateManyWithoutBranchNestedInput
     users?: UserUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUpdateManyWithoutBranchNestedInput
+    customerVouchers?: CustomerVoucherUpdateManyWithoutBranchNestedInput
   }
 
   export type BranchUncheckedUpdateWithoutChallansInput = {
@@ -125805,6 +130230,7 @@ export namespace Prisma {
     leads?: LeadUncheckedUpdateManyWithoutBranchNestedInput
     users?: UserUncheckedUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUncheckedUpdateManyWithoutBranchNestedInput
+    customerVouchers?: CustomerVoucherUncheckedUpdateManyWithoutBranchNestedInput
   }
 
   export type CustomerUpsertWithoutChallansInput = {
@@ -125842,6 +130268,7 @@ export namespace Prisma {
     quotations?: QuotationUpdateManyWithoutCustomerNestedInput
     sales?: SaleUpdateManyWithoutCustomerNestedInput
     tickets?: TicketUpdateManyWithoutCustomerNestedInput
+    customerVouchers?: CustomerVoucherUpdateManyWithoutCustomerNestedInput
   }
 
   export type CustomerUncheckedUpdateWithoutChallansInput = {
@@ -125869,6 +130296,7 @@ export namespace Prisma {
     quotations?: QuotationUncheckedUpdateManyWithoutCustomerNestedInput
     sales?: SaleUncheckedUpdateManyWithoutCustomerNestedInput
     tickets?: TicketUncheckedUpdateManyWithoutCustomerNestedInput
+    customerVouchers?: CustomerVoucherUncheckedUpdateManyWithoutCustomerNestedInput
   }
 
   export type FinancialYearUpsertWithoutChallansInput = {
@@ -126363,6 +130791,8 @@ export namespace Prisma {
     description?: string | null
     deliveryCharge?: Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: boolean
+    voucherCode?: string | null
+    voucherDiscount?: Decimal | DecimalJsLike | number | string
     payments?: PaymentCreateNestedManyWithoutSaleInput
     branch: BranchCreateNestedOneWithoutSalesInput
     customer?: CustomerCreateNestedOneWithoutSalesInput
@@ -126371,6 +130801,9 @@ export namespace Prisma {
     salesman?: UserCreateNestedOneWithoutSalesInput
     items?: SaleItemCreateNestedManyWithoutSaleInput
     lead?: LeadCreateNestedOneWithoutSaleInput
+    customerVouchersIssued?: CustomerVoucherCreateNestedManyWithoutIssuedSaleInput
+    customerVouchersRedeemed?: CustomerVoucherCreateNestedManyWithoutRedeemedSaleInput
+    customerVoucherRedemptions?: CustomerVoucherRedemptionCreateNestedManyWithoutSaleInput
   }
 
   export type SaleUncheckedCreateWithoutTerminalInput = {
@@ -126416,9 +130849,14 @@ export namespace Prisma {
     description?: string | null
     deliveryCharge?: Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: boolean
+    voucherCode?: string | null
+    voucherDiscount?: Decimal | DecimalJsLike | number | string
     payments?: PaymentUncheckedCreateNestedManyWithoutSaleInput
     items?: SaleItemUncheckedCreateNestedManyWithoutSaleInput
     lead?: LeadUncheckedCreateNestedOneWithoutSaleInput
+    customerVouchersIssued?: CustomerVoucherUncheckedCreateNestedManyWithoutIssuedSaleInput
+    customerVouchersRedeemed?: CustomerVoucherUncheckedCreateNestedManyWithoutRedeemedSaleInput
+    customerVoucherRedemptions?: CustomerVoucherRedemptionUncheckedCreateNestedManyWithoutSaleInput
   }
 
   export type SaleCreateOrConnectWithoutTerminalInput = {
@@ -126466,6 +130904,7 @@ export namespace Prisma {
     leads?: LeadCreateNestedManyWithoutBranchInput
     users?: UserCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseCreateNestedManyWithoutBranchInput
+    customerVouchers?: CustomerVoucherCreateNestedManyWithoutBranchInput
   }
 
   export type BranchUncheckedCreateWithoutTerminalsInput = {
@@ -126504,6 +130943,7 @@ export namespace Prisma {
     leads?: LeadUncheckedCreateNestedManyWithoutBranchInput
     users?: UserUncheckedCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseUncheckedCreateNestedManyWithoutBranchInput
+    customerVouchers?: CustomerVoucherUncheckedCreateNestedManyWithoutBranchInput
   }
 
   export type BranchCreateOrConnectWithoutTerminalsInput = {
@@ -126673,6 +131113,7 @@ export namespace Prisma {
     leads?: LeadUpdateManyWithoutBranchNestedInput
     users?: UserUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUpdateManyWithoutBranchNestedInput
+    customerVouchers?: CustomerVoucherUpdateManyWithoutBranchNestedInput
   }
 
   export type BranchUncheckedUpdateWithoutTerminalsInput = {
@@ -126711,6 +131152,7 @@ export namespace Prisma {
     leads?: LeadUncheckedUpdateManyWithoutBranchNestedInput
     users?: UserUncheckedUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUncheckedUpdateManyWithoutBranchNestedInput
+    customerVouchers?: CustomerVoucherUncheckedUpdateManyWithoutBranchNestedInput
   }
 
   export type UserUpsertWithWhereUniqueWithoutTerminalsInput = {
@@ -127482,6 +131924,7 @@ export namespace Prisma {
     leads?: LeadCreateNestedManyWithoutBranchInput
     users?: UserCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseCreateNestedManyWithoutBranchInput
+    customerVouchers?: CustomerVoucherCreateNestedManyWithoutBranchInput
   }
 
   export type BranchUncheckedCreateWithoutWorkLogsInput = {
@@ -127520,6 +131963,7 @@ export namespace Prisma {
     leads?: LeadUncheckedCreateNestedManyWithoutBranchInput
     users?: UserUncheckedCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseUncheckedCreateNestedManyWithoutBranchInput
+    customerVouchers?: CustomerVoucherUncheckedCreateNestedManyWithoutBranchInput
   }
 
   export type BranchCreateOrConnectWithoutWorkLogsInput = {
@@ -127779,6 +132223,7 @@ export namespace Prisma {
     leads?: LeadUpdateManyWithoutBranchNestedInput
     users?: UserUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUpdateManyWithoutBranchNestedInput
+    customerVouchers?: CustomerVoucherUpdateManyWithoutBranchNestedInput
   }
 
   export type BranchUncheckedUpdateWithoutWorkLogsInput = {
@@ -127817,6 +132262,7 @@ export namespace Prisma {
     leads?: LeadUncheckedUpdateManyWithoutBranchNestedInput
     users?: UserUncheckedUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUncheckedUpdateManyWithoutBranchNestedInput
+    customerVouchers?: CustomerVoucherUncheckedUpdateManyWithoutBranchNestedInput
   }
 
   export type UserUpsertWithoutWorkLogsInput = {
@@ -128160,6 +132606,7 @@ export namespace Prisma {
     leads?: LeadCreateNestedManyWithoutBranchInput
     users?: UserCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseCreateNestedManyWithoutBranchInput
+    customerVouchers?: CustomerVoucherCreateNestedManyWithoutBranchInput
   }
 
   export type BranchUncheckedCreateWithoutTicketsInput = {
@@ -128198,6 +132645,7 @@ export namespace Prisma {
     leads?: LeadUncheckedCreateNestedManyWithoutBranchInput
     users?: UserUncheckedCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseUncheckedCreateNestedManyWithoutBranchInput
+    customerVouchers?: CustomerVoucherUncheckedCreateNestedManyWithoutBranchInput
   }
 
   export type BranchCreateOrConnectWithoutTicketsInput = {
@@ -128343,6 +132791,7 @@ export namespace Prisma {
     payments?: PaymentCreateNestedManyWithoutCustomerInput
     quotations?: QuotationCreateNestedManyWithoutCustomerInput
     sales?: SaleCreateNestedManyWithoutCustomerInput
+    customerVouchers?: CustomerVoucherCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerUncheckedCreateWithoutTicketsInput = {
@@ -128370,6 +132819,7 @@ export namespace Prisma {
     payments?: PaymentUncheckedCreateNestedManyWithoutCustomerInput
     quotations?: QuotationUncheckedCreateNestedManyWithoutCustomerInput
     sales?: SaleUncheckedCreateNestedManyWithoutCustomerInput
+    customerVouchers?: CustomerVoucherUncheckedCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerCreateOrConnectWithoutTicketsInput = {
@@ -128817,6 +133267,7 @@ export namespace Prisma {
     leads?: LeadUpdateManyWithoutBranchNestedInput
     users?: UserUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUpdateManyWithoutBranchNestedInput
+    customerVouchers?: CustomerVoucherUpdateManyWithoutBranchNestedInput
   }
 
   export type BranchUncheckedUpdateWithoutTicketsInput = {
@@ -128855,6 +133306,7 @@ export namespace Prisma {
     leads?: LeadUncheckedUpdateManyWithoutBranchNestedInput
     users?: UserUncheckedUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUncheckedUpdateManyWithoutBranchNestedInput
+    customerVouchers?: CustomerVoucherUncheckedUpdateManyWithoutBranchNestedInput
   }
 
   export type TicketCategoryUpsertWithoutTicketsInput = {
@@ -129018,6 +133470,7 @@ export namespace Prisma {
     payments?: PaymentUpdateManyWithoutCustomerNestedInput
     quotations?: QuotationUpdateManyWithoutCustomerNestedInput
     sales?: SaleUpdateManyWithoutCustomerNestedInput
+    customerVouchers?: CustomerVoucherUpdateManyWithoutCustomerNestedInput
   }
 
   export type CustomerUncheckedUpdateWithoutTicketsInput = {
@@ -129045,6 +133498,7 @@ export namespace Prisma {
     payments?: PaymentUncheckedUpdateManyWithoutCustomerNestedInput
     quotations?: QuotationUncheckedUpdateManyWithoutCustomerNestedInput
     sales?: SaleUncheckedUpdateManyWithoutCustomerNestedInput
+    customerVouchers?: CustomerVoucherUncheckedUpdateManyWithoutCustomerNestedInput
   }
 
   export type UserUpsertWithoutPreviousAssignedTicketsInput = {
@@ -130292,6 +134746,7 @@ export namespace Prisma {
     workLogs?: WorkLogCreateNestedManyWithoutBranchInput
     leads?: LeadCreateNestedManyWithoutBranchInput
     users?: UserCreateNestedManyWithoutBranchInput
+    customerVouchers?: CustomerVoucherCreateNestedManyWithoutBranchInput
   }
 
   export type BranchUncheckedCreateWithoutDayClosesInput = {
@@ -130330,6 +134785,7 @@ export namespace Prisma {
     workLogs?: WorkLogUncheckedCreateNestedManyWithoutBranchInput
     leads?: LeadUncheckedCreateNestedManyWithoutBranchInput
     users?: UserUncheckedCreateNestedManyWithoutBranchInput
+    customerVouchers?: CustomerVoucherUncheckedCreateNestedManyWithoutBranchInput
   }
 
   export type BranchCreateOrConnectWithoutDayClosesInput = {
@@ -130516,6 +134972,7 @@ export namespace Prisma {
     workLogs?: WorkLogUpdateManyWithoutBranchNestedInput
     leads?: LeadUpdateManyWithoutBranchNestedInput
     users?: UserUpdateManyWithoutBranchNestedInput
+    customerVouchers?: CustomerVoucherUpdateManyWithoutBranchNestedInput
   }
 
   export type BranchUncheckedUpdateWithoutDayClosesInput = {
@@ -130554,6 +135011,7 @@ export namespace Prisma {
     workLogs?: WorkLogUncheckedUpdateManyWithoutBranchNestedInput
     leads?: LeadUncheckedUpdateManyWithoutBranchNestedInput
     users?: UserUncheckedUpdateManyWithoutBranchNestedInput
+    customerVouchers?: CustomerVoucherUncheckedUpdateManyWithoutBranchNestedInput
   }
 
   export type UserUpsertWithoutDayCloseFinalizationsInput = {
@@ -130958,6 +135416,1133 @@ export namespace Prisma {
     dayCloseFinalizations?: DayCloseUncheckedUpdateManyWithoutFinalizedByNestedInput
   }
 
+  export type CustomerCreateWithoutCustomerVouchersInput = {
+    name: string
+    phone?: string | null
+    email?: string | null
+    address?: string | null
+    state?: string | null
+    area?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    city?: string | null
+    gstin?: string | null
+    partyType?: string
+    pincode?: string | null
+    accessPermissions?: NullableJsonNullValueInput | InputJsonValue
+    password?: string | null
+    role?: string
+    username?: string | null
+    advances?: AdvanceCreateNestedOneWithoutCustomerInput
+    advanceHistory?: AdvanceHistoryCreateNestedManyWithoutCustomerInput
+    branch?: BranchCreateNestedOneWithoutCustomersInput
+    challans?: DeliveryChallanCreateNestedManyWithoutCustomerInput
+    payments?: PaymentCreateNestedManyWithoutCustomerInput
+    quotations?: QuotationCreateNestedManyWithoutCustomerInput
+    sales?: SaleCreateNestedManyWithoutCustomerInput
+    tickets?: TicketCreateNestedManyWithoutCustomerInput
+  }
+
+  export type CustomerUncheckedCreateWithoutCustomerVouchersInput = {
+    id?: number
+    name: string
+    phone?: string | null
+    email?: string | null
+    address?: string | null
+    state?: string | null
+    area?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    branchId?: number | null
+    city?: string | null
+    gstin?: string | null
+    partyType?: string
+    pincode?: string | null
+    accessPermissions?: NullableJsonNullValueInput | InputJsonValue
+    password?: string | null
+    role?: string
+    username?: string | null
+    advances?: AdvanceUncheckedCreateNestedOneWithoutCustomerInput
+    advanceHistory?: AdvanceHistoryUncheckedCreateNestedManyWithoutCustomerInput
+    challans?: DeliveryChallanUncheckedCreateNestedManyWithoutCustomerInput
+    payments?: PaymentUncheckedCreateNestedManyWithoutCustomerInput
+    quotations?: QuotationUncheckedCreateNestedManyWithoutCustomerInput
+    sales?: SaleUncheckedCreateNestedManyWithoutCustomerInput
+    tickets?: TicketUncheckedCreateNestedManyWithoutCustomerInput
+  }
+
+  export type CustomerCreateOrConnectWithoutCustomerVouchersInput = {
+    where: CustomerWhereUniqueInput
+    create: XOR<CustomerCreateWithoutCustomerVouchersInput, CustomerUncheckedCreateWithoutCustomerVouchersInput>
+  }
+
+  export type BranchCreateWithoutCustomerVouchersInput = {
+    name: string
+    address?: string | null
+    phone?: string | null
+    email?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    invoiceSettings?: NullableJsonNullValueInput | InputJsonValue
+    stockIncluded?: boolean
+    invoiceTemplate?: string | null
+    currencyCode?: string | null
+    currencySymbol?: string | null
+    attendance?: AttendanceCreateNestedManyWithoutBranchInput
+    barcodeSetting?: BarcodeSettingCreateNestedOneWithoutBranchInput
+    customers?: CustomerCreateNestedManyWithoutBranchInput
+    challans?: DeliveryChallanCreateNestedManyWithoutBranchInput
+    expenses?: ExpenseCreateNestedManyWithoutBranchInput
+    financialYears?: FinancialYearCreateNestedManyWithoutBranchInput
+    leaveRequests?: LeaveRequestCreateNestedManyWithoutBranchInput
+    missPunchRequests?: MissPunchRequestCreateNestedManyWithoutBranchInput
+    payments?: PaymentCreateNestedManyWithoutBranchInput
+    payrolls?: PayrollCreateNestedManyWithoutBranchInput
+    productStocks?: ProductStockCreateNestedManyWithoutBranchInput
+    purchases?: PurchaseCreateNestedManyWithoutBranchInput
+    quotations?: QuotationCreateNestedManyWithoutBranchInput
+    salaryAdvances?: SalaryAdvanceCreateNestedManyWithoutBranchInput
+    sales?: SaleCreateNestedManyWithoutBranchInput
+    outgoingTransfers?: StockTransferCreateNestedManyWithoutFromBranchInput
+    incomingTransfers?: StockTransferCreateNestedManyWithoutToBranchInput
+    terminals?: TerminalCreateNestedManyWithoutBranchInput
+    tickets?: TicketCreateNestedManyWithoutBranchInput
+    workLogs?: WorkLogCreateNestedManyWithoutBranchInput
+    leads?: LeadCreateNestedManyWithoutBranchInput
+    users?: UserCreateNestedManyWithoutBranchInput
+    dayCloses?: DayCloseCreateNestedManyWithoutBranchInput
+  }
+
+  export type BranchUncheckedCreateWithoutCustomerVouchersInput = {
+    id?: number
+    name: string
+    address?: string | null
+    phone?: string | null
+    email?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    invoiceSettings?: NullableJsonNullValueInput | InputJsonValue
+    stockIncluded?: boolean
+    invoiceTemplate?: string | null
+    currencyCode?: string | null
+    currencySymbol?: string | null
+    attendance?: AttendanceUncheckedCreateNestedManyWithoutBranchInput
+    barcodeSetting?: BarcodeSettingUncheckedCreateNestedOneWithoutBranchInput
+    customers?: CustomerUncheckedCreateNestedManyWithoutBranchInput
+    challans?: DeliveryChallanUncheckedCreateNestedManyWithoutBranchInput
+    expenses?: ExpenseUncheckedCreateNestedManyWithoutBranchInput
+    financialYears?: FinancialYearUncheckedCreateNestedManyWithoutBranchInput
+    leaveRequests?: LeaveRequestUncheckedCreateNestedManyWithoutBranchInput
+    missPunchRequests?: MissPunchRequestUncheckedCreateNestedManyWithoutBranchInput
+    payments?: PaymentUncheckedCreateNestedManyWithoutBranchInput
+    payrolls?: PayrollUncheckedCreateNestedManyWithoutBranchInput
+    productStocks?: ProductStockUncheckedCreateNestedManyWithoutBranchInput
+    purchases?: PurchaseUncheckedCreateNestedManyWithoutBranchInput
+    quotations?: QuotationUncheckedCreateNestedManyWithoutBranchInput
+    salaryAdvances?: SalaryAdvanceUncheckedCreateNestedManyWithoutBranchInput
+    sales?: SaleUncheckedCreateNestedManyWithoutBranchInput
+    outgoingTransfers?: StockTransferUncheckedCreateNestedManyWithoutFromBranchInput
+    incomingTransfers?: StockTransferUncheckedCreateNestedManyWithoutToBranchInput
+    terminals?: TerminalUncheckedCreateNestedManyWithoutBranchInput
+    tickets?: TicketUncheckedCreateNestedManyWithoutBranchInput
+    workLogs?: WorkLogUncheckedCreateNestedManyWithoutBranchInput
+    leads?: LeadUncheckedCreateNestedManyWithoutBranchInput
+    users?: UserUncheckedCreateNestedManyWithoutBranchInput
+    dayCloses?: DayCloseUncheckedCreateNestedManyWithoutBranchInput
+  }
+
+  export type BranchCreateOrConnectWithoutCustomerVouchersInput = {
+    where: BranchWhereUniqueInput
+    create: XOR<BranchCreateWithoutCustomerVouchersInput, BranchUncheckedCreateWithoutCustomerVouchersInput>
+  }
+
+  export type SaleCreateWithoutCustomerVouchersIssuedInput = {
+    invoiceNumber: string
+    saleDate?: Date | string
+    subTotal: Decimal | DecimalJsLike | number | string
+    taxAmount: Decimal | DecimalJsLike | number | string
+    totalAmount: Decimal | DecimalJsLike | number | string
+    roundOffAmount?: Decimal | DecimalJsLike | number | string
+    paymentMethod?: string | null
+    status?: string
+    isReturn?: boolean
+    returnReason?: string | null
+    originalInvoice?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    balanceAmount?: Decimal | DecimalJsLike | number | string
+    paidAmount?: Decimal | DecimalJsLike | number | string
+    cancelledAt?: Date | string | null
+    cancelledBy?: string | null
+    cancelReason?: string | null
+    incentiveAmount?: Decimal | DecimalJsLike | number | string
+    ewayBillDate?: Date | string | null
+    ewayBillNumber?: string | null
+    isB2B?: boolean
+    placeOfSupply?: string | null
+    transportMode?: string | null
+    transporterId?: string | null
+    transporterName?: string | null
+    vehicleNumber?: string | null
+    isTaxInclusive?: boolean
+    isInvoice?: boolean
+    currencyCode?: string | null
+    exchangeRate?: Decimal | DecimalJsLike | number | string | null
+    discount?: number
+    advanceUsed?: Decimal | DecimalJsLike | number | string
+    description?: string | null
+    deliveryCharge?: Decimal | DecimalJsLike | number | string
+    hasDeliveryCharge?: boolean
+    voucherCode?: string | null
+    voucherDiscount?: Decimal | DecimalJsLike | number | string
+    payments?: PaymentCreateNestedManyWithoutSaleInput
+    branch: BranchCreateNestedOneWithoutSalesInput
+    customer?: CustomerCreateNestedOneWithoutSalesInput
+    financialYear?: FinancialYearCreateNestedOneWithoutSalesInput
+    quotation?: QuotationCreateNestedOneWithoutInvoiceInput
+    salesman?: UserCreateNestedOneWithoutSalesInput
+    terminal?: TerminalCreateNestedOneWithoutSalesInput
+    items?: SaleItemCreateNestedManyWithoutSaleInput
+    lead?: LeadCreateNestedOneWithoutSaleInput
+    customerVouchersRedeemed?: CustomerVoucherCreateNestedManyWithoutRedeemedSaleInput
+    customerVoucherRedemptions?: CustomerVoucherRedemptionCreateNestedManyWithoutSaleInput
+  }
+
+  export type SaleUncheckedCreateWithoutCustomerVouchersIssuedInput = {
+    id?: number
+    invoiceNumber: string
+    customerId?: number | null
+    saleDate?: Date | string
+    subTotal: Decimal | DecimalJsLike | number | string
+    taxAmount: Decimal | DecimalJsLike | number | string
+    totalAmount: Decimal | DecimalJsLike | number | string
+    roundOffAmount?: Decimal | DecimalJsLike | number | string
+    paymentMethod?: string | null
+    status?: string
+    isReturn?: boolean
+    returnReason?: string | null
+    originalInvoice?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    balanceAmount?: Decimal | DecimalJsLike | number | string
+    paidAmount?: Decimal | DecimalJsLike | number | string
+    cancelledAt?: Date | string | null
+    cancelledBy?: string | null
+    cancelReason?: string | null
+    branchId: number
+    salesmanId?: number | null
+    incentiveAmount?: Decimal | DecimalJsLike | number | string
+    ewayBillDate?: Date | string | null
+    ewayBillNumber?: string | null
+    isB2B?: boolean
+    placeOfSupply?: string | null
+    transportMode?: string | null
+    transporterId?: string | null
+    transporterName?: string | null
+    vehicleNumber?: string | null
+    isTaxInclusive?: boolean
+    terminalId?: number | null
+    financialYearId?: number | null
+    isInvoice?: boolean
+    quotationId?: number | null
+    currencyCode?: string | null
+    exchangeRate?: Decimal | DecimalJsLike | number | string | null
+    discount?: number
+    advanceUsed?: Decimal | DecimalJsLike | number | string
+    description?: string | null
+    deliveryCharge?: Decimal | DecimalJsLike | number | string
+    hasDeliveryCharge?: boolean
+    voucherCode?: string | null
+    voucherDiscount?: Decimal | DecimalJsLike | number | string
+    payments?: PaymentUncheckedCreateNestedManyWithoutSaleInput
+    items?: SaleItemUncheckedCreateNestedManyWithoutSaleInput
+    lead?: LeadUncheckedCreateNestedOneWithoutSaleInput
+    customerVouchersRedeemed?: CustomerVoucherUncheckedCreateNestedManyWithoutRedeemedSaleInput
+    customerVoucherRedemptions?: CustomerVoucherRedemptionUncheckedCreateNestedManyWithoutSaleInput
+  }
+
+  export type SaleCreateOrConnectWithoutCustomerVouchersIssuedInput = {
+    where: SaleWhereUniqueInput
+    create: XOR<SaleCreateWithoutCustomerVouchersIssuedInput, SaleUncheckedCreateWithoutCustomerVouchersIssuedInput>
+  }
+
+  export type SaleCreateWithoutCustomerVouchersRedeemedInput = {
+    invoiceNumber: string
+    saleDate?: Date | string
+    subTotal: Decimal | DecimalJsLike | number | string
+    taxAmount: Decimal | DecimalJsLike | number | string
+    totalAmount: Decimal | DecimalJsLike | number | string
+    roundOffAmount?: Decimal | DecimalJsLike | number | string
+    paymentMethod?: string | null
+    status?: string
+    isReturn?: boolean
+    returnReason?: string | null
+    originalInvoice?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    balanceAmount?: Decimal | DecimalJsLike | number | string
+    paidAmount?: Decimal | DecimalJsLike | number | string
+    cancelledAt?: Date | string | null
+    cancelledBy?: string | null
+    cancelReason?: string | null
+    incentiveAmount?: Decimal | DecimalJsLike | number | string
+    ewayBillDate?: Date | string | null
+    ewayBillNumber?: string | null
+    isB2B?: boolean
+    placeOfSupply?: string | null
+    transportMode?: string | null
+    transporterId?: string | null
+    transporterName?: string | null
+    vehicleNumber?: string | null
+    isTaxInclusive?: boolean
+    isInvoice?: boolean
+    currencyCode?: string | null
+    exchangeRate?: Decimal | DecimalJsLike | number | string | null
+    discount?: number
+    advanceUsed?: Decimal | DecimalJsLike | number | string
+    description?: string | null
+    deliveryCharge?: Decimal | DecimalJsLike | number | string
+    hasDeliveryCharge?: boolean
+    voucherCode?: string | null
+    voucherDiscount?: Decimal | DecimalJsLike | number | string
+    payments?: PaymentCreateNestedManyWithoutSaleInput
+    branch: BranchCreateNestedOneWithoutSalesInput
+    customer?: CustomerCreateNestedOneWithoutSalesInput
+    financialYear?: FinancialYearCreateNestedOneWithoutSalesInput
+    quotation?: QuotationCreateNestedOneWithoutInvoiceInput
+    salesman?: UserCreateNestedOneWithoutSalesInput
+    terminal?: TerminalCreateNestedOneWithoutSalesInput
+    items?: SaleItemCreateNestedManyWithoutSaleInput
+    lead?: LeadCreateNestedOneWithoutSaleInput
+    customerVouchersIssued?: CustomerVoucherCreateNestedManyWithoutIssuedSaleInput
+    customerVoucherRedemptions?: CustomerVoucherRedemptionCreateNestedManyWithoutSaleInput
+  }
+
+  export type SaleUncheckedCreateWithoutCustomerVouchersRedeemedInput = {
+    id?: number
+    invoiceNumber: string
+    customerId?: number | null
+    saleDate?: Date | string
+    subTotal: Decimal | DecimalJsLike | number | string
+    taxAmount: Decimal | DecimalJsLike | number | string
+    totalAmount: Decimal | DecimalJsLike | number | string
+    roundOffAmount?: Decimal | DecimalJsLike | number | string
+    paymentMethod?: string | null
+    status?: string
+    isReturn?: boolean
+    returnReason?: string | null
+    originalInvoice?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    balanceAmount?: Decimal | DecimalJsLike | number | string
+    paidAmount?: Decimal | DecimalJsLike | number | string
+    cancelledAt?: Date | string | null
+    cancelledBy?: string | null
+    cancelReason?: string | null
+    branchId: number
+    salesmanId?: number | null
+    incentiveAmount?: Decimal | DecimalJsLike | number | string
+    ewayBillDate?: Date | string | null
+    ewayBillNumber?: string | null
+    isB2B?: boolean
+    placeOfSupply?: string | null
+    transportMode?: string | null
+    transporterId?: string | null
+    transporterName?: string | null
+    vehicleNumber?: string | null
+    isTaxInclusive?: boolean
+    terminalId?: number | null
+    financialYearId?: number | null
+    isInvoice?: boolean
+    quotationId?: number | null
+    currencyCode?: string | null
+    exchangeRate?: Decimal | DecimalJsLike | number | string | null
+    discount?: number
+    advanceUsed?: Decimal | DecimalJsLike | number | string
+    description?: string | null
+    deliveryCharge?: Decimal | DecimalJsLike | number | string
+    hasDeliveryCharge?: boolean
+    voucherCode?: string | null
+    voucherDiscount?: Decimal | DecimalJsLike | number | string
+    payments?: PaymentUncheckedCreateNestedManyWithoutSaleInput
+    items?: SaleItemUncheckedCreateNestedManyWithoutSaleInput
+    lead?: LeadUncheckedCreateNestedOneWithoutSaleInput
+    customerVouchersIssued?: CustomerVoucherUncheckedCreateNestedManyWithoutIssuedSaleInput
+    customerVoucherRedemptions?: CustomerVoucherRedemptionUncheckedCreateNestedManyWithoutSaleInput
+  }
+
+  export type SaleCreateOrConnectWithoutCustomerVouchersRedeemedInput = {
+    where: SaleWhereUniqueInput
+    create: XOR<SaleCreateWithoutCustomerVouchersRedeemedInput, SaleUncheckedCreateWithoutCustomerVouchersRedeemedInput>
+  }
+
+  export type CustomerVoucherRedemptionCreateWithoutVoucherInput = {
+    customerId?: number | null
+    branchId: number
+    discountAmount: Decimal | DecimalJsLike | number | string
+    redeemedAt?: Date | string
+    sale: SaleCreateNestedOneWithoutCustomerVoucherRedemptionsInput
+  }
+
+  export type CustomerVoucherRedemptionUncheckedCreateWithoutVoucherInput = {
+    id?: number
+    saleId: number
+    customerId?: number | null
+    branchId: number
+    discountAmount: Decimal | DecimalJsLike | number | string
+    redeemedAt?: Date | string
+  }
+
+  export type CustomerVoucherRedemptionCreateOrConnectWithoutVoucherInput = {
+    where: CustomerVoucherRedemptionWhereUniqueInput
+    create: XOR<CustomerVoucherRedemptionCreateWithoutVoucherInput, CustomerVoucherRedemptionUncheckedCreateWithoutVoucherInput>
+  }
+
+  export type CustomerVoucherRedemptionCreateManyVoucherInputEnvelope = {
+    data: CustomerVoucherRedemptionCreateManyVoucherInput | CustomerVoucherRedemptionCreateManyVoucherInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type CustomerUpsertWithoutCustomerVouchersInput = {
+    update: XOR<CustomerUpdateWithoutCustomerVouchersInput, CustomerUncheckedUpdateWithoutCustomerVouchersInput>
+    create: XOR<CustomerCreateWithoutCustomerVouchersInput, CustomerUncheckedCreateWithoutCustomerVouchersInput>
+    where?: CustomerWhereInput
+  }
+
+  export type CustomerUpdateToOneWithWhereWithoutCustomerVouchersInput = {
+    where?: CustomerWhereInput
+    data: XOR<CustomerUpdateWithoutCustomerVouchersInput, CustomerUncheckedUpdateWithoutCustomerVouchersInput>
+  }
+
+  export type CustomerUpdateWithoutCustomerVouchersInput = {
+    name?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    state?: NullableStringFieldUpdateOperationsInput | string | null
+    area?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    gstin?: NullableStringFieldUpdateOperationsInput | string | null
+    partyType?: StringFieldUpdateOperationsInput | string
+    pincode?: NullableStringFieldUpdateOperationsInput | string | null
+    accessPermissions?: NullableJsonNullValueInput | InputJsonValue
+    password?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: StringFieldUpdateOperationsInput | string
+    username?: NullableStringFieldUpdateOperationsInput | string | null
+    advances?: AdvanceUpdateOneWithoutCustomerNestedInput
+    advanceHistory?: AdvanceHistoryUpdateManyWithoutCustomerNestedInput
+    branch?: BranchUpdateOneWithoutCustomersNestedInput
+    challans?: DeliveryChallanUpdateManyWithoutCustomerNestedInput
+    payments?: PaymentUpdateManyWithoutCustomerNestedInput
+    quotations?: QuotationUpdateManyWithoutCustomerNestedInput
+    sales?: SaleUpdateManyWithoutCustomerNestedInput
+    tickets?: TicketUpdateManyWithoutCustomerNestedInput
+  }
+
+  export type CustomerUncheckedUpdateWithoutCustomerVouchersInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    name?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    state?: NullableStringFieldUpdateOperationsInput | string | null
+    area?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    gstin?: NullableStringFieldUpdateOperationsInput | string | null
+    partyType?: StringFieldUpdateOperationsInput | string
+    pincode?: NullableStringFieldUpdateOperationsInput | string | null
+    accessPermissions?: NullableJsonNullValueInput | InputJsonValue
+    password?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: StringFieldUpdateOperationsInput | string
+    username?: NullableStringFieldUpdateOperationsInput | string | null
+    advances?: AdvanceUncheckedUpdateOneWithoutCustomerNestedInput
+    advanceHistory?: AdvanceHistoryUncheckedUpdateManyWithoutCustomerNestedInput
+    challans?: DeliveryChallanUncheckedUpdateManyWithoutCustomerNestedInput
+    payments?: PaymentUncheckedUpdateManyWithoutCustomerNestedInput
+    quotations?: QuotationUncheckedUpdateManyWithoutCustomerNestedInput
+    sales?: SaleUncheckedUpdateManyWithoutCustomerNestedInput
+    tickets?: TicketUncheckedUpdateManyWithoutCustomerNestedInput
+  }
+
+  export type BranchUpsertWithoutCustomerVouchersInput = {
+    update: XOR<BranchUpdateWithoutCustomerVouchersInput, BranchUncheckedUpdateWithoutCustomerVouchersInput>
+    create: XOR<BranchCreateWithoutCustomerVouchersInput, BranchUncheckedCreateWithoutCustomerVouchersInput>
+    where?: BranchWhereInput
+  }
+
+  export type BranchUpdateToOneWithWhereWithoutCustomerVouchersInput = {
+    where?: BranchWhereInput
+    data: XOR<BranchUpdateWithoutCustomerVouchersInput, BranchUncheckedUpdateWithoutCustomerVouchersInput>
+  }
+
+  export type BranchUpdateWithoutCustomerVouchersInput = {
+    name?: StringFieldUpdateOperationsInput | string
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    invoiceSettings?: NullableJsonNullValueInput | InputJsonValue
+    stockIncluded?: BoolFieldUpdateOperationsInput | boolean
+    invoiceTemplate?: NullableStringFieldUpdateOperationsInput | string | null
+    currencyCode?: NullableStringFieldUpdateOperationsInput | string | null
+    currencySymbol?: NullableStringFieldUpdateOperationsInput | string | null
+    attendance?: AttendanceUpdateManyWithoutBranchNestedInput
+    barcodeSetting?: BarcodeSettingUpdateOneWithoutBranchNestedInput
+    customers?: CustomerUpdateManyWithoutBranchNestedInput
+    challans?: DeliveryChallanUpdateManyWithoutBranchNestedInput
+    expenses?: ExpenseUpdateManyWithoutBranchNestedInput
+    financialYears?: FinancialYearUpdateManyWithoutBranchNestedInput
+    leaveRequests?: LeaveRequestUpdateManyWithoutBranchNestedInput
+    missPunchRequests?: MissPunchRequestUpdateManyWithoutBranchNestedInput
+    payments?: PaymentUpdateManyWithoutBranchNestedInput
+    payrolls?: PayrollUpdateManyWithoutBranchNestedInput
+    productStocks?: ProductStockUpdateManyWithoutBranchNestedInput
+    purchases?: PurchaseUpdateManyWithoutBranchNestedInput
+    quotations?: QuotationUpdateManyWithoutBranchNestedInput
+    salaryAdvances?: SalaryAdvanceUpdateManyWithoutBranchNestedInput
+    sales?: SaleUpdateManyWithoutBranchNestedInput
+    outgoingTransfers?: StockTransferUpdateManyWithoutFromBranchNestedInput
+    incomingTransfers?: StockTransferUpdateManyWithoutToBranchNestedInput
+    terminals?: TerminalUpdateManyWithoutBranchNestedInput
+    tickets?: TicketUpdateManyWithoutBranchNestedInput
+    workLogs?: WorkLogUpdateManyWithoutBranchNestedInput
+    leads?: LeadUpdateManyWithoutBranchNestedInput
+    users?: UserUpdateManyWithoutBranchNestedInput
+    dayCloses?: DayCloseUpdateManyWithoutBranchNestedInput
+  }
+
+  export type BranchUncheckedUpdateWithoutCustomerVouchersInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    name?: StringFieldUpdateOperationsInput | string
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    invoiceSettings?: NullableJsonNullValueInput | InputJsonValue
+    stockIncluded?: BoolFieldUpdateOperationsInput | boolean
+    invoiceTemplate?: NullableStringFieldUpdateOperationsInput | string | null
+    currencyCode?: NullableStringFieldUpdateOperationsInput | string | null
+    currencySymbol?: NullableStringFieldUpdateOperationsInput | string | null
+    attendance?: AttendanceUncheckedUpdateManyWithoutBranchNestedInput
+    barcodeSetting?: BarcodeSettingUncheckedUpdateOneWithoutBranchNestedInput
+    customers?: CustomerUncheckedUpdateManyWithoutBranchNestedInput
+    challans?: DeliveryChallanUncheckedUpdateManyWithoutBranchNestedInput
+    expenses?: ExpenseUncheckedUpdateManyWithoutBranchNestedInput
+    financialYears?: FinancialYearUncheckedUpdateManyWithoutBranchNestedInput
+    leaveRequests?: LeaveRequestUncheckedUpdateManyWithoutBranchNestedInput
+    missPunchRequests?: MissPunchRequestUncheckedUpdateManyWithoutBranchNestedInput
+    payments?: PaymentUncheckedUpdateManyWithoutBranchNestedInput
+    payrolls?: PayrollUncheckedUpdateManyWithoutBranchNestedInput
+    productStocks?: ProductStockUncheckedUpdateManyWithoutBranchNestedInput
+    purchases?: PurchaseUncheckedUpdateManyWithoutBranchNestedInput
+    quotations?: QuotationUncheckedUpdateManyWithoutBranchNestedInput
+    salaryAdvances?: SalaryAdvanceUncheckedUpdateManyWithoutBranchNestedInput
+    sales?: SaleUncheckedUpdateManyWithoutBranchNestedInput
+    outgoingTransfers?: StockTransferUncheckedUpdateManyWithoutFromBranchNestedInput
+    incomingTransfers?: StockTransferUncheckedUpdateManyWithoutToBranchNestedInput
+    terminals?: TerminalUncheckedUpdateManyWithoutBranchNestedInput
+    tickets?: TicketUncheckedUpdateManyWithoutBranchNestedInput
+    workLogs?: WorkLogUncheckedUpdateManyWithoutBranchNestedInput
+    leads?: LeadUncheckedUpdateManyWithoutBranchNestedInput
+    users?: UserUncheckedUpdateManyWithoutBranchNestedInput
+    dayCloses?: DayCloseUncheckedUpdateManyWithoutBranchNestedInput
+  }
+
+  export type SaleUpsertWithoutCustomerVouchersIssuedInput = {
+    update: XOR<SaleUpdateWithoutCustomerVouchersIssuedInput, SaleUncheckedUpdateWithoutCustomerVouchersIssuedInput>
+    create: XOR<SaleCreateWithoutCustomerVouchersIssuedInput, SaleUncheckedCreateWithoutCustomerVouchersIssuedInput>
+    where?: SaleWhereInput
+  }
+
+  export type SaleUpdateToOneWithWhereWithoutCustomerVouchersIssuedInput = {
+    where?: SaleWhereInput
+    data: XOR<SaleUpdateWithoutCustomerVouchersIssuedInput, SaleUncheckedUpdateWithoutCustomerVouchersIssuedInput>
+  }
+
+  export type SaleUpdateWithoutCustomerVouchersIssuedInput = {
+    invoiceNumber?: StringFieldUpdateOperationsInput | string
+    saleDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    subTotal?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    taxAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    totalAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    roundOffAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    paymentMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    isReturn?: BoolFieldUpdateOperationsInput | boolean
+    returnReason?: NullableStringFieldUpdateOperationsInput | string | null
+    originalInvoice?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    balanceAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    paidAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    cancelledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelledBy?: NullableStringFieldUpdateOperationsInput | string | null
+    cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+    incentiveAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    ewayBillDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ewayBillNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    isB2B?: BoolFieldUpdateOperationsInput | boolean
+    placeOfSupply?: NullableStringFieldUpdateOperationsInput | string | null
+    transportMode?: NullableStringFieldUpdateOperationsInput | string | null
+    transporterId?: NullableStringFieldUpdateOperationsInput | string | null
+    transporterName?: NullableStringFieldUpdateOperationsInput | string | null
+    vehicleNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    isTaxInclusive?: BoolFieldUpdateOperationsInput | boolean
+    isInvoice?: BoolFieldUpdateOperationsInput | boolean
+    currencyCode?: NullableStringFieldUpdateOperationsInput | string | null
+    exchangeRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    discount?: FloatFieldUpdateOperationsInput | number
+    advanceUsed?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
+    voucherCode?: NullableStringFieldUpdateOperationsInput | string | null
+    voucherDiscount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    payments?: PaymentUpdateManyWithoutSaleNestedInput
+    branch?: BranchUpdateOneRequiredWithoutSalesNestedInput
+    customer?: CustomerUpdateOneWithoutSalesNestedInput
+    financialYear?: FinancialYearUpdateOneWithoutSalesNestedInput
+    quotation?: QuotationUpdateOneWithoutInvoiceNestedInput
+    salesman?: UserUpdateOneWithoutSalesNestedInput
+    terminal?: TerminalUpdateOneWithoutSalesNestedInput
+    items?: SaleItemUpdateManyWithoutSaleNestedInput
+    lead?: LeadUpdateOneWithoutSaleNestedInput
+    customerVouchersRedeemed?: CustomerVoucherUpdateManyWithoutRedeemedSaleNestedInput
+    customerVoucherRedemptions?: CustomerVoucherRedemptionUpdateManyWithoutSaleNestedInput
+  }
+
+  export type SaleUncheckedUpdateWithoutCustomerVouchersIssuedInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    invoiceNumber?: StringFieldUpdateOperationsInput | string
+    customerId?: NullableIntFieldUpdateOperationsInput | number | null
+    saleDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    subTotal?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    taxAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    totalAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    roundOffAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    paymentMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    isReturn?: BoolFieldUpdateOperationsInput | boolean
+    returnReason?: NullableStringFieldUpdateOperationsInput | string | null
+    originalInvoice?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    balanceAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    paidAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    cancelledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelledBy?: NullableStringFieldUpdateOperationsInput | string | null
+    cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+    branchId?: IntFieldUpdateOperationsInput | number
+    salesmanId?: NullableIntFieldUpdateOperationsInput | number | null
+    incentiveAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    ewayBillDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ewayBillNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    isB2B?: BoolFieldUpdateOperationsInput | boolean
+    placeOfSupply?: NullableStringFieldUpdateOperationsInput | string | null
+    transportMode?: NullableStringFieldUpdateOperationsInput | string | null
+    transporterId?: NullableStringFieldUpdateOperationsInput | string | null
+    transporterName?: NullableStringFieldUpdateOperationsInput | string | null
+    vehicleNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    isTaxInclusive?: BoolFieldUpdateOperationsInput | boolean
+    terminalId?: NullableIntFieldUpdateOperationsInput | number | null
+    financialYearId?: NullableIntFieldUpdateOperationsInput | number | null
+    isInvoice?: BoolFieldUpdateOperationsInput | boolean
+    quotationId?: NullableIntFieldUpdateOperationsInput | number | null
+    currencyCode?: NullableStringFieldUpdateOperationsInput | string | null
+    exchangeRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    discount?: FloatFieldUpdateOperationsInput | number
+    advanceUsed?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
+    voucherCode?: NullableStringFieldUpdateOperationsInput | string | null
+    voucherDiscount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    payments?: PaymentUncheckedUpdateManyWithoutSaleNestedInput
+    items?: SaleItemUncheckedUpdateManyWithoutSaleNestedInput
+    lead?: LeadUncheckedUpdateOneWithoutSaleNestedInput
+    customerVouchersRedeemed?: CustomerVoucherUncheckedUpdateManyWithoutRedeemedSaleNestedInput
+    customerVoucherRedemptions?: CustomerVoucherRedemptionUncheckedUpdateManyWithoutSaleNestedInput
+  }
+
+  export type SaleUpsertWithoutCustomerVouchersRedeemedInput = {
+    update: XOR<SaleUpdateWithoutCustomerVouchersRedeemedInput, SaleUncheckedUpdateWithoutCustomerVouchersRedeemedInput>
+    create: XOR<SaleCreateWithoutCustomerVouchersRedeemedInput, SaleUncheckedCreateWithoutCustomerVouchersRedeemedInput>
+    where?: SaleWhereInput
+  }
+
+  export type SaleUpdateToOneWithWhereWithoutCustomerVouchersRedeemedInput = {
+    where?: SaleWhereInput
+    data: XOR<SaleUpdateWithoutCustomerVouchersRedeemedInput, SaleUncheckedUpdateWithoutCustomerVouchersRedeemedInput>
+  }
+
+  export type SaleUpdateWithoutCustomerVouchersRedeemedInput = {
+    invoiceNumber?: StringFieldUpdateOperationsInput | string
+    saleDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    subTotal?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    taxAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    totalAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    roundOffAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    paymentMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    isReturn?: BoolFieldUpdateOperationsInput | boolean
+    returnReason?: NullableStringFieldUpdateOperationsInput | string | null
+    originalInvoice?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    balanceAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    paidAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    cancelledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelledBy?: NullableStringFieldUpdateOperationsInput | string | null
+    cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+    incentiveAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    ewayBillDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ewayBillNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    isB2B?: BoolFieldUpdateOperationsInput | boolean
+    placeOfSupply?: NullableStringFieldUpdateOperationsInput | string | null
+    transportMode?: NullableStringFieldUpdateOperationsInput | string | null
+    transporterId?: NullableStringFieldUpdateOperationsInput | string | null
+    transporterName?: NullableStringFieldUpdateOperationsInput | string | null
+    vehicleNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    isTaxInclusive?: BoolFieldUpdateOperationsInput | boolean
+    isInvoice?: BoolFieldUpdateOperationsInput | boolean
+    currencyCode?: NullableStringFieldUpdateOperationsInput | string | null
+    exchangeRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    discount?: FloatFieldUpdateOperationsInput | number
+    advanceUsed?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
+    voucherCode?: NullableStringFieldUpdateOperationsInput | string | null
+    voucherDiscount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    payments?: PaymentUpdateManyWithoutSaleNestedInput
+    branch?: BranchUpdateOneRequiredWithoutSalesNestedInput
+    customer?: CustomerUpdateOneWithoutSalesNestedInput
+    financialYear?: FinancialYearUpdateOneWithoutSalesNestedInput
+    quotation?: QuotationUpdateOneWithoutInvoiceNestedInput
+    salesman?: UserUpdateOneWithoutSalesNestedInput
+    terminal?: TerminalUpdateOneWithoutSalesNestedInput
+    items?: SaleItemUpdateManyWithoutSaleNestedInput
+    lead?: LeadUpdateOneWithoutSaleNestedInput
+    customerVouchersIssued?: CustomerVoucherUpdateManyWithoutIssuedSaleNestedInput
+    customerVoucherRedemptions?: CustomerVoucherRedemptionUpdateManyWithoutSaleNestedInput
+  }
+
+  export type SaleUncheckedUpdateWithoutCustomerVouchersRedeemedInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    invoiceNumber?: StringFieldUpdateOperationsInput | string
+    customerId?: NullableIntFieldUpdateOperationsInput | number | null
+    saleDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    subTotal?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    taxAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    totalAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    roundOffAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    paymentMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    isReturn?: BoolFieldUpdateOperationsInput | boolean
+    returnReason?: NullableStringFieldUpdateOperationsInput | string | null
+    originalInvoice?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    balanceAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    paidAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    cancelledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelledBy?: NullableStringFieldUpdateOperationsInput | string | null
+    cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+    branchId?: IntFieldUpdateOperationsInput | number
+    salesmanId?: NullableIntFieldUpdateOperationsInput | number | null
+    incentiveAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    ewayBillDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ewayBillNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    isB2B?: BoolFieldUpdateOperationsInput | boolean
+    placeOfSupply?: NullableStringFieldUpdateOperationsInput | string | null
+    transportMode?: NullableStringFieldUpdateOperationsInput | string | null
+    transporterId?: NullableStringFieldUpdateOperationsInput | string | null
+    transporterName?: NullableStringFieldUpdateOperationsInput | string | null
+    vehicleNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    isTaxInclusive?: BoolFieldUpdateOperationsInput | boolean
+    terminalId?: NullableIntFieldUpdateOperationsInput | number | null
+    financialYearId?: NullableIntFieldUpdateOperationsInput | number | null
+    isInvoice?: BoolFieldUpdateOperationsInput | boolean
+    quotationId?: NullableIntFieldUpdateOperationsInput | number | null
+    currencyCode?: NullableStringFieldUpdateOperationsInput | string | null
+    exchangeRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    discount?: FloatFieldUpdateOperationsInput | number
+    advanceUsed?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
+    voucherCode?: NullableStringFieldUpdateOperationsInput | string | null
+    voucherDiscount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    payments?: PaymentUncheckedUpdateManyWithoutSaleNestedInput
+    items?: SaleItemUncheckedUpdateManyWithoutSaleNestedInput
+    lead?: LeadUncheckedUpdateOneWithoutSaleNestedInput
+    customerVouchersIssued?: CustomerVoucherUncheckedUpdateManyWithoutIssuedSaleNestedInput
+    customerVoucherRedemptions?: CustomerVoucherRedemptionUncheckedUpdateManyWithoutSaleNestedInput
+  }
+
+  export type CustomerVoucherRedemptionUpsertWithWhereUniqueWithoutVoucherInput = {
+    where: CustomerVoucherRedemptionWhereUniqueInput
+    update: XOR<CustomerVoucherRedemptionUpdateWithoutVoucherInput, CustomerVoucherRedemptionUncheckedUpdateWithoutVoucherInput>
+    create: XOR<CustomerVoucherRedemptionCreateWithoutVoucherInput, CustomerVoucherRedemptionUncheckedCreateWithoutVoucherInput>
+  }
+
+  export type CustomerVoucherRedemptionUpdateWithWhereUniqueWithoutVoucherInput = {
+    where: CustomerVoucherRedemptionWhereUniqueInput
+    data: XOR<CustomerVoucherRedemptionUpdateWithoutVoucherInput, CustomerVoucherRedemptionUncheckedUpdateWithoutVoucherInput>
+  }
+
+  export type CustomerVoucherRedemptionUpdateManyWithWhereWithoutVoucherInput = {
+    where: CustomerVoucherRedemptionScalarWhereInput
+    data: XOR<CustomerVoucherRedemptionUpdateManyMutationInput, CustomerVoucherRedemptionUncheckedUpdateManyWithoutVoucherInput>
+  }
+
+  export type CustomerVoucherCreateWithoutRedemptionsInput = {
+    code: string
+    name: string
+    type: string
+    value: Decimal | DecimalJsLike | number | string
+    maximumDiscount?: Decimal | DecimalJsLike | number | string | null
+    minimumPurchaseAmount?: Decimal | DecimalJsLike | number | string
+    issueDate?: Date | string
+    expiryDate?: Date | string | null
+    status?: string
+    redeemedAt?: Date | string | null
+    usageLimit?: number
+    usageCount?: number
+    description?: string | null
+    createdBy?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    customer?: CustomerCreateNestedOneWithoutCustomerVouchersInput
+    branch?: BranchCreateNestedOneWithoutCustomerVouchersInput
+    issuedSale?: SaleCreateNestedOneWithoutCustomerVouchersIssuedInput
+    redeemedSale?: SaleCreateNestedOneWithoutCustomerVouchersRedeemedInput
+  }
+
+  export type CustomerVoucherUncheckedCreateWithoutRedemptionsInput = {
+    id?: number
+    code: string
+    name: string
+    type: string
+    value: Decimal | DecimalJsLike | number | string
+    maximumDiscount?: Decimal | DecimalJsLike | number | string | null
+    minimumPurchaseAmount?: Decimal | DecimalJsLike | number | string
+    issueDate?: Date | string
+    expiryDate?: Date | string | null
+    status?: string
+    customerId?: number | null
+    branchId?: number | null
+    issuedSaleId?: number | null
+    redeemedSaleId?: number | null
+    redeemedAt?: Date | string | null
+    usageLimit?: number
+    usageCount?: number
+    description?: string | null
+    createdBy?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type CustomerVoucherCreateOrConnectWithoutRedemptionsInput = {
+    where: CustomerVoucherWhereUniqueInput
+    create: XOR<CustomerVoucherCreateWithoutRedemptionsInput, CustomerVoucherUncheckedCreateWithoutRedemptionsInput>
+  }
+
+  export type SaleCreateWithoutCustomerVoucherRedemptionsInput = {
+    invoiceNumber: string
+    saleDate?: Date | string
+    subTotal: Decimal | DecimalJsLike | number | string
+    taxAmount: Decimal | DecimalJsLike | number | string
+    totalAmount: Decimal | DecimalJsLike | number | string
+    roundOffAmount?: Decimal | DecimalJsLike | number | string
+    paymentMethod?: string | null
+    status?: string
+    isReturn?: boolean
+    returnReason?: string | null
+    originalInvoice?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    balanceAmount?: Decimal | DecimalJsLike | number | string
+    paidAmount?: Decimal | DecimalJsLike | number | string
+    cancelledAt?: Date | string | null
+    cancelledBy?: string | null
+    cancelReason?: string | null
+    incentiveAmount?: Decimal | DecimalJsLike | number | string
+    ewayBillDate?: Date | string | null
+    ewayBillNumber?: string | null
+    isB2B?: boolean
+    placeOfSupply?: string | null
+    transportMode?: string | null
+    transporterId?: string | null
+    transporterName?: string | null
+    vehicleNumber?: string | null
+    isTaxInclusive?: boolean
+    isInvoice?: boolean
+    currencyCode?: string | null
+    exchangeRate?: Decimal | DecimalJsLike | number | string | null
+    discount?: number
+    advanceUsed?: Decimal | DecimalJsLike | number | string
+    description?: string | null
+    deliveryCharge?: Decimal | DecimalJsLike | number | string
+    hasDeliveryCharge?: boolean
+    voucherCode?: string | null
+    voucherDiscount?: Decimal | DecimalJsLike | number | string
+    payments?: PaymentCreateNestedManyWithoutSaleInput
+    branch: BranchCreateNestedOneWithoutSalesInput
+    customer?: CustomerCreateNestedOneWithoutSalesInput
+    financialYear?: FinancialYearCreateNestedOneWithoutSalesInput
+    quotation?: QuotationCreateNestedOneWithoutInvoiceInput
+    salesman?: UserCreateNestedOneWithoutSalesInput
+    terminal?: TerminalCreateNestedOneWithoutSalesInput
+    items?: SaleItemCreateNestedManyWithoutSaleInput
+    lead?: LeadCreateNestedOneWithoutSaleInput
+    customerVouchersIssued?: CustomerVoucherCreateNestedManyWithoutIssuedSaleInput
+    customerVouchersRedeemed?: CustomerVoucherCreateNestedManyWithoutRedeemedSaleInput
+  }
+
+  export type SaleUncheckedCreateWithoutCustomerVoucherRedemptionsInput = {
+    id?: number
+    invoiceNumber: string
+    customerId?: number | null
+    saleDate?: Date | string
+    subTotal: Decimal | DecimalJsLike | number | string
+    taxAmount: Decimal | DecimalJsLike | number | string
+    totalAmount: Decimal | DecimalJsLike | number | string
+    roundOffAmount?: Decimal | DecimalJsLike | number | string
+    paymentMethod?: string | null
+    status?: string
+    isReturn?: boolean
+    returnReason?: string | null
+    originalInvoice?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    balanceAmount?: Decimal | DecimalJsLike | number | string
+    paidAmount?: Decimal | DecimalJsLike | number | string
+    cancelledAt?: Date | string | null
+    cancelledBy?: string | null
+    cancelReason?: string | null
+    branchId: number
+    salesmanId?: number | null
+    incentiveAmount?: Decimal | DecimalJsLike | number | string
+    ewayBillDate?: Date | string | null
+    ewayBillNumber?: string | null
+    isB2B?: boolean
+    placeOfSupply?: string | null
+    transportMode?: string | null
+    transporterId?: string | null
+    transporterName?: string | null
+    vehicleNumber?: string | null
+    isTaxInclusive?: boolean
+    terminalId?: number | null
+    financialYearId?: number | null
+    isInvoice?: boolean
+    quotationId?: number | null
+    currencyCode?: string | null
+    exchangeRate?: Decimal | DecimalJsLike | number | string | null
+    discount?: number
+    advanceUsed?: Decimal | DecimalJsLike | number | string
+    description?: string | null
+    deliveryCharge?: Decimal | DecimalJsLike | number | string
+    hasDeliveryCharge?: boolean
+    voucherCode?: string | null
+    voucherDiscount?: Decimal | DecimalJsLike | number | string
+    payments?: PaymentUncheckedCreateNestedManyWithoutSaleInput
+    items?: SaleItemUncheckedCreateNestedManyWithoutSaleInput
+    lead?: LeadUncheckedCreateNestedOneWithoutSaleInput
+    customerVouchersIssued?: CustomerVoucherUncheckedCreateNestedManyWithoutIssuedSaleInput
+    customerVouchersRedeemed?: CustomerVoucherUncheckedCreateNestedManyWithoutRedeemedSaleInput
+  }
+
+  export type SaleCreateOrConnectWithoutCustomerVoucherRedemptionsInput = {
+    where: SaleWhereUniqueInput
+    create: XOR<SaleCreateWithoutCustomerVoucherRedemptionsInput, SaleUncheckedCreateWithoutCustomerVoucherRedemptionsInput>
+  }
+
+  export type CustomerVoucherUpsertWithoutRedemptionsInput = {
+    update: XOR<CustomerVoucherUpdateWithoutRedemptionsInput, CustomerVoucherUncheckedUpdateWithoutRedemptionsInput>
+    create: XOR<CustomerVoucherCreateWithoutRedemptionsInput, CustomerVoucherUncheckedCreateWithoutRedemptionsInput>
+    where?: CustomerVoucherWhereInput
+  }
+
+  export type CustomerVoucherUpdateToOneWithWhereWithoutRedemptionsInput = {
+    where?: CustomerVoucherWhereInput
+    data: XOR<CustomerVoucherUpdateWithoutRedemptionsInput, CustomerVoucherUncheckedUpdateWithoutRedemptionsInput>
+  }
+
+  export type CustomerVoucherUpdateWithoutRedemptionsInput = {
+    code?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    value?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    maximumDiscount?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    minimumPurchaseAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    issueDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiryDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    redeemedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    usageLimit?: IntFieldUpdateOperationsInput | number
+    usageCount?: IntFieldUpdateOperationsInput | number
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    customer?: CustomerUpdateOneWithoutCustomerVouchersNestedInput
+    branch?: BranchUpdateOneWithoutCustomerVouchersNestedInput
+    issuedSale?: SaleUpdateOneWithoutCustomerVouchersIssuedNestedInput
+    redeemedSale?: SaleUpdateOneWithoutCustomerVouchersRedeemedNestedInput
+  }
+
+  export type CustomerVoucherUncheckedUpdateWithoutRedemptionsInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    code?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    value?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    maximumDiscount?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    minimumPurchaseAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    issueDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiryDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    customerId?: NullableIntFieldUpdateOperationsInput | number | null
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
+    issuedSaleId?: NullableIntFieldUpdateOperationsInput | number | null
+    redeemedSaleId?: NullableIntFieldUpdateOperationsInput | number | null
+    redeemedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    usageLimit?: IntFieldUpdateOperationsInput | number
+    usageCount?: IntFieldUpdateOperationsInput | number
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SaleUpsertWithoutCustomerVoucherRedemptionsInput = {
+    update: XOR<SaleUpdateWithoutCustomerVoucherRedemptionsInput, SaleUncheckedUpdateWithoutCustomerVoucherRedemptionsInput>
+    create: XOR<SaleCreateWithoutCustomerVoucherRedemptionsInput, SaleUncheckedCreateWithoutCustomerVoucherRedemptionsInput>
+    where?: SaleWhereInput
+  }
+
+  export type SaleUpdateToOneWithWhereWithoutCustomerVoucherRedemptionsInput = {
+    where?: SaleWhereInput
+    data: XOR<SaleUpdateWithoutCustomerVoucherRedemptionsInput, SaleUncheckedUpdateWithoutCustomerVoucherRedemptionsInput>
+  }
+
+  export type SaleUpdateWithoutCustomerVoucherRedemptionsInput = {
+    invoiceNumber?: StringFieldUpdateOperationsInput | string
+    saleDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    subTotal?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    taxAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    totalAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    roundOffAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    paymentMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    isReturn?: BoolFieldUpdateOperationsInput | boolean
+    returnReason?: NullableStringFieldUpdateOperationsInput | string | null
+    originalInvoice?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    balanceAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    paidAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    cancelledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelledBy?: NullableStringFieldUpdateOperationsInput | string | null
+    cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+    incentiveAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    ewayBillDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ewayBillNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    isB2B?: BoolFieldUpdateOperationsInput | boolean
+    placeOfSupply?: NullableStringFieldUpdateOperationsInput | string | null
+    transportMode?: NullableStringFieldUpdateOperationsInput | string | null
+    transporterId?: NullableStringFieldUpdateOperationsInput | string | null
+    transporterName?: NullableStringFieldUpdateOperationsInput | string | null
+    vehicleNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    isTaxInclusive?: BoolFieldUpdateOperationsInput | boolean
+    isInvoice?: BoolFieldUpdateOperationsInput | boolean
+    currencyCode?: NullableStringFieldUpdateOperationsInput | string | null
+    exchangeRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    discount?: FloatFieldUpdateOperationsInput | number
+    advanceUsed?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
+    voucherCode?: NullableStringFieldUpdateOperationsInput | string | null
+    voucherDiscount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    payments?: PaymentUpdateManyWithoutSaleNestedInput
+    branch?: BranchUpdateOneRequiredWithoutSalesNestedInput
+    customer?: CustomerUpdateOneWithoutSalesNestedInput
+    financialYear?: FinancialYearUpdateOneWithoutSalesNestedInput
+    quotation?: QuotationUpdateOneWithoutInvoiceNestedInput
+    salesman?: UserUpdateOneWithoutSalesNestedInput
+    terminal?: TerminalUpdateOneWithoutSalesNestedInput
+    items?: SaleItemUpdateManyWithoutSaleNestedInput
+    lead?: LeadUpdateOneWithoutSaleNestedInput
+    customerVouchersIssued?: CustomerVoucherUpdateManyWithoutIssuedSaleNestedInput
+    customerVouchersRedeemed?: CustomerVoucherUpdateManyWithoutRedeemedSaleNestedInput
+  }
+
+  export type SaleUncheckedUpdateWithoutCustomerVoucherRedemptionsInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    invoiceNumber?: StringFieldUpdateOperationsInput | string
+    customerId?: NullableIntFieldUpdateOperationsInput | number | null
+    saleDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    subTotal?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    taxAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    totalAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    roundOffAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    paymentMethod?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    isReturn?: BoolFieldUpdateOperationsInput | boolean
+    returnReason?: NullableStringFieldUpdateOperationsInput | string | null
+    originalInvoice?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    balanceAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    paidAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    cancelledAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    cancelledBy?: NullableStringFieldUpdateOperationsInput | string | null
+    cancelReason?: NullableStringFieldUpdateOperationsInput | string | null
+    branchId?: IntFieldUpdateOperationsInput | number
+    salesmanId?: NullableIntFieldUpdateOperationsInput | number | null
+    incentiveAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    ewayBillDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    ewayBillNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    isB2B?: BoolFieldUpdateOperationsInput | boolean
+    placeOfSupply?: NullableStringFieldUpdateOperationsInput | string | null
+    transportMode?: NullableStringFieldUpdateOperationsInput | string | null
+    transporterId?: NullableStringFieldUpdateOperationsInput | string | null
+    transporterName?: NullableStringFieldUpdateOperationsInput | string | null
+    vehicleNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    isTaxInclusive?: BoolFieldUpdateOperationsInput | boolean
+    terminalId?: NullableIntFieldUpdateOperationsInput | number | null
+    financialYearId?: NullableIntFieldUpdateOperationsInput | number | null
+    isInvoice?: BoolFieldUpdateOperationsInput | boolean
+    quotationId?: NullableIntFieldUpdateOperationsInput | number | null
+    currencyCode?: NullableStringFieldUpdateOperationsInput | string | null
+    exchangeRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    discount?: FloatFieldUpdateOperationsInput | number
+    advanceUsed?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
+    voucherCode?: NullableStringFieldUpdateOperationsInput | string | null
+    voucherDiscount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    payments?: PaymentUncheckedUpdateManyWithoutSaleNestedInput
+    items?: SaleItemUncheckedUpdateManyWithoutSaleNestedInput
+    lead?: LeadUncheckedUpdateOneWithoutSaleNestedInput
+    customerVouchersIssued?: CustomerVoucherUncheckedUpdateManyWithoutIssuedSaleNestedInput
+    customerVouchersRedeemed?: CustomerVoucherUncheckedUpdateManyWithoutRedeemedSaleNestedInput
+  }
+
   export type AttendanceCreateManyUserInput = {
     id?: number
     date?: Date | string
@@ -131175,6 +136760,8 @@ export namespace Prisma {
     description?: string | null
     deliveryCharge?: Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: boolean
+    voucherCode?: string | null
+    voucherDiscount?: Decimal | DecimalJsLike | number | string
   }
 
   export type StockTransferCreateManyReceivedByInput = {
@@ -131995,6 +137582,8 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
+    voucherCode?: NullableStringFieldUpdateOperationsInput | string | null
+    voucherDiscount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     payments?: PaymentUpdateManyWithoutSaleNestedInput
     branch?: BranchUpdateOneRequiredWithoutSalesNestedInput
     customer?: CustomerUpdateOneWithoutSalesNestedInput
@@ -132003,6 +137592,9 @@ export namespace Prisma {
     terminal?: TerminalUpdateOneWithoutSalesNestedInput
     items?: SaleItemUpdateManyWithoutSaleNestedInput
     lead?: LeadUpdateOneWithoutSaleNestedInput
+    customerVouchersIssued?: CustomerVoucherUpdateManyWithoutIssuedSaleNestedInput
+    customerVouchersRedeemed?: CustomerVoucherUpdateManyWithoutRedeemedSaleNestedInput
+    customerVoucherRedemptions?: CustomerVoucherRedemptionUpdateManyWithoutSaleNestedInput
   }
 
   export type SaleUncheckedUpdateWithoutSalesmanInput = {
@@ -132048,9 +137640,14 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
+    voucherCode?: NullableStringFieldUpdateOperationsInput | string | null
+    voucherDiscount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     payments?: PaymentUncheckedUpdateManyWithoutSaleNestedInput
     items?: SaleItemUncheckedUpdateManyWithoutSaleNestedInput
     lead?: LeadUncheckedUpdateOneWithoutSaleNestedInput
+    customerVouchersIssued?: CustomerVoucherUncheckedUpdateManyWithoutIssuedSaleNestedInput
+    customerVouchersRedeemed?: CustomerVoucherUncheckedUpdateManyWithoutRedeemedSaleNestedInput
+    customerVoucherRedemptions?: CustomerVoucherRedemptionUncheckedUpdateManyWithoutSaleNestedInput
   }
 
   export type SaleUncheckedUpdateManyWithoutSalesmanInput = {
@@ -132096,6 +137693,8 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
+    voucherCode?: NullableStringFieldUpdateOperationsInput | string | null
+    voucherDiscount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
   }
 
   export type StockTransferUpdateWithoutReceivedByInput = {
@@ -133289,6 +138888,8 @@ export namespace Prisma {
     description?: string | null
     deliveryCharge?: Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: boolean
+    voucherCode?: string | null
+    voucherDiscount?: Decimal | DecimalJsLike | number | string
   }
 
   export type StockTransferCreateManyFromBranchInput = {
@@ -133420,6 +139021,29 @@ export namespace Prisma {
     updatedAt?: Date | string
   }
 
+  export type CustomerVoucherCreateManyBranchInput = {
+    id?: number
+    code: string
+    name: string
+    type: string
+    value: Decimal | DecimalJsLike | number | string
+    maximumDiscount?: Decimal | DecimalJsLike | number | string | null
+    minimumPurchaseAmount?: Decimal | DecimalJsLike | number | string
+    issueDate?: Date | string
+    expiryDate?: Date | string | null
+    status?: string
+    customerId?: number | null
+    issuedSaleId?: number | null
+    redeemedSaleId?: number | null
+    redeemedAt?: Date | string | null
+    usageLimit?: number
+    usageCount?: number
+    description?: string | null
+    createdBy?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
   export type AttendanceUpdateWithoutBranchInput = {
     date?: DateTimeFieldUpdateOperationsInput | Date | string
     checkIn?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -133476,6 +139100,7 @@ export namespace Prisma {
     quotations?: QuotationUpdateManyWithoutCustomerNestedInput
     sales?: SaleUpdateManyWithoutCustomerNestedInput
     tickets?: TicketUpdateManyWithoutCustomerNestedInput
+    customerVouchers?: CustomerVoucherUpdateManyWithoutCustomerNestedInput
   }
 
   export type CustomerUncheckedUpdateWithoutBranchInput = {
@@ -133503,6 +139128,7 @@ export namespace Prisma {
     quotations?: QuotationUncheckedUpdateManyWithoutCustomerNestedInput
     sales?: SaleUncheckedUpdateManyWithoutCustomerNestedInput
     tickets?: TicketUncheckedUpdateManyWithoutCustomerNestedInput
+    customerVouchers?: CustomerVoucherUncheckedUpdateManyWithoutCustomerNestedInput
   }
 
   export type CustomerUncheckedUpdateManyWithoutBranchInput = {
@@ -134083,6 +139709,8 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
+    voucherCode?: NullableStringFieldUpdateOperationsInput | string | null
+    voucherDiscount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     payments?: PaymentUpdateManyWithoutSaleNestedInput
     customer?: CustomerUpdateOneWithoutSalesNestedInput
     financialYear?: FinancialYearUpdateOneWithoutSalesNestedInput
@@ -134091,6 +139719,9 @@ export namespace Prisma {
     terminal?: TerminalUpdateOneWithoutSalesNestedInput
     items?: SaleItemUpdateManyWithoutSaleNestedInput
     lead?: LeadUpdateOneWithoutSaleNestedInput
+    customerVouchersIssued?: CustomerVoucherUpdateManyWithoutIssuedSaleNestedInput
+    customerVouchersRedeemed?: CustomerVoucherUpdateManyWithoutRedeemedSaleNestedInput
+    customerVoucherRedemptions?: CustomerVoucherRedemptionUpdateManyWithoutSaleNestedInput
   }
 
   export type SaleUncheckedUpdateWithoutBranchInput = {
@@ -134136,9 +139767,14 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
+    voucherCode?: NullableStringFieldUpdateOperationsInput | string | null
+    voucherDiscount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     payments?: PaymentUncheckedUpdateManyWithoutSaleNestedInput
     items?: SaleItemUncheckedUpdateManyWithoutSaleNestedInput
     lead?: LeadUncheckedUpdateOneWithoutSaleNestedInput
+    customerVouchersIssued?: CustomerVoucherUncheckedUpdateManyWithoutIssuedSaleNestedInput
+    customerVouchersRedeemed?: CustomerVoucherUncheckedUpdateManyWithoutRedeemedSaleNestedInput
+    customerVoucherRedemptions?: CustomerVoucherRedemptionUncheckedUpdateManyWithoutSaleNestedInput
   }
 
   export type SaleUncheckedUpdateManyWithoutBranchInput = {
@@ -134184,6 +139820,8 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
+    voucherCode?: NullableStringFieldUpdateOperationsInput | string | null
+    voucherDiscount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
   }
 
   export type StockTransferUpdateWithoutFromBranchInput = {
@@ -134656,6 +140294,76 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type CustomerVoucherUpdateWithoutBranchInput = {
+    code?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    value?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    maximumDiscount?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    minimumPurchaseAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    issueDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiryDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    redeemedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    usageLimit?: IntFieldUpdateOperationsInput | number
+    usageCount?: IntFieldUpdateOperationsInput | number
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    customer?: CustomerUpdateOneWithoutCustomerVouchersNestedInput
+    issuedSale?: SaleUpdateOneWithoutCustomerVouchersIssuedNestedInput
+    redeemedSale?: SaleUpdateOneWithoutCustomerVouchersRedeemedNestedInput
+    redemptions?: CustomerVoucherRedemptionUpdateManyWithoutVoucherNestedInput
+  }
+
+  export type CustomerVoucherUncheckedUpdateWithoutBranchInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    code?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    value?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    maximumDiscount?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    minimumPurchaseAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    issueDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiryDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    customerId?: NullableIntFieldUpdateOperationsInput | number | null
+    issuedSaleId?: NullableIntFieldUpdateOperationsInput | number | null
+    redeemedSaleId?: NullableIntFieldUpdateOperationsInput | number | null
+    redeemedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    usageLimit?: IntFieldUpdateOperationsInput | number
+    usageCount?: IntFieldUpdateOperationsInput | number
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    redemptions?: CustomerVoucherRedemptionUncheckedUpdateManyWithoutVoucherNestedInput
+  }
+
+  export type CustomerVoucherUncheckedUpdateManyWithoutBranchInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    code?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    value?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    maximumDiscount?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    minimumPurchaseAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    issueDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiryDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    customerId?: NullableIntFieldUpdateOperationsInput | number | null
+    issuedSaleId?: NullableIntFieldUpdateOperationsInput | number | null
+    redeemedSaleId?: NullableIntFieldUpdateOperationsInput | number | null
+    redeemedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    usageLimit?: IntFieldUpdateOperationsInput | number
+    usageCount?: IntFieldUpdateOperationsInput | number
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type AdvanceHistoryCreateManyCustomerInput = {
     id?: string
     advanceId: string
@@ -134766,6 +140474,8 @@ export namespace Prisma {
     description?: string | null
     deliveryCharge?: Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: boolean
+    voucherCode?: string | null
+    voucherDiscount?: Decimal | DecimalJsLike | number | string
   }
 
   export type TicketCreateManyCustomerInput = {
@@ -134789,6 +140499,29 @@ export namespace Prisma {
     createdById?: number | null
     reassignReason?: string | null
     previousAssigneeId?: number | null
+  }
+
+  export type CustomerVoucherCreateManyCustomerInput = {
+    id?: number
+    code: string
+    name: string
+    type: string
+    value: Decimal | DecimalJsLike | number | string
+    maximumDiscount?: Decimal | DecimalJsLike | number | string | null
+    minimumPurchaseAmount?: Decimal | DecimalJsLike | number | string
+    issueDate?: Date | string
+    expiryDate?: Date | string | null
+    status?: string
+    branchId?: number | null
+    issuedSaleId?: number | null
+    redeemedSaleId?: number | null
+    redeemedAt?: Date | string | null
+    usageLimit?: number
+    usageCount?: number
+    description?: string | null
+    createdBy?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
   }
 
   export type AdvanceHistoryUpdateWithoutCustomerInput = {
@@ -135036,6 +140769,8 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
+    voucherCode?: NullableStringFieldUpdateOperationsInput | string | null
+    voucherDiscount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     payments?: PaymentUpdateManyWithoutSaleNestedInput
     branch?: BranchUpdateOneRequiredWithoutSalesNestedInput
     financialYear?: FinancialYearUpdateOneWithoutSalesNestedInput
@@ -135044,6 +140779,9 @@ export namespace Prisma {
     terminal?: TerminalUpdateOneWithoutSalesNestedInput
     items?: SaleItemUpdateManyWithoutSaleNestedInput
     lead?: LeadUpdateOneWithoutSaleNestedInput
+    customerVouchersIssued?: CustomerVoucherUpdateManyWithoutIssuedSaleNestedInput
+    customerVouchersRedeemed?: CustomerVoucherUpdateManyWithoutRedeemedSaleNestedInput
+    customerVoucherRedemptions?: CustomerVoucherRedemptionUpdateManyWithoutSaleNestedInput
   }
 
   export type SaleUncheckedUpdateWithoutCustomerInput = {
@@ -135089,9 +140827,14 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
+    voucherCode?: NullableStringFieldUpdateOperationsInput | string | null
+    voucherDiscount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     payments?: PaymentUncheckedUpdateManyWithoutSaleNestedInput
     items?: SaleItemUncheckedUpdateManyWithoutSaleNestedInput
     lead?: LeadUncheckedUpdateOneWithoutSaleNestedInput
+    customerVouchersIssued?: CustomerVoucherUncheckedUpdateManyWithoutIssuedSaleNestedInput
+    customerVouchersRedeemed?: CustomerVoucherUncheckedUpdateManyWithoutRedeemedSaleNestedInput
+    customerVoucherRedemptions?: CustomerVoucherRedemptionUncheckedUpdateManyWithoutSaleNestedInput
   }
 
   export type SaleUncheckedUpdateManyWithoutCustomerInput = {
@@ -135137,6 +140880,8 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
+    voucherCode?: NullableStringFieldUpdateOperationsInput | string | null
+    voucherDiscount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
   }
 
   export type TicketUpdateWithoutCustomerInput = {
@@ -135212,6 +140957,76 @@ export namespace Prisma {
     createdById?: NullableIntFieldUpdateOperationsInput | number | null
     reassignReason?: NullableStringFieldUpdateOperationsInput | string | null
     previousAssigneeId?: NullableIntFieldUpdateOperationsInput | number | null
+  }
+
+  export type CustomerVoucherUpdateWithoutCustomerInput = {
+    code?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    value?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    maximumDiscount?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    minimumPurchaseAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    issueDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiryDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    redeemedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    usageLimit?: IntFieldUpdateOperationsInput | number
+    usageCount?: IntFieldUpdateOperationsInput | number
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    branch?: BranchUpdateOneWithoutCustomerVouchersNestedInput
+    issuedSale?: SaleUpdateOneWithoutCustomerVouchersIssuedNestedInput
+    redeemedSale?: SaleUpdateOneWithoutCustomerVouchersRedeemedNestedInput
+    redemptions?: CustomerVoucherRedemptionUpdateManyWithoutVoucherNestedInput
+  }
+
+  export type CustomerVoucherUncheckedUpdateWithoutCustomerInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    code?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    value?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    maximumDiscount?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    minimumPurchaseAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    issueDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiryDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
+    issuedSaleId?: NullableIntFieldUpdateOperationsInput | number | null
+    redeemedSaleId?: NullableIntFieldUpdateOperationsInput | number | null
+    redeemedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    usageLimit?: IntFieldUpdateOperationsInput | number
+    usageCount?: IntFieldUpdateOperationsInput | number
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    redemptions?: CustomerVoucherRedemptionUncheckedUpdateManyWithoutVoucherNestedInput
+  }
+
+  export type CustomerVoucherUncheckedUpdateManyWithoutCustomerInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    code?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    value?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    maximumDiscount?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    minimumPurchaseAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    issueDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiryDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
+    issuedSaleId?: NullableIntFieldUpdateOperationsInput | number | null
+    redeemedSaleId?: NullableIntFieldUpdateOperationsInput | number | null
+    redeemedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    usageLimit?: IntFieldUpdateOperationsInput | number
+    usageCount?: IntFieldUpdateOperationsInput | number
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type PaymentCreateManySupplierInput = {
@@ -135912,9 +141727,11 @@ export namespace Prisma {
     size?: string | null
     quantity: number
     unitPrice: Decimal | DecimalJsLike | number | string
+    originalUnitPrice?: Decimal | DecimalJsLike | number | string | null
     total: Decimal | DecimalJsLike | number | string
     discountAmount?: Decimal | DecimalJsLike | number | string
     discountPercent?: Decimal | DecimalJsLike | number | string
+    voucherDiscountAmount?: Decimal | DecimalJsLike | number | string
     taxAmount?: Decimal | DecimalJsLike | number | string
     taxRate?: Decimal | DecimalJsLike | number | string
     isTaxInclusive?: boolean
@@ -136066,9 +141883,11 @@ export namespace Prisma {
     size?: NullableStringFieldUpdateOperationsInput | string | null
     quantity?: IntFieldUpdateOperationsInput | number
     unitPrice?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    originalUnitPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     total?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     discountAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     discountPercent?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    voucherDiscountAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     taxAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     taxRate?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     isTaxInclusive?: BoolFieldUpdateOperationsInput | boolean
@@ -136081,9 +141900,11 @@ export namespace Prisma {
     size?: NullableStringFieldUpdateOperationsInput | string | null
     quantity?: IntFieldUpdateOperationsInput | number
     unitPrice?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    originalUnitPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     total?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     discountAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     discountPercent?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    voucherDiscountAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     taxAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     taxRate?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     isTaxInclusive?: BoolFieldUpdateOperationsInput | boolean
@@ -136095,9 +141916,11 @@ export namespace Prisma {
     size?: NullableStringFieldUpdateOperationsInput | string | null
     quantity?: IntFieldUpdateOperationsInput | number
     unitPrice?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    originalUnitPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     total?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     discountAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     discountPercent?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    voucherDiscountAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     taxAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     taxRate?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     isTaxInclusive?: BoolFieldUpdateOperationsInput | boolean
@@ -136291,12 +142114,69 @@ export namespace Prisma {
     size?: string | null
     quantity: number
     unitPrice: Decimal | DecimalJsLike | number | string
+    originalUnitPrice?: Decimal | DecimalJsLike | number | string | null
     total: Decimal | DecimalJsLike | number | string
     discountAmount?: Decimal | DecimalJsLike | number | string
     discountPercent?: Decimal | DecimalJsLike | number | string
+    voucherDiscountAmount?: Decimal | DecimalJsLike | number | string
     taxAmount?: Decimal | DecimalJsLike | number | string
     taxRate?: Decimal | DecimalJsLike | number | string
     isTaxInclusive?: boolean
+  }
+
+  export type CustomerVoucherCreateManyIssuedSaleInput = {
+    id?: number
+    code: string
+    name: string
+    type: string
+    value: Decimal | DecimalJsLike | number | string
+    maximumDiscount?: Decimal | DecimalJsLike | number | string | null
+    minimumPurchaseAmount?: Decimal | DecimalJsLike | number | string
+    issueDate?: Date | string
+    expiryDate?: Date | string | null
+    status?: string
+    customerId?: number | null
+    branchId?: number | null
+    redeemedSaleId?: number | null
+    redeemedAt?: Date | string | null
+    usageLimit?: number
+    usageCount?: number
+    description?: string | null
+    createdBy?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type CustomerVoucherCreateManyRedeemedSaleInput = {
+    id?: number
+    code: string
+    name: string
+    type: string
+    value: Decimal | DecimalJsLike | number | string
+    maximumDiscount?: Decimal | DecimalJsLike | number | string | null
+    minimumPurchaseAmount?: Decimal | DecimalJsLike | number | string
+    issueDate?: Date | string
+    expiryDate?: Date | string | null
+    status?: string
+    customerId?: number | null
+    branchId?: number | null
+    issuedSaleId?: number | null
+    redeemedAt?: Date | string | null
+    usageLimit?: number
+    usageCount?: number
+    description?: string | null
+    createdBy?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type CustomerVoucherRedemptionCreateManySaleInput = {
+    id?: number
+    voucherId: number
+    customerId?: number | null
+    branchId: number
+    discountAmount: Decimal | DecimalJsLike | number | string
+    redeemedAt?: Date | string
   }
 
   export type PaymentUpdateWithoutSaleInput = {
@@ -136350,9 +142230,11 @@ export namespace Prisma {
     size?: NullableStringFieldUpdateOperationsInput | string | null
     quantity?: IntFieldUpdateOperationsInput | number
     unitPrice?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    originalUnitPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     total?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     discountAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     discountPercent?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    voucherDiscountAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     taxAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     taxRate?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     isTaxInclusive?: BoolFieldUpdateOperationsInput | boolean
@@ -136365,9 +142247,11 @@ export namespace Prisma {
     size?: NullableStringFieldUpdateOperationsInput | string | null
     quantity?: IntFieldUpdateOperationsInput | number
     unitPrice?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    originalUnitPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     total?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     discountAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     discountPercent?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    voucherDiscountAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     taxAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     taxRate?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     isTaxInclusive?: BoolFieldUpdateOperationsInput | boolean
@@ -136379,12 +142263,180 @@ export namespace Prisma {
     size?: NullableStringFieldUpdateOperationsInput | string | null
     quantity?: IntFieldUpdateOperationsInput | number
     unitPrice?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    originalUnitPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     total?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     discountAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     discountPercent?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    voucherDiscountAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     taxAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     taxRate?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     isTaxInclusive?: BoolFieldUpdateOperationsInput | boolean
+  }
+
+  export type CustomerVoucherUpdateWithoutIssuedSaleInput = {
+    code?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    value?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    maximumDiscount?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    minimumPurchaseAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    issueDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiryDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    redeemedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    usageLimit?: IntFieldUpdateOperationsInput | number
+    usageCount?: IntFieldUpdateOperationsInput | number
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    customer?: CustomerUpdateOneWithoutCustomerVouchersNestedInput
+    branch?: BranchUpdateOneWithoutCustomerVouchersNestedInput
+    redeemedSale?: SaleUpdateOneWithoutCustomerVouchersRedeemedNestedInput
+    redemptions?: CustomerVoucherRedemptionUpdateManyWithoutVoucherNestedInput
+  }
+
+  export type CustomerVoucherUncheckedUpdateWithoutIssuedSaleInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    code?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    value?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    maximumDiscount?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    minimumPurchaseAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    issueDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiryDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    customerId?: NullableIntFieldUpdateOperationsInput | number | null
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
+    redeemedSaleId?: NullableIntFieldUpdateOperationsInput | number | null
+    redeemedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    usageLimit?: IntFieldUpdateOperationsInput | number
+    usageCount?: IntFieldUpdateOperationsInput | number
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    redemptions?: CustomerVoucherRedemptionUncheckedUpdateManyWithoutVoucherNestedInput
+  }
+
+  export type CustomerVoucherUncheckedUpdateManyWithoutIssuedSaleInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    code?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    value?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    maximumDiscount?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    minimumPurchaseAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    issueDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiryDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    customerId?: NullableIntFieldUpdateOperationsInput | number | null
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
+    redeemedSaleId?: NullableIntFieldUpdateOperationsInput | number | null
+    redeemedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    usageLimit?: IntFieldUpdateOperationsInput | number
+    usageCount?: IntFieldUpdateOperationsInput | number
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type CustomerVoucherUpdateWithoutRedeemedSaleInput = {
+    code?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    value?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    maximumDiscount?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    minimumPurchaseAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    issueDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiryDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    redeemedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    usageLimit?: IntFieldUpdateOperationsInput | number
+    usageCount?: IntFieldUpdateOperationsInput | number
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    customer?: CustomerUpdateOneWithoutCustomerVouchersNestedInput
+    branch?: BranchUpdateOneWithoutCustomerVouchersNestedInput
+    issuedSale?: SaleUpdateOneWithoutCustomerVouchersIssuedNestedInput
+    redemptions?: CustomerVoucherRedemptionUpdateManyWithoutVoucherNestedInput
+  }
+
+  export type CustomerVoucherUncheckedUpdateWithoutRedeemedSaleInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    code?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    value?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    maximumDiscount?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    minimumPurchaseAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    issueDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiryDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    customerId?: NullableIntFieldUpdateOperationsInput | number | null
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
+    issuedSaleId?: NullableIntFieldUpdateOperationsInput | number | null
+    redeemedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    usageLimit?: IntFieldUpdateOperationsInput | number
+    usageCount?: IntFieldUpdateOperationsInput | number
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    redemptions?: CustomerVoucherRedemptionUncheckedUpdateManyWithoutVoucherNestedInput
+  }
+
+  export type CustomerVoucherUncheckedUpdateManyWithoutRedeemedSaleInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    code?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    value?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    maximumDiscount?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    minimumPurchaseAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    issueDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiryDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    status?: StringFieldUpdateOperationsInput | string
+    customerId?: NullableIntFieldUpdateOperationsInput | number | null
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
+    issuedSaleId?: NullableIntFieldUpdateOperationsInput | number | null
+    redeemedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    usageLimit?: IntFieldUpdateOperationsInput | number
+    usageCount?: IntFieldUpdateOperationsInput | number
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    createdBy?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type CustomerVoucherRedemptionUpdateWithoutSaleInput = {
+    customerId?: NullableIntFieldUpdateOperationsInput | number | null
+    branchId?: IntFieldUpdateOperationsInput | number
+    discountAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    redeemedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    voucher?: CustomerVoucherUpdateOneRequiredWithoutRedemptionsNestedInput
+  }
+
+  export type CustomerVoucherRedemptionUncheckedUpdateWithoutSaleInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    voucherId?: IntFieldUpdateOperationsInput | number
+    customerId?: NullableIntFieldUpdateOperationsInput | number | null
+    branchId?: IntFieldUpdateOperationsInput | number
+    discountAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    redeemedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type CustomerVoucherRedemptionUncheckedUpdateManyWithoutSaleInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    voucherId?: IntFieldUpdateOperationsInput | number
+    customerId?: NullableIntFieldUpdateOperationsInput | number | null
+    branchId?: IntFieldUpdateOperationsInput | number
+    discountAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    redeemedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type PaymentCreateManyQuotationInput = {
@@ -137621,6 +143673,8 @@ export namespace Prisma {
     description?: string | null
     deliveryCharge?: Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: boolean
+    voucherCode?: string | null
+    voucherDiscount?: Decimal | DecimalJsLike | number | string
   }
 
   export type DeliveryChallanUpdateWithoutFinancialYearInput = {
@@ -137840,6 +143894,8 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
+    voucherCode?: NullableStringFieldUpdateOperationsInput | string | null
+    voucherDiscount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     payments?: PaymentUpdateManyWithoutSaleNestedInput
     branch?: BranchUpdateOneRequiredWithoutSalesNestedInput
     customer?: CustomerUpdateOneWithoutSalesNestedInput
@@ -137848,6 +143904,9 @@ export namespace Prisma {
     terminal?: TerminalUpdateOneWithoutSalesNestedInput
     items?: SaleItemUpdateManyWithoutSaleNestedInput
     lead?: LeadUpdateOneWithoutSaleNestedInput
+    customerVouchersIssued?: CustomerVoucherUpdateManyWithoutIssuedSaleNestedInput
+    customerVouchersRedeemed?: CustomerVoucherUpdateManyWithoutRedeemedSaleNestedInput
+    customerVoucherRedemptions?: CustomerVoucherRedemptionUpdateManyWithoutSaleNestedInput
   }
 
   export type SaleUncheckedUpdateWithoutFinancialYearInput = {
@@ -137893,9 +143952,14 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
+    voucherCode?: NullableStringFieldUpdateOperationsInput | string | null
+    voucherDiscount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     payments?: PaymentUncheckedUpdateManyWithoutSaleNestedInput
     items?: SaleItemUncheckedUpdateManyWithoutSaleNestedInput
     lead?: LeadUncheckedUpdateOneWithoutSaleNestedInput
+    customerVouchersIssued?: CustomerVoucherUncheckedUpdateManyWithoutIssuedSaleNestedInput
+    customerVouchersRedeemed?: CustomerVoucherUncheckedUpdateManyWithoutRedeemedSaleNestedInput
+    customerVoucherRedemptions?: CustomerVoucherRedemptionUncheckedUpdateManyWithoutSaleNestedInput
   }
 
   export type SaleUncheckedUpdateManyWithoutFinancialYearInput = {
@@ -137941,6 +144005,8 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
+    voucherCode?: NullableStringFieldUpdateOperationsInput | string | null
+    voucherDiscount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
   }
 
   export type DeliveryChallanItemCreateManyChallanInput = {
@@ -138120,6 +144186,8 @@ export namespace Prisma {
     description?: string | null
     deliveryCharge?: Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: boolean
+    voucherCode?: string | null
+    voucherDiscount?: Decimal | DecimalJsLike | number | string
   }
 
   export type SaleUpdateWithoutTerminalInput = {
@@ -138159,6 +144227,8 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
+    voucherCode?: NullableStringFieldUpdateOperationsInput | string | null
+    voucherDiscount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     payments?: PaymentUpdateManyWithoutSaleNestedInput
     branch?: BranchUpdateOneRequiredWithoutSalesNestedInput
     customer?: CustomerUpdateOneWithoutSalesNestedInput
@@ -138167,6 +144237,9 @@ export namespace Prisma {
     salesman?: UserUpdateOneWithoutSalesNestedInput
     items?: SaleItemUpdateManyWithoutSaleNestedInput
     lead?: LeadUpdateOneWithoutSaleNestedInput
+    customerVouchersIssued?: CustomerVoucherUpdateManyWithoutIssuedSaleNestedInput
+    customerVouchersRedeemed?: CustomerVoucherUpdateManyWithoutRedeemedSaleNestedInput
+    customerVoucherRedemptions?: CustomerVoucherRedemptionUpdateManyWithoutSaleNestedInput
   }
 
   export type SaleUncheckedUpdateWithoutTerminalInput = {
@@ -138212,9 +144285,14 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
+    voucherCode?: NullableStringFieldUpdateOperationsInput | string | null
+    voucherDiscount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     payments?: PaymentUncheckedUpdateManyWithoutSaleNestedInput
     items?: SaleItemUncheckedUpdateManyWithoutSaleNestedInput
     lead?: LeadUncheckedUpdateOneWithoutSaleNestedInput
+    customerVouchersIssued?: CustomerVoucherUncheckedUpdateManyWithoutIssuedSaleNestedInput
+    customerVouchersRedeemed?: CustomerVoucherUncheckedUpdateManyWithoutRedeemedSaleNestedInput
+    customerVoucherRedemptions?: CustomerVoucherRedemptionUncheckedUpdateManyWithoutSaleNestedInput
   }
 
   export type SaleUncheckedUpdateManyWithoutTerminalInput = {
@@ -138260,6 +144338,8 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
+    voucherCode?: NullableStringFieldUpdateOperationsInput | string | null
+    voucherDiscount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
   }
 
   export type UserUpdateWithoutTerminalsInput = {
@@ -138623,6 +144703,41 @@ export namespace Prisma {
     submittedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type CustomerVoucherRedemptionCreateManyVoucherInput = {
+    id?: number
+    saleId: number
+    customerId?: number | null
+    branchId: number
+    discountAmount: Decimal | DecimalJsLike | number | string
+    redeemedAt?: Date | string
+  }
+
+  export type CustomerVoucherRedemptionUpdateWithoutVoucherInput = {
+    customerId?: NullableIntFieldUpdateOperationsInput | number | null
+    branchId?: IntFieldUpdateOperationsInput | number
+    discountAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    redeemedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    sale?: SaleUpdateOneRequiredWithoutCustomerVoucherRedemptionsNestedInput
+  }
+
+  export type CustomerVoucherRedemptionUncheckedUpdateWithoutVoucherInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    saleId?: IntFieldUpdateOperationsInput | number
+    customerId?: NullableIntFieldUpdateOperationsInput | number | null
+    branchId?: IntFieldUpdateOperationsInput | number
+    discountAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    redeemedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type CustomerVoucherRedemptionUncheckedUpdateManyWithoutVoucherInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    saleId?: IntFieldUpdateOperationsInput | number
+    customerId?: NullableIntFieldUpdateOperationsInput | number | null
+    branchId?: IntFieldUpdateOperationsInput | number
+    discountAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    redeemedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
 
 
   /**
@@ -138744,6 +144859,10 @@ export namespace Prisma {
      * @deprecated Use DayCloseCountOutputTypeDefaultArgs instead
      */
     export type DayCloseCountOutputTypeArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = DayCloseCountOutputTypeDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use CustomerVoucherCountOutputTypeDefaultArgs instead
+     */
+    export type CustomerVoucherCountOutputTypeArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = CustomerVoucherCountOutputTypeDefaultArgs<ExtArgs>
     /**
      * @deprecated Use UserDefaultArgs instead
      */
@@ -139004,6 +145123,14 @@ export namespace Prisma {
      * @deprecated Use StaffDayCloseDefaultArgs instead
      */
     export type StaffDayCloseArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = StaffDayCloseDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use CustomerVoucherDefaultArgs instead
+     */
+    export type CustomerVoucherArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = CustomerVoucherDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use CustomerVoucherRedemptionDefaultArgs instead
+     */
+    export type CustomerVoucherRedemptionArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = CustomerVoucherRedemptionDefaultArgs<ExtArgs>
 
   /**
    * Batch Payload for updateMany & deleteMany & createMany

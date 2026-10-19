@@ -41,7 +41,8 @@ const ProfessionalInvoice = React.forwardRef(({ printData, companyProfile, previ
         invoiceNumber, quotationNumber, saleDate, quotationDate, createdAt, items, subTotal, taxAmount, totalAmount, roundOffAmount,
         customer, customerName, previousBalance, currentBalance, placeOfSupply,
         currencyCode, currencySymbol, exchangeRate, discount, advanceUsed, description, notes, terms, paidAmount, paymentMethod,
-        deliveryCharge, hasDeliveryCharge
+        deliveryCharge, hasDeliveryCharge,
+        voucherCode, voucherDiscount, issuedRewardVoucher, issuedVoucher
     } = printData;
 
     const isQuotation = !!quotationNumber;
@@ -79,6 +80,57 @@ const ProfessionalInvoice = React.forwardRef(({ printData, companyProfile, previ
 
     // Use stored discount from DB — single source of truth, do NOT recalculate
     const invoiceDiscount = parseFloat(printData.discount || 0);
+    const vDiscount = parseFloat(voucherDiscount || printData.voucherDiscount || 0);
+    const vCode = voucherCode || printData.voucherCode || null;
+    const itemDiscountAmt = Math.max(0, invoiceDiscount - vDiscount);
+    const rewardVoucher = issuedRewardVoucher || issuedVoucher || printData.issuedRewardVoucher || printData.issuedVoucher || null;
+
+    // Helper to extract line item pricing consistently across all templates
+    const getItemValues = (item) => {
+        if (!item) return { origPrice: 0, afterProdPrice: 0, vAlloc: 0, lineTotal: 0, taxRate: 0, qty: 0 };
+        const posPrice = parseFloat(item.unitPrice || item.price || 0);
+        const discAmt = parseFloat(item.discountAmount || 0);
+        const afterProdPrice = Math.max(0, posPrice - discAmt);
+        const origPrice = (item.originalUnitPrice !== undefined && item.originalUnitPrice !== null)
+            ? parseFloat(item.originalUnitPrice)
+            : (item.product?.price !== undefined && item.product?.price !== null
+                ? parseFloat(item.product.price)
+                : posPrice);
+        const vAlloc = parseFloat(item.voucherDiscountAmount || 0);
+        const qty = parseFloat(item.quantity) || 1;
+        const taxRate = parseFloat(item.taxRate || item.taxPercent || item.product?.taxRate || 0);
+        const lineTax = parseFloat(item.taxAmount || 0);
+        const lineTotal = item.total !== undefined
+            ? parseFloat(item.total)
+            : Math.max(0, (qty * afterProdPrice) - vAlloc + lineTax);
+        return { origPrice, afterProdPrice, vAlloc, lineTotal, taxRate, qty };
+    };
+
+    const { totalBeforeDiscount, totalAfterProductDiscount } = useMemo(() => {
+        let beforeSum = 0;
+        let afterProdSum = 0;
+        (items || []).forEach(item => {
+            const vals = getItemValues(item);
+            beforeSum += vals.origPrice * vals.qty;
+            afterProdSum += vals.afterProdPrice * vals.qty;
+        });
+        return { totalBeforeDiscount: beforeSum, totalAfterProductDiscount: afterProdSum };
+    }, [items]);
+
+    const calculatedProdDisc = Math.max(0, totalBeforeDiscount - totalAfterProductDiscount);
+    const prodDiscountAmt = calculatedProdDisc > 0.005 ? calculatedProdDisc : itemDiscountAmt;
+    const effectiveTotalBeforeDiscount = Math.max(totalBeforeDiscount, totalAfterProductDiscount + prodDiscountAmt);
+
+    const taxableSubtotal = parseFloat(subTotal || 0);
+    const gstTaxAmt = parseFloat(taxAmount || 0);
+    const deliveryAmt = parseFloat(deliveryCharge || 0);
+    const isDeliveryActive = deliveryAmt > 0 || hasDeliveryCharge;
+    const roundOffAmt = parseFloat(roundOffAmount || 0);
+    const advanceAmt = parseFloat(advanceUsed || 0);
+    const grandTotalAmt = parseFloat(totalAmount || 0);
+    const paidAmt = printData.paidAmount !== undefined ? parseFloat(printData.paidAmount) : parseFloat(paidAmount || 0);
+    const balanceAmt = printData.balanceAmount !== undefined ? parseFloat(printData.balanceAmount) : Math.max(0, grandTotalAmt - paidAmt - advanceAmt);
+    const paymentsList = printData.payments || [];
 
     const taxBreakdown = useMemo(() => {
         const breakdown = {};
@@ -167,11 +219,17 @@ const ProfessionalInvoice = React.forwardRef(({ printData, companyProfile, previ
                             color: #000000 !important;
                             border-color: #000000 !important;
                             font-family: Arial, Helvetica, sans-serif !important;
+                            -webkit-text-stroke: 0 !important;
+                            text-stroke: 0 !important;
                         }
                     }
                     .thermal-invoice {
                         font-family: Arial, Helvetica, sans-serif !important;
                         color: #000000;
+                    }
+                    .thermal-invoice, .thermal-invoice * {
+                        -webkit-text-stroke: 0 !important;
+                        text-stroke: 0 !important;
                     }
                     .thermal-invoice img {
                         image-rendering: -webkit-optimize-contrast;
@@ -187,58 +245,171 @@ const ProfessionalInvoice = React.forwardRef(({ printData, companyProfile, previ
                         )
                     )}
                     {settings.showCompanyName !== false && <h2 className="text-[14px] font-bold uppercase text-black">{companyProfile?.companyName || 'OUR STORE'}</h2>}
-                    <p className="text-[10px] text-black">{companyProfile?.address}</p>
-                    <p className="text-[10px] text-black">Ph: {companyProfile?.phone}</p>
-                    <div className="border-t border-b border-black py-1 mt-1 font-bold text-black">{settings.headerTitle || (isQuotation ? 'QUOTATION' : 'TAX INVOICE')}</div>
+                    <p className="text-[10px] text-black font-normal">{companyProfile?.address}</p>
+                    <p className="text-[10px] text-black font-normal">Ph: {companyProfile?.phone}</p>
+                    <div className="border-t border-b border-black py-1 mt-1 font-semibold text-black">{settings.headerTitle || (isQuotation ? 'QUOTATION' : 'TAX INVOICE')}</div>
                 </div>
                 <div className="text-[10px] mb-4 text-black">
-                    <div className="flex justify-between font-normal"><span>{isQuotation ? 'Quote' : 'Inv'}: <strong className="font-semibold">{quotationNumber || invoiceNumber || ''}</strong></span><span>{invoiceDate ? new Date(invoiceDate).toLocaleDateString() : ''}</span></div>
-                    <div className="font-medium mt-1">Bill To: {customer?.name || customerName || 'Walk-in'}</div>
+                    <div className="flex justify-between font-normal"><span>{isQuotation ? 'Quote' : 'Inv'}: <strong className="font-medium">{quotationNumber || invoiceNumber || ''}</strong></span><span>{invoiceDate ? new Date(invoiceDate).toLocaleDateString() : ''}</span></div>
+                    <div className="font-normal mt-1 text-black">Bill To: <span className="font-medium">{customer?.name || customerName || 'Walk-in'}</span></div>
                 </div>
-                <table className="w-full text-[10px] border-b border-dashed border-black mb-4 text-black">
-                    <thead><tr><th className="text-left font-bold py-1">Item</th><th className="text-right font-bold w-12 py-1">Qty</th><th className="text-right font-bold w-16 py-1">Amt</th></tr></thead>
-                    <tbody>{items?.map((item, i) => (<tr key={i}><td className="py-1 font-normal">{item.product?.name || item.name || 'Item'}</td><td className="text-right py-1 font-normal">{item.quantity || 0}</td><td className="text-right py-1 font-semibold">{currentSymbol}{formatAmt(item.total)}</td></tr>))}</tbody>
+                <table className="w-full text-[10px] border-b border-dashed border-black mb-3 text-black">
+                    <thead>
+                        <tr className="border-b border-black">
+                            <th className="text-left font-medium py-1">Item Description</th>
+                            <th className="text-center font-medium w-10 py-1">Qty</th>
+                            <th className="text-right font-medium w-16 py-1">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {items?.map((item, i) => {
+                            const { origPrice, afterProdPrice, vAlloc, lineTotal, qty } = getItemValues(item);
+                            const hasVoucher = vAlloc > 0.005;
+                            return (
+                                <tr key={i} className="border-b border-dotted border-black">
+                                    <td className="py-1 font-normal text-left">
+                                        <div className="font-normal text-black">{item.product?.name || item.name || 'Item'}</div>
+                                        {item.size && <div className="text-[9px] font-normal text-black">Size: {item.size}</div>}
+                                        <div className="text-[8.5px] font-normal text-black space-x-1 mt-0.5">
+                                            <span>Before: {currentSymbol}{formatAmt(origPrice)}</span>
+                                            <span>• After: {currentSymbol}{formatAmt(afterProdPrice)}</span>
+                                            {hasVoucher && <span>• Vchr: -{currentSymbol}{formatAmt(vAlloc)}</span>}
+                                        </div>
+                                    </td>
+                                    <td className="text-center py-1 font-normal align-top text-black">{qty}</td>
+                                    <td className="text-right py-1 font-normal align-top text-black">{currentSymbol}{formatAmt(lineTotal)}</td>
+                                </tr>
+                            );
+                        })}
+                    </tbody>
                 </table>
-                <div className="space-y-1 text-[11px] font-normal flex flex-col items-end text-black">
-                    <div className="flex justify-between w-full"><span>Subtotal:</span><span className="font-semibold">{currentSymbol}{formatAmt(parseFloat(subTotal) + parseFloat(invoiceDiscount))}</span></div>
-                    {invoiceDiscount > 0 && (
-                        <div className="flex justify-between w-full text-black"><span>Discount:</span><span className="font-semibold">- {currentSymbol}{formatAmt(invoiceDiscount)}</span></div>
+                <div className="space-y-1 text-[10.5px] font-normal flex flex-col items-end text-black">
+                    {/* 1. Original Price / Before Discount */}
+                    <div className="flex justify-between w-full font-normal">
+                        <span>Before Discount:</span>
+                        <span>{currentSymbol}{formatAmt(effectiveTotalBeforeDiscount)}</span>
+                    </div>
+
+                    {/* 2. Product Discount */}
+                    {prodDiscountAmt > 0.005 && (
+                        <div className="flex justify-between w-full font-normal">
+                            <span>Product Discount:</span>
+                            <span>- {currentSymbol}{formatAmt(prodDiscountAmt)}</span>
+                        </div>
                     )}
-                    {parseFloat(taxAmount || 0) > 0 && (
-                        <div className="flex justify-between w-full"><span>Tax:</span><span className="font-semibold">{currentSymbol}{formatAmt(taxAmount)}</span></div>
+
+                    {/* 3. Subtotal After Product Discount */}
+                    {(prodDiscountAmt > 0.005 || vDiscount > 0.005) && (
+                        <div className="flex justify-between w-full font-normal">
+                            <span>Subtotal After Prod Disc:</span>
+                            <span>{currentSymbol}{formatAmt(totalAfterProductDiscount)}</span>
+                        </div>
                     )}
-                    {(parseFloat(deliveryCharge || 0) > 0 || hasDeliveryCharge) && (
-                        <div className="flex justify-between w-full"><span>Delivery Charge:</span><span className="font-semibold">+{currentSymbol}{formatAmt(deliveryCharge)}</span></div>
+
+                    {/* 4. Voucher Code & Voucher Discount */}
+                    {vDiscount > 0.005 && (
+                        <div className="flex justify-between w-full font-normal">
+                            <span>Voucher {vCode ? `(${vCode})` : 'Discount'}:</span>
+                            <span>- {currentSymbol}{formatAmt(vDiscount)}</span>
+                        </div>
                     )}
-                    <div className="flex justify-between w-full text-[13px] border-t-2 border-black pt-1 mt-1 font-bold"><span>TOTAL:</span><span>{currentSymbol}{formatAmt(totalAmount)}</span></div>
+
+                    {/* 5. Taxable Subtotal */}
+                    {(vDiscount > 0.005 || gstTaxAmt > 0.005) && (
+                        <div className="flex justify-between w-full font-normal">
+                            <span>Taxable Subtotal:</span>
+                            <span>{currentSymbol}{formatAmt(taxableSubtotal)}</span>
+                        </div>
+                    )}
+
+                    {/* 6. GST / Tax */}
+                    {gstTaxAmt > 0.005 && (
+                        <div className="flex justify-between w-full font-normal">
+                            <span>GST / Tax:</span>
+                            <span>+{currentSymbol}{formatAmt(gstTaxAmt)}</span>
+                        </div>
+                    )}
+
+                    {/* 7. Delivery Charge */}
+                    {isDeliveryActive && (
+                        <div className="flex justify-between w-full font-normal">
+                            <span>Delivery Charge:</span>
+                            <span>+{currentSymbol}{formatAmt(deliveryAmt)}</span>
+                        </div>
+                    )}
+
+                    {/* 8. Round Off */}
+                    {Math.abs(roundOffAmt) > 0.005 && (
+                        <div className="flex justify-between w-full font-normal">
+                            <span>Round-off:</span>
+                            <span>{roundOffAmt > 0 ? '+' : ''}{currentSymbol}{formatAmt(roundOffAmt)}</span>
+                        </div>
+                    )}
+
+                    {/* 9. Customer Advance */}
+                    {advanceAmt > 0.005 && (
+                        <div className="flex justify-between w-full font-normal">
+                            <span>Customer Advance:</span>
+                            <span>- {currentSymbol}{formatAmt(advanceAmt)}</span>
+                        </div>
+                    )}
+
+                    {/* 10. Grand Total */}
+                    <div className="flex justify-between w-full text-[13px] border-t-2 border-black pt-1 mt-1 font-bold">
+                        <span>TOTAL:</span>
+                        <span>{currentSymbol}{formatAmt(grandTotalAmt)}</span>
+                    </div>
+
+                    {/* Payment Method */}
                     {paymentMethod && (
-                        <div className="flex justify-between w-full text-[10.5px] pt-1"><span>Payment Method:</span><span className="font-semibold">{paymentMethod}</span></div>
+                        <div className="flex justify-between w-full text-[10px] pt-0.5 font-normal">
+                            <span>Payment Method:</span>
+                            <span className="font-medium">{paymentMethod}</span>
+                        </div>
                     )}
-                    {(() => {
-                        const paid = printData.paidAmount !== undefined ? parseFloat(printData.paidAmount) : parseFloat(paidAmount || 0);
-                        const bal = printData.balanceAmount !== undefined ? parseFloat(printData.balanceAmount) : Math.max(0, parseFloat(totalAmount || 0) - paid - parseFloat(advanceUsed || 0));
-                        const paymentsList = printData.payments || [];
-                        return (
-                            <>
-                                {paymentsList.length > 1 && (
-                                    <div className="w-full text-[10px] text-black pl-2 border-l border-black my-0.5 space-y-0.5 font-normal">
-                                        {paymentsList.map((p, idx) => (
-                                            <div key={idx} className="flex justify-between">
-                                                <span>{p.method}:</span>
-                                                <span className="font-semibold">{currentSymbol}{formatAmt(p.amount)}</span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                                <div className="flex justify-between w-full text-[10.5px] text-black"><span>Amount Paid:</span><span className="font-semibold">{currentSymbol}{formatAmt(paid)}</span></div>
-                                {bal > 0.01 && (
-                                    <div className="flex justify-between w-full text-[10.5px] text-black font-bold"><span>Balance Due:</span><span>{currentSymbol}{formatAmt(bal)}</span></div>
-                                )}
-                            </>
-                        );
-                    })()}
+
+                    {/* Split Payment Breakdown */}
+                    {paymentsList.length > 1 && (
+                        <div className="w-full text-[9.5px] text-black pl-2 border-l border-black my-0.5 space-y-0.5 font-normal">
+                            {paymentsList.map((p, idx) => (
+                                <div key={idx} className="flex justify-between font-normal">
+                                    <span>{p.method}:</span>
+                                    <span>{currentSymbol}{formatAmt(p.amount)}</span>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+
+                    {/* 11. Amount Paid */}
+                    <div className="flex justify-between w-full text-[10.5px] font-normal">
+                        <span>Amount Paid:</span>
+                        <span className="font-medium">{currentSymbol}{formatAmt(paidAmt)}</span>
+                    </div>
+
+                    {/* 12. Balance Due */}
+                    {balanceAmt > 0.005 && (
+                        <div className="flex justify-between w-full text-[11px] font-semibold">
+                            <span>Balance Due:</span>
+                            <span>{currentSymbol}{formatAmt(balanceAmt)}</span>
+                        </div>
+                    )}
                 </div>
-                <div className="text-center mt-4 pt-2 border-t border-dashed border-black text-[9.5px] font-medium tracking-wider text-black"><p>{settings.footerText || settings.footerNote || 'THANK YOU!'}</p></div>
+                {rewardVoucher && (
+                    <div className="mt-3 p-2 border border-dashed border-black text-center text-black">
+                        <p className="font-semibold text-[10px] uppercase tracking-wider">🎉 REWARD COUPON</p>
+                        <p className="text-[12px] font-mono font-bold mt-0.5">{rewardVoucher.code}</p>
+                        <p className="text-[9.5px] mt-0.5 font-normal">
+                            Get {rewardVoucher.type === 'PERCENTAGE' ? `${rewardVoucher.value}% OFF` : `${currentSymbol}${formatAmt(rewardVoucher.value)} OFF`} on next purchase
+                        </p>
+                        {parseFloat(rewardVoucher.minimumPurchaseAmount || 0) > 0 && (
+                            <p className="text-[9px] font-normal">Min spend: {currentSymbol}{formatAmt(rewardVoucher.minimumPurchaseAmount)}</p>
+                        )}
+                        {rewardVoucher.expiryDate && (
+                            <p className="text-[9px] font-normal">Valid until: {new Date(rewardVoucher.expiryDate).toLocaleDateString()}</p>
+                        )}
+                    </div>
+                )}
+                <div className="text-center mt-4 pt-2 border-t border-dashed border-black text-[9.5px] font-normal tracking-wider text-black"><p>{settings.footerText || settings.footerNote || 'THANK YOU!'}</p></div>
             </div>
         );
     }
@@ -403,63 +574,127 @@ const ProfessionalInvoice = React.forwardRef(({ printData, companyProfile, previ
                 {/* ITEM TABLE */}
                 <table className="w-full border-collapse my-1.5 text-[11px]">
                     <thead>
-                        <tr className="bg-black text-white text-[10.5px] font-bold">
-                            <th className="py-1 px-1 text-center w-8 border-r border-gray-700 print:border-black">No.</th>
-                            <th className="py-1 px-2 text-center border-r border-gray-700 print:border-black">Item Description</th>
-                            {settings.showColHsn === true && <th className="py-1 px-1 text-center w-14 border-r border-gray-700 print:border-black">HSN</th>}
-                            {settings.showColQty !== false && <th className="py-1 px-1 text-center w-10 border-r border-gray-700 print:border-black">Qty</th>}
-                            <th className="py-1 px-1 text-center w-12 border-r border-gray-700 print:border-black">Size</th>
-                            {settings.showColPrice !== false && <th className="py-1 px-1.5 text-center w-28 border-r border-gray-700 print:border-black">Unit Price ({currCodeStr})</th>}
-                            {settings.showColTotal !== false && <th className="py-1 px-1.5 text-center w-28">Amount ({currCodeStr})</th>}
+                        <tr className="bg-black text-white text-[10px] font-bold">
+                            <th className="py-1 px-1 text-center w-7 border-r border-gray-700 print:border-black">No.</th>
+                            <th className="py-1 px-1.5 text-left border-r border-gray-700 print:border-black">Item Description</th>
+                            {settings.showColHsn === true && <th className="py-1 px-1 text-center w-12 border-r border-gray-700 print:border-black">HSN</th>}
+                            {settings.showColQty !== false && <th className="py-1 px-1 text-center w-8 border-r border-gray-700 print:border-black">Qty</th>}
+                            <th className="py-1 px-1 text-center w-10 border-r border-gray-700 print:border-black">Size</th>
+                            <th className="py-1 px-1 text-right w-16 border-r border-gray-700 print:border-black">Before Disc</th>
+                            <th className="py-1 px-1 text-right w-16 border-r border-gray-700 print:border-black">After Disc</th>
+                            <th className="py-1 px-1 text-right w-16 border-r border-gray-700 print:border-black">Voucher Disc</th>
+                            {settings.showColTotal !== false && <th className="py-1 px-1.5 text-right w-20">Total ({currCodeStr})</th>}
                         </tr>
                     </thead>
                     <tbody>
-                        {displayRows.map((item, idx) => (
-                            <tr key={idx} className="h-5">
-                                <td className="py-0.5 px-1 text-center font-semibold text-black">{idx + 1}</td>
-                                <td className="py-0.5 px-2 text-left font-medium text-black">
-                                    {item ? (item.product?.name || item.name || '') : ''}
-                                </td>
-                                {settings.showColHsn === true && <td className="py-0.5 px-1 text-center font-medium text-black">{item ? (item.product?.hsnCode || item.hsnCode || '-') : ''}</td>}
-                                {settings.showColQty !== false && <td className="py-0.5 px-1 text-center font-bold text-black">{item ? (item.quantity || '') : ''}</td>}
-                                <td className="py-0.5 px-1 text-center font-medium text-black">{item ? (item.size || '-') : ''}</td>
-                                {settings.showColPrice !== false && <td className="py-0.5 px-1.5 text-right font-semibold text-black">{item ? formatAmt(item.unitPrice) : ''}</td>}
-                                {settings.showColTotal !== false && <td className="py-0.5 px-1.5 text-right font-bold text-black">{item ? formatAmt(item.total) : ''}</td>}
-                            </tr>
-                        ))}
+                        {displayRows.map((item, idx) => {
+                            const itemVals = getItemValues(item);
+                            return (
+                                <tr key={idx} className="h-5">
+                                    <td className="py-0.5 px-1 text-center font-semibold text-black">{idx + 1}</td>
+                                    <td className="py-0.5 px-1.5 text-left font-medium text-black">
+                                        {item ? (item.product?.name || item.name || '') : ''}
+                                    </td>
+                                    {settings.showColHsn === true && <td className="py-0.5 px-1 text-center font-medium text-black">{item ? (item.product?.hsnCode || item.hsnCode || '-') : ''}</td>}
+                                    {settings.showColQty !== false && <td className="py-0.5 px-1 text-center font-bold text-black">{item ? itemVals.qty : ''}</td>}
+                                    <td className="py-0.5 px-1 text-center font-medium text-black">{item ? (item.size || '-') : ''}</td>
+                                    <td className="py-0.5 px-1 text-right font-semibold text-black">{item ? formatAmt(itemVals.origPrice) : ''}</td>
+                                    <td className="py-0.5 px-1 text-right font-semibold text-black">{item ? formatAmt(itemVals.afterProdPrice) : ''}</td>
+                                    <td className="py-0.5 px-1 text-right font-semibold text-black">{item ? (itemVals.vAlloc > 0.005 ? formatAmt(itemVals.vAlloc) : '-') : ''}</td>
+                                    {settings.showColTotal !== false && <td className="py-0.5 px-1.5 text-right font-bold text-black">{item ? formatAmt(itemVals.lineTotal) : ''}</td>}
+                                </tr>
+                            );
+                        })}
 
-                        {/* SUBTOTAL ROW */}
+                        {/* BOUTIQUE A5 SUMMARY ROWS */}
                         {(() => {
-                            const leadCols = 2 + (settings.showColHsn === true ? 1 : 0) + (settings.showColQty !== false ? 1 : 0) + 1;
+                            const leadCols = 1 + 1 + (settings.showColHsn === true ? 1 : 0) + (settings.showColQty !== false ? 1 : 0) + 1;
                             return (
                                 <>
+                                    {/* 1. Before Discount */}
                                     <tr className="h-5.5">
                                         <td colSpan={leadCols} className="border-r border-black"></td>
-                                        {settings.showColPrice !== false && <td className="py-0.5 px-3 text-right font-bold text-black border-r border-black">Subtotal</td>}
-                                        {settings.showColTotal !== false && <td className="py-0.5 px-1.5 text-right font-bold text-black">{formatAmt(subTotalAmt)}</td>}
+                                        <td colSpan={3} className="py-0.5 px-2 text-right font-bold text-black border-r border-black">Before Discount</td>
+                                        <td className="py-0.5 px-1.5 text-right font-bold text-black">{formatAmt(effectiveTotalBeforeDiscount)}</td>
                                     </tr>
 
-                                    {/* DISCOUNT ROW */}
-                                    <tr className="h-5.5">
-                                        <td colSpan={leadCols} className="border-r border-black"></td>
-                                        {settings.showColPrice !== false && <td className="py-0.5 px-3 text-right font-bold text-black border-r border-black">Discount</td>}
-                                        {settings.showColTotal !== false && <td className="py-0.5 px-1.5 text-right font-bold text-black">{totalDiscountAmt > 0 ? formatAmt(totalDiscountAmt) : ''}</td>}
-                                    </tr>
-
-                                    {/* DELIVERY CHARGE ROW */}
-                                    {(parseFloat(deliveryCharge || 0) > 0 || hasDeliveryCharge) && (
+                                    {/* 2. Product Discount */}
+                                    {prodDiscountAmt > 0.005 && (
                                         <tr className="h-5.5">
                                             <td colSpan={leadCols} className="border-r border-black"></td>
-                                            {settings.showColPrice !== false && <td className="py-0.5 px-3 text-right font-bold text-black border-r border-black">Delivery Charge</td>}
-                                            {settings.showColTotal !== false && <td className="py-0.5 px-1.5 text-right font-bold text-black">+{formatAmt(deliveryCharge)}</td>}
+                                            <td colSpan={3} className="py-0.5 px-2 text-right font-bold text-black border-r border-black">Product Discount</td>
+                                            <td className="py-0.5 px-1.5 text-right font-bold text-black">-{formatAmt(prodDiscountAmt)}</td>
                                         </tr>
                                     )}
 
-                                    {/* GRAND TOTAL ROW */}
+                                    {/* 3. Subtotal After Product Discount */}
+                                    {(prodDiscountAmt > 0.005 || vDiscount > 0.005) && (
+                                        <tr className="h-5.5">
+                                            <td colSpan={leadCols} className="border-r border-black"></td>
+                                            <td colSpan={3} className="py-0.5 px-2 text-right font-bold text-black border-r border-black">Subtotal After Prod Disc</td>
+                                            <td className="py-0.5 px-1.5 text-right font-bold text-black">{formatAmt(totalAfterProductDiscount)}</td>
+                                        </tr>
+                                    )}
+
+                                    {/* 4. Voucher Discount */}
+                                    {vDiscount > 0.005 && (
+                                        <tr className="h-5.5">
+                                            <td colSpan={leadCols} className="border-r border-black"></td>
+                                            <td colSpan={3} className="py-0.5 px-2 text-right font-bold text-black border-r border-black">Voucher {vCode ? `(${vCode})` : 'Discount'}</td>
+                                            <td className="py-0.5 px-1.5 text-right font-bold text-black">-{formatAmt(vDiscount)}</td>
+                                        </tr>
+                                    )}
+
+                                    {/* 5. Taxable Subtotal */}
+                                    {(vDiscount > 0.005 || gstTaxAmt > 0.005) && (
+                                        <tr className="h-5.5">
+                                            <td colSpan={leadCols} className="border-r border-black"></td>
+                                            <td colSpan={3} className="py-0.5 px-2 text-right font-bold text-black border-r border-black">Taxable Subtotal</td>
+                                            <td className="py-0.5 px-1.5 text-right font-bold text-black">{formatAmt(taxableSubtotal)}</td>
+                                        </tr>
+                                    )}
+
+                                    {/* 6. GST / Tax */}
+                                    {gstTaxAmt > 0.005 && (
+                                        <tr className="h-5.5">
+                                            <td colSpan={leadCols} className="border-r border-black"></td>
+                                            <td colSpan={3} className="py-0.5 px-2 text-right font-bold text-black border-r border-black">GST / Tax</td>
+                                            <td className="py-0.5 px-1.5 text-right font-bold text-black">+{formatAmt(gstTaxAmt)}</td>
+                                        </tr>
+                                    )}
+
+                                    {/* 7. Delivery Charge */}
+                                    {isDeliveryActive && (
+                                        <tr className="h-5.5">
+                                            <td colSpan={leadCols} className="border-r border-black"></td>
+                                            <td colSpan={3} className="py-0.5 px-2 text-right font-bold text-black border-r border-black">Delivery Charge</td>
+                                            <td className="py-0.5 px-1.5 text-right font-bold text-black">+{formatAmt(deliveryAmt)}</td>
+                                        </tr>
+                                    )}
+
+                                    {/* 8. Round-off */}
+                                    {Math.abs(roundOffAmt) > 0.005 && (
+                                        <tr className="h-5.5">
+                                            <td colSpan={leadCols} className="border-r border-black"></td>
+                                            <td colSpan={3} className="py-0.5 px-2 text-right font-bold text-black border-r border-black">Round-off</td>
+                                            <td className="py-0.5 px-1.5 text-right font-bold text-black">{roundOffAmt > 0 ? '+' : ''}{formatAmt(roundOffAmt)}</td>
+                                        </tr>
+                                    )}
+
+                                    {/* 9. Customer Advance */}
+                                    {advanceAmt > 0.005 && (
+                                        <tr className="h-5.5">
+                                            <td colSpan={leadCols} className="border-r border-black"></td>
+                                            <td colSpan={3} className="py-0.5 px-2 text-right font-bold text-black border-r border-black">Customer Advance</td>
+                                            <td className="py-0.5 px-1.5 text-right font-bold text-black">-{formatAmt(advanceAmt)}</td>
+                                        </tr>
+                                    )}
+
+                                    {/* 10. GRAND TOTAL */}
                                     <tr className="h-6 bg-gray-200">
                                         <td colSpan={leadCols} className="border-r border-black bg-white"></td>
-                                        {settings.showColPrice !== false && <td className="py-0.5 px-3 text-right font-black text-black uppercase border-r border-black">GRAND TOTAL</td>}
-                                        {settings.showColTotal !== false && <td className="py-0.5 px-1.5 text-right font-black text-black bg-gray-200">{formatAmt(grandTotalAmt)}</td>}
+                                        <td colSpan={3} className="py-0.5 px-2 text-right font-black text-black uppercase border-r border-black">GRAND TOTAL</td>
+                                        <td className="py-0.5 px-1.5 text-right font-black text-black bg-gray-200">{formatAmt(grandTotalAmt)}</td>
                                     </tr>
                                 </>
                             );
@@ -486,11 +721,33 @@ const ProfessionalInvoice = React.forwardRef(({ printData, companyProfile, previ
                         <span>
                             <span className="font-bold">Amount Paid:</span> {currCodeStr} <span className="font-bold text-black">{formatAmt(paidAmt)}</span>
                         </span>
-                        <span>
-                            <span className="font-bold">Balance:</span> {currCodeStr} <span className="font-bold text-black">{formatAmt(balanceAmt)}</span>
-                        </span>
+                        {balanceAmt > 0.005 && (
+                            <span>
+                                <span className="font-bold">Balance Due:</span> {currCodeStr} <span className="font-bold text-black">{formatAmt(balanceAmt)}</span>
+                            </span>
+                        )}
                     </p>
                 </div>
+
+                {/* REWARD VOUCHER BLOCK */}
+                {rewardVoucher && (
+                    <div className="my-2 p-2 border-2 border-dashed border-black rounded flex items-center justify-between text-black">
+                        <div>
+                            <span className="font-bold text-[10px] uppercase tracking-wider block">🎁 Reward Coupon: {rewardVoucher.code}</span>
+                            <span className="text-[9.5px]">
+                                Get {rewardVoucher.type === 'PERCENTAGE' ? `${rewardVoucher.value}% OFF` : `${currCodeStr} ${formatAmt(rewardVoucher.value)} OFF`} on your next purchase
+                            </span>
+                            {parseFloat(rewardVoucher.minimumPurchaseAmount || 0) > 0 && (
+                                <span className="block text-[8.5px]">Min spend: {currCodeStr} {formatAmt(rewardVoucher.minimumPurchaseAmount)}</span>
+                            )}
+                        </div>
+                        {rewardVoucher.expiryDate && (
+                            <div className="text-right text-[8.5px]">
+                                <span>Expires: {new Date(rewardVoucher.expiryDate).toLocaleDateString()}</span>
+                            </div>
+                        )}
+                    </div>
+                )}
 
                 {/* RETURN / EXCHANGE POLICY */}
                 <div className="mt-2 mb-2 text-[10px]">
@@ -634,31 +891,48 @@ const ProfessionalInvoice = React.forwardRef(({ printData, companyProfile, previ
                             <th className={`${s_TableTh} text-left ${isMinimal ? 'border-b border-slate-200' : isBold ? 'rounded-l-lg' : 'rounded-l-lg'}`}>{isBold ? 'DESCRIPTION' : 'Description'}</th>
                             {settings.showColHsn !== false && <th className={`${s_TableTh} text-center w-20 ${isMinimal ? 'border-b border-slate-200' : ''}`}>{isBold ? 'HSN/SAC' : 'HSN/SAC'}</th>}
                             {settings.showColQty !== false && <th className={`${s_TableTh} text-center w-14 ${isMinimal ? 'border-b border-slate-200' : ''}`}>{isBold ? 'QTY' : 'Qty'}</th>}
-                            {settings.showColPrice !== false && <th className={`${s_TableTh} text-center w-24 ${isMinimal ? 'border-b border-slate-200' : ''}`}>{isBold ? 'PRICE' : 'Price'}</th>}
-                            {settings.showColTax !== false && parseFloat(taxAmount || 0) > 0 && <th className={`${s_TableTh} text-center w-16 ${isMinimal ? 'border-b border-slate-200' : ''}`}>{isBold ? 'GST%' : 'Gst %'}</th>}
-                            {parseFloat(invoiceDiscount || 0) > 0 && <th className={`${s_TableTh} text-center w-16 ${isMinimal ? 'border-b border-slate-200' : ''}`}>{isBold ? 'DISC' : 'Disc'}</th>}
-                            {settings.showColTotal !== false && <th className={`${s_TableTh} text-right w-28 ${isMinimal ? 'border-b border-slate-200' : isBold ? 'rounded-r-lg' : 'rounded-r-lg'}`}>{isBold ? 'TOTAL' : 'Total'}</th>}
+                            <th className={`${s_TableTh} text-right w-24 ${isMinimal ? 'border-b border-slate-200' : ''}`}>{isBold ? 'BEFORE DISC' : 'Before Discount'}</th>
+                            <th className={`${s_TableTh} text-right w-24 ${isMinimal ? 'border-b border-slate-200' : ''}`}>{isBold ? 'AFTER DISC' : 'After Discount'}</th>
+                            <th className={`${s_TableTh} text-right w-24 ${isMinimal ? 'border-b border-slate-200' : ''}`}>{isBold ? 'VOUCHER DISC' : 'Voucher Discount'}</th>
+                            {settings.showColTax !== false && parseFloat(taxAmount || 0) > 0 && <th className={`${s_TableTh} text-center w-16 ${isMinimal ? 'border-b border-slate-200' : ''}`}>{isBold ? 'GST%' : 'GST %'}</th>}
+                            {settings.showColTotal !== false && <th className={`${s_TableTh} text-right w-24 ${isMinimal ? 'border-b border-slate-200' : isBold ? 'rounded-r-lg' : 'rounded-r-lg'}`}>{isBold ? 'TOTAL' : 'Total'}</th>}
                         </tr>
                     </thead>
                     <tbody>
-                        {items?.map((item, idx) => (
-                            <tr key={idx} className="border-b border-transparent">
-                                <td className={`${s_TableTd} text-left font-semibold text-slate-900 print:text-black`}>
-                                    <div>{item.product?.name || item.name || 'Item'}</div>
-                                    {item.size && (
-                                        <span className="inline-block mt-0.5 text-[10.5px] font-medium text-slate-700 bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded print:text-black">
-                                            Size: {item.size}
-                                        </span>
-                                    )}
-                                </td>
-                                {settings.showColHsn !== false && <td className={`${s_TableTd} text-center font-medium text-slate-700 print:text-black`}>{item.product?.hsnCode || '-'}</td>}
-                                {settings.showColQty !== false && <td className={`${s_TableTd} text-center font-bold text-slate-900 print:text-black`}>{item.quantity || 0}</td>}
-                                {settings.showColPrice !== false && <td className={`${s_TableTd} text-center text-slate-900 font-semibold print:text-black`}>{currentSymbol}{formatAmt(item.unitPrice)}</td>}
-                                {settings.showColTax !== false && parseFloat(taxAmount || 0) > 0 && <td className={`${s_TableTd} text-center text-slate-700 font-semibold print:text-black`}>{parseFloat(item.taxRate || 0)}%</td>}
-                                {parseFloat(invoiceDiscount || 0) > 0 && <td className={`${s_TableTd} text-center text-slate-700 font-semibold print:text-black`}>{parseFloat(item.discountAmount || 0) > 0 ? `${currentSymbol}${formatAmt(item.discountAmount)}` : '-'}</td>}
-                                {settings.showColTotal !== false && <td className={`${s_TableTd} text-right font-bold text-slate-950 print:text-black`}>{currentSymbol}{formatAmt((parseFloat(item.unitPrice) - parseFloat(item.discountAmount || 0)) * (parseFloat(item.quantity) || 0))}</td>}
-                            </tr>
-                        ))}
+                        {items?.map((item, idx) => {
+                            const { origPrice, afterProdPrice, vAlloc, lineTotal, taxRate, qty } = getItemValues(item);
+                            return (
+                                <tr key={idx} className="border-b border-transparent">
+                                    <td className={`${s_TableTd} text-left font-semibold text-slate-900 print:text-black`}>
+                                        <div>{item.product?.name || item.name || 'Item'}</div>
+                                        <div className="flex flex-wrap items-center gap-1 mt-0.5">
+                                            {item.size && (
+                                                <span className="text-[10px] font-medium text-slate-700 bg-slate-100 border border-slate-200 px-1.5 py-0.2 rounded print:text-black">
+                                                    Size: {item.size}
+                                                </span>
+                                            )}
+                                            {Math.abs(origPrice - afterProdPrice) > 0.005 && (
+                                                <span className="text-[9.5px] font-medium text-slate-500 bg-slate-50 border border-slate-200 px-1 py-0.2 rounded print:text-black">
+                                                    Catalog: {currentSymbol}{formatAmt(origPrice)}
+                                                </span>
+                                            )}
+                                            {vAlloc > 0.005 && (
+                                                <span className="text-[9.5px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-1 py-0.2 rounded print:text-black">
+                                                    Voucher: -{currentSymbol}{formatAmt(vAlloc)}
+                                                </span>
+                                            )}
+                                        </div>
+                                    </td>
+                                    {settings.showColHsn !== false && <td className={`${s_TableTd} text-center font-medium text-slate-700 print:text-black`}>{item.product?.hsnCode || '-'}</td>}
+                                    {settings.showColQty !== false && <td className={`${s_TableTd} text-center font-bold text-slate-900 print:text-black`}>{qty}</td>}
+                                    <td className={`${s_TableTd} text-right text-slate-900 font-semibold print:text-black`}>{currentSymbol}{formatAmt(origPrice)}</td>
+                                    <td className={`${s_TableTd} text-right text-slate-900 font-semibold print:text-black`}>{currentSymbol}{formatAmt(afterProdPrice)}</td>
+                                    <td className={`${s_TableTd} text-right text-slate-700 font-semibold print:text-black`}>{vAlloc > 0.005 ? `${currentSymbol}${formatAmt(vAlloc)}` : '-'}</td>
+                                    {settings.showColTax !== false && parseFloat(taxAmount || 0) > 0 && <td className={`${s_TableTd} text-center text-slate-700 font-semibold print:text-black`}>{taxRate}%</td>}
+                                    {settings.showColTotal !== false && <td className={`${s_TableTd} text-right font-bold text-slate-950 print:text-black`}>{currentSymbol}{formatAmt(lineTotal)}</td>}
+                                </tr>
+                            );
+                        })}
                     </tbody>
                 </table>
             </div>
@@ -697,55 +971,79 @@ const ProfessionalInvoice = React.forwardRef(({ printData, companyProfile, previ
                     )}
                 </div>
 
-                <div className={`${isMobile ? 'w-full' : 'w-[250px] ml-auto'} p-3 rounded-xl bg-[#f8fafc] border border-slate-200 shadow-sm ${isBold ? 'border-l-[4px]' : isModern ? 'border-t-4' : isClassic ? 'border-2 border-black' : ''}`} style={isBold ? { borderLeftColor: accent } : isModern ? { borderTopColor: accent } : {}}>
+                <div className={`${isMobile ? 'w-full' : 'w-[270px] ml-auto'} p-3 rounded-xl bg-[#f8fafc] border border-slate-200 shadow-sm ${isBold ? 'border-l-[4px]' : isModern ? 'border-t-4' : isClassic ? 'border-2 border-black' : ''}`} style={isBold ? { borderLeftColor: accent } : isModern ? { borderTopColor: accent } : {}}>
                     <div className="space-y-1.5 mb-1.5">
-                        {/* 1. Sub Total (Base amount before discount) */}
+                        {/* 1. Original Price / Before Discount */}
                         <div className="flex justify-between items-center text-slate-700 text-[11px] font-semibold tracking-tight">
-                            <span className="whitespace-nowrap mr-2">Sub Total</span>
-                            <span className="font-bold text-slate-900 whitespace-nowrap print:text-black">{currentSymbol}{formatAmt(parseFloat(subTotal) + parseFloat(invoiceDiscount))}</span>
+                            <span className="whitespace-nowrap mr-2">Original Price (Before Disc)</span>
+                            <span className="font-bold text-slate-900 whitespace-nowrap print:text-black">{currentSymbol}{formatAmt(effectiveTotalBeforeDiscount)}</span>
                         </div>
 
-                        {/* 2. Discount */}
-                        {parseFloat(invoiceDiscount) > 0 && (
+                        {/* 2. Product Discount */}
+                        {prodDiscountAmt > 0.005 && (
                             <div className="flex justify-between items-center text-slate-700 text-[11px] font-semibold tracking-tight">
-                                <span className="whitespace-nowrap mr-2">Discount</span>
-                                <span className="font-bold text-red-600 whitespace-nowrap print:text-black">- {currentSymbol}{formatAmt(invoiceDiscount)}</span>
+                                <span className="whitespace-nowrap mr-2">Product Discount</span>
+                                <span className="font-bold text-red-600 whitespace-nowrap print:text-black">- {currentSymbol}{formatAmt(prodDiscountAmt)}</span>
                             </div>
                         )}
 
-                        {/* 3. Tax */}
-                        {parseFloat(taxAmount || 0) > 0 && (
+                        {/* 3. Subtotal After Product Discount */}
+                        {(prodDiscountAmt > 0.005 || vDiscount > 0.005) && (
                             <div className="flex justify-between items-center text-slate-700 text-[11px] font-semibold tracking-tight">
-                                <span className="whitespace-nowrap mr-2">Tax</span>
-                                <span className="font-bold text-slate-900 whitespace-nowrap print:text-black">{currentSymbol}{formatAmt(taxAmount)}</span>
+                                <span className="whitespace-nowrap mr-2">Subtotal After Prod Disc</span>
+                                <span className="font-bold text-slate-900 whitespace-nowrap print:text-black">{currentSymbol}{formatAmt(totalAfterProductDiscount)}</span>
                             </div>
                         )}
 
-                        {/* Delivery Charge */}
-                        {(parseFloat(deliveryCharge || 0) > 0 || hasDeliveryCharge) && (
+                        {/* 4. Voucher Code and Voucher Discount */}
+                        {vDiscount > 0.005 && (
+                            <div className="flex justify-between items-center text-slate-700 text-[11px] font-semibold tracking-tight">
+                                <span className="whitespace-nowrap mr-2">Voucher {vCode ? `(${vCode})` : 'Discount'}</span>
+                                <span className="font-bold text-emerald-600 whitespace-nowrap print:text-black">- {currentSymbol}{formatAmt(vDiscount)}</span>
+                            </div>
+                        )}
+
+                        {/* 5. Taxable Subtotal */}
+                        {(vDiscount > 0.005 || gstTaxAmt > 0.005) && (
+                            <div className="flex justify-between items-center text-slate-700 text-[11px] font-semibold tracking-tight">
+                                <span className="whitespace-nowrap mr-2">Taxable Subtotal</span>
+                                <span className="font-bold text-slate-900 whitespace-nowrap print:text-black">{currentSymbol}{formatAmt(taxableSubtotal)}</span>
+                            </div>
+                        )}
+
+                        {/* 6. GST / Tax */}
+                        {gstTaxAmt > 0.005 && (
+                            <div className="flex justify-between items-center text-slate-700 text-[11px] font-semibold tracking-tight">
+                                <span className="whitespace-nowrap mr-2">GST / Tax</span>
+                                <span className="font-bold text-slate-900 whitespace-nowrap print:text-black">{currentSymbol}{formatAmt(gstTaxAmt)}</span>
+                            </div>
+                        )}
+
+                        {/* 7. Delivery Charge */}
+                        {isDeliveryActive && (
                             <div className="flex justify-between items-center text-slate-700 text-[11px] font-semibold tracking-tight">
                                 <span className="whitespace-nowrap mr-2">Delivery Charge</span>
-                                <span className="font-bold text-slate-900 whitespace-nowrap print:text-black">+{currentSymbol}{formatAmt(deliveryCharge)}</span>
+                                <span className="font-bold text-slate-900 whitespace-nowrap print:text-black">+{currentSymbol}{formatAmt(deliveryAmt)}</span>
                             </div>
                         )}
 
-                        {/* 4. Round Off */}
-                        {parseFloat(roundOffAmount || 0) !== 0 && (
+                        {/* 8. Round Off */}
+                        {Math.abs(roundOffAmt) > 0.005 && (
                             <div className="flex justify-between items-center text-slate-700 text-[11px] font-semibold tracking-tight">
                                 <span className="whitespace-nowrap mr-2">Round Off</span>
-                                <span className="font-bold text-slate-900 whitespace-nowrap print:text-black">{parseFloat(roundOffAmount) > 0 ? '+' : ''}{currentSymbol}{formatAmt(roundOffAmount)}</span>
+                                <span className="font-bold text-slate-900 whitespace-nowrap print:text-black">{roundOffAmt > 0 ? '+' : ''}{currentSymbol}{formatAmt(roundOffAmt)}</span>
                             </div>
                         )}
 
-                        {/* 5. Advance Amount */}
-                        {(parseFloat(advanceUsed) || 0) > 0 && (
+                        {/* 9. Customer Advance */}
+                        {advanceAmt > 0.005 && (
                             <div className="flex justify-between items-center text-slate-700 text-[11px] font-semibold tracking-tight">
-                                <span className="whitespace-nowrap mr-2">Advance Amount</span>
-                                <span className="font-bold text-emerald-700 whitespace-nowrap print:text-black">- {currentSymbol}{formatAmt(advanceUsed)}</span>
+                                <span className="whitespace-nowrap mr-2">Customer Advance</span>
+                                <span className="font-bold text-emerald-700 whitespace-nowrap print:text-black">- {currentSymbol}{formatAmt(advanceAmt)}</span>
                             </div>
                         )}
 
-                        {/* Payment Method (if provided) */}
+                        {/* Payment Method */}
                         {paymentMethod && (
                             <div className="flex justify-between items-center text-slate-700 text-[11px] font-semibold tracking-tight">
                                 <span className="whitespace-nowrap mr-2">Payment Method</span>
@@ -754,54 +1052,43 @@ const ProfessionalInvoice = React.forwardRef(({ printData, companyProfile, previ
                         )}
 
                         {/* Split Payment Breakdown */}
-                        {(() => {
-                            const paymentsList = printData.payments || [];
-                            if (paymentsList.length <= 1) return null;
-                            return (
-                                <div className="pl-2 border-l-2 border-slate-300 my-1 space-y-0.5">
-                                    {paymentsList.map((p, idx) => (
-                                        <div key={idx} className="flex justify-between items-center text-slate-700 text-[10px]">
-                                            <span>{p.method}:</span>
-                                            <span className="font-bold text-slate-900 print:text-black">{currentSymbol}{formatAmt(p.amount)}</span>
-                                        </div>
-                                    ))}
-                                </div>
-                            );
-                        })()}
+                        {paymentsList.length > 1 && (
+                            <div className="pl-2 border-l-2 border-slate-300 my-1 space-y-0.5">
+                                {paymentsList.map((p, idx) => (
+                                    <div key={idx} className="flex justify-between items-center text-slate-700 text-[10px]">
+                                        <span>{p.method}:</span>
+                                        <span className="font-bold text-slate-900 print:text-black">{currentSymbol}{formatAmt(p.amount)}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
 
-                        {/* Amount Paid */}
+                        {/* 11. Amount Paid */}
                         <div className="flex justify-between items-center text-slate-700 text-[11px] font-semibold tracking-tight">
                             <span className="whitespace-nowrap mr-2">Amount Paid</span>
-                            <span className="font-bold text-emerald-700 whitespace-nowrap print:text-black">{currentSymbol}{formatAmt(printData.paidAmount !== undefined ? parseFloat(printData.paidAmount) : parseFloat(paidAmount || 0))}</span>
+                            <span className="font-bold text-emerald-700 whitespace-nowrap print:text-black">{currentSymbol}{formatAmt(paidAmt)}</span>
                         </div>
                     </div>
 
-                    {/* 6. Grand Total */}
+                    {/* 10. Grand Total */}
                     <div className={`pt-2 border-t-2 border-slate-300 flex justify-between items-center mt-2`}>
                         <span className="font-bold uppercase tracking-[0.5px] text-[11.5px] text-[#009262] print:text-black">
                             GRAND TOTAL
                         </span>
                         <span className="font-black text-[18px] tracking-tighter text-[#009262] print:text-black">
-                            {currentSymbol}{formatAmt(totalAmount)}
+                            {currentSymbol}{formatAmt(grandTotalAmt)}
                         </span>
                     </div>
 
-                    {/* 7. Balance Due */}
-                    {(() => {
-                        const paid = printData.paidAmount !== undefined ? parseFloat(printData.paidAmount) : parseFloat(paidAmount || 0);
-                        const balance = printData.balanceAmount !== undefined ? parseFloat(printData.balanceAmount) : Math.max(0, parseFloat(totalAmount || 0) - paid - parseFloat(advanceUsed || 0));
-                        if (balance > 0.01) {
-                            return (
-                                <div className={`pt-1.5 mt-1.5 border-t border-dashed border-slate-300 flex justify-between items-center`}>
-                                    <span className="text-[10.5px] font-bold text-slate-700 uppercase tracking-wide print:text-black">BALANCE / OUTSTANDING</span>
-                                    <span className="text-[15px] font-black text-red-600 tracking-tight print:text-black">
-                                        {currentSymbol}{formatAmt(balance)}
-                                    </span>
-                                </div>
-                            );
-                        }
-                        return null;
-                    })()}
+                    {/* 12. Balance Due */}
+                    {balanceAmt > 0.005 && (
+                        <div className={`pt-1.5 mt-1.5 border-t border-dashed border-slate-300 flex justify-between items-center`}>
+                            <span className="text-[10.5px] font-bold text-slate-700 uppercase tracking-wide print:text-black">BALANCE DUE</span>
+                            <span className="text-[15px] font-black text-red-600 tracking-tight print:text-black">
+                                {currentSymbol}{formatAmt(balanceAmt)}
+                            </span>
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -844,6 +1131,39 @@ const ProfessionalInvoice = React.forwardRef(({ printData, companyProfile, previ
                                 <span className="w-3 text-slate-600 print:text-black">:</span>
                                 <span className="font-bold text-slate-900 flex-1 print:text-black">{companyBank.branchName}</span>
                             </div>
+                        )}
+                    </div>
+                </div>
+            )}
+
+            {/* REWARD VOUCHER COUPON CARD */}
+            {rewardVoucher && (
+                <div className="my-3 p-3 bg-gradient-to-r from-emerald-50 to-teal-50 border-2 border-dashed border-emerald-400 rounded-xl flex items-center justify-between text-slate-800 print:border-black print:bg-white" style={{ pageBreakInside: 'avoid', breakInside: 'avoid' }}>
+                    <div className="space-y-0.5">
+                        <div className="flex items-center gap-1.5">
+                            <span className="text-[14px]">🎁</span>
+                            <span className="font-bold text-[12px] text-emerald-900 uppercase tracking-wide print:text-black">
+                                Next Purchase Reward Voucher
+                            </span>
+                        </div>
+                        <p className="text-[11px] text-slate-600 print:text-black">
+                            Enjoy <strong className="text-emerald-700 print:text-black">{rewardVoucher.type === 'PERCENTAGE' ? `${rewardVoucher.value}% OFF` : `${currentSymbol}${formatAmt(rewardVoucher.value)} OFF`}</strong> on your next store visit!
+                        </p>
+                        {parseFloat(rewardVoucher.minimumPurchaseAmount || 0) > 0 && (
+                            <p className="text-[10px] text-slate-500 print:text-black">
+                                Valid on minimum purchase of {currentSymbol}{formatAmt(rewardVoucher.minimumPurchaseAmount)}
+                            </p>
+                        )}
+                    </div>
+                    <div className="text-right pl-3 border-l border-emerald-200 print:border-black">
+                        <span className="block text-[9px] font-bold uppercase tracking-widest text-slate-400 print:text-black">COUPON CODE</span>
+                        <span className="inline-block px-2.5 py-1 bg-white border border-emerald-300 rounded font-mono font-black text-sm text-emerald-800 tracking-wider shadow-sm mt-0.5 print:border-black print:text-black">
+                            {rewardVoucher.code}
+                        </span>
+                        {rewardVoucher.expiryDate && (
+                            <span className="block text-[9px] text-slate-400 mt-1 print:text-black">
+                                Expires: {new Date(rewardVoucher.expiryDate).toLocaleDateString()}
+                            </span>
                         )}
                     </div>
                 </div>
