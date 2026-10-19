@@ -152,17 +152,19 @@ const ProfessionalInvoice = React.forwardRef(({ printData, companyProfile, previ
     const taxBreakdown = useMemo(() => {
         const breakdown = {};
         items?.forEach(item => {
-            const rate = parseFloat(item.taxRate || 0);
+            const rate = parseFloat(item.taxRate || item.taxPercent || item.product?.taxRate || 0);
             const lineTax = parseFloat(item.taxAmount || 0);
             const taxable = (parseFloat(item.total) || 0) - lineTax;
-            if (!breakdown[rate]) {
-                breakdown[rate] = { taxableAmount: 0, taxAmount: 0 };
+            const tType = item.taxType || item.product?.taxType || printData?.taxType || 'cgst_sgst';
+            const key = `${rate}_${tType}`;
+            if (!breakdown[key]) {
+                breakdown[key] = { rate, taxType: tType, taxableAmount: 0, taxAmount: 0 };
             }
-            breakdown[rate].taxableAmount += taxable;
-            breakdown[rate].taxAmount += lineTax;
+            breakdown[key].taxableAmount += taxable;
+            breakdown[key].taxAmount += lineTax;
         });
         return breakdown;
-    }, [items]);
+    }, [items, printData?.taxType]);
 
     const getContainerStyle = () => {
         const base = {
@@ -516,12 +518,40 @@ const ProfessionalInvoice = React.forwardRef(({ printData, companyProfile, previ
                             </div>
                         )}
 
-                        {/* 4. GST / Tax */}
+                        {/* 4. GST Breakdown */}
                         {gstTaxAmt > 0.005 && (
-                            <div className="flex justify-between w-full">
-                                <span>GST / Tax:</span>
-                                <span>+{currentSymbol}{formatAmt(gstTaxAmt)}</span>
-                            </div>
+                            <>
+                                {Object.entries(taxBreakdown).filter(([_, data]) => parseFloat(data.rate) > 0).length > 0 ? (
+                                    Object.entries(taxBreakdown)
+                                        .filter(([_, data]) => parseFloat(data.rate) > 0)
+                                        .map(([key, data]) => {
+                                            const rate = parseFloat(data.rate);
+                                            const isIgst = data.taxType === 'igst';
+                                            return isIgst ? (
+                                                <div key={key} className="flex justify-between w-full">
+                                                    <span>IGST ({rate}%):</span>
+                                                    <span>+{currentSymbol}{formatAmt(data.taxAmount)}</span>
+                                                </div>
+                                            ) : (
+                                                <React.Fragment key={key}>
+                                                    <div className="flex justify-between w-full">
+                                                        <span>CGST ({rate / 2}%):</span>
+                                                        <span>+{currentSymbol}{formatAmt(data.taxAmount / 2)}</span>
+                                                    </div>
+                                                    <div className="flex justify-between w-full">
+                                                        <span>SGST ({rate / 2}%):</span>
+                                                        <span>+{currentSymbol}{formatAmt(data.taxAmount / 2)}</span>
+                                                    </div>
+                                                </React.Fragment>
+                                            );
+                                        })
+                                ) : (
+                                    <div className="flex justify-between w-full">
+                                        <span>GST / Tax:</span>
+                                        <span>+{currentSymbol}{formatAmt(gstTaxAmt)}</span>
+                                    </div>
+                                )}
+                            </>
                         )}
 
                         {/* 5. Delivery Charge */}
@@ -1019,24 +1049,37 @@ const ProfessionalInvoice = React.forwardRef(({ printData, companyProfile, previ
             {/* TAX & TOTALS */}
             <div className={`flex ${isMobile ? 'flex-col gap-4' : 'justify-between items-start gap-4'} mb-4 w-full`} style={{ pageBreakInside: 'avoid', breakInside: 'avoid' }}>
                 <div className={isMobile ? 'w-full' : 'w-fit'}>
-                    {settings.showTaxSummary !== false && parseFloat(taxAmount || 0) > 0 && Object.entries(taxBreakdown).filter(([rate]) => parseFloat(rate) > 0).length > 0 && (
+                    {settings.showTaxSummary !== false && parseFloat(taxAmount || 0) > 0 && Object.entries(taxBreakdown).filter(([_, data]) => parseFloat(data.rate) > 0).length > 0 && (
                         <div className={`bg-[#f8fafc] p-3 rounded-xl border border-slate-200 shadow-sm min-w-[200px]`}>
                             <p className={`${s_SecHead} mb-2 font-bold text-[10px] tracking-[1.2px]`} style={{ color: '#009262' }}>TAX SUMMARY</p>
                             <div className={`space-y-1 text-[11px]`}>
                                 {Object.entries(taxBreakdown)
-                                    .filter(([rate]) => parseFloat(rate) > 0)
-                                    .map(([rate, data]) => (
-                                        <React.Fragment key={rate}>
-                                            <div className="flex justify-between items-center text-slate-700 font-medium">
-                                                <span>CGST ({parseFloat(rate) / 2}%)</span>
-                                                <span className="font-bold text-slate-900 print:text-black">{currentSymbol}{formatAmt(data.taxAmount / 2)}</span>
-                                            </div>
-                                            <div className="flex justify-between items-center text-slate-700 font-medium">
-                                                <span>SGST ({parseFloat(rate) / 2}%)</span>
-                                                <span className="font-bold text-slate-900 print:text-black">{currentSymbol}{formatAmt(data.taxAmount / 2)}</span>
-                                            </div>
-                                        </React.Fragment>
-                                    ))}
+                                    .filter(([_, data]) => parseFloat(data.rate) > 0)
+                                    .map(([key, data]) => {
+                                        const rate = parseFloat(data.rate);
+                                        const isIgst = data.taxType === 'igst';
+                                        return (
+                                            <React.Fragment key={key}>
+                                                {isIgst ? (
+                                                    <div className="flex justify-between items-center text-slate-700 font-medium">
+                                                        <span>IGST ({rate}%)</span>
+                                                        <span className="font-bold text-slate-900 print:text-black">{currentSymbol}{formatAmt(data.taxAmount)}</span>
+                                                    </div>
+                                                ) : (
+                                                    <>
+                                                        <div className="flex justify-between items-center text-slate-700 font-medium">
+                                                            <span>CGST ({rate / 2}%)</span>
+                                                            <span className="font-bold text-slate-900 print:text-black">{currentSymbol}{formatAmt(data.taxAmount / 2)}</span>
+                                                        </div>
+                                                        <div className="flex justify-between items-center text-slate-700 font-medium">
+                                                            <span>SGST ({rate / 2}%)</span>
+                                                            <span className="font-bold text-slate-900 print:text-black">{currentSymbol}{formatAmt(data.taxAmount / 2)}</span>
+                                                        </div>
+                                                    </>
+                                                )}
+                                            </React.Fragment>
+                                        );
+                                    })}
                             </div>
                         </div>
                     )}

@@ -1355,7 +1355,7 @@ export default function Products() {
       size: product.size || '',
       sizeStocks: parsedSizeStocks || [],
       stock: product.stock !== undefined ? product.stock.toString() : '0',
-      price: product.price ? product.price.toString() : '',
+      price: (product.price !== null && product.price !== undefined) ? product.price.toString() : '',
       brandPrices: parsedBrandPrices || {},
       costPrice: product.costPrice ? product.costPrice.toString() : '',
       taxRate: product.taxRate !== undefined ? product.taxRate.toString() : '0',
@@ -1463,6 +1463,11 @@ export default function Products() {
       toast.error('Category is required');
       return;
     }
+    const parsedPrice = parseFloat(formData.price);
+    if (formData.price === '' || isNaN(parsedPrice) || parsedPrice < 0) {
+      toast.error('Selling price must be a valid non-negative number');
+      return;
+    }
 
     // Validate and auto-repair barcodes before submission
     const barcodeCheckResult = ensureUniqueBarcodesBeforeSubmit(formData);
@@ -1472,6 +1477,18 @@ export default function Products() {
 
     const finalBarcode = barcodeCheckResult.updatedBarcode;
     const finalBrandPrices = barcodeCheckResult.updatedBrandPrices;
+
+    if (finalBrandPrices && typeof finalBrandPrices === 'object') {
+      for (const [bKey, bVal] of Object.entries(finalBrandPrices)) {
+        if (bVal && bVal.price !== undefined && bVal.price !== null && bVal.price !== '') {
+          const bpNum = parseFloat(bVal.price);
+          if (isNaN(bpNum) || bpNum < 0) {
+            toast.error(`Selling price for brand "${bVal.brandName || bKey}" must be a valid non-negative number`);
+            return;
+          }
+        }
+      }
+    }
 
     // Create FormData for file upload
     const data = new FormData();
