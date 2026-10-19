@@ -332,7 +332,14 @@ export default function InvoicesList() {
                         <div className="flex-1 p-8 bg-slate-100 overflow-y-auto">
                             <div className="mx-auto shadow-2xl bg-white max-w-[800px]" ref={modalPrintRef}>
                                 <ProfessionalInvoice
-                                    printData={{ ...printData, settings: printData.isReturn ? returnSettings : salesSettings }}
+                                    printData={{ 
+                                        ...printData, 
+                                        settings: {
+                                            ...((printData?.isReturn ? returnSettings : salesSettings) || {}),
+                                            ...(printData?.settings || {}),
+                                            template: (printData?.settings?.template || (printData?.isReturn ? returnSettings?.template : salesSettings?.template) || 'modern')
+                                        } 
+                                    }}
                                     companyProfile={companyProfile}
                                 />
                             </div>
@@ -480,7 +487,14 @@ export default function InvoicesList() {
                 <div ref={directPrintRef}>
                     {printData && (
                         <ProfessionalInvoice
-                            printData={{ ...printData, settings: printData?.isReturn ? returnSettings : salesSettings }}
+                            printData={{ 
+                                ...printData, 
+                                settings: {
+                                    ...((printData?.isReturn ? returnSettings : salesSettings) || {}),
+                                    ...(printData?.settings || {}),
+                                    template: (printData?.settings?.template || (printData?.isReturn ? returnSettings?.template : salesSettings?.template) || 'modern')
+                                } 
+                            }}
                             companyProfile={companyProfile}
                         />
                     )}

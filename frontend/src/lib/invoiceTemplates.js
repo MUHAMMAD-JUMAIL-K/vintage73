@@ -77,10 +77,12 @@ export const getDemoInvoiceData = (templateId = 'modern', branch = null, company
         },
         items: [
             {
-                product: { name: 'Designer Silk Abaya', hsnCode: '6204' },
+                product: { name: 'Designer Silk Abaya', price: 500.00, hsnCode: '6204' },
                 name: 'Designer Silk Abaya',
                 size: 'M',
                 quantity: 1,
+                mrp: 500.00,
+                originalUnitPrice: 500.00,
                 unitPrice: 450.00,
                 total: 450.00,
                 discountAmount: 50.00,
@@ -88,10 +90,12 @@ export const getDemoInvoiceData = (templateId = 'modern', branch = null, company
                 taxAmount: 20.00
             },
             {
-                product: { name: 'Embroidered Kaftan Dress', hsnCode: '6204' },
+                product: { name: 'Embroidered Kaftan Dress', price: 200.00, hsnCode: '6204' },
                 name: 'Embroidered Kaftan Dress',
                 size: 'L',
                 quantity: 2,
+                mrp: 200.00,
+                originalUnitPrice: 200.00,
                 unitPrice: 200.00,
                 total: 400.00,
                 discountAmount: 0.00,

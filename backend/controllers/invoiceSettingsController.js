@@ -57,6 +57,21 @@ exports.updateInvoiceSettings = async (req, res) => {
             create: { type, settings }
         });
 
+        // Also synchronize to CompanyProfile if type is sales
+        if (type === 'sales') {
+            try {
+                const comp = await prisma.companyProfile.findFirst();
+                if (comp) {
+                    await prisma.companyProfile.update({
+                        where: { id: comp.id },
+                        data: { invoiceSettings: settings }
+                    });
+                }
+            } catch (syncErr) {
+                console.warn("⚠️ Could not sync invoice settings to CompanyProfile:", syncErr.message);
+            }
+        }
+
         res.json(updated);
     } catch (error) {
         console.error("❌ [ERROR] Updating invoice settings:", error.message);
