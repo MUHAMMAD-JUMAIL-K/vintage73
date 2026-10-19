@@ -253,6 +253,10 @@ exports.createProduct = asyncHandler(async (req, res) => {
   }
 
   const priceDecimal = parseFloat(price);
+  if (price === undefined || price === null || price === '' || isNaN(priceDecimal) || priceDecimal < 0) {
+    res.status(400);
+    throw new Error('Selling price must be a valid non-negative number');
+  }
   const taxVal = taxPercent !== undefined ? taxPercent : (taxRate !== undefined ? taxRate : 0);
   const taxRateDecimal = parseFloat(taxVal) || 0;
 
@@ -260,6 +264,19 @@ exports.createProduct = asyncHandler(async (req, res) => {
   const parsedAttributes = safeJsonParse(attributes);
   const parsedSizeStocks = safeJsonParse(sizeStocks);
   const parsedBrandPrices = safeJsonParse(req.body.brandPrices);
+
+  // Validate brand prices if provided
+  if (parsedBrandPrices && typeof parsedBrandPrices === 'object') {
+    for (const [bKey, bVal] of Object.entries(parsedBrandPrices)) {
+      if (bVal && bVal.price !== undefined && bVal.price !== null && bVal.price !== '') {
+        const bpNum = parseFloat(bVal.price);
+        if (isNaN(bpNum) || bpNum < 0) {
+          res.status(400);
+          throw new Error(`Selling price for brand "${bVal.brandName || bKey}" must be a valid non-negative number`);
+        }
+      }
+    }
+  }
 
   // Determine stock quantity
   let totalStockQty = 0;
@@ -433,6 +450,15 @@ exports.updateProduct = asyncHandler(async (req, res) => {
   if (req.body.brandPrices !== undefined) {
     const parsedBp = safeJsonParse(req.body.brandPrices);
     if (parsedBp && typeof parsedBp === 'object') {
+      for (const [bKey, bVal] of Object.entries(parsedBp)) {
+        if (bVal && bVal.price !== undefined && bVal.price !== null && bVal.price !== '') {
+          const bpNum = parseFloat(bVal.price);
+          if (isNaN(bpNum) || bpNum < 0) {
+            res.status(400);
+            throw new Error(`Selling price for brand "${bVal.brandName || bKey}" must be a valid non-negative number`);
+          }
+        }
+      }
       const existingProduct = await prisma.product.findUnique({
         where: { id: parseInt(id) },
         select: { brandPrices: true }
@@ -449,8 +475,13 @@ exports.updateProduct = asyncHandler(async (req, res) => {
     dataToUpdate.brandPrices = parsedBp;
   }
 
-  if (price !== undefined && !isNaN(parseFloat(price))) {
-    dataToUpdate.price = parseFloat(price);
+  if (price !== undefined) {
+    const priceDecimal = parseFloat(price);
+    if (price === null || price === '' || isNaN(priceDecimal) || priceDecimal < 0) {
+      res.status(400);
+      throw new Error('Selling price must be a valid non-negative number');
+    }
+    dataToUpdate.price = priceDecimal;
   }
 
   if (taxRate !== undefined || taxPercent !== undefined) {

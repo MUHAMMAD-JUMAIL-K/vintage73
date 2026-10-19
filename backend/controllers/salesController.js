@@ -187,9 +187,20 @@ exports.createSale = asyncHandler(async (req, res) => {
       }
 
       const unitPrice = parseFloat(item.unitPrice || item.price || 0);
+      let catalogPrice = product ? parseFloat(product.price || 0) : unitPrice;
+      if (product && item.brandId && product.brandPrices) {
+        let bPrices = product.brandPrices;
+        if (typeof bPrices === 'string') {
+          try { bPrices = JSON.parse(bPrices); } catch(e) { bPrices = null; }
+        }
+        const bKey = String(item.brandId);
+        if (bPrices && bPrices[bKey] && bPrices[bKey].price !== undefined && bPrices[bKey].price !== null && bPrices[bKey].price !== '') {
+          catalogPrice = parseFloat(bPrices[bKey].price);
+        }
+      }
       const originalUnitPrice = item.originalUnitPrice !== undefined && item.originalUnitPrice !== null
         ? parseFloat(item.originalUnitPrice)
-        : (product ? parseFloat(product.price || 0) : unitPrice);
+        : catalogPrice;
       const discAmt = parseFloat(item.discountAmount || 0);
       const netPrice = Math.max(0, unitPrice - discAmt);
       
@@ -761,31 +772,51 @@ exports.updateSale = asyncHandler(async (req, res) => {
       }
 
       const unitPrice = parseFloat(item.unitPrice || item.price || 0);
+      let catalogPrice = product ? parseFloat(product.price || 0) : unitPrice;
+      if (product && item.brandId && product.brandPrices) {
+        let bPrices = product.brandPrices;
+        if (typeof bPrices === 'string') {
+          try { bPrices = JSON.parse(bPrices); } catch(e) { bPrices = null; }
+        }
+        const bKey = String(item.brandId);
+        if (bPrices && bPrices[bKey] && bPrices[bKey].price !== undefined && bPrices[bKey].price !== null && bPrices[bKey].price !== '') {
+          catalogPrice = parseFloat(bPrices[bKey].price);
+        }
+      }
       const originalUnitPrice = item.originalUnitPrice !== undefined && item.originalUnitPrice !== null
         ? parseFloat(item.originalUnitPrice)
-        : (product ? parseFloat(product.price || 0) : unitPrice);
+        : catalogPrice;
       const discAmt = parseFloat(item.discountAmount || 0);
       const voucherDiscountAmount = parseFloat(item.voucherDiscountAmount || 0);
-      const netPrice = unitPrice - discAmt;
+      const netPrice = Math.max(0, unitPrice - discAmt);
       const taxRate = item.taxPercent !== undefined ? parseFloat(item.taxPercent) : parseFloat(product.taxRate || 0);
-      
-      // FORCE EXCLUSIVE FOR POS TAX (to ensure Total = Subtotal + Tax as per user req)
-      const isTaxInclusive = false;
+      const itemIsTaxInclusive = item.isTaxInclusive === true || item.isTaxInclusive === 'true';
+
+      const lineTotalPayableBeforeVoucher = item.quantity * netPrice;
+      const lineTotalPayable = Math.max(0, lineTotalPayableBeforeVoucher - voucherDiscountAmount);
 
       let lineTax = 0;
-      let lineTotal = 0; // Exclusive
+      let lineTotal = 0; // Taxable base amount
 
-      if (taxRate > 0) {
-        lineTotal = item.quantity * netPrice;
-        lineTax = (lineTotal * taxRate) / 100;
+      if (itemIsTaxInclusive && taxRate > 0) {
+        const baseAmount = lineTotalPayable / (1 + (taxRate / 100));
+        lineTax = lineTotalPayable - baseAmount;
+        lineTotal = baseAmount;
+      } else if (taxRate > 0) {
+        lineTotal = lineTotalPayable;
+        lineTax = (lineTotalPayable * taxRate) / 100;
       } else {
-        lineTotal = item.quantity * netPrice;
+        lineTotal = lineTotalPayable;
         lineTax = 0;
       }
 
       subTotal += lineTotal;
       taxAmount += lineTax;
       totalItemsDiscount += (discAmt * item.quantity);
+
+      const savedLineTotal = itemIsTaxInclusive
+        ? lineTotalPayable
+        : lineTotal + lineTax;
 
       saleItemsData.push({
         productId: parseInt(item.productId),
@@ -796,9 +827,10 @@ exports.updateSale = asyncHandler(async (req, res) => {
         discountPercent: parseFloat(item.discountPercent || 0),
         discountAmount: parseFloat(discAmt.toFixed(2)),
         voucherDiscountAmount: parseFloat(voucherDiscountAmount.toFixed(2)),
-        total: parseFloat((lineTotal + lineTax).toFixed(2)),
+        total: parseFloat(savedLineTotal.toFixed(2)),
         taxAmount: parseFloat(lineTax.toFixed(2)),
-        taxRate
+        taxRate: parseFloat(taxRate.toFixed(2)),
+        isTaxInclusive: itemIsTaxInclusive
       });
     }
 

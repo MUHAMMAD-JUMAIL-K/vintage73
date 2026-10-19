@@ -248,17 +248,36 @@ const EXCHANGE_RATES = {
                 lineTax = 0;
             }
 
+            let cgst = 0;
+            let sgst = 0;
+            let igst = 0;
+            const taxType = item.taxType || 'cgst_sgst';
+            if (rate > 0 && lineTax > 0) {
+                if (taxType === 'igst') {
+                    igst = lineTax;
+                } else {
+                    cgst = lineTax / 2;
+                    sgst = lineTax / 2;
+                }
+            }
+
             return {
                 subTotal: acc.subTotal + lineSubTotal,
-                tax: acc.tax + lineTax
+                tax: acc.tax + lineTax,
+                cgst: acc.cgst + cgst,
+                sgst: acc.sgst + sgst,
+                igst: acc.igst + igst
             };
-        }, { subTotal: 0, tax: 0 });
+        }, { subTotal: 0, tax: 0, cgst: 0, sgst: 0, igst: 0 });
 
         const voucherDiscount = appliedVoucher ? parseFloat(appliedVoucher.finalVoucherDiscount || 0) : 0;
 
         return {
             subTotal: results.subTotal,
             tax: results.tax,
+            cgst: results.cgst,
+            sgst: results.sgst,
+            igst: results.igst,
             totalCatalogPrice,
             totalProductDiscount,
             voucherDiscount,
@@ -454,15 +473,30 @@ const EXCHANGE_RATES = {
 
     // --- CART SYNC EFFECT ---
     useEffect(() => {
-        if (products.length > 0 && cart.length > 0) {
+        if (!products || products.length === 0) return;
+
+        setCart(prevCart => {
+            if (!prevCart || prevCart.length === 0) return prevCart;
             let hasChanges = false;
 
-            const updatedCart = cart.map(cartItem => {
+            const updatedCart = prevCart.map(cartItem => {
                 const freshProd = products.find(p => p.id === cartItem.id);
                 if (freshProd) {
-                    const freshPrice = Number(freshProd.price);
+                    let freshPrice = Number(freshProd.price);
+                    if (cartItem.brandId && freshProd.brandPrices) {
+                        let bPrices = freshProd.brandPrices;
+                        if (typeof bPrices === 'string') {
+                            try { bPrices = JSON.parse(bPrices); } catch(e) { bPrices = null; }
+                        }
+                        const bKey = String(cartItem.brandId);
+                        if (bPrices && bPrices[bKey] && bPrices[bKey].price !== undefined && bPrices[bKey].price !== null && bPrices[bKey].price !== '') {
+                            freshPrice = Number(bPrices[bKey].price);
+                        }
+                    }
+
                     const freshTaxRate = parseFloat(freshProd.taxRate || 0);
                     const freshTaxPercent = parseFloat(freshProd.taxPercent || freshProd.taxRate || 0);
+                    const freshTaxType = freshProd.taxType || 'cgst_sgst';
                     const freshIsInclusive = freshProd.isTaxInclusive === true || freshProd.isTaxInclusive === 'true';
 
                     const isPriceDiff = !cartItem.isPriceOverridden && Number(cartItem.price) !== freshPrice;
@@ -471,13 +505,16 @@ const EXCHANGE_RATES = {
 
                     if (isPriceDiff || isTaxDiff || isIncDiff) {
                         hasChanges = true;
+                        const preservedName = cartItem.brandName ? `${freshProd.name} (${cartItem.brandName})` : (cartItem.name || freshProd.name);
                         return {
                             ...cartItem,
                             price: isPriceDiff ? freshPrice : cartItem.price,
+                            originalPrice: freshPrice,
                             taxRate: freshTaxRate,
                             taxPercent: freshTaxPercent,
+                            taxType: freshTaxType,
                             isTaxInclusive: freshIsInclusive,
-                            name: freshProd.name
+                            name: preservedName
                         };
                     }
                 }
@@ -486,11 +523,11 @@ const EXCHANGE_RATES = {
 
             if (hasChanges) {
                 console.log("Syncing cart with fresh product data...");
-                setCart(updatedCart);
-                toast.info("Cart prices updated to latest values");
+                return updatedCart;
             }
-        }
-    }, [products, cart]);
+            return prevCart;
+        });
+    }, [products]);
 
 
     // Update Invoice Settings and Stock Settings when Branch Changes
@@ -638,6 +675,7 @@ const EXCHANGE_RATES = {
                         hasBarcode: !!primaryBarcode,
                         taxRate: p.taxRate,
                         taxPercent: p.taxPercent,
+                        taxType: p.taxType || 'cgst_sgst',
                         isTaxInclusive: p.isTaxInclusive,
                         minDiscount: p.minDiscount,
                         maxDiscount: p.maxDiscount,
@@ -702,6 +740,7 @@ const EXCHANGE_RATES = {
                     hasBarcode: !!primaryBarcode,
                     taxRate: p.taxRate,
                     taxPercent: p.taxPercent,
+                    taxType: p.taxType || 'cgst_sgst',
                     isTaxInclusive: p.isTaxInclusive,
                     minDiscount: p.minDiscount,
                     maxDiscount: p.maxDiscount,
@@ -753,14 +792,13 @@ const EXCHANGE_RATES = {
                 return;
             }
 
-            const foundGroup = groupedProducts.find(p => {
+            let foundGroup = groupedProducts.find(p => {
                 const bCode = p.barcode ? String(p.barcode).trim().toLowerCase() : '';
                 const brandCode = p.brandBarcode ? String(p.brandBarcode).trim().toLowerCase() : '';
                 const prodCode = p.productBarcode ? String(p.productBarcode).trim().toLowerCase() : '';
-                const pName = p.name ? p.name.toLowerCase() : '';
-                const baseName = p.baseName ? p.baseName.toLowerCase() : '';
+                const pName = p.name ? p.name.trim().toLowerCase() : '';
 
-                if (bCode === query || brandCode === query || prodCode === query || pName === query || baseName === query) {
+                if (bCode === query || brandCode === query || prodCode === query || pName === query) {
                     return true;
                 }
 
@@ -770,6 +808,13 @@ const EXCHANGE_RATES = {
 
                 return false;
             });
+
+            if (!foundGroup) {
+                foundGroup = groupedProducts.find(p => {
+                    const baseName = p.baseName ? p.baseName.trim().toLowerCase() : '';
+                    return baseName === query;
+                });
+            }
 
             if (foundGroup) {
                 const matchedVariant = foundGroup.variants?.find(v =>
@@ -852,6 +897,7 @@ const EXCHANGE_RATES = {
 
         const freshPrice = Number(product.price);
         const freshTaxRate = parseFloat(product.taxRate || 0);
+        const freshTaxType = product.taxType || 'cgst_sgst';
         const freshIsInclusive = product.isTaxInclusive === true || product.isTaxInclusive === 'true';
 
         if (existing) {
@@ -861,6 +907,7 @@ const EXCHANGE_RATES = {
                 originalPrice: item.originalPrice !== undefined ? item.originalPrice : freshPrice,
                 price: item.isPriceOverridden ? item.price : freshPrice,
                 taxRate: freshTaxRate,
+                taxType: freshTaxType,
                 isTaxInclusive: freshIsInclusive,
                 isPriceOverridden: item.isPriceOverridden || false
             } : item));
@@ -884,6 +931,7 @@ const EXCHANGE_RATES = {
                 discountAmount: 0,
                 taxRate: freshTaxRate,
                 taxPercent: freshTaxRate,
+                taxType: freshTaxType,
                 isTaxInclusive: freshIsInclusive
             }]);
         }
@@ -1029,7 +1077,7 @@ const EXCHANGE_RATES = {
     }, [cart, customerId]);
 
     // Calculations Unpacking
-    const { subTotal, tax, totalCatalogPrice, totalProductDiscount, voucherDiscount, totalBeforeVoucher } = calcResults;
+    const { subTotal, tax, cgst, sgst, igst, totalCatalogPrice, totalProductDiscount, voucherDiscount, totalBeforeVoucher } = calcResults;
     const effectiveDelivery = deliveryChargeEnabled ? (parseFloat(deliveryCharge) || 0) : 0;
     const totalBeforeRound = subTotal + tax + effectiveDelivery;
     const redeemedAmount = parseFloat(advanceRedeemed || 0);
@@ -1255,15 +1303,19 @@ const EXCHANGE_RATES = {
                 items: cart.map(item => {
                     return {
                         productId: item.id,
+                        brandId: item.brandId || null,
+                        brandName: item.brandName || null,
                         size: item.selectedSize || item.size || null,
                         quantity: item.quantity,
                         unitPrice: parseFloat(item.price || 0),
                         originalUnitPrice: item.originalPrice !== undefined ? parseFloat(item.originalPrice) : parseFloat(item.price || 0),
                         mrp: item.originalPrice !== undefined ? parseFloat(item.originalPrice) : parseFloat(item.price || 0),
-                        taxPercent: taxEnabled ? item.taxPercent : 0,
+                        taxRate: taxEnabled ? parseFloat(item.taxRate || item.taxPercent || 0) : 0,
+                        taxPercent: taxEnabled ? parseFloat(item.taxPercent || item.taxRate || 0) : 0,
+                        taxType: item.taxType || 'cgst_sgst',
                         discountPercent: item.discountPercent,
                         discountAmount: parseFloat(item.discountAmount || 0),
-                        isTaxInclusive: item.isTaxInclusive
+                        isTaxInclusive: item.isTaxInclusive === true
                     };
                 }),
                 paymentMethod: finalPayments.length === 1 ? finalPayments[0].method : 'Split',
@@ -1785,8 +1837,30 @@ const EXCHANGE_RATES = {
                                 const effPrice = parseFloat(item.price || 0);
                                 const effDisc = parseFloat(item.discountAmount || 0);
                                 const lineAlloc = appliedVoucher?.lineAllocations?.[idx] || 0;
-                                const lineTotalBeforeVoucher = Math.max(0, (effPrice - effDisc) * (parseFloat(item.quantity) || 0));
-                                const lineFinalTotal = Math.max(0, lineTotalBeforeVoucher - lineAlloc);
+                                const qty = parseFloat(item.quantity) || 1;
+                                const rate = taxEnabled ? parseFloat(item.taxRate || item.taxPercent || 0) : 0;
+                                const isInc = item.isTaxInclusive === true;
+
+                                // Tax calculations for line item
+                                const baseLineBeforeVoucher = Math.max(0, (effPrice - effDisc) * qty);
+                                let lineTaxBeforeVoucher = 0;
+                                if (isInc && rate > 0) {
+                                    const baseAmount = baseLineBeforeVoucher / (1 + (rate / 100));
+                                    lineTaxBeforeVoucher = baseLineBeforeVoucher - baseAmount;
+                                } else if (rate > 0) {
+                                    lineTaxBeforeVoucher = (baseLineBeforeVoucher * rate) / 100;
+                                }
+                                const lineTotalBeforeVoucher = isInc ? baseLineBeforeVoucher : (baseLineBeforeVoucher + lineTaxBeforeVoucher);
+
+                                const baseLineAfterVoucher = Math.max(0, baseLineBeforeVoucher - lineAlloc);
+                                let lineTaxAfterVoucher = 0;
+                                if (isInc && rate > 0) {
+                                    const baseAmount = baseLineAfterVoucher / (1 + (rate / 100));
+                                    lineTaxAfterVoucher = baseLineAfterVoucher - baseAmount;
+                                } else if (rate > 0) {
+                                    lineTaxAfterVoucher = (baseLineAfterVoucher * rate) / 100;
+                                }
+                                const lineFinalTotal = isInc ? baseLineAfterVoucher : (baseLineAfterVoucher + lineTaxAfterVoucher);
 
                                 return (
                                     <div key={itemKey} className="px-4 py-3 hover:bg-slate-50 group transition-colors">
@@ -1803,6 +1877,11 @@ const EXCHANGE_RATES = {
                                                     {item.selectedSize && (
                                                         <span className="text-[9px] px-1.5 py-0.2 rounded bg-slate-100 text-slate-700 font-bold border border-slate-200">
                                                             Size: {item.selectedSize}
+                                                        </span>
+                                                    )}
+                                                    {rate > 0 && (
+                                                        <span className="text-[9px] px-1.5 py-0.2 rounded bg-amber-50 text-amber-800 font-semibold border border-amber-200">
+                                                            GST: {rate}%{isInc ? ' (Incl)' : ''}
                                                         </span>
                                                     )}
                                                     {lineAlloc > 0 && (
@@ -1960,9 +2039,9 @@ const EXCHANGE_RATES = {
                 {/* Totals & Actions - Compacted */}
                 <div className="bg-slate-50 border-t border-slate-200 p-3 space-y-1.5">
                     <div className="space-y-0.5 text-xs">
-                        {/* 1. Catalog Price Total */}
+                        {/* 1. Subtotal */}
                         <div className="flex justify-between text-slate-500">
-                            <span className="font-medium text-[10px] uppercase">Catalog Price</span>
+                            <span className="font-medium text-[10px] uppercase">Subtotal</span>
                             <span className="font-semibold text-slate-700">
                                 {currencyCode === 'AED' ? `${totalCatalogPrice.toFixed(2)} ${currencySymbol}` : `${currencySymbol}${totalCatalogPrice.toFixed(2)}`}
                             </span>
@@ -1990,22 +2069,41 @@ const EXCHANGE_RATES = {
                             </div>
                         )}
 
-                        {/* 4. Taxable Subtotal */}
+                        {/* 4. Taxable Amount */}
                         <div className="flex justify-between text-slate-500">
-                            <span className="font-medium text-[10px] uppercase">Taxable Subtotal</span>
+                            <span className="font-medium text-[10px] uppercase">Taxable Amount</span>
                             <span className="font-semibold text-slate-700">
                                 {currencyCode === 'AED' ? `${subTotal.toFixed(2)} ${currencySymbol}` : `${currencySymbol}${subTotal.toFixed(2)}`}
                             </span>
                         </div>
 
-                        {/* 5. Tax (GST) */}
-                        {taxEnabled && (
-                            <div className="flex justify-between text-slate-500">
-                                <span className="font-medium text-[10px] uppercase">Tax (GST)</span>
-                                <span className="font-semibold text-emerald-600">
-                                    +{currencyCode === 'AED' ? `${tax.toFixed(2)} ${currencySymbol}` : `${currencySymbol}${tax.toFixed(2)}`}
-                                </span>
-                            </div>
+                        {/* 5. GST Breakdown */}
+                        {taxEnabled && tax > 0 && (
+                            <>
+                                {igst > 0 ? (
+                                    <div className="flex justify-between text-slate-500">
+                                        <span className="font-medium text-[10px] uppercase">IGST</span>
+                                        <span className="font-semibold text-emerald-600">
+                                            +{currencyCode === 'AED' ? `${igst.toFixed(2)} ${currencySymbol}` : `${currencySymbol}${igst.toFixed(2)}`}
+                                        </span>
+                                    </div>
+                                ) : (
+                                    <>
+                                        <div className="flex justify-between text-slate-500">
+                                            <span className="font-medium text-[10px] uppercase">CGST</span>
+                                            <span className="font-semibold text-emerald-600">
+                                                +{currencyCode === 'AED' ? `${cgst.toFixed(2)} ${currencySymbol}` : `${currencySymbol}${cgst.toFixed(2)}`}
+                                            </span>
+                                        </div>
+                                        <div className="flex justify-between text-slate-500">
+                                            <span className="font-medium text-[10px] uppercase">SGST</span>
+                                            <span className="font-semibold text-emerald-600">
+                                                +{currencyCode === 'AED' ? `${sgst.toFixed(2)} ${currencySymbol}` : `${currencySymbol}${sgst.toFixed(2)}`}
+                                            </span>
+                                        </div>
+                                    </>
+                                )}
+                            </>
                         )}
 
                         {/* 6. Delivery Charge */}
