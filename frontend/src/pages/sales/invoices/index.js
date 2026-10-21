@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import api from '@/lib/api';
 import { getCurrencySymbol } from '@/lib/currency';
-import { FiPrinter, FiEye, FiCheckCircle, FiFileText, FiDollarSign, FiX, FiSearch, FiTrash2, FiAlertTriangle, FiEdit2, FiClock, FiUser, FiCalendar, FiTag, FiShoppingBag, FiCreditCard } from 'react-icons/fi';
+import { FiPrinter, FiEye, FiCheckCircle, FiFileText, FiDollarSign, FiX, FiSearch, FiTrash2, FiAlertTriangle, FiEdit2, FiClock, FiUser, FiCalendar, FiTag, FiShoppingBag, FiCreditCard, FiLock } from 'react-icons/fi';
 
 import { useRouter } from 'next/router';
 import { toast } from 'react-toastify';
@@ -38,11 +38,29 @@ export default function InvoicesList() {
     // History Modal State
     const [showHistoryModal, setShowHistoryModal] = useState(false);
     const [historyInvoice, setHistoryInvoice] = useState(null);
+    const [closedDatesSet, setClosedDatesSet] = useState(new Set());
 
     useEffect(() => {
         fetchInvoices();
         fetchSettings();
+        fetchClosedDates();
     }, []);
+
+    const fetchClosedDates = async () => {
+        try {
+            const res = await api.get('/day-close/history', { params: { limit: 100 } });
+            if (res.data?.records) {
+                const set = new Set(
+                    res.data.records
+                        .filter(r => r.status === 'CLOSED' || r.status === 'ADMIN_CLOSED')
+                        .map(r => r.businessDate.split('T')[0])
+                );
+                setClosedDatesSet(set);
+            }
+        } catch (e) {
+            console.error('Failed to fetch closed dates', e);
+        }
+    };
 
     // Clear printData when preview modal closes to avoid stale data
     useEffect(() => {
@@ -214,7 +232,11 @@ export default function InvoicesList() {
                                     <td colSpan="6" className="p-4 bg-slate-50/50"></td>
                                 </tr>
                             ))
-                        ) : filteredInvoices.map((inv) => (
+                        ) : filteredInvoices.map((inv) => {
+                            const invDateIso = (inv.saleDate || inv.createdAt).split('T')[0];
+                            const isClosedDay = closedDatesSet.has(invDateIso);
+
+                            return (
                             <tr key={inv.id} className="hover:bg-slate-50 transition-colors">
                                 <td className="px-6 py-4 text-sm text-slate-600">
                                     {new Date(inv.createdAt || inv.saleDate).toLocaleDateString('en-GB')}
@@ -227,13 +249,23 @@ export default function InvoicesList() {
                                     <div className="text-xs text-slate-400">{inv.customer?.phone}</div>
                                 </td>
                                 <td className="px-6 py-4">
-                                    <span className={`px-2 py-1 rounded-full text-[10px] font-medium uppercase tracking-tighter border ${
-                                        inv.status === 'cancelled'
-                                        ? 'bg-red-50 text-red-600 border-red-100'
-                                        : 'bg-emerald-50 text-emerald-600 border-emerald-100'
-                                    }`}>
-                                        {inv.status}
-                                    </span>
+                                    <div className="flex flex-col gap-1 items-start">
+                                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium uppercase tracking-tighter border ${
+                                            inv.status === 'cancelled'
+                                            ? 'bg-red-50 text-red-600 border-red-100'
+                                            : 'bg-emerald-50 text-emerald-600 border-emerald-100'
+                                        }`}>
+                                            {inv.status}
+                                        </span>
+                                        {isClosedDay && (
+                                            <span
+                                                className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-slate-100 text-slate-700 border border-slate-300 flex items-center gap-1 cursor-help"
+                                                title={`This invoice belongs to a closed business day (${new Date(inv.saleDate || inv.createdAt).toLocaleDateString('en-GB')}). Closed financial records are immutable.`}
+                                            >
+                                                <FiLock size={9} /> Closed Day
+                                            </span>
+                                        )}
+                                    </div>
                                 </td>
                                 <td className="px-6 py-4 text-sm text-right font-medium text-slate-800">
                                     {getCurrencySymbol(inv.currencyCode)}
@@ -258,26 +290,38 @@ export default function InvoicesList() {
                                             <FiPrinter size={16} />
                                         </button>
                                         <button
-                                            onClick={() => router.push(`/pos?editId=${inv.id}`)}
-                                            disabled={inv.status === 'cancelled'}
+                                            onClick={() => {
+                                                if (isClosedDay) {
+                                                    toast.error(`Invoice belongs to a closed business day (${new Date(inv.saleDate || inv.createdAt).toLocaleDateString('en-GB')}). Closed records cannot be edited.`);
+                                                    return;
+                                                }
+                                                router.push(`/pos?editId=${inv.id}`);
+                                            }}
+                                            disabled={inv.status === 'cancelled' || isClosedDay}
                                             className={`p-1.5 rounded-lg transition-all ${
-                                                inv.status === 'cancelled'
+                                                inv.status === 'cancelled' || isClosedDay
                                                 ? 'text-slate-200 cursor-not-allowed'
                                                 : 'text-slate-400 hover:text-blue-600 hover:bg-blue-50'
                                             }`}
-                                            title="Edit Invoice"
+                                            title={isClosedDay ? 'Locked: Invoice belongs to a closed business day' : 'Edit Invoice'}
                                         >
                                             <FiEdit2 size={16} />
                                         </button>
                                         <button
-                                            onClick={() => handleDeleteClick(inv)}
-                                            disabled={inv.status === 'cancelled'}
+                                            onClick={() => {
+                                                if (isClosedDay) {
+                                                    toast.error(`Invoice belongs to a closed business day (${new Date(inv.saleDate || inv.createdAt).toLocaleDateString('en-GB')}). Closed records cannot be cancelled.`);
+                                                    return;
+                                                }
+                                                handleDeleteClick(inv);
+                                            }}
+                                            disabled={inv.status === 'cancelled' || isClosedDay}
                                             className={`p-1.5 rounded-lg transition-all ${
-                                                inv.status === 'cancelled'
+                                                inv.status === 'cancelled' || isClosedDay
                                                 ? 'text-slate-200 cursor-not-allowed'
                                                 : 'text-slate-400 hover:text-red-600 hover:bg-red-50'
                                             }`}
-                                            title="Cancel Invoice"
+                                            title={isClosedDay ? 'Locked: Invoice belongs to a closed business day' : 'Cancel Invoice'}
                                         >
                                             <FiTrash2 size={16} />
                                         </button>
@@ -288,10 +332,20 @@ export default function InvoicesList() {
                                         >
                                             <FiClock size={16} />
                                         </button>
+                                        {isClosedDay && (
+                                            <button
+                                                onClick={() => router.push(`/reports/sales?businessDate=${invDateIso}`)}
+                                                className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all"
+                                                title="View Closed Day Report"
+                                            >
+                                                <FiLock size={16} className="text-emerald-700" />
+                                            </button>
+                                        )}
                                     </div>
                                 </td>
                             </tr>
-                        ))}
+                            );
+                        })}
                         {!loading && filteredInvoices.length === 0 && (
                             <tr>
                                 <td colSpan="6" className="text-center py-12 text-slate-400">

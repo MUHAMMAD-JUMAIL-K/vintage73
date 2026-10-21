@@ -468,7 +468,7 @@ exports.getStockSummary = asyncHandler(async (req, res) => {
 // Supplies Dashboard KPIs, Trend Chart data, Payment Breakdown, Top Products,
 // Single-row-per-invoice Summary Report, and Line-item Detailed Report.
 exports.getSalesAnalyticsReport = asyncHandler(async (req, res) => {
-  const { startDate, endDate, paymentMethod, salesmanId, customerId, status, search } = req.query;
+  const { startDate, endDate, businessDate, paymentMethod, salesmanId, customerId, status, search } = req.query;
   const effectiveBranchId = getEffectiveBranchId(req);
 
   if (effectiveBranchId === -1) {
@@ -476,10 +476,19 @@ exports.getSalesAnalyticsReport = asyncHandler(async (req, res) => {
     throw new Error('Access denied. No branch assigned to this account.');
   }
 
+  const targetSingleDate = businessDate || (startDate && endDate && startDate === endDate ? startDate : null);
+
   const where = {};
   if (effectiveBranchId) where.branchId = effectiveBranchId;
 
-  if (startDate || endDate) {
+  if (targetSingleDate) {
+    const startUTC = parseBusinessDateStart(targetSingleDate);
+    const endUTC = parseBusinessDateEnd(targetSingleDate);
+    where.OR = [
+      { saleDate: { gte: startUTC, lte: endUTC } },
+      { createdAt: { gte: startUTC, lte: endUTC } }
+    ];
+  } else if (startDate || endDate) {
     const startUTC = parseBusinessDateStart(startDate);
     const endUTC = parseBusinessDateEnd(endDate);
     const dateFilter = {};
@@ -813,14 +822,162 @@ exports.getSalesAnalyticsReport = asyncHandler(async (req, res) => {
     }
   }
 
-  if (!currency) {
-    const company = await prisma.companyProfile.findFirst({
-      select: { currencyCode: true, currencySymbol: true }
+  // 9. Build Comprehensive Daily Activity for Selected Business Date
+  const cancelledInvoicesList = sales.filter(s => s.status === 'cancelled').map(s => ({
+    id: s.id,
+    invoiceNumber: s.invoiceNumber,
+    saleDate: s.saleDate,
+    createdAt: s.createdAt,
+    cancelledAt: s.cancelledAt || s.updatedAt,
+    cancelledBy: s.cancelledBy || 'Staff',
+    cancelReason: s.cancelReason || 'Cancelled by staff',
+    originalAmount: Number((parseFloat(s.totalAmount) || 0).toFixed(2)),
+    customer: s.customer ? { name: s.customer.name, phone: s.customer.phone } : { name: 'Walk-in' },
+    itemsCount: s.items.length
+  }));
+
+  const returnsList = returnSales.map(s => ({
+    id: s.id,
+    invoiceNumber: s.invoiceNumber,
+    originalInvoice: s.originalInvoice,
+    saleDate: s.saleDate,
+    customer: s.customer ? { name: s.customer.name, phone: s.customer.phone } : { name: 'Walk-in' },
+    refundAmount: Number((parseFloat(s.totalAmount) || 0).toFixed(2)),
+    paymentMethod: s.paymentMethod || 'Cash',
+    returnReason: s.returnReason || 'Product Return',
+    itemsCount: s.items.length,
+    items: s.items.map(i => ({
+      name: i.product?.name || 'Item',
+      size: i.size,
+      quantity: i.quantity,
+      unitPrice: Number(i.unitPrice),
+      total: Number(i.total)
+    }))
+  }));
+
+  const paymentRecords = [];
+  sales.forEach(s => {
+    if (s.payments && s.payments.length > 0) {
+      s.payments.forEach(p => {
+        paymentRecords.push({
+          id: p.id,
+          reference: p.reference || s.invoiceNumber,
+          invoiceNumber: s.invoiceNumber,
+          customer: s.customer?.name || 'Walk-in',
+          date: p.paymentDate || s.createdAt,
+          method: p.method,
+          amount: Number(p.amount),
+          status: s.status,
+          cashier: s.salesman?.name || 'Staff'
+        });
+      });
+    } else if (s.paymentMethod && s.status !== 'cancelled') {
+      paymentRecords.push({
+        id: s.id,
+        reference: s.invoiceNumber,
+        invoiceNumber: s.invoiceNumber,
+        customer: s.customer?.name || 'Walk-in',
+        date: s.saleDate || s.createdAt,
+        method: s.paymentMethod,
+        amount: Number(s.paidAmount || s.totalAmount),
+        status: s.status,
+        cashier: s.salesman?.name || 'Staff'
+      });
+    }
+  });
+
+  const totalTaxable = Number(activeSales.reduce((sum, s) => sum + (parseFloat(s.subTotal) || 0) - (parseFloat(s.discount) || 0), 0).toFixed(2));
+  const gstReport = {
+    taxableAmount: totalTaxable,
+    cgst: Number((totalTax / 2).toFixed(2)),
+    sgst: Number((totalTax / 2).toFixed(2)),
+    igst: 0,
+    totalTax: totalTax
+  };
+
+  const productMovementMap = {};
+  sales.forEach(s => {
+    s.items.forEach(it => {
+      const pId = it.productId;
+      if (!productMovementMap[pId]) {
+        productMovementMap[pId] = {
+          productId: pId,
+          productName: it.product?.name || 'Item',
+          sku: it.product?.sku || '',
+          unitsSold: 0,
+          unitsReturned: 0,
+          netMovement: 0
+        };
+      }
+      if (s.status === 'cancelled') {
+        // cancelled sales don't alter net inventory
+      } else if (s.isReturn) {
+        productMovementMap[pId].unitsReturned += it.quantity;
+        productMovementMap[pId].netMovement -= it.quantity;
+      } else {
+        productMovementMap[pId].unitsSold += it.quantity;
+        productMovementMap[pId].netMovement += it.quantity;
+      }
     });
-    currency = {
-      code: company?.currencyCode || 'INR',
-      symbol: company?.currencySymbol || '₹'
-    };
+  });
+  const inventoryMovements = Object.values(productMovementMap);
+
+  let dayCloseSummary = null;
+  let expensesList = [];
+  if (targetSingleDate && effectiveBranchId) {
+    try {
+      const [ty, tm, td] = targetSingleDate.split('-').map(Number);
+      const targetUtc = new Date(Date.UTC(ty, tm - 1, td));
+      const dc = await prisma.dayClose.findUnique({
+        where: {
+          branchId_businessDate: {
+            branchId: effectiveBranchId,
+            businessDate: targetUtc
+          }
+        },
+        include: {
+          openedBy: { select: { id: true, name: true, username: true } },
+          finalizedBy: { select: { id: true, name: true, username: true } }
+        }
+      });
+      if (dc) {
+        dayCloseSummary = {
+          id: dc.id,
+          businessDate: targetSingleDate,
+          status: dc.status,
+          openingTime: dc.openedAt,
+          openedBy: dc.openedBy ? (dc.openedBy.name || dc.openedBy.username) : null,
+          openingCash: Number(dc.actualOpeningCash || dc.openingCash || 0),
+          openingDifference: Number(dc.openingDifference || 0),
+          closingTime: dc.finalizedAt,
+          closedBy: dc.finalizedBy ? (dc.finalizedBy.name || dc.finalizedBy.username) : null,
+          physicalCash: dc.physicalCash ? Number(dc.physicalCash) : null,
+          closingExpectedCash: dc.closingExpectedCash ? Number(dc.closingExpectedCash) : null,
+          cashDifference: dc.cashDifference ? Number(dc.cashDifference) : null,
+          verificationChecks: dc.verificationChecks
+        };
+      }
+
+      const startUTC = parseBusinessDateStart(targetSingleDate);
+      const endUTC = parseBusinessDateEnd(targetSingleDate);
+      const exps = await prisma.expense.findMany({
+        where: {
+          branchId: effectiveBranchId,
+          date: { gte: startUTC, lte: endUTC }
+        },
+        orderBy: { createdAt: 'asc' }
+      });
+      expensesList = exps.map(e => ({
+        id: e.id,
+        title: e.title,
+        category: e.category || 'General',
+        amount: Number(e.amount),
+        description: e.description,
+        date: e.date
+      }));
+    } catch (err) {
+      console.error('Error fetching daily activity dayClose/expenses:', err);
+    }
   }
 
   res.json({
@@ -844,6 +1001,36 @@ exports.getSalesAnalyticsReport = asyncHandler(async (req, res) => {
     summary,
     detailed,
     summaryTotals,
+    dailyActivity: {
+      targetDate: targetSingleDate,
+      businessDate: targetSingleDate,
+      invoices: activeSales.map(s => ({
+        id: s.id,
+        invoiceNumber: s.invoiceNumber,
+        saleDate: s.saleDate,
+        customerName: s.customer?.name || 'Walk-in',
+        totalAmount: Number(s.totalAmount),
+        paymentMethod: s.paymentMethod || 'Cash',
+        status: s.status,
+        isReturn: s.isReturn
+      })),
+      cancelledInvoices: cancelledInvoicesList,
+      returns: returnsList,
+      payments: paymentRecords,
+      gstReport,
+      gstSummary: gstReport,
+      inventoryMovements,
+      stockMovements: inventoryMovements,
+      expenses: expensesList,
+      dayCloseSummary,
+      dayCloseRecord: dayCloseSummary,
+      counts: {
+        totalInvoicesCount: activeSales.length + cancelledInvoicesList.length,
+        cancelledCount: cancelledInvoicesList.length,
+        returnsCount: returnsList.length,
+        expensesCount: expensesList.length
+      }
+    },
     currency
   });
 });

@@ -2,7 +2,12 @@ const prisma = require('../config/prisma');
 const asyncHandler = require('../middleware/asyncHandler');
 const { processSalePosting } = require('../utils/accountingHelper');
 const { generateNextNumber } = require('../services/numberingService');
-const { getBranchActiveBusinessDate } = require('../utils/businessDateHelper');
+const {
+  getLocalDateString,
+  getUtcDateObj,
+  formatDisplayDate,
+  getBranchActiveBusinessDate
+} = require('../utils/businessDateHelper');
 const {
   validateVoucherForSale,
   redeemVoucherInSale,
@@ -51,6 +56,24 @@ exports.createSale = asyncHandler(async (req, res) => {
     const activeBiz = await getBranchActiveBusinessDate(validBranchId);
     effectiveSaleDate = activeBiz.dateObj;
   }
+
+  // Prevent assigning sales to closed business sessions
+  const saleDateStr = getLocalDateString(effectiveSaleDate);
+  const saleDateUtc = getUtcDateObj(saleDateStr);
+  const dayCloseRecord = await prisma.dayClose.findUnique({
+    where: {
+      branchId_businessDate: {
+        branchId: validBranchId,
+        businessDate: saleDateUtc
+      }
+    }
+  });
+
+  if (dayCloseRecord && (dayCloseRecord.status === 'CLOSED' || dayCloseRecord.status === 'ADMIN_CLOSED')) {
+    res.status(400);
+    throw new Error(`Cannot create sales for closed business date ${formatDisplayDate(saleDateStr)}. This business session is closed and immutable.`);
+  }
+
   if (!items || !Array.isArray(items) || items.length === 0) {
     res.status(400);
     throw new Error('Sale must have at least one item.');
@@ -594,6 +617,23 @@ exports.cancelSale = asyncHandler(async (req, res) => {
   const sale = await prisma.sale.findUnique({ where: { id: parseInt(id) }, include: { items: true } });
   if (!sale || sale.status === 'cancelled') throw new Error('Invalid sale or already cancelled');
 
+  // Strict Business-Session Locking: Invoices belonging to a closed business day cannot be cancelled
+  const saleDateStr = getLocalDateString(sale.saleDate);
+  const saleDateUtc = getUtcDateObj(saleDateStr);
+  const dayCloseRecord = await prisma.dayClose.findUnique({
+    where: {
+      branchId_businessDate: {
+        branchId: sale.branchId,
+        businessDate: saleDateUtc
+      }
+    }
+  });
+
+  if (dayCloseRecord && (dayCloseRecord.status === 'CLOSED' || dayCloseRecord.status === 'ADMIN_CLOSED')) {
+    res.status(403);
+    throw new Error(`This invoice belongs to a closed business day (${formatDisplayDate(saleDateStr)}). Invoices belonging to a closed business day cannot be cancelled. Closed financial records are locked and immutable.`);
+  }
+
   await prisma.$transaction(async (tx) => {
     await tx.sale.update({
       where: { id: parseInt(id) },
@@ -670,6 +710,23 @@ exports.updateSale = asyncHandler(async (req, res) => {
   const validSaleId = parseInt(id);
   const existing = await prisma.sale.findUnique({ where: { id: validSaleId }, include: { items: true } });
   if (!existing) throw new Error('Sale not found');
+
+  // Strict Business-Session Locking: Invoices belonging to a closed business day cannot be modified
+  const saleDateStr = getLocalDateString(existing.saleDate);
+  const saleDateUtc = getUtcDateObj(saleDateStr);
+  const dayCloseRecord = await prisma.dayClose.findUnique({
+    where: {
+      branchId_businessDate: {
+        branchId: existing.branchId,
+        businessDate: saleDateUtc
+      }
+    }
+  });
+
+  if (dayCloseRecord && (dayCloseRecord.status === 'CLOSED' || dayCloseRecord.status === 'ADMIN_CLOSED')) {
+    res.status(403);
+    throw new Error(`This invoice belongs to a closed business day (${formatDisplayDate(saleDateStr)}). Invoices belonging to a closed business day cannot be modified. Closed financial records are locked and immutable.`);
+  }
 
   let effectiveDeliveryCharge = 0;
   let isDeliveryEnabled = false;
@@ -1052,3 +1109,47 @@ exports.updateSale = asyncHandler(async (req, res) => {
 
   res.json(result);
 });
+
+exports.deleteSale = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const validSaleId = parseInt(id);
+  const sale = await prisma.sale.findUnique({ where: { id: validSaleId }, include: { items: true } });
+  if (!sale) {
+    res.status(404);
+    throw new Error('Sale not found');
+  }
+
+  // Strict Business-Session Locking: Invoices belonging to a closed business day cannot be deleted
+  const saleDateStr = getLocalDateString(sale.saleDate);
+  const saleDateUtc = getUtcDateObj(saleDateStr);
+  const dayCloseRecord = await prisma.dayClose.findUnique({
+    where: {
+      branchId_businessDate: {
+        branchId: sale.branchId,
+        businessDate: saleDateUtc
+      }
+    }
+  });
+
+  if (dayCloseRecord && (dayCloseRecord.status === 'CLOSED' || dayCloseRecord.status === 'ADMIN_CLOSED')) {
+    res.status(403);
+    throw new Error(`This invoice belongs to a closed business day (${formatDisplayDate(saleDateStr)}). Invoices belonging to a closed business day cannot be deleted. Closed financial records are locked and immutable.`);
+  }
+
+  // For completed/posted invoices, require cancellation to preserve financial integrity
+  if (sale.status !== 'cancelled' && sale.status !== 'draft') {
+    res.status(400);
+    throw new Error('Posted invoices must be cancelled with a valid cancellation reason to preserve audit trail, stock reconciliation, and accounting integrity. Direct hard-deletion is not permitted.');
+  }
+
+  // If already cancelled or draft, delete cleanly in transaction
+  await prisma.$transaction(async (tx) => {
+    await tx.saleItem.deleteMany({ where: { saleId: validSaleId } });
+    await tx.payment.deleteMany({ where: { saleId: validSaleId } });
+    await tx.customerVoucherRedemption.deleteMany({ where: { saleId: validSaleId } });
+    await tx.sale.delete({ where: { id: validSaleId } });
+  });
+
+  res.json({ success: true, message: 'Invoice deleted successfully.' });
+});
+

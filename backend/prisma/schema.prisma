@@ -55,7 +55,10 @@ model User {
   managedStaff            User[]                 @relation("StaffAdmin")
   branch                  Branch?                @relation(fields: [branchId], references: [id], map: "User_branchId_fkey")
   terminals               Terminal[]             @relation("TerminalToUser")
-  dayCloseFinalizations   DayClose[]             @relation("DayCloseFinalizedBy")
+  dayCloseOpenings          DayClose[]             @relation("DayCloseOpenedBy")
+  dayCloseOpeningApprovals  DayClose[]             @relation("DayCloseOpeningApprovedBy")
+  dayCloseFinalizations     DayClose[]             @relation("DayCloseFinalizedBy")
+  dayCloseExceptionApprovals DayClose[]            @relation("DayCloseExceptionApprovedBy")
   staffDayClosings        StaffDayClose[]
 }
 
@@ -1044,6 +1047,7 @@ model Terminal {
   sales        Sale[]
   branch       Branch?  @relation(fields: [branchId], references: [id])
   users        User[]   @relation("TerminalToUser")
+  dayCloses    DayClose[]
 }
 
 model SystemSetting {
@@ -1180,21 +1184,52 @@ model InvoiceSetting {
 }
 
 model DayClose {
-  id             Int             @id @default(autoincrement())
-  branchId       Int
-  businessDate   DateTime        @db.Date
-  status         String          @default("OPEN") // OPEN, STAFF_CLOSED, ADMIN_CLOSED
-  salesSummary   Json?
-  physicalCash   Decimal?        @db.Decimal(10, 2)
-  cashDifference Decimal?        @db.Decimal(10, 2)
-  notes          String?
-  finalizedById  Int?
-  finalizedAt    DateTime?
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
-  branch         Branch          @relation(fields: [branchId], references: [id])
-  finalizedBy    User?           @relation("DayCloseFinalizedBy", fields: [finalizedById], references: [id])
-  staffClosings  StaffDayClose[]
+  id                        Int             @id @default(autoincrement())
+  branchId                  Int
+  businessDate              DateTime        @db.Date
+  status                    String          @default("NOT_OPENED") // NOT_OPENED, OPEN, CLOSING_PENDING, CLOSED, ADMIN_CLOSED
+  terminalId                Int?
+
+  // Day Opening
+  openedById                Int?
+  openedAt                  DateTime?
+  openingCash               Decimal?        @db.Decimal(10, 2)
+  previousClosingCash       Decimal?        @default(0) @db.Decimal(10, 2)
+  additionalCashAdded       Decimal?        @default(0) @db.Decimal(10, 2)
+  cashRemovedBeforeOpening  Decimal?        @default(0) @db.Decimal(10, 2)
+  expectedOpeningCash       Decimal?        @default(0) @db.Decimal(10, 2)
+  actualOpeningCash         Decimal?        @default(0) @db.Decimal(10, 2)
+  openingDifference         Decimal?        @default(0) @db.Decimal(10, 2)
+  openingDiscrepancyReason  String?
+  openingApprovedById       Int?
+  openingDenominations      Json?
+  openingRemarks            String?
+
+  // Daily Activity Verification & Exceptions
+  verificationChecks        Json?
+  verificationExceptions    Json?
+  exceptionApprovedById     Int?
+  exceptionApprovalReason   String?
+
+  // Day Closing
+  salesSummary              Json?
+  closingExpectedCash       Decimal?        @db.Decimal(10, 2)
+  physicalCash              Decimal?        @db.Decimal(10, 2)
+  cashDifference            Decimal?        @db.Decimal(10, 2)
+  closingDenominations      Json?
+  notes                     String?
+  finalizedById             Int?
+  finalizedAt               DateTime?
+  createdAt                 DateTime        @default(now())
+  updatedAt                 DateTime        @updatedAt
+
+  branch                    Branch          @relation(fields: [branchId], references: [id])
+  terminal                  Terminal?       @relation(fields: [terminalId], references: [id])
+  openedBy                  User?           @relation("DayCloseOpenedBy", fields: [openedById], references: [id])
+  openingApprovedBy         User?           @relation("DayCloseOpeningApprovedBy", fields: [openingApprovedById], references: [id])
+  finalizedBy               User?           @relation("DayCloseFinalizedBy", fields: [finalizedById], references: [id])
+  exceptionApprovedBy       User?           @relation("DayCloseExceptionApprovedBy", fields: [exceptionApprovedById], references: [id])
+  staffClosings             StaffDayClose[]
 
   @@unique([branchId, businessDate])
 }

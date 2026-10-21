@@ -2,11 +2,12 @@ import { useState, useEffect } from 'react';
 import api from '@/lib/api';
 import { toast } from 'react-toastify';
 import {
-  FiCalendar, FiCheckCircle, FiAlertTriangle, FiLock, FiClock, FiRefreshCw
+  FiCalendar, FiCheckCircle, FiAlertTriangle, FiLock, FiClock, FiRefreshCw,
+  FiDollarSign, FiShoppingBag, FiLayers, FiBox, FiFileText, FiEye, FiList,
+  FiX, FiCheck, FiArrowRight, FiShield, FiSliders, FiCreditCard, FiSearch,
+  FiChevronRight
 } from 'react-icons/fi';
 import { useRouter } from 'next/router';
-
-const getTodayIso = () => new Date().toISOString().split('T')[0];
 
 const formatDisplayFromIso = (isoStr) => {
   if (!isoStr) return '';
@@ -16,52 +17,221 @@ const formatDisplayFromIso = (isoStr) => {
 
 export default function DayClosePage() {
   const router = useRouter();
-  const [selectedDate, setSelectedDate] = useState(getTodayIso());
+
+  // Session & Status States
   const [statusData, setStatusData] = useState(null);
+  const [verificationData, setVerificationData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [verifLoading, setVerifLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState(null);
+
+  // Day Opening Modal State
+  const [showOpenModal, setShowOpenModal] = useState(false);
+  const [openingActualCash, setOpeningActualCash] = useState('');
+  const [openingAddCash, setOpeningAddCash] = useState('0');
+  const [openingRemCash, setOpeningRemCash] = useState('0');
+  const [openingReason, setOpeningReason] = useState('');
+  const [openingRemarks, setOpeningRemarks] = useState('');
+
+  // Day Closing States
+  const [physicalCash, setPhysicalCash] = useState('');
+  const [closingNotes, setClosingNotes] = useState('');
   const [showConfirmModal, setShowConfirmModal] = useState(false);
 
-  // Sync with URL date query if navigated with ?date=YYYY-MM-DD
+  // Find Open Days Drawer / Modal
+  const [showOpenDaysModal, setShowOpenDaysModal] = useState(false);
+  const [openDaysList, setOpenDaysList] = useState([]);
+  const [openDaysLoading, setOpenDaysLoading] = useState(false);
+  const [openDaysFilter, setOpenDaysFilter] = useState({ fromDate: '', toDate: '', status: 'all' });
+
+  // Detail Inspector Modal for Verification Items
+  const [inspectingItem, setInspectingItem] = useState(null);
+
+  // Exception Approval Modal (Manager / Admin)
+  const [showExceptionModal, setShowExceptionModal] = useState(false);
+  const [selectedExceptionKey, setSelectedExceptionKey] = useState('');
+  const [exceptionReason, setExceptionReason] = useState('');
+  const [approvingException, setApprovingException] = useState(false);
+
+  // User info from localStorage
+  const [currentUser, setCurrentUser] = useState(null);
+
   useEffect(() => {
-    if (router.query.date) {
-      setSelectedDate(router.query.date);
-    }
+    try {
+      const u = localStorage.getItem('user');
+      if (u) setCurrentUser(JSON.parse(u));
+    } catch (e) {}
+  }, []);
+
+  // Fetch session status whenever router query changes or initially
+  useEffect(() => {
+    fetchSessionStatus(router.query.date);
   }, [router.query.date]);
 
-  useEffect(() => {
-    fetchDayCloseStatus(selectedDate);
-  }, [selectedDate]);
-
-  const fetchDayCloseStatus = async (dateStr) => {
+  const fetchSessionStatus = async (dateOverride = null) => {
     setLoading(true);
     setError(null);
     try {
-      const res = await api.get('/day-close/status', {
-        params: { date: dateStr }
-      });
+      const params = {};
+      if (dateOverride) params.date = dateOverride;
+      const res = await api.get('/day-close/status', { params });
       if (res.data && res.data.success) {
         setStatusData(res.data);
+        // Pre-fill physical cash with expected closing cash if not closed
+        if (res.data.status !== 'CLOSED') {
+          fetchVerificationDetails(res.data.businessDate);
+        }
       }
     } catch (err) {
       console.error('Error fetching day close status:', err);
-      setError(err.response?.data?.message || 'Failed to load business date status');
+      setError(err.response?.data?.message || 'Failed to load business session status');
       toast.error(err.response?.data?.message || 'Failed to load Day Close status');
     } finally {
       setLoading(false);
     }
   };
 
+  const fetchVerificationDetails = async (businessDate) => {
+    setVerifLoading(true);
+    try {
+      const res = await api.get('/day-close/verification-data', {
+        params: { date: businessDate }
+      });
+      if (res.data && res.data.success) {
+        setVerificationData(res.data);
+        if (!physicalCash && res.data.expectedClosingCash !== undefined) {
+          setPhysicalCash(res.data.expectedClosingCash.toString());
+        }
+      }
+    } catch (err) {
+      console.error('Error fetching verification data:', err);
+    } finally {
+      setVerifLoading(false);
+    }
+  };
+
+  // Toggle Verification Checkbox and Save to Server
+  const handleToggleCheck = async (key, currentReviewed) => {
+    const newReviewed = !currentReviewed;
+
+    // Optimistic UI update
+    setVerificationData(prev => {
+      if (!prev || !prev.checklist) return prev;
+      const updatedChecklist = {
+        ...prev.checklist,
+        [key]: {
+          ...prev.checklist[key],
+          isReviewed: newReviewed
+        }
+      };
+      const allRev = Object.keys(updatedChecklist).every(k => updatedChecklist[k].isReviewed);
+      return {
+        ...prev,
+        checklist: updatedChecklist,
+        allReviewed: allRev,
+        canClose: allRev && (!prev.criticalDiscrepancies || prev.criticalDiscrepancies.length === 0)
+      };
+    });
+
+    try {
+      await api.post('/day-close/save-verification', {
+        businessDate: statusData.businessDate,
+        checks: {
+          [key]: { reviewed: newReviewed }
+        }
+      });
+    } catch (err) {
+      console.error('Failed to save verification check:', err);
+      toast.error('Failed to save verification status to server');
+      // Revert on error
+      fetchVerificationDetails(statusData.businessDate);
+    }
+  };
+
+  // Handle Day Opening
+  const handleOpenDaySubmit = async (e) => {
+    e.preventDefault();
+    setSubmitting(true);
+    try {
+      const prevCash = Number(statusData?.previousClosingCash || 0);
+      const addCash = parseFloat(openingAddCash) || 0;
+      const remCash = parseFloat(openingRemCash) || 0;
+      const actualCash = parseFloat(openingActualCash) || 0;
+      const expectedCash = prevCash + addCash - remCash;
+      const diff = actualCash - expectedCash;
+
+      if (Math.abs(diff) > 0.01 && !openingReason.trim()) {
+        toast.warn(`Please provide an explanation for the opening difference of ₹${diff.toFixed(2)}.`);
+        setSubmitting(false);
+        return;
+      }
+
+      const payload = {
+        branchId: statusData.branchId,
+        previousClosingCash: prevCash,
+        additionalCashAdded: addCash,
+        cashRemovedBeforeOpening: remCash,
+        actualOpeningCash: actualCash,
+        openingDiscrepancyReason: openingReason.trim(),
+        openingRemarks: openingRemarks.trim()
+      };
+
+      const res = await api.post('/day-close/open', payload);
+      if (res.data && res.data.success) {
+        toast.success(res.data.message || 'Business day opened successfully!');
+        setShowOpenModal(false);
+        await fetchSessionStatus(statusData.businessDate);
+      }
+    } catch (err) {
+      console.error('Error opening business day:', err);
+      toast.error(err.response?.data?.message || 'Failed to open business day');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // Handle Manager Exception Approval
+  const handleApproveException = async () => {
+    if (!exceptionReason.trim()) {
+      toast.warn('Please provide an approval reason/notes.');
+      return;
+    }
+    setApprovingException(true);
+    try {
+      const res = await api.post('/day-close/resolve-exception', {
+        businessDate: statusData.businessDate,
+        exceptionKey: selectedExceptionKey,
+        reason: exceptionReason.trim()
+      });
+      if (res.data && res.data.success) {
+        toast.success(`Exception for "${selectedExceptionKey}" approved.`);
+        setShowExceptionModal(false);
+        setExceptionReason('');
+        await fetchVerificationDetails(statusData.businessDate);
+      }
+    } catch (err) {
+      console.error('Error approving exception:', err);
+      toast.error(err.response?.data?.message || 'Failed to approve exception');
+    } finally {
+      setApprovingException(false);
+    }
+  };
+
+  // Handle Confirm Day Close
   const handleConfirmClose = async () => {
     setSubmitting(true);
     try {
-      const payload = { businessDate: selectedDate };
+      const payload = {
+        businessDate: statusData.businessDate,
+        physicalCash: parseFloat(physicalCash) || 0,
+        notes: closingNotes.trim()
+      };
       const res = await api.post('/day-close/confirm', payload);
       if (res.data && res.data.success) {
         toast.success(res.data.message || 'Day Close completed successfully!');
         setShowConfirmModal(false);
-        await fetchDayCloseStatus(selectedDate);
+        await fetchSessionStatus(statusData.businessDate);
       }
     } catch (err) {
       console.error('Error confirming day close:', err);
@@ -71,44 +241,114 @@ export default function DayClosePage() {
     }
   };
 
-  const todayIso = getTodayIso();
+  // Load Unclosed / Open Days
+  const handleFetchOpenDays = async () => {
+    setOpenDaysLoading(true);
+    try {
+      const params = {};
+      if (openDaysFilter.fromDate) params.fromDate = openDaysFilter.fromDate;
+      if (openDaysFilter.toDate) params.toDate = openDaysFilter.toDate;
+      if (openDaysFilter.status !== 'all') params.status = openDaysFilter.status;
+
+      const res = await api.get('/day-close/open-days', { params });
+      if (res.data && res.data.openDays) {
+        setOpenDaysList(res.data.openDays);
+      }
+    } catch (err) {
+      console.error('Error fetching open days:', err);
+      toast.error('Failed to load open business days');
+    } finally {
+      setOpenDaysLoading(false);
+    }
+  };
+
   const isClosed = statusData?.status === 'CLOSED';
+  const isNotOpened = statusData?.status === 'NOT_OPENED';
+  const isOpen = statusData?.status === 'OPEN' || statusData?.status === 'CLOSING_PENDING';
   const isPendingPrevious = statusData?.hasPendingPrevious;
   const pendingDateDisplay = statusData?.pendingDateDisplay;
   const pendingDateIso = statusData?.pendingDate;
 
-  const displayFormattedDate = formatDisplayFromIso(selectedDate);
+  const displayFormattedDate = statusData?.businessDateDisplay || formatDisplayFromIso(statusData?.businessDate);
+
+  const prevClosingCash = Number(statusData?.previousClosingCash || 0);
+  const addCashNum = parseFloat(openingAddCash) || 0;
+  const remCashNum = parseFloat(openingRemCash) || 0;
+  const actualCashNum = parseFloat(openingActualCash) || 0;
+  const expectedOpenCalc = prevClosingCash + addCashNum - remCashNum;
+  const openDiffCalc = actualCashNum - expectedOpenCalc;
+
+  const expectedClosing = verificationData?.expectedClosingCash !== undefined ? Number(verificationData.expectedClosingCash) : 0;
+  const actualClosingNum = parseFloat(physicalCash) || 0;
+  const closingDiffCalc = Number((actualClosingNum - expectedClosing).toFixed(2));
+
+  // Verification readiness check
+  const checklist = verificationData?.checklist || {};
+  const checklistKeys = Object.keys(checklist);
+  const totalChecks = checklistKeys.length;
+  const reviewedCount = checklistKeys.filter(k => checklist[k].isReviewed).length;
+  const allChecksComplete = totalChecks > 0 && reviewedCount === totalChecks;
+
+  const criticalIssues = verificationData?.criticalDiscrepancies || [];
+  const canCloseDay = allChecksComplete && criticalIssues.length === 0;
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6 pt-4">
-      {/* Title Card */}
-      <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 text-center space-y-2">
-        <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-xl font-bold">
-          <FiCalendar />
+    <div className="max-w-4xl mx-auto space-y-6 pt-4 pb-12 px-3">
+      {/* Title Card with Header & Find Open Days */}
+      <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center text-2xl font-bold flex-shrink-0">
+            <FiClock />
+          </div>
+          <div>
+            <h1 className="text-xl font-bold text-gray-800 tracking-tight flex items-center gap-2">
+              Business Day Management & Close
+            </h1>
+            <p className="text-xs text-gray-500">
+              Session verification, daily reconciliation, and end-of-day immutable closing.
+            </p>
+          </div>
         </div>
-        <h1 className="text-2xl font-bold text-gray-800 tracking-tight">Day Close</h1>
-        <p className="text-xs text-gray-500 max-w-md mx-auto">
-          Finalize business operations for the selected business date.
-        </p>
+
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => {
+              setShowOpenDaysModal(true);
+              handleFetchOpenDays();
+            }}
+            className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 cursor-pointer shadow-sm"
+          >
+            <FiSearch className="text-slate-500" /> Find Open Days
+          </button>
+          <button
+            type="button"
+            onClick={() => fetchSessionStatus(statusData?.businessDate)}
+            className="p-2 bg-slate-50 hover:bg-slate-100 text-slate-600 rounded-xl transition-all"
+            title="Refresh Status"
+          >
+            <FiRefreshCw className={loading ? 'animate-spin' : ''} />
+          </button>
+        </div>
       </div>
 
       {loading ? (
         <div className="bg-white p-12 rounded-2xl shadow-sm border border-gray-100 text-center text-xs text-gray-400 flex items-center justify-center gap-2">
           <FiRefreshCw className="animate-spin text-emerald-600" />
-          Loading business date status...
+          Loading business session details...
         </div>
       ) : error ? (
         <div className="bg-white rounded-2xl shadow-sm border border-red-100 p-8 text-center space-y-4">
           <div className="text-red-500 text-sm font-semibold">{error}</div>
           <button
-            onClick={() => fetchDayCloseStatus(selectedDate)}
+            onClick={() => fetchSessionStatus()}
             className="px-4 py-2 bg-emerald-600 text-white text-xs font-bold rounded-lg hover:bg-emerald-700 transition-colors inline-flex items-center gap-1.5 cursor-pointer"
           >
             <FiRefreshCw /> Retry Loading
           </button>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-6">
           {/* Missed Day Close Warning Banner */}
           {isPendingPrevious && (
             <div className="bg-amber-500 text-white p-4 rounded-xl shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-pulse">
@@ -121,103 +361,678 @@ export default function DayClosePage() {
                   </p>
                 </div>
               </div>
-              {pendingDateIso && selectedDate !== pendingDateIso && (
+              {pendingDateIso && statusData.businessDate !== pendingDateIso && (
                 <button
                   type="button"
-                  onClick={() => setSelectedDate(pendingDateIso)}
+                  onClick={() => router.push(`/settings/day-close?date=${pendingDateIso}`)}
                   className="px-3.5 py-1.5 bg-white text-amber-900 text-xs font-bold rounded-lg shadow-sm hover:bg-amber-50 transition-colors whitespace-nowrap self-start sm:self-auto cursor-pointer"
                 >
-                  Select {pendingDateDisplay} →
+                  Go to {pendingDateDisplay} →
                 </button>
               )}
             </div>
           )}
 
-          {/* Main Business Date Card */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 space-y-6 text-center">
-            
-            {/* Status Indicator */}
-            <div className="flex justify-center">
-              <span className={`px-4 py-1.5 text-xs font-bold rounded-full flex items-center gap-1.5 ${
-                isClosed
-                  ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
-                  : 'bg-amber-100 text-amber-800 border border-amber-200'
-              }`}>
-                {isClosed ? (
-                  <><FiCheckCircle className="text-emerald-600" /> CLOSED</>
-                ) : (
-                  <><FiClock className="text-amber-600" /> OPEN</>
-                )}
-              </span>
-            </div>
-
-            {/* Display & Date Picker Section */}
-            <div className="space-y-3">
-              <span className="text-xs font-semibold uppercase tracking-wider text-gray-400">
-                CURRENT BUSINESS DATE
-              </span>
-
-              {/* Formatted Date Display */}
-              <div className="text-4xl font-extrabold text-gray-900 tracking-tight">
-                {displayFormattedDate}
+          {/* Business Session Information Card */}
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-4">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-100 pb-4">
+              <div>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">CURRENT BUSINESS SESSION</span>
+                <div className="text-3xl font-extrabold text-gray-900 tracking-tight flex items-center gap-2">
+                  {displayFormattedDate}
+                  <span className={`text-xs px-3 py-1 font-bold rounded-full ${
+                    isClosed
+                      ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+                      : isOpen
+                      ? 'bg-blue-100 text-blue-800 border border-blue-200'
+                      : 'bg-amber-100 text-amber-800 border border-amber-200'
+                  }`}>
+                    {statusData.status}
+                  </span>
+                </div>
               </div>
 
-              {/* Date Picker Component */}
-              <div className="flex items-center justify-center gap-2 pt-2">
-                <label className="text-xs font-semibold text-gray-500 flex items-center gap-1">
-                  <FiCalendar className="text-emerald-600" /> Select Business Date:
-                </label>
-                <input
-                  type="date"
-                  max={todayIso}
-                  value={selectedDate}
-                  onChange={(e) => setSelectedDate(e.target.value)}
-                  className="px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-xs font-bold text-gray-800 focus:bg-white focus:border-emerald-500 focus:outline-none cursor-pointer"
-                />
-              </div>
-
-              {isClosed && statusData?.closedAt && (
-                <p className="text-xs text-emerald-700 font-medium pt-2">
-                  Closed on {new Date(statusData.closedAt).toLocaleString()} by {statusData.closedBy || 'User'}
-                </p>
+              {/* Action: Open Day button if NOT_OPENED */}
+              {isNotOpened && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setOpeningActualCash(prevClosingCash.toString());
+                    setShowOpenModal(true);
+                  }}
+                  className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-md transition-all flex items-center gap-2 cursor-pointer"
+                >
+                  <FiCheckCircle /> Open Business Day
+                </button>
               )}
             </div>
 
-            {/* Action Section */}
-            <div className="pt-4 border-t border-gray-100 space-y-3">
-              {isClosed ? (
-                <div className="p-4 bg-emerald-50 rounded-xl text-emerald-800 text-xs font-semibold flex items-center justify-center gap-2">
-                  <FiCheckCircle className="text-emerald-600 text-base" />
-                  Day Close for {displayFormattedDate} is complete.
-                </div>
-              ) : (
+            {/* Session Metadata Grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
+              <div className="p-3 bg-gray-50 rounded-xl space-y-0.5">
+                <span className="text-[10px] text-gray-400 font-semibold uppercase">Branch</span>
+                <p className="font-bold text-gray-800">{statusData.branchName}</p>
+              </div>
+              <div className="p-3 bg-gray-50 rounded-xl space-y-0.5">
+                <span className="text-[10px] text-gray-400 font-semibold uppercase">Register / Terminal</span>
+                <p className="font-bold text-gray-800">{statusData.terminalName || 'Main Register'}</p>
+              </div>
+              <div className="p-3 bg-gray-50 rounded-xl space-y-0.5">
+                <span className="text-[10px] text-gray-400 font-semibold uppercase">Cashier / Opened By</span>
+                <p className="font-bold text-gray-800">{statusData.openedBy || 'Not Opened'}</p>
+              </div>
+              <div className="p-3 bg-gray-50 rounded-xl space-y-0.5">
+                <span className="text-[10px] text-gray-400 font-semibold uppercase">Opening Cash</span>
+                <p className="font-bold text-emerald-600">₹{statusData.openingCash.toLocaleString('en-IN')}</p>
+              </div>
+            </div>
+
+            {/* Previous Closing Reference */}
+            {statusData.previousClosingDateDisplay && (
+              <div className="text-[11px] text-gray-500 bg-slate-50 p-2.5 rounded-lg border border-slate-100 flex items-center gap-2">
+                <FiLock className="text-slate-400" />
+                <span>
+                  Previous Closing Reference: Closed on <span className="font-bold text-gray-700">{statusData.previousClosingDateDisplay}</span> with <span className="font-bold text-gray-700">₹{statusData.previousClosingCash.toLocaleString('en-IN')}</span> closing cash.
+                </span>
+              </div>
+            )}
+          </div>
+
+          {/* CLOSED STATE VIEW */}
+          {isClosed ? (
+            <div className="bg-emerald-50 rounded-2xl border border-emerald-200 p-8 text-center space-y-4">
+              <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-3xl font-bold">
+                <FiCheckCircle />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-emerald-900">Business Day is Closed & Immutable</h3>
+                <p className="text-xs text-emerald-700 mt-1 max-w-md mx-auto">
+                  Day Close for {displayFormattedDate} was completed on {statusData.closedAt ? new Date(statusData.closedAt).toLocaleString() : ''} by {statusData.closedBy || 'Staff'}.
+                </p>
+              </div>
+              <div className="flex justify-center gap-3 pt-2">
                 <button
                   type="button"
-                  disabled={submitting}
-                  onClick={() => setShowConfirmModal(true)}
-                  className="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-base rounded-xl shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer disabled:bg-gray-300 disabled:cursor-not-allowed"
+                  onClick={() => router.push(`/reports/sales?businessDate=${statusData.businessDate}`)}
+                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-sm transition-all"
                 >
-                  <FiCheckCircle className="text-lg" /> OK / Confirm Day Close
+                  View Full Sales Report →
                 </button>
+              </div>
+            </div>
+          ) : (
+            /* OPEN / CLOSING_PENDING STATE: DAILY ACTIVITY VERIFICATION CHECKLIST */
+            <div className="space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div>
+                  <h2 className="text-base font-bold text-gray-800">Daily Activity Verification Checklist</h2>
+                  <p className="text-xs text-gray-500">
+                    Mandatory verification: inspect each activity domain and mark as reviewed before closing.
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className={`text-xs font-bold px-3 py-1 rounded-full ${
+                    allChecksComplete ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
+                  }`}>
+                    {reviewedCount} / {totalChecks} Verified
+                  </span>
+                </div>
+              </div>
+
+              {/* 8 Required Verification Checklist Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {checklistKeys.map(key => {
+                  const item = checklist[key];
+                  const hasDiscrepancy = item.hasDiscrepancy;
+                  const isApproved = verificationData?.savedExceptions?.[key];
+
+                  return (
+                    <div
+                      key={key}
+                      className={`p-4 rounded-xl border transition-all space-y-3 bg-white ${
+                        hasDiscrepancy && !isApproved
+                          ? 'border-red-300 shadow-sm shadow-red-50 bg-red-50/20'
+                          : item.isReviewed
+                          ? 'border-emerald-200 shadow-sm'
+                          : 'border-gray-200'
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <label className="flex items-start gap-3 cursor-pointer select-none">
+                          <input
+                            type="checkbox"
+                            checked={item.isReviewed}
+                            onChange={() => handleToggleCheck(key, item.isReviewed)}
+                            className="mt-0.5 w-4 h-4 text-emerald-600 rounded border-gray-300 focus:ring-emerald-500 cursor-pointer"
+                          />
+                          <div>
+                            <h4 className="text-xs font-bold text-gray-800 flex items-center gap-1.5">
+                              {item.title}
+                            </h4>
+                            <p className="text-[11px] text-gray-500 mt-0.5 leading-snug">
+                              {item.summary}
+                            </p>
+                          </div>
+                        </label>
+
+                        {/* Status Badge */}
+                        <div className="flex-shrink-0">
+                          {hasDiscrepancy && !isApproved ? (
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-red-100 text-red-700 border border-red-200 flex items-center gap-1">
+                              <FiAlertTriangle /> Discrepancy
+                            </span>
+                          ) : item.isReviewed ? (
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-700 border border-emerald-200 flex items-center gap-1">
+                              <FiCheck /> Reviewed
+                            </span>
+                          ) : (
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-100 text-amber-700 border border-amber-200">
+                              Pending
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Discrepancy Alert & Resolution */}
+                      {hasDiscrepancy && (
+                        <div className="p-2 bg-red-50 border border-red-200 rounded-lg text-[11px] text-red-800 flex items-center justify-between gap-2">
+                          <span>{item.discrepancyMessage}</span>
+                          {currentUser?.role === 'admin' && !isApproved && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setSelectedExceptionKey(key);
+                                setShowExceptionModal(true);
+                              }}
+                              className="px-2 py-1 bg-red-600 text-white rounded text-[10px] font-bold hover:bg-red-700"
+                            >
+                              Approve Exception
+                            </button>
+                          )}
+                        </div>
+                      )}
+
+                      {isApproved && (
+                        <div className="p-1.5 bg-emerald-50 border border-emerald-200 rounded text-[10px] text-emerald-700">
+                          Exception Approved by {verificationData.savedExceptions[key].approvedByName}: "{verificationData.savedExceptions[key].reason}"
+                        </div>
+                      )}
+
+                      {/* View Details / Navigate Button */}
+                      <div className="pt-2 border-t border-gray-100 flex items-center justify-between text-[11px]">
+                        <button
+                          type="button"
+                          onClick={() => setInspectingItem(item)}
+                          className="text-emerald-600 hover:text-emerald-700 font-bold flex items-center gap-1"
+                        >
+                          <FiEye /> Quick Inspect
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => router.push(item.actionRoute)}
+                          className="text-gray-500 hover:text-gray-700 font-medium flex items-center gap-1"
+                        >
+                          {item.actionLabel} <FiChevronRight />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* End of Day Cash Count & Final Closing Confirmation */}
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-4">
+                <h3 className="text-sm font-bold text-gray-800">Final Cash Reconciliation & Day Close</h3>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="p-3 bg-gray-50 rounded-xl space-y-1">
+                    <span className="text-[10px] text-gray-400 font-semibold uppercase">Expected Closing Cash</span>
+                    <p className="text-lg font-extrabold text-gray-800">₹{expectedClosing.toLocaleString('en-IN')}</p>
+                    <span className="text-[10px] text-gray-400">Opening + Cash Sales - Expenses</span>
+                  </div>
+
+                  <div className="p-3 bg-gray-50 rounded-xl space-y-1">
+                    <span className="text-[10px] text-gray-400 font-semibold uppercase">Actual Physical Cash Counted</span>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={physicalCash}
+                      onChange={(e) => setPhysicalCash(e.target.value)}
+                      placeholder="Enter counted cash"
+                      className="w-full px-2.5 py-1 text-sm font-bold bg-white border border-gray-200 rounded-lg focus:outline-none focus:border-emerald-500"
+                    />
+                  </div>
+
+                  <div className="p-3 bg-gray-50 rounded-xl space-y-1">
+                    <span className="text-[10px] text-gray-400 font-semibold uppercase">Closing Cash Difference</span>
+                    <p className={`text-lg font-extrabold ${
+                      closingDiffCalc === 0
+                        ? 'text-emerald-600'
+                        : closingDiffCalc > 0
+                        ? 'text-blue-600'
+                        : 'text-red-600'
+                    }`}>
+                      {closingDiffCalc >= 0 ? `+₹${closingDiffCalc}` : `-₹${Math.abs(closingDiffCalc)}`}
+                    </p>
+                    <span className="text-[10px] text-gray-400">{closingDiffCalc === 0 ? 'Exact match' : 'Difference'}</span>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-[11px] font-semibold text-gray-500">Closing Notes / Remarks (Optional)</label>
+                  <textarea
+                    rows={2}
+                    value={closingNotes}
+                    onChange={(e) => setClosingNotes(e.target.value)}
+                    placeholder="Enter any notes about cash variance, shift changes, or special events..."
+                    className="w-full mt-1 p-2 text-xs bg-gray-50 border border-gray-200 rounded-lg focus:bg-white focus:outline-none focus:border-emerald-500"
+                  />
+                </div>
+
+                {/* Validation warnings before closing */}
+                {!canCloseDay && (
+                  <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-800 space-y-1">
+                    <div className="font-bold flex items-center gap-1.5">
+                      <FiAlertTriangle /> Day Closing is Currently Blocked:
+                    </div>
+                    {!allChecksComplete && (
+                      <p className="text-[11px]">
+                        • You must inspect and check off all {totalChecks} verification items above ({reviewedCount} completed).
+                      </p>
+                    )}
+                    {criticalIssues.length > 0 && (
+                      <p className="text-[11px]">
+                        • Critical discrepancies exist in ({criticalIssues.join(', ')}). A manager must resolve or approve an exception before closing.
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                {/* Confirm Close Button */}
+                <button
+                  type="button"
+                  disabled={!canCloseDay || submitting}
+                  onClick={() => setShowConfirmModal(true)}
+                  className="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm rounded-xl shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer disabled:bg-gray-300 disabled:cursor-not-allowed"
+                >
+                  <FiLock /> Proceed to Final Day Close
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* MODAL 1: Day Opening Modal */}
+      {showOpenModal && (
+        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-xl border border-gray-100 max-w-md w-full p-6 space-y-4">
+            <div className="flex items-center justify-between border-b pb-3">
+              <h3 className="font-bold text-gray-800 text-base flex items-center gap-2">
+                <FiClock className="text-emerald-600" /> Open Business Day
+              </h3>
+              <button onClick={() => setShowOpenModal(false)} className="text-gray-400 hover:text-gray-600">
+                <FiX size={18} />
+              </button>
+            </div>
+
+            <form onSubmit={handleOpenDaySubmit} className="space-y-4">
+              <div className="grid grid-cols-2 gap-3 text-xs">
+                <div className="p-2.5 bg-gray-50 rounded-lg">
+                  <span className="text-[10px] text-gray-400 font-semibold uppercase">Business Date</span>
+                  <p className="font-bold text-gray-800">{displayFormattedDate}</p>
+                </div>
+                <div className="p-2.5 bg-gray-50 rounded-lg">
+                  <span className="text-[10px] text-gray-400 font-semibold uppercase">Previous Closing Cash</span>
+                  <p className="font-bold text-gray-800">₹{prevClosingCash.toLocaleString('en-IN')}</p>
+                </div>
+              </div>
+
+              <div className="space-y-3 text-xs">
+                <div>
+                  <label className="font-semibold text-gray-600">Additional Cash Added to Till (₹)</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={openingAddCash}
+                    onChange={(e) => setOpeningAddCash(e.target.value)}
+                    className="w-full mt-1 p-2 bg-gray-50 border border-gray-200 rounded-lg font-bold"
+                  />
+                </div>
+
+                <div>
+                  <label className="font-semibold text-gray-600">Cash Removed Before Opening (₹)</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={openingRemCash}
+                    onChange={(e) => setOpeningRemCash(e.target.value)}
+                    className="w-full mt-1 p-2 bg-gray-50 border border-gray-200 rounded-lg font-bold"
+                  />
+                </div>
+
+                <div className="p-2.5 bg-emerald-50 rounded-lg border border-emerald-100 flex justify-between items-center">
+                  <span className="text-emerald-800 font-bold">Expected Opening Cash:</span>
+                  <span className="text-emerald-900 font-extrabold text-sm">₹{expectedOpenCalc.toFixed(2)}</span>
+                </div>
+
+                <div>
+                  <label className="font-semibold text-gray-600">Actual Opening Cash Counted (₹)</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    required
+                    value={openingActualCash}
+                    onChange={(e) => setOpeningActualCash(e.target.value)}
+                    placeholder="Enter physical cash in drawer"
+                    className="w-full mt-1 p-2 bg-white border border-emerald-400 rounded-lg font-extrabold text-sm text-gray-900"
+                  />
+                </div>
+
+                {Math.abs(openDiffCalc) > 0.01 && (
+                  <div className="space-y-2 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                    <div className="flex justify-between items-center text-amber-800 font-bold">
+                      <span>Opening Difference:</span>
+                      <span>{openDiffCalc > 0 ? `+₹${openDiffCalc.toFixed(2)}` : `-₹${Math.abs(openDiffCalc).toFixed(2)}`}</span>
+                    </div>
+                    <label className="block text-[10px] font-bold text-amber-900 uppercase">Reason / Explanation (Required):</label>
+                    <textarea
+                      required
+                      rows={2}
+                      value={openingReason}
+                      onChange={(e) => setOpeningReason(e.target.value)}
+                      placeholder="Explain the opening cash difference..."
+                      className="w-full p-2 bg-white border border-amber-300 rounded text-xs"
+                    />
+                  </div>
+                )}
+
+                <div>
+                  <label className="font-semibold text-gray-600">Opening Remarks (Optional)</label>
+                  <input
+                    type="text"
+                    value={openingRemarks}
+                    onChange={(e) => setOpeningRemarks(e.target.value)}
+                    placeholder="Shift notes or opening remarks"
+                    className="w-full mt-1 p-2 bg-gray-50 border border-gray-200 rounded-lg"
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-2 justify-end pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowOpenModal(false)}
+                  className="px-4 py-2 bg-gray-100 text-gray-700 text-xs font-semibold rounded-xl"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-sm"
+                >
+                  {submitting ? 'Opening...' : 'Confirm & Open Day'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 2: Find Open Days Modal */}
+      {showOpenDaysModal && (
+        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 max-w-3xl w-full p-6 space-y-4 max-h-[90vh] flex flex-col">
+            <div className="flex items-center justify-between border-b pb-3">
+              <div>
+                <h3 className="font-bold text-gray-800 text-base flex items-center gap-2">
+                  <FiSearch className="text-emerald-600" /> Find Unclosed Business Days
+                </h3>
+                <p className="text-xs text-gray-500">
+                  Business dates requiring verification and closure.
+                </p>
+              </div>
+              <button onClick={() => setShowOpenDaysModal(false)} className="text-gray-400 hover:text-gray-600">
+                <FiX size={18} />
+              </button>
+            </div>
+
+            {/* Filters */}
+            <div className="grid grid-cols-1 sm:grid-cols-4 gap-2 text-xs">
+              <div>
+                <label className="text-[10px] font-bold text-gray-400 uppercase">From Date</label>
+                <input
+                  type="date"
+                  value={openDaysFilter.fromDate}
+                  onChange={(e) => setOpenDaysFilter({ ...openDaysFilter, fromDate: e.target.value })}
+                  className="w-full p-1.5 bg-gray-50 border border-gray-200 rounded-lg text-xs"
+                />
+              </div>
+              <div>
+                <label className="text-[10px] font-bold text-gray-400 uppercase">To Date</label>
+                <input
+                  type="date"
+                  value={openDaysFilter.toDate}
+                  onChange={(e) => setOpenDaysFilter({ ...openDaysFilter, toDate: e.target.value })}
+                  className="w-full p-1.5 bg-gray-50 border border-gray-200 rounded-lg text-xs"
+                />
+              </div>
+              <div>
+                <label className="text-[10px] font-bold text-gray-400 uppercase">Status</label>
+                <select
+                  value={openDaysFilter.status}
+                  onChange={(e) => setOpenDaysFilter({ ...openDaysFilter, status: e.target.value })}
+                  className="w-full p-1.5 bg-gray-50 border border-gray-200 rounded-lg text-xs"
+                >
+                  <option value="all">All Open Statuses</option>
+                  <option value="NOT_OPENED">Not Opened</option>
+                  <option value="OPEN">Open</option>
+                  <option value="CLOSING_PENDING">Closing Pending</option>
+                </select>
+              </div>
+              <div className="flex items-end">
+                <button
+                  type="button"
+                  onClick={handleFetchOpenDays}
+                  className="w-full py-1.5 bg-emerald-600 text-white font-bold rounded-lg hover:bg-emerald-700 text-xs"
+                >
+                  Apply Filter
+                </button>
+              </div>
+            </div>
+
+            {/* Results Table */}
+            <div className="flex-1 overflow-y-auto border border-gray-100 rounded-xl">
+              {openDaysLoading ? (
+                <div className="p-8 text-center text-xs text-gray-400 flex items-center justify-center gap-2">
+                  <FiRefreshCw className="animate-spin text-emerald-600" /> Loading open days...
+                </div>
+              ) : openDaysList.length === 0 ? (
+                <div className="p-8 text-center text-xs text-gray-400">
+                  No unclosed business days found for the selected criteria.
+                </div>
+              ) : (
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-gray-50 text-gray-400 font-bold uppercase text-[10px] sticky top-0">
+                    <tr>
+                      <th className="p-3">Business Date</th>
+                      <th className="p-3">Branch</th>
+                      <th className="p-3">Cashier</th>
+                      <th className="p-3 text-right">Sales Count</th>
+                      <th className="p-3 text-right">Total Sales</th>
+                      <th className="p-3 text-right">Cash Collections</th>
+                      <th className="p-3">Status</th>
+                      <th className="p-3 text-center">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100 font-medium">
+                    {openDaysList.map((od) => (
+                      <tr key={od.businessDate} className="hover:bg-slate-50">
+                        <td className="p-3 font-bold text-gray-800">{od.businessDateDisplay}</td>
+                        <td className="p-3 text-gray-600">{od.branchName}</td>
+                        <td className="p-3 text-gray-600">{od.cashier}</td>
+                        <td className="p-3 text-right text-gray-800">{od.salesCount}</td>
+                        <td className="p-3 text-right font-bold text-gray-900">₹{od.totalSales.toLocaleString('en-IN')}</td>
+                        <td className="p-3 text-right text-emerald-600 font-bold">₹{od.cashCollections.toLocaleString('en-IN')}</td>
+                        <td className="p-3">
+                          <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                            od.isPendingClosure
+                              ? 'bg-amber-100 text-amber-800'
+                              : 'bg-blue-100 text-blue-800'
+                          }`}>
+                            {od.currentStatus}
+                          </span>
+                        </td>
+                        <td className="p-3 text-center">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setShowOpenDaysModal(false);
+                              router.push(`/settings/day-close?date=${od.businessDate}`);
+                            }}
+                            className="px-3 py-1 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-bold rounded-lg text-xs"
+                          >
+                            {od.action} →
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               )}
             </div>
           </div>
         </div>
       )}
 
-      {/* Confirmation Modal */}
+      {/* MODAL 3: Quick Inspector Modal for Verification Items */}
+      {inspectingItem && (
+        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-xl border border-gray-100 max-w-lg w-full p-6 space-y-4">
+            <div className="flex items-center justify-between border-b pb-3">
+              <h3 className="font-bold text-gray-800 text-base">{inspectingItem.title} - Detailed Inspection</h3>
+              <button onClick={() => setInspectingItem(null)} className="text-gray-400 hover:text-gray-600">
+                <FiX size={18} />
+              </button>
+            </div>
+
+            <div className="max-h-72 overflow-y-auto space-y-2 text-xs">
+              <pre className="p-3 bg-gray-50 border border-gray-100 rounded-xl font-mono text-[11px] text-gray-700 whitespace-pre-wrap">
+                {JSON.stringify(inspectingItem.details, null, 2)}
+              </pre>
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2 border-t">
+              <button
+                type="button"
+                onClick={() => {
+                  const targetRoute = inspectingItem.actionRoute;
+                  setInspectingItem(null);
+                  router.push(targetRoute);
+                }}
+                className="px-4 py-2 bg-emerald-600 text-white font-bold text-xs rounded-xl hover:bg-emerald-700"
+              >
+                Go to Dedicated Page →
+              </button>
+              <button
+                type="button"
+                onClick={() => setInspectingItem(null)}
+                className="px-4 py-2 bg-gray-100 text-gray-700 font-semibold text-xs rounded-xl"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 4: Exception Approval Modal */}
+      {showExceptionModal && (
+        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-xl border border-gray-100 max-w-sm w-full p-6 space-y-4">
+            <div className="flex items-center justify-between border-b pb-3">
+              <h3 className="font-bold text-gray-800 text-base flex items-center gap-2 text-red-600">
+                <FiShield /> Manager Exception Approval
+              </h3>
+              <button onClick={() => setShowExceptionModal(false)} className="text-gray-400 hover:text-gray-600">
+                <FiX size={18} />
+              </button>
+            </div>
+
+            <p className="text-xs text-gray-500">
+              You are approving an exception for <span className="font-bold text-gray-800">"{selectedExceptionKey}"</span>. An audit trail will be permanently recorded with your user ID and timestamp.
+            </p>
+
+            <div>
+              <label className="text-[11px] font-bold text-gray-600 uppercase">Reason / Justification Note:</label>
+              <textarea
+                required
+                rows={3}
+                value={exceptionReason}
+                onChange={(e) => setExceptionReason(e.target.value)}
+                placeholder="e.g. Approved inventory count adjustment in progress; cash shortage acknowledged by staff."
+                className="w-full mt-1 p-2 bg-gray-50 border border-gray-200 rounded-lg text-xs focus:bg-white"
+              />
+            </div>
+
+            <div className="flex gap-2 justify-end pt-2">
+              <button
+                type="button"
+                onClick={() => setShowExceptionModal(false)}
+                className="px-4 py-2 bg-gray-100 text-gray-700 text-xs font-semibold rounded-xl"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={approvingException}
+                onClick={handleApproveException}
+                className="px-5 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-xl shadow-sm"
+              >
+                {approvingException ? 'Approving...' : 'Sign & Approve'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 5: Pre-Closing Confirmation Modal */}
       {showConfirmModal && (
-        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-xl border border-gray-100 max-w-sm w-full p-6 text-center space-y-4">
-            <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-xl font-bold">
+        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 max-w-md w-full p-6 space-y-4 text-center">
+            <div className="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-2xl font-bold">
               <FiLock />
             </div>
 
             <div>
-              <h3 className="font-bold text-gray-800 text-lg">Confirm Day Close</h3>
+              <h3 className="font-bold text-gray-800 text-lg">Confirm Final Day Close</h3>
               <p className="text-xs text-gray-500 mt-1">
-                Are you sure you want to close business date <span className="font-bold text-gray-900">{displayFormattedDate}</span>?
+                You are about to finalize business date <span className="font-bold text-gray-900">{displayFormattedDate}</span>. Once closed, this business day becomes completely immutable.
               </p>
+            </div>
+
+            {/* Reconciliation Snapshot */}
+            <div className="p-3 bg-gray-50 rounded-xl text-left text-xs space-y-1.5 border border-gray-100 font-medium">
+              <div className="flex justify-between">
+                <span className="text-gray-500">Opening Cash:</span>
+                <span className="font-bold text-gray-800">₹{statusData.openingCash.toLocaleString('en-IN')}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-500">Expected Closing Cash:</span>
+                <span className="font-bold text-gray-800">₹{expectedClosing.toLocaleString('en-IN')}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-500">Actual Physical Cash:</span>
+                <span className="font-bold text-emerald-600">₹{actualClosingNum.toLocaleString('en-IN')}</span>
+              </div>
+              <div className="flex justify-between border-t pt-1">
+                <span className="text-gray-500">Cash Difference:</span>
+                <span className={`font-bold ${closingDiffCalc === 0 ? 'text-gray-700' : 'text-red-600'}`}>
+                  ₹{closingDiffCalc.toFixed(2)}
+                </span>
+              </div>
             </div>
 
             <div className="flex gap-3 justify-center pt-2">
@@ -227,15 +1042,15 @@ export default function DayClosePage() {
                 onClick={() => setShowConfirmModal(false)}
                 className="px-5 py-2.5 bg-gray-100 text-gray-700 text-xs font-semibold rounded-xl hover:bg-gray-200 transition-colors"
               >
-                Cancel
+                Go Back
               </button>
               <button
                 type="button"
                 disabled={submitting}
                 onClick={handleConfirmClose}
-                className="px-6 py-2.5 bg-emerald-600 text-white text-xs font-bold rounded-xl hover:bg-emerald-700 shadow-sm transition-colors"
+                className="px-6 py-2.5 bg-emerald-600 text-white text-xs font-bold rounded-xl hover:bg-emerald-700 shadow-md transition-colors"
               >
-                {submitting ? 'Saving...' : 'Yes, Close Date'}
+                {submitting ? 'Finalizing...' : 'Yes, Finalize & Close'}
               </button>
             </div>
           </div>
