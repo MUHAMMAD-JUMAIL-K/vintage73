@@ -959,6 +959,7 @@ const confirmDayClose = asyncHandler(async (req, res) => {
 
   const openingCash = Number(existingRecord?.actualOpeningCash || existingRecord?.openingCash || 0);
   const closingExpectedCash = Number((openingCash + cashSales - totalExpenseAmount - cashRefunds).toFixed(2));
+  const expectedClosingCash = closingExpectedCash;
 
   const physicalCash = inputPhysicalCash !== undefined ? parseFloat(inputPhysicalCash) || 0 : closingExpectedCash;
   const cashDifference = Number((physicalCash - closingExpectedCash).toFixed(2));

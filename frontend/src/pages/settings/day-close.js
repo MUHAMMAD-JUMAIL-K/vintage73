@@ -293,7 +293,7 @@ export default function DayClosePage() {
   const canCloseDay = allChecksComplete && criticalIssues.length === 0;
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 pt-4 pb-12 px-3">
+    <div className="w-full space-y-6 pt-1 pb-12">
       {/* Title Card with Header & Find Open Days */}
       <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
@@ -784,7 +784,7 @@ export default function DayClosePage() {
       {/* MODAL 2: Find Open Days Modal */}
       {showOpenDaysModal && (
         <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 max-w-3xl w-full p-6 space-y-4 max-h-[90vh] flex flex-col">
+          <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 max-w-5xl w-full p-6 space-y-4 max-h-[90vh] flex flex-col">
             <div className="flex items-center justify-between border-b pb-3">
               <div>
                 <h3 className="font-bold text-gray-800 text-base flex items-center gap-2">

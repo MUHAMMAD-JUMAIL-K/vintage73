@@ -173,6 +173,7 @@ exports.checkTerminal = asyncHandler(async (req, res) => {
         authorized: terminal.isActive,
         registered: true,
         terminal: {
+            id: terminal.id,
             name: terminal.name,
             branchId: terminal.branchId
         }

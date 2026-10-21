@@ -1,3 +1,4 @@
+import axios from 'axios';
 import api from './api';
 
 const TERMINAL_KEY = 'jewellery_terminal_id';
@@ -15,13 +16,15 @@ export const getTerminalId = () => {
 
 export const checkTerminalAccess = async () => {
     const terminalCode = getTerminalId();
+    if (!terminalCode) return { authorized: true, error: true };
     try {
-        const { data } = await api.get(`/terminals/check?terminalCode=${terminalCode}`);
+        const baseUrl = (process.env.NEXT_PUBLIC_API_URL || '').replace(/\/$/, '');
+        const { data } = await axios.get(`${baseUrl}/api/terminals/check?terminalCode=${terminalCode}`);
         return data; // { authorized: boolean, registered: boolean, terminal: {} }
     } catch (err) {
-        console.error('Terminal check failed:', err);
-        return { authorized: true, error: true }; // Default to true to avoid blocking on API failure? 
-        // Or false for strict security. Given user request, maybe false.
+        // Do not crash or trigger session logout interceptor on terminal check failures
+        console.warn('Terminal check could not be completed:', err.response?.data?.message || err.message);
+        return { authorized: true, error: true }; // Fallback to avoid blocking cashier on network/terminal issue
     }
 };
 
