@@ -85,44 +85,43 @@ const ProfessionalInvoice = React.forwardRef(({ printData, companyProfile, previ
     const vDiscount = parseFloat(voucherDiscount || printData.voucherDiscount || 0);
     const vCode = voucherCode || printData.voucherCode || null;
     const itemDiscountAmt = Math.max(0, invoiceDiscount - vDiscount);
-    const rewardVoucher = issuedRewardVoucher || issuedVoucher || printData.issuedRewardVoucher || printData.issuedVoucher || null;
+    const rewardVoucher = (settings?.showRewardCoupon === true) ? (issuedRewardVoucher || issuedVoucher || printData.issuedRewardVoucher || printData.issuedVoucher || null) : null;
 
     // Helper to extract line item pricing consistently across all templates
     const getItemValues = (item) => {
-        if (!item) return { mrp: 0, origPrice: 0, posPrice: 0, afterProdPrice: 0, vAlloc: 0, lineTotal: 0, taxRate: 0, qty: 0 };
+        if (!item) return { mrp: 0, origPrice: 0, posPrice: 0, afterProdPrice: 0, vAlloc: 0, lineSubtotal: 0, linePreTaxTotal: 0, lineTotal: 0, taxRate: 0, lineTax: 0, qty: 0 };
         const posPrice = parseFloat(item.unitPrice || item.price || 0);
+        const qty = parseFloat(item.quantity) || 1;
         const discAmt = parseFloat(item.discountAmount || 0);
         const afterProdPrice = Math.max(0, posPrice - discAmt);
         const origPrice = (item.originalUnitPrice !== undefined && item.originalUnitPrice !== null)
             ? parseFloat(item.originalUnitPrice)
-            : (item.product?.price !== undefined && item.product?.price !== null
-                ? parseFloat(item.product.price)
-                : posPrice);
+            : posPrice;
         const mrp = (item.mrp !== undefined && item.mrp !== null)
             ? parseFloat(item.mrp)
             : origPrice;
         const vAlloc = parseFloat(item.voucherDiscountAmount || 0);
-        const qty = parseFloat(item.quantity) || 1;
         const taxRate = parseFloat(item.taxRate || item.taxPercent || item.product?.taxRate || 0);
         const lineTax = parseFloat(item.taxAmount || 0);
-        const lineTotal = item.total !== undefined
-            ? parseFloat(item.total)
-            : Math.max(0, (qty * afterProdPrice) - vAlloc + lineTax);
-        return { mrp, origPrice, posPrice, afterProdPrice, vAlloc, lineTotal, taxRate, qty };
+        // Line Subtotal = Actual Selling Price * Quantity (Pre-tax)
+        const lineSubtotal = posPrice * qty;
+        const linePreTaxTotal = Math.max(0, (posPrice - discAmt) * qty - vAlloc);
+        // Column Amount represents the pre-tax Line Subtotal
+        const lineTotal = lineSubtotal;
+        return { mrp, origPrice, posPrice, afterProdPrice, discAmt, vAlloc, lineSubtotal, linePreTaxTotal, lineTotal, taxRate, lineTax, qty };
     };
 
-    const { totalMrpSum, totalAfterProductDiscount, totalLineTotalSum } = useMemo(() => {
-        let mrpSum = 0;
-        let afterProdSum = 0;
-        let lineSum = 0;
-        (items || []).forEach(item => {
-            const vals = getItemValues(item);
-            mrpSum += vals.mrp * vals.qty;
-            afterProdSum += vals.afterProdPrice * vals.qty;
-            lineSum += vals.lineTotal;
-        });
-        return { totalMrpSum: mrpSum, totalAfterProductDiscount: afterProdSum, totalLineTotalSum: lineSum };
-    }, [items]);
+    // Determine inter-state vs intra-state
+    const isInterState = useMemo(() => {
+        if (printData?.taxType === 'igst') return true;
+        if (printData?.taxType === 'cgst_sgst') return false;
+        const custState = (printData?.customer?.state || printData?.placeOfSupply || '').trim().toLowerCase();
+        const compState = (companyProfile?.state || '').trim().toLowerCase();
+        if (custState && compState && custState !== compState) {
+            return true;
+        }
+        return false;
+    }, [printData?.taxType, printData?.customer?.state, printData?.placeOfSupply, companyProfile?.state]);
 
     const grandTotalAmt = parseFloat(totalAmount || 0);
     const taxableSubtotal = parseFloat(subTotal || 0);
@@ -135,36 +134,46 @@ const ProfessionalInvoice = React.forwardRef(({ printData, companyProfile, previ
     const balanceAmt = printData.balanceAmount !== undefined ? parseFloat(printData.balanceAmount) : Math.max(0, grandTotalAmt - paidAmt - advanceAmt);
     const paymentsList = printData.payments || [];
 
-    // Authoritative single discount calculation:
-    const productLevelDiscount = Math.max(0, totalMrpSum - totalAfterProductDiscount);
-    const effectiveTotalDiscount = Math.max(invoiceDiscount, productLevelDiscount + vDiscount);
+    // Exact catalog subtotal = sum of (Actual Selling Price * Quantity)
+    const totalCatalogPrice = useMemo(() => {
+        if (items && items.length > 0) {
+            return items.reduce((sum, item) => {
+                const p = parseFloat(item.unitPrice || item.price || 0);
+                const q = parseFloat(item.quantity) || 1;
+                return sum + (p * q);
+            }, 0);
+        }
+        return taxableSubtotal + invoiceDiscount;
+    }, [items, taxableSubtotal, invoiceDiscount]);
 
-    // Total Amount: Original applicable total before discount
-    const applicableSubtotal = (taxableSubtotal > 0 && gstTaxAmt > 0.005)
-        ? (taxableSubtotal + effectiveTotalDiscount)
-        : (grandTotalAmt + effectiveTotalDiscount - (isDeliveryActive ? deliveryAmt : 0) - roundOffAmt);
-    const originalApplicableTotal = effectiveTotalDiscount > 0.005
-        ? Math.max(totalMrpSum, applicableSubtotal)
-        : (totalMrpSum > 0 ? totalMrpSum : (taxableSubtotal > 0 ? taxableSubtotal : grandTotalAmt));
-    const effectiveTotalBeforeDiscount = originalApplicableTotal;
-    const prodDiscountAmt = productLevelDiscount;
+    // Item-level discounts sum
+    const totalItemDiscounts = useMemo(() => {
+        if (items && items.length > 0) {
+            return items.reduce((sum, item) => sum + (parseFloat(item.discountAmount || 0) * (parseFloat(item.quantity) || 1)), 0);
+        }
+        return 0;
+    }, [items]);
+
+    // Single source of truth discount
+    const effectiveTotalDiscount = Math.max(invoiceDiscount, totalItemDiscounts) + vDiscount;
+    const effectiveTotalBeforeDiscount = totalCatalogPrice > 0 ? totalCatalogPrice : (taxableSubtotal + effectiveTotalDiscount);
+    const prodDiscountAmt = Math.max(0, effectiveTotalDiscount - vDiscount);
 
     const taxBreakdown = useMemo(() => {
         const breakdown = {};
         items?.forEach(item => {
             const rate = parseFloat(item.taxRate || item.taxPercent || item.product?.taxRate || 0);
             const lineTax = parseFloat(item.taxAmount || 0);
-            const taxable = (parseFloat(item.total) || 0) - lineTax;
-            const tType = item.taxType || item.product?.taxType || printData?.taxType || 'cgst_sgst';
+            const isIgst = (item.taxType === 'igst' || item.product?.taxType === 'igst' || isInterState);
+            const tType = isIgst ? 'igst' : 'gst';
             const key = `${rate}_${tType}`;
             if (!breakdown[key]) {
-                breakdown[key] = { rate, taxType: tType, taxableAmount: 0, taxAmount: 0 };
+                breakdown[key] = { rate, taxType: tType, taxAmount: 0 };
             }
-            breakdown[key].taxableAmount += taxable;
             breakdown[key].taxAmount += lineTax;
         });
         return breakdown;
-    }, [items, printData?.taxType]);
+    }, [items, isInterState]);
 
     const getContainerStyle = () => {
         const base = {
@@ -345,7 +354,7 @@ const ProfessionalInvoice = React.forwardRef(({ printData, companyProfile, previ
                         </div>
                     ) : (
                         /* Default Modern Template */
-                        <div className="text-center pb-2 mb-2 border-b border-dashed border-black">
+                        <div className="text-center pb-1 mb-1">
                             {settings.showLogo !== false && companyProfile?.logoUrl && (
                                 <img src={companyProfile.logoUrl} alt="Logo" className="w-12 h-12 object-contain mx-auto mb-1" />
                             )}
@@ -361,7 +370,7 @@ const ProfessionalInvoice = React.forwardRef(({ printData, companyProfile, previ
                                 </div>
                             )}
                             <div className="my-1.5 text-center">
-                                <span className="border border-black px-3 py-0.5 rounded-full inline-block font-semibold text-[10.5px] uppercase tracking-wider text-black">
+                                <span className="border border-black px-4 py-0.5 rounded-full inline-block font-bold text-[10.5px] uppercase tracking-wider text-black">
                                     {settings.headerTitle || (isQuotation ? 'QUOTATION' : 'TAX INVOICE')}
                                 </span>
                             </div>
@@ -420,7 +429,7 @@ const ProfessionalInvoice = React.forwardRef(({ printData, companyProfile, previ
                         </div>
                     ) : (
                         /* Default Modern */
-                        <div className="border-t border-b border-dotted border-black py-1.5 my-2 text-[9.5px] font-normal text-black space-y-0.5">
+                        <div className="border-t border-dotted border-b border-black py-1.5 my-2 text-[9.5px] font-normal text-black space-y-0.5">
                             <div className="flex justify-between">
                                 <span>{isQuotation ? 'Quote' : 'Inv'}: <strong className="font-medium">{quotationNumber || invoiceNumber || ''}</strong></span>
                                 <span>{invoiceDate ? new Date(invoiceDate).toLocaleDateString() : ''}</span>
@@ -445,7 +454,7 @@ const ProfessionalInvoice = React.forwardRef(({ printData, companyProfile, previ
                                                 ? 'border-y border-dashed border-black font-semibold text-black'
                                                 : isMinimal
                                                     ? 'border-b border-gray-400 font-semibold text-black'
-                                                    : 'border-b border-black font-semibold text-black'
+                                                    : 'font-bold text-black'
                                 }>
                                     <th className="py-1 text-left w-[44%] pr-1">Item Description</th>
                                     <th className="py-1 text-right w-[20%] pr-1">Rate</th>
@@ -455,7 +464,7 @@ const ProfessionalInvoice = React.forwardRef(({ printData, companyProfile, previ
                             </thead>
                             <tbody>
                                 {items?.map((item, idx) => {
-                                    const { posPrice, lineTotal, qty } = getItemValues(item);
+                                    const { posPrice, lineSubtotal, discAmt, qty } = getItemValues(item);
                                     const rowBorder = isClassic
                                         ? 'border-b border-black'
                                         : isBold
@@ -464,7 +473,7 @@ const ProfessionalInvoice = React.forwardRef(({ printData, companyProfile, previ
                                                 ? 'border-b border-dashed border-gray-400'
                                                 : isMinimal
                                                     ? 'border-b border-gray-200'
-                                                    : 'border-b border-dotted border-gray-400';
+                                                    : '';
                                     return (
                                         <tr key={idx} className={`${rowBorder} align-top`}>
                                             <td className="py-1 pr-1 text-left whitespace-normal break-words leading-tight font-normal text-black">
@@ -477,6 +486,11 @@ const ProfessionalInvoice = React.forwardRef(({ printData, companyProfile, previ
                                                         Size: {item.size}
                                                     </div>
                                                 )}
+                                                {discAmt > 0 && (
+                                                    <div className="text-[8px] text-orange-600 font-normal mt-0.5">
+                                                        Disc: -{currentSymbol}{formatAmt(discAmt * qty)}
+                                                    </div>
+                                                )}
                                             </td>
                                             <td className="py-1 pr-1 text-right font-normal text-black whitespace-nowrap">
                                                 {currentSymbol}{formatAmt(posPrice)}
@@ -485,7 +499,7 @@ const ProfessionalInvoice = React.forwardRef(({ printData, companyProfile, previ
                                                 {qty}
                                             </td>
                                             <td className="py-1 text-right font-normal text-black whitespace-nowrap">
-                                                {currentSymbol}{formatAmt(lineTotal)}
+                                                {currentSymbol}{formatAmt(lineSubtotal)}
                                             </td>
                                         </tr>
                                     );
@@ -510,15 +524,8 @@ const ProfessionalInvoice = React.forwardRef(({ printData, companyProfile, previ
                             </div>
                         )}
 
-                        {/* 3. Taxable Amount */}
-                        {gstTaxAmt > 0.005 && (
-                            <div className="flex justify-between w-full">
-                                <span>Taxable Amount:</span>
-                                <span>{currentSymbol}{formatAmt(taxableSubtotal)}</span>
-                            </div>
-                        )}
 
-                        {/* 4. GST Breakdown */}
+                        {/* 4. GST Breakdown - Show SINGLE GST line per rate to keep bill clean and simple */}
                         {gstTaxAmt > 0.005 && (
                             <>
                                 {Object.entries(taxBreakdown).filter(([_, data]) => parseFloat(data.rate) > 0).length > 0 ? (
@@ -527,27 +534,17 @@ const ProfessionalInvoice = React.forwardRef(({ printData, companyProfile, previ
                                         .map(([key, data]) => {
                                             const rate = parseFloat(data.rate);
                                             const isIgst = data.taxType === 'igst';
-                                            return isIgst ? (
+                                            const label = isIgst ? `IGST (${rate}%):` : `GST (${rate}%):`;
+                                            return (
                                                 <div key={key} className="flex justify-between w-full">
-                                                    <span>IGST ({rate}%):</span>
+                                                    <span>{label}</span>
                                                     <span>+{currentSymbol}{formatAmt(data.taxAmount)}</span>
                                                 </div>
-                                            ) : (
-                                                <React.Fragment key={key}>
-                                                    <div className="flex justify-between w-full">
-                                                        <span>CGST ({rate / 2}%):</span>
-                                                        <span>+{currentSymbol}{formatAmt(data.taxAmount / 2)}</span>
-                                                    </div>
-                                                    <div className="flex justify-between w-full">
-                                                        <span>SGST ({rate / 2}%):</span>
-                                                        <span>+{currentSymbol}{formatAmt(data.taxAmount / 2)}</span>
-                                                    </div>
-                                                </React.Fragment>
                                             );
                                         })
                                 ) : (
                                     <div className="flex justify-between w-full">
-                                        <span>GST / Tax:</span>
+                                        <span>GST:</span>
                                         <span>+{currentSymbol}{formatAmt(gstTaxAmt)}</span>
                                     </div>
                                 )}
@@ -660,8 +657,8 @@ const ProfessionalInvoice = React.forwardRef(({ printData, companyProfile, previ
                     )}
 
                     {/* FOOTER NOTE */}
-                    <div className="text-center mt-3 pt-1.5 border-t border-dashed border-black text-[9px] font-normal tracking-wider text-black">
-                        <p>{settings.footerText || settings.footerNote || (isBoutiqueA5 ? 'Thank you for shopping with us! ❖ Visit Again' : 'THANK YOU FOR YOUR BUSINESS!')}</p>
+                    <div className="text-center mt-3 pt-1.5 border-t border-dotted border-black text-[9.5px] font-normal tracking-wide text-black">
+                        <p>{settings.footerText || settings.footerNote || (isBoutiqueA5 ? 'Thank you for shopping with us! ❖ Visit Again' : 'Thank you for your business!')}</p>
                     </div>
 
                 </div>
@@ -994,7 +991,7 @@ const ProfessionalInvoice = React.forwardRef(({ printData, companyProfile, previ
                     </thead>
                     <tbody>
                         {items?.map((item, idx) => {
-                            const { posPrice, lineTotal, qty } = getItemValues(item);
+                            const { posPrice, lineSubtotal, discAmt, qty } = getItemValues(item);
                             const rowBorderClass = isClassic
                                 ? 'border-b border-black'
                                 : isBoutiqueA5
@@ -1014,13 +1011,18 @@ const ProfessionalInvoice = React.forwardRef(({ printData, companyProfile, previ
                                                 {item.product?.name || item.name || 'Item'}
                                             </span>
                                         </div>
-                                        {item.size && (
-                                            <div className="mt-0.5">
+                                        <div className="flex flex-wrap gap-1 mt-0.5">
+                                            {item.size && (
                                                 <span className="text-[10px] font-normal text-slate-600 bg-slate-100 border border-slate-200 px-1.5 py-0.2 rounded print:text-black">
                                                     Size: {item.size}
                                                 </span>
-                                            </div>
-                                        )}
+                                            )}
+                                            {discAmt > 0 && (
+                                                <span className="text-[10px] font-normal text-orange-600 bg-orange-50 border border-orange-200 px-1.5 py-0.2 rounded print:text-black">
+                                                    Disc: -{currentSymbol}{formatAmt(discAmt * qty)}
+                                                </span>
+                                            )}
+                                        </div>
                                     </td>
                                     <td className={`${s_TableTd} text-right font-normal text-slate-900 print:text-black whitespace-nowrap ${isClassic ? 'border-r border-black' : ''}`}>
                                         {currentSymbol}{formatAmt(posPrice)}
@@ -1029,7 +1031,7 @@ const ProfessionalInvoice = React.forwardRef(({ printData, companyProfile, previ
                                         {qty}
                                     </td>
                                     <td className={`${s_TableTd} text-right font-semibold text-slate-950 print:text-black whitespace-nowrap`}>
-                                        {currentSymbol}{formatAmt(lineTotal)}
+                                        {currentSymbol}{formatAmt(lineSubtotal)}
                                     </td>
                                 </tr>
                             );
@@ -1058,26 +1060,12 @@ const ProfessionalInvoice = React.forwardRef(({ printData, companyProfile, previ
                                     .map(([key, data]) => {
                                         const rate = parseFloat(data.rate);
                                         const isIgst = data.taxType === 'igst';
+                                        const label = isIgst ? `IGST (${rate}%)` : `GST (${rate}%)`;
                                         return (
-                                            <React.Fragment key={key}>
-                                                {isIgst ? (
-                                                    <div className="flex justify-between items-center text-slate-700 font-medium">
-                                                        <span>IGST ({rate}%)</span>
-                                                        <span className="font-bold text-slate-900 print:text-black">{currentSymbol}{formatAmt(data.taxAmount)}</span>
-                                                    </div>
-                                                ) : (
-                                                    <>
-                                                        <div className="flex justify-between items-center text-slate-700 font-medium">
-                                                            <span>CGST ({rate / 2}%)</span>
-                                                            <span className="font-bold text-slate-900 print:text-black">{currentSymbol}{formatAmt(data.taxAmount / 2)}</span>
-                                                        </div>
-                                                        <div className="flex justify-between items-center text-slate-700 font-medium">
-                                                            <span>SGST ({rate / 2}%)</span>
-                                                            <span className="font-bold text-slate-900 print:text-black">{currentSymbol}{formatAmt(data.taxAmount / 2)}</span>
-                                                        </div>
-                                                    </>
-                                                )}
-                                            </React.Fragment>
+                                            <div key={key} className="flex justify-between items-center text-slate-700 font-medium">
+                                                <span>{label}</span>
+                                                <span className="font-bold text-slate-900 print:text-black">{currentSymbol}{formatAmt(data.taxAmount)}</span>
+                                            </div>
                                         );
                                     })}
                             </div>
@@ -1114,20 +1102,31 @@ const ProfessionalInvoice = React.forwardRef(({ printData, companyProfile, previ
                             </div>
                         )}
 
-                        {/* 3. Taxable Amount */}
-                        {gstTaxAmt > 0.005 && (
-                            <div className="flex justify-between items-center text-slate-700 text-[11.5px] font-normal tracking-tight">
-                                <span className="whitespace-nowrap mr-2">Taxable Amount:</span>
-                                <span className="font-semibold text-slate-900 whitespace-nowrap print:text-black">{currentSymbol}{formatAmt(taxableSubtotal)}</span>
-                            </div>
-                        )}
 
-                        {/* 4. GST / Tax */}
+                        {/* 4. GST Breakdown - Show SINGLE GST line per rate to keep bill clean and simple */}
                         {gstTaxAmt > 0.005 && (
-                            <div className="flex justify-between items-center text-slate-700 text-[11.5px] font-normal tracking-tight">
-                                <span className="whitespace-nowrap mr-2">GST / Tax:</span>
-                                <span className="font-semibold text-slate-900 whitespace-nowrap print:text-black">+{currentSymbol}{formatAmt(gstTaxAmt)}</span>
-                            </div>
+                            <>
+                                {Object.entries(taxBreakdown).filter(([_, data]) => parseFloat(data.rate) > 0).length > 0 ? (
+                                    Object.entries(taxBreakdown)
+                                        .filter(([_, data]) => parseFloat(data.rate) > 0)
+                                        .map(([key, data]) => {
+                                            const rate = parseFloat(data.rate);
+                                            const isIgst = data.taxType === 'igst';
+                                            const label = isIgst ? `IGST (${rate}%):` : `GST (${rate}%):`;
+                                            return (
+                                                <div key={key} className="flex justify-between items-center text-slate-700 text-[11.5px] font-normal tracking-tight">
+                                                    <span className="whitespace-nowrap mr-2">{label}</span>
+                                                    <span className="font-semibold text-slate-900 whitespace-nowrap print:text-black">+{currentSymbol}{formatAmt(data.taxAmount)}</span>
+                                                </div>
+                                            );
+                                        })
+                                ) : (
+                                    <div className="flex justify-between items-center text-slate-700 text-[11.5px] font-normal tracking-tight">
+                                        <span className="whitespace-nowrap mr-2">GST:</span>
+                                        <span className="font-semibold text-slate-900 whitespace-nowrap print:text-black">+{currentSymbol}{formatAmt(gstTaxAmt)}</span>
+                                    </div>
+                                )}
+                            </>
                         )}
 
                         {/* 5. Delivery Charge */}
@@ -1153,32 +1152,6 @@ const ProfessionalInvoice = React.forwardRef(({ printData, companyProfile, previ
                                 <span className="font-semibold text-emerald-700 whitespace-nowrap print:text-black">- {currentSymbol}{formatAmt(advanceAmt)}</span>
                             </div>
                         )}
-
-                        {/* Payment Method */}
-                        {paymentMethod && (
-                            <div className="flex justify-between items-center text-slate-700 text-[11px] font-normal tracking-tight pt-0.5 border-t border-slate-200">
-                                <span className="whitespace-nowrap mr-2">Payment Method:</span>
-                                <span className="font-medium text-slate-900 whitespace-nowrap print:text-black">{paymentMethod}</span>
-                            </div>
-                        )}
-
-                        {/* Split Payment Breakdown */}
-                        {paymentsList.length > 1 && (
-                            <div className="pl-2 border-l-2 border-slate-300 my-1 space-y-0.5">
-                                {paymentsList.map((p, idx) => (
-                                    <div key={idx} className="flex justify-between items-center text-slate-700 text-[10px]">
-                                        <span>{p.method}:</span>
-                                        <span className="font-medium text-slate-900 print:text-black">{currentSymbol}{formatAmt(p.amount)}</span>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-
-                        {/* Amount Paid */}
-                        <div className="flex justify-between items-center text-slate-700 text-[11px] font-normal tracking-tight">
-                            <span className="whitespace-nowrap mr-2">Amount Paid:</span>
-                            <span className="font-medium text-emerald-700 whitespace-nowrap print:text-black">{currentSymbol}{formatAmt(paidAmt)}</span>
-                        </div>
                     </div>
 
                     {/* TOTAL */}
@@ -1228,6 +1201,34 @@ const ProfessionalInvoice = React.forwardRef(({ printData, companyProfile, previ
                             </span>
                         </div>
                     )}
+
+                    {/* PAYMENT DETAILS */}
+                    <div className="pt-1.5 mt-1.5 border-t border-slate-200 space-y-1">
+                        {paymentMethod && (
+                            <div className="flex justify-between items-center text-slate-700 text-[11px] font-normal tracking-tight">
+                                <span className="whitespace-nowrap mr-2">Payment Method:</span>
+                                <span className="font-medium text-slate-900 whitespace-nowrap print:text-black">{paymentMethod}</span>
+                            </div>
+                        )}
+
+                        {/* Split Payment Breakdown */}
+                        {paymentsList.length > 1 && (
+                            <div className="pl-2 border-l-2 border-slate-300 my-1 space-y-0.5">
+                                {paymentsList.map((p, idx) => (
+                                    <div key={idx} className="flex justify-between items-center text-slate-700 text-[10px]">
+                                        <span>{p.method}:</span>
+                                        <span className="font-medium text-slate-900 print:text-black">{currentSymbol}{formatAmt(p.amount)}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        {/* Amount Paid */}
+                        <div className="flex justify-between items-center text-slate-700 text-[11px] font-normal tracking-tight">
+                            <span className="whitespace-nowrap mr-2">Amount Paid:</span>
+                            <span className="font-medium text-emerald-700 whitespace-nowrap print:text-black">{currentSymbol}{formatAmt(paidAmt)}</span>
+                        </div>
+                    </div>
 
                     {/* Balance Due */}
                     {balanceAmt > 0.005 && (

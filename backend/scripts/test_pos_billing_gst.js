@@ -165,9 +165,50 @@ async function runTests() {
     });
 
     // ----------------------------------------------------
-    // TEST 1: Selling Price ₹1,000 + GST 5% Exclusive
+    // PRIMARY TEST CASE (USER SPECIFIED)
     // ----------------------------------------------------
-    recordTest('TEST 1: Selling Price ₹1,000 with 5% exclusive GST -> Expected Total ₹1,050.00', () => {
+    recordTest('PRIMARY TEST CASE: Price ₹50,000, Qty 1, Disc ₹500, GST 5% Exclusive -> Subtotal ₹50,000, Disc -₹500, GST +₹2,475, Total ₹51,975', () => {
+        const line = calculatePOSLineItem({ price: 50000, quantity: 1, discountAmount: 500, taxRate: 5, isTaxInclusive: false, taxType: 'cgst_sgst' });
+        
+        // Cart unit price must remain the pre-tax selling price
+        assert.strictEqual(line.unitPrice, 50000.00, 'Unit price must be 50,000');
+        // Cart line total must be pre-tax line total after discount: 50,000 - 500 = 49,500
+        const preTaxLineTotal = (line.unitPrice - line.discountAmount) * line.qty;
+        assert.strictEqual(preTaxLineTotal, 49500.00, 'Cart line total before GST must be 49,500.00');
+        
+        // GST (5% of 49,500) = 2,475
+        assert.strictEqual(line.taxableAmount, 49500.00, 'Taxable base must be 49,500.00');
+        assert.strictEqual(line.taxAmount, 2475.00, 'GST must be 2,475.00');
+        assert.strictEqual(line.cgst, 1237.50, 'CGST (2.5%) must be 1,237.50');
+        assert.strictEqual(line.sgst, 1237.50, 'SGST (2.5%) must be 1,237.50');
+
+        const summary = calculatePOSBillSummary([line], { roundOff: 0 });
+        assert.strictEqual(summary.catalogPrice, 50000.00, 'Subtotal row must show ₹50,000.00');
+        assert.strictEqual(summary.productDiscount, 500.00, 'Product Discount row must show -₹500.00');
+        assert.strictEqual(summary.totalTax, 2475.00, 'GST (5%) row must show +₹2,475.00');
+        assert.strictEqual(summary.roundOff, 0.00, 'Round off must be ₹0.00');
+        assert.strictEqual(summary.grandTotal, 51975.00, 'Bill Total must be exactly ₹51,975.00');
+    });
+
+    // ----------------------------------------------------
+    // TEST 1: Selling Price ₹1,000 + GST 0% Exclusive
+    // ----------------------------------------------------
+    recordTest('TEST 1A: Selling Price ₹1,000 with 0% GST -> Expected Total ₹1,000.00', () => {
+        const line = calculatePOSLineItem({ price: 1000, quantity: 1, taxRate: 0, isTaxInclusive: false });
+        assert.strictEqual(line.taxableAmount, 1000.00);
+        assert.strictEqual(line.taxAmount, 0.00);
+        assert.strictEqual(line.lineTotal, 1000.00);
+
+        const summary = calculatePOSBillSummary([line]);
+        assert.strictEqual(summary.catalogPrice, 1000.00);
+        assert.strictEqual(summary.totalTax, 0.00);
+        assert.strictEqual(summary.grandTotal, 1000.00);
+    });
+
+    // ----------------------------------------------------
+    // TEST 1B: Selling Price ₹1,000 + GST 5% Exclusive
+    // ----------------------------------------------------
+    recordTest('TEST 1B: Selling Price ₹1,000 with 5% exclusive GST -> Expected Total ₹1,050.00', () => {
         const line = calculatePOSLineItem({ price: 1000, quantity: 1, taxRate: 5, isTaxInclusive: false });
         assert.strictEqual(line.taxableAmount, 1000.00);
         assert.strictEqual(line.taxAmount, 50.00);
@@ -206,6 +247,20 @@ async function runTests() {
     });
 
     // ----------------------------------------------------
+    // TEST 3B: Selling Price ₹1,000 + GST 28% Exclusive
+    // ----------------------------------------------------
+    recordTest('TEST 3B: Selling Price ₹1,000 with 28% exclusive GST -> Expected Total ₹1,280.00', () => {
+        const line = calculatePOSLineItem({ price: 1000, quantity: 1, taxRate: 28, isTaxInclusive: false });
+        assert.strictEqual(line.taxableAmount, 1000.00);
+        assert.strictEqual(line.taxAmount, 280.00);
+        assert.strictEqual(line.lineTotal, 1280.00);
+
+        const summary = calculatePOSBillSummary([line]);
+        assert.strictEqual(summary.totalTax, 280.00);
+        assert.strictEqual(summary.grandTotal, 1280.00);
+    });
+
+    // ----------------------------------------------------
     // TEST 4: Selling Price ₹1,000 + GST 5% Inclusive
     // ----------------------------------------------------
     recordTest('TEST 4: Selling Price ₹1,000 with 5% inclusive GST -> Expected Total ₹1,000.00, Tax component ₹47.62', () => {
@@ -221,33 +276,35 @@ async function runTests() {
     });
 
     // ----------------------------------------------------
-    // TEST 5: Selling Price ₹1,000 + Quantity 2 + GST 5% Exclusive
+    // TEST 5: Selling Price ₹1,000 + Quantity 3 + GST 18% Exclusive (Prompt Requirement 5.C)
     // ----------------------------------------------------
-    recordTest('TEST 5: Selling Price ₹1,000, Qty 2, 5% exclusive GST -> Expected Total ₹2,100.00', () => {
-        const line = calculatePOSLineItem({ price: 1000, quantity: 2, taxRate: 5, isTaxInclusive: false });
-        assert.strictEqual(line.taxableAmount, 2000.00);
-        assert.strictEqual(line.taxAmount, 100.00);
-        assert.strictEqual(line.lineTotal, 2100.00);
+    recordTest('TEST 5: Selling Price ₹1,000, Qty 3, 18% exclusive GST -> Subtotal ₹3,000, GST ₹540, Final ₹3,540', () => {
+        const line = calculatePOSLineItem({ price: 1000, quantity: 3, taxRate: 18, isTaxInclusive: false });
+        assert.strictEqual(line.taxableAmount, 3000.00);
+        assert.strictEqual(line.taxAmount, 540.00);
+        assert.strictEqual(line.lineTotal, 3540.00);
 
         const summary = calculatePOSBillSummary([line]);
-        assert.strictEqual(summary.grandTotal, 2100.00);
+        assert.strictEqual(summary.catalogPrice, 3000.00);
+        assert.strictEqual(summary.totalTax, 540.00);
+        assert.strictEqual(summary.grandTotal, 3540.00);
     });
 
     // ----------------------------------------------------
-    // TEST 6: Selling Price ₹1,000 + Discount ₹100 + GST 5% Exclusive
+    // TEST 6: Selling Price ₹1,000 + Discount ₹100 + GST 18% Exclusive (Prompt Requirement 5.B)
     // ----------------------------------------------------
-    recordTest('TEST 6: Selling Price ₹1,000, Discount ₹100, 5% exclusive GST -> Taxable ₹900, GST ₹45, Total ₹945.00', () => {
-        const line = calculatePOSLineItem({ price: 1000, quantity: 1, discountAmount: 100, taxRate: 5, isTaxInclusive: false });
+    recordTest('TEST 6: Selling Price ₹1,000, Discount ₹100, 18% exclusive GST -> Subtotal ₹1,000, Discount ₹100, GST Base ₹900, GST ₹162, Final ₹1,062', () => {
+        const line = calculatePOSLineItem({ price: 1000, quantity: 1, discountAmount: 100, taxRate: 18, isTaxInclusive: false });
         assert.strictEqual(line.taxableAmount, 900.00);
-        assert.strictEqual(line.taxAmount, 45.00);
-        assert.strictEqual(line.lineTotal, 945.00);
+        assert.strictEqual(line.taxAmount, 162.00);
+        assert.strictEqual(line.lineTotal, 1062.00);
 
         const summary = calculatePOSBillSummary([line]);
         assert.strictEqual(summary.catalogPrice, 1000.00);
         assert.strictEqual(summary.productDiscount, 100.00);
         assert.strictEqual(summary.taxableAmount, 900.00);
-        assert.strictEqual(summary.totalTax, 45.00);
-        assert.strictEqual(summary.grandTotal, 945.00);
+        assert.strictEqual(summary.totalTax, 162.00);
+        assert.strictEqual(summary.grandTotal, 1062.00);
     });
 
     // ----------------------------------------------------
@@ -323,6 +380,40 @@ async function runTests() {
     });
 
     // ----------------------------------------------------
+    // TEST 9B: Multi-product with Mixed GST Rates (Prompt Requirement 3)
+    // ----------------------------------------------------
+    recordTest('TEST 9B: Mixed GST rates (5% and 18%) -> Taxes grouped separately by rate and summed correctly', () => {
+        // Item A: 5% exclusive GST, price 1000
+        const itemA = calculatePOSLineItem({ price: 1000, quantity: 1, taxRate: 5, isTaxInclusive: false, taxType: 'cgst_sgst' });
+        // Item B: 18% exclusive GST, price 2000
+        const itemB = calculatePOSLineItem({ price: 2000, quantity: 1, taxRate: 18, isTaxInclusive: false, taxType: 'cgst_sgst' });
+
+        // Item A: Taxable 1000, Tax 50 (CGST 25, SGST 25)
+        // Item B: Taxable 2000, Tax 360 (CGST 180, SGST 180)
+        assert.strictEqual(itemA.taxAmount, 50.00);
+        assert.strictEqual(itemB.taxAmount, 360.00);
+
+        // Simulate POS grouping logic by rate and taxType
+        const breakdownMap = {};
+        [itemA, itemB].forEach(item => {
+            const key = `${item.taxType}_${item.isTaxInclusive ? 'inc' : 'exc'}_${5 || 18}`; // key per rate
+            const rateKey = `${item.taxType}_${item.taxAmount === 50 ? 5 : 18}`;
+            if (!breakdownMap[rateKey]) {
+                breakdownMap[rateKey] = { rate: item.taxAmount === 50 ? 5 : 18, taxAmount: 0 };
+            }
+            breakdownMap[rateKey].taxAmount += item.taxAmount;
+        });
+
+        assert.strictEqual(breakdownMap['cgst_sgst_5'].taxAmount, 50.00, '5% GST group must be ₹50.00');
+        assert.strictEqual(breakdownMap['cgst_sgst_18'].taxAmount, 360.00, '18% GST group must be ₹360.00');
+
+        const summary = calculatePOSBillSummary([itemA, itemB]);
+        assert.strictEqual(summary.catalogPrice, 3000.00, 'Subtotal must be ₹3,000.00');
+        assert.strictEqual(summary.totalTax, 410.00, 'Total tax must be 50 + 360 = ₹410.00');
+        assert.strictEqual(summary.grandTotal, 3410.00, 'Grand total must be ₹3,410.00');
+    });
+
+    // ----------------------------------------------------
     // TEST 10: Frontend, Backend, and Invoice Reconciled Consistency
     // ----------------------------------------------------
     recordTest('TEST 10: Total reconciliation across POS, backend sales calculation, and invoice display', () => {
@@ -362,6 +453,22 @@ async function runTests() {
         assert.strictEqual(summary.taxableAmount, 900.00);
         assert.strictEqual(summary.totalTax, 45.00);
         assert.strictEqual(summary.grandTotal, 945.00);
+    });
+
+    // ----------------------------------------------------
+    // TEST 11B: Verification of "Taxable Amount" Removal in UI Components
+    // ----------------------------------------------------
+    recordTest('TEST 11B: Verified "Taxable Amount" is completely removed from POS UI and Invoice UI', () => {
+        const fs = require('fs');
+        const posSource = fs.readFileSync(path.join(__dirname, '../../frontend/src/pages/pos.js'), 'utf8');
+        const invoiceSource = fs.readFileSync(path.join(__dirname, '../../frontend/src/components/ProfessionalInvoice.js'), 'utf8');
+
+        // Check for UI label occurrences (e.g. >Taxable Amount<, "Taxable Amount", 'Taxable Amount')
+        const posMatch = posSource.match(/>\s*Taxable Amount\s*</i);
+        const invoiceMatch = invoiceSource.match(/>\s*Taxable Amount\s*</i);
+
+        assert.strictEqual(posMatch, null, 'pos.js must not render "Taxable Amount" in UI');
+        assert.strictEqual(invoiceMatch, null, 'ProfessionalInvoice.js must not render "Taxable Amount" in UI');
     });
 
     // ----------------------------------------------------

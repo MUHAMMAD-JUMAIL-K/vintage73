@@ -385,13 +385,8 @@ export default function InvoiceSettings() {
 
                                 {/* Header Customize Section */}
                                 <div className="mb-2">
-                                    <div className="flex items-center justify-between mb-3">
-                                        <div className="flex items-center gap-2 text-sm font-medium text-slate-800">
-                                            <FiGrid className="text-slate-400" /> Header
-                                        </div>
-                                        <button className="text-[10px] text-[#009262] flex items-center gap-1 hover:underline font-medium">
-                                            <FiSettings size={10} /> Customize Header {'>'}
-                                        </button>
+                                    <div className="flex items-center gap-2 text-sm font-medium text-slate-800 mb-3">
+                                        <FiGrid className="text-slate-400" /> Customize Header
                                     </div>
                                     
                                     <div className="bg-slate-50 border border-slate-100 p-3 rounded-xl grid grid-cols-2 gap-3 relative">
