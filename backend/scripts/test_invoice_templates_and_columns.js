@@ -106,11 +106,11 @@ assert.strictEqual(taxableSubtotal.toFixed(2), '847.46', 'Taxable Amount must be
 assert.strictEqual(gstTaxAmt.toFixed(2), '152.54', 'GST / Tax must be 152.54');
 assert.strictEqual(grandTotalAmt.toFixed(2), '1000.00', 'TOTAL must be 1000.00');
 
-console.log('   ✓ Subtotal:       ', effectiveTotalBeforeDiscount.toFixed(2));
-console.log('   ✓ Discount:       ', effectiveTotalDiscount.toFixed(2));
-console.log('   ✓ Taxable Amount: ', taxableSubtotal.toFixed(2));
-console.log('   ✓ GST / Tax:      ', gstTaxAmt.toFixed(2));
-console.log('   ✓ TOTAL:          ', grandTotalAmt.toFixed(2));
+console.log('   ✓ Subtotal:              ', effectiveTotalBeforeDiscount.toFixed(2));
+console.log('   ✓ Discount:              ', effectiveTotalDiscount.toFixed(2));
+console.log('   ✓ Internal Taxable Base: ', taxableSubtotal.toFixed(2));
+console.log('   ✓ GST / Tax:             ', gstTaxAmt.toFixed(2));
+console.log('   ✓ TOTAL:                 ', grandTotalAmt.toFixed(2));
 
 console.log('\n=============================================================');
 console.log('ALL VERIFICATIONS PASSED SUCCESSFULLY!');

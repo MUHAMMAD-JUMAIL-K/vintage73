@@ -198,6 +198,37 @@ exports.createSale = asyncHandler(async (req, res) => {
           catalogPrice = parseFloat(bPrices[bKey].price);
         }
       }
+      if (product && (item.size || item.selectedSize)) {
+        const itemSize = item.size || item.selectedSize;
+        let sizeFound = false;
+        if (item.brandId && product.brandPrices) {
+          let bPrices = product.brandPrices;
+          if (typeof bPrices === 'string') {
+            try { bPrices = JSON.parse(bPrices); } catch(e) { bPrices = null; }
+          }
+          const bKey = String(item.brandId);
+          const bEntry = bPrices && bPrices[bKey];
+          if (bEntry && Array.isArray(bEntry.sizeStocks)) {
+            const sObj = bEntry.sizeStocks.find(s => String(s.size).trim().toLowerCase() === String(itemSize).trim().toLowerCase());
+            if (sObj && sObj.price !== undefined && sObj.price !== null && sObj.price !== '' && !isNaN(parseFloat(sObj.price))) {
+              catalogPrice = parseFloat(sObj.price);
+              sizeFound = true;
+            }
+          }
+        }
+        if (!sizeFound && product.sizeStocks) {
+          let sStocks = product.sizeStocks;
+          if (typeof sStocks === 'string') {
+            try { sStocks = JSON.parse(sStocks); } catch(e) { sStocks = null; }
+          }
+          if (Array.isArray(sStocks)) {
+            const sObj = sStocks.find(s => String(s.size).trim().toLowerCase() === String(itemSize).trim().toLowerCase());
+            if (sObj && sObj.price !== undefined && sObj.price !== null && sObj.price !== '' && !isNaN(parseFloat(sObj.price))) {
+              catalogPrice = parseFloat(sObj.price);
+            }
+          }
+        }
+      }
       const originalUnitPrice = item.originalUnitPrice !== undefined && item.originalUnitPrice !== null
         ? parseFloat(item.originalUnitPrice)
         : catalogPrice;
@@ -364,9 +395,10 @@ exports.createSale = asyncHandler(async (req, res) => {
         isReturn,
         returnReason,
         originalInvoice,
-        currencyCode,
+        currencyCode: branchExists.currencyCode || currencyCode || 'INR',
         exchangeRate: parseFloat(exchangeRate),
         description,
+        placeOfSupply: req.body.placeOfSupply || customer?.state || null,
         items: { create: saleItemsData }
       },
       include: { 
@@ -488,7 +520,11 @@ exports.createSale = asyncHandler(async (req, res) => {
       }
     }
 
-    return { ...sale, issuedRewardVoucher };
+    const createdPayments = await tx.payment.findMany({ where: { saleId: sale.id } });
+    const isInterState = req.body.taxType === 'igst' || 
+      (sale.placeOfSupply && branchExists.state && sale.placeOfSupply.trim().toLowerCase() !== branchExists.state.trim().toLowerCase()) || 
+      (customer?.state && branchExists.state && customer.state.trim().toLowerCase() !== branchExists.state.trim().toLowerCase());
+    return { ...sale, payments: createdPayments, issuedRewardVoucher, taxType: isInterState ? 'igst' : 'cgst_sgst' };
   });
 
   res.status(201).json(result);
@@ -530,6 +566,11 @@ exports.getAllSales = asyncHandler(async (req, res) => {
       paymentsList = [{ method: 'Credit', amount: balAmt }];
     }
 
+    const isInterState = Boolean(
+      (s.placeOfSupply && s.branch?.state && s.placeOfSupply.trim().toLowerCase() !== s.branch.state.trim().toLowerCase()) ||
+      (s.customer?.state && s.branch?.state && s.customer.state.trim().toLowerCase() !== s.branch.state.trim().toLowerCase())
+    );
+
     return {
       ...s,
       discount: Number(s.discount || 0),
@@ -539,7 +580,8 @@ exports.getAllSales = asyncHandler(async (req, res) => {
       paidAmount: paidAmt,
       balanceAmount: balAmt,
       payments: paymentsList,
-      customerName: s.customer?.name || s.customerName || 'Walk-in Customer'
+      customerName: s.customer?.name || s.customerName || 'Walk-in Customer',
+      taxType: isInterState ? 'igst' : 'cgst_sgst'
     };
   });
 
@@ -783,6 +825,37 @@ exports.updateSale = asyncHandler(async (req, res) => {
           catalogPrice = parseFloat(bPrices[bKey].price);
         }
       }
+      if (product && (item.size || item.selectedSize)) {
+        const itemSize = item.size || item.selectedSize;
+        let sizeFound = false;
+        if (item.brandId && product.brandPrices) {
+          let bPrices = product.brandPrices;
+          if (typeof bPrices === 'string') {
+            try { bPrices = JSON.parse(bPrices); } catch(e) { bPrices = null; }
+          }
+          const bKey = String(item.brandId);
+          const bEntry = bPrices && bPrices[bKey];
+          if (bEntry && Array.isArray(bEntry.sizeStocks)) {
+            const sObj = bEntry.sizeStocks.find(s => String(s.size).trim().toLowerCase() === String(itemSize).trim().toLowerCase());
+            if (sObj && sObj.price !== undefined && sObj.price !== null && sObj.price !== '' && !isNaN(parseFloat(sObj.price))) {
+              catalogPrice = parseFloat(sObj.price);
+              sizeFound = true;
+            }
+          }
+        }
+        if (!sizeFound && product.sizeStocks) {
+          let sStocks = product.sizeStocks;
+          if (typeof sStocks === 'string') {
+            try { sStocks = JSON.parse(sStocks); } catch(e) { sStocks = null; }
+          }
+          if (Array.isArray(sStocks)) {
+            const sObj = sStocks.find(s => String(s.size).trim().toLowerCase() === String(itemSize).trim().toLowerCase());
+            if (sObj && sObj.price !== undefined && sObj.price !== null && sObj.price !== '' && !isNaN(parseFloat(sObj.price))) {
+              catalogPrice = parseFloat(sObj.price);
+            }
+          }
+        }
+      }
       const originalUnitPrice = item.originalUnitPrice !== undefined && item.originalUnitPrice !== null
         ? parseFloat(item.originalUnitPrice)
         : catalogPrice;
@@ -884,6 +957,7 @@ exports.updateSale = asyncHandler(async (req, res) => {
         advanceUsed: parseFloat(advanceRedeemed || 0),
         balanceAmount: finalBalanceAmount,
         description,
+        placeOfSupply: req.body.placeOfSupply || customer?.state || existing.placeOfSupply || null,
         status: finalBalanceAmount > 0.01 ? 'partial' : 'completed',
         items: { create: saleItemsData }
       },
@@ -969,7 +1043,11 @@ exports.updateSale = asyncHandler(async (req, res) => {
         });
       }
     }
-    return updated;
+    const createdPayments = await tx.payment.findMany({ where: { saleId: validSaleId } });
+    const isInterState = req.body.taxType === 'igst' || 
+      (updated.placeOfSupply && branchExists?.state && updated.placeOfSupply.trim().toLowerCase() !== branchExists.state.trim().toLowerCase()) || 
+      (customer?.state && branchExists?.state && customer.state.trim().toLowerCase() !== branchExists.state.trim().toLowerCase());
+    return { ...updated, payments: createdPayments, taxType: isInterState ? 'igst' : 'cgst_sgst' };
   });
 
   res.json(result);
