@@ -1,5 +1,11 @@
 const prisma = require('../config/prisma');
 const asyncHandler = require('../middleware/asyncHandler');
+const {
+    getLocalDateString,
+    getUtcDateObj,
+    formatDisplayDate,
+    getBranchActiveBusinessDate
+} = require('../utils/businessDateHelper');
 
 exports.getDashboardStats = asyncHandler(async (req, res) => {
     const { branchId: queryBranchId } = req.query;
@@ -169,6 +175,84 @@ exports.getDashboardStats = asyncHandler(async (req, res) => {
         }));
     } catch (e) { console.error("Dashboard Fast moving products error:", e); }
 
+    // 7. Day Opening & Closing Status
+    let dayManagement = {
+        businessDate: null,
+        businessDateDisplay: null,
+        status: 'NOT_OPENED',
+        openingCash: 0,
+        additionalCashAdded: 0,
+        cashRemovedBeforeOpening: 0,
+        expectedOpeningCash: 0,
+        actualOpeningCash: 0,
+        openingDifference: 0,
+        openingTime: null,
+        openedBy: null,
+        closingStatus: 'NOT_OPENED',
+        todayCancelledCount: 0,
+        todayExpenses: 0,
+        hasPendingPrevious: false,
+        pendingDateDisplay: null
+    };
+
+    try {
+        const targetBId = parsedBranchId || 1;
+        const activeDateInfo = await getBranchActiveBusinessDate(targetBId);
+        const dateStr = activeDateInfo.dateStr;
+        const dateUtc = getUtcDateObj(dateStr);
+
+        const dc = await prisma.dayClose.findUnique({
+            where: {
+                branchId_businessDate: {
+                    branchId: targetBId,
+                    businessDate: dateUtc
+                }
+            },
+            include: {
+                openedBy: { select: { id: true, name: true, username: true } },
+                finalizedBy: { select: { id: true, name: true, username: true } }
+            }
+        });
+
+        const cancelledCount = await prisma.sale.count({
+            where: {
+                ...(parsedBranchId ? { branchId: parsedBranchId } : {}),
+                status: 'cancelled',
+                saleDate: { gte: today }
+            }
+        });
+
+        const todayExpensesAgg = await prisma.expense.aggregate({
+            where: {
+                ...(parsedBranchId ? { branchId: parsedBranchId } : {}),
+                date: { gte: today }
+            },
+            _sum: { amount: true }
+        });
+
+        dayManagement = {
+            businessDate: dateStr,
+            businessDateDisplay: formatDisplayDate(dateStr),
+            status: dc ? dc.status : 'NOT_OPENED',
+            openingCash: Number(dc?.actualOpeningCash || dc?.openingCash || 0),
+            additionalCashAdded: Number(dc?.additionalCashAdded || 0),
+            cashRemovedBeforeOpening: Number(dc?.cashRemovedBeforeOpening || 0),
+            expectedOpeningCash: Number(dc?.expectedOpeningCash || 0),
+            actualOpeningCash: Number(dc?.actualOpeningCash || 0),
+            openingDifference: Number(dc?.openingDifference || 0),
+            openingTime: dc?.openedAt || null,
+            openedBy: dc?.openedBy ? (dc.openedBy.name || dc.openedBy.username) : null,
+            closingStatus: dc ? dc.status : 'NOT_OPENED',
+            todayCancelledCount: cancelledCount,
+            todayExpenses: Number(todayExpensesAgg._sum.amount || 0),
+            hasPendingPrevious: activeDateInfo.isPendingPrevious,
+            pendingDate: activeDateInfo.isPendingPrevious ? activeDateInfo.dateStr : null,
+            pendingDateDisplay: activeDateInfo.isPendingPrevious ? formatDisplayDate(activeDateInfo.dateStr) : null
+        };
+    } catch (e) {
+        console.error("Dashboard Day Management error:", e);
+    }
+
     res.json({
         sales: {
             total: totalSales,
@@ -193,6 +277,7 @@ exports.getDashboardStats = asyncHandler(async (req, res) => {
         },
         recentSales,
         fastMovingProducts,
+        dayManagement,
         scope: parsedBranchId ? `Branch: ${parsedBranchId}` : "Global"
     });
 });

@@ -1,7 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/router';
 import api from '@/lib/api';
 import {
-  FiDollarSign, FiShoppingBag, FiBox, FiUsers, FiTrendingUp, FiArrowUpRight, FiPrinter
+  FiDollarSign, FiShoppingBag, FiBox, FiUsers, FiTrendingUp, FiArrowUpRight, FiPrinter,
+  FiClock, FiCheckCircle, FiAlertTriangle, FiLock, FiSearch, FiLayers, FiX
 } from 'react-icons/fi';
 import { HiOutlineReceiptRefund } from 'react-icons/hi';
 import { TbBusinessplan } from 'react-icons/tb';
@@ -11,6 +13,7 @@ import DynamicInvoice from '@/components/DynamicInvoice';
 import { getCurrencySymbol, normalizeCurrencySymbol, formatAmountWithCurrency } from '@/lib/currency';
 
 export default function Dashboard() {
+  const router = useRouter();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [userData, setUserData] = useState(null);
@@ -19,6 +22,15 @@ export default function Dashboard() {
   const [branch, setBranch] = useState(null);
   const [invoiceSettings, setInvoiceSettings] = useState(null);
   const componentRef = useRef();
+
+  // Day Opening Modal State
+  const [showOpenModal, setShowOpenModal] = useState(false);
+  const [openingActualCash, setOpeningActualCash] = useState('');
+  const [openingAddCash, setOpeningAddCash] = useState('0');
+  const [openingRemCash, setOpeningRemCash] = useState('0');
+  const [openingReason, setOpeningReason] = useState('');
+  const [openingRemarks, setOpeningRemarks] = useState('');
+  const [submittingOpen, setSubmittingOpen] = useState(false);
 
   useEffect(() => {
     fetchDashboardData();
@@ -130,8 +142,50 @@ export default function Dashboard() {
     );
   }
 
-  const activeCurrencyCode = branch?.currencyCode || companyProfile?.currencyCode || 'INR';
-  const activeCurrencySymbol = normalizeCurrencySymbol(branch?.currencySymbol || companyProfile?.currencySymbol, activeCurrencyCode);
+  const handleOpenDaySubmit = async (e) => {
+    e.preventDefault();
+    setSubmittingOpen(true);
+    try {
+      const dm = data?.dayManagement;
+      const prevCash = Number(dm?.expectedOpeningCash || 0);
+      const addCash = parseFloat(openingAddCash) || 0;
+      const remCash = parseFloat(openingRemCash) || 0;
+      const actualCash = parseFloat(openingActualCash) || 0;
+      const expectedCash = prevCash + addCash - remCash;
+      const diff = actualCash - expectedCash;
+
+      if (Math.abs(diff) > 0.01 && !openingReason.trim()) {
+        toast.warn(`Please provide an explanation for the opening difference of ₹${diff.toFixed(2)}.`);
+        setSubmittingOpen(false);
+        return;
+      }
+
+      const res = await api.post('/day-close/open', {
+        branchId: branch?.id || userData?.branchId,
+        previousClosingCash: prevCash,
+        additionalCashAdded: addCash,
+        cashRemovedBeforeOpening: remCash,
+        actualOpeningCash: actualCash,
+        openingDiscrepancyReason: openingReason.trim(),
+        openingRemarks: openingRemarks.trim()
+      });
+
+      if (res.data?.success) {
+        toast.success(res.data.message || 'Business day opened successfully!');
+        setShowOpenModal(false);
+        fetchDashboardData();
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error(err.response?.data?.message || 'Failed to open business day');
+    } finally {
+      setSubmittingOpen(false);
+    }
+  };
+
+  const dm = data?.dayManagement;
+  const isDayOpened = dm && dm.status !== 'NOT_OPENED';
+  const isDayClosed = dm && (dm.status === 'CLOSED' || dm.status === 'ADMIN_CLOSED');
 
   return (
     <div className="space-y-6 md:space-y-8 font-sans relative">
@@ -144,6 +198,122 @@ export default function Dashboard() {
           {new Date().toLocaleDateString('en-GB', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
         </div>
       </header>
+
+      {/* Day Opening & Daily Activity Summary Card */}
+      {dm && (
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-5 space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl font-bold">
+                <FiClock />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-sm font-bold text-slate-800">
+                    Business Date: {dm.businessDateDisplay || dm.businessDate || 'Today'}
+                  </h3>
+                  <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                    isDayClosed
+                      ? 'bg-slate-100 text-slate-700 border border-slate-200'
+                      : isDayOpened
+                      ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+                      : 'bg-amber-100 text-amber-800 border border-amber-200 animate-pulse'
+                  }`}>
+                    {dm.status}
+                  </span>
+                </div>
+                <p className="text-[11px] text-slate-400 mt-0.5">
+                  {isDayClosed
+                    ? 'This business day has been closed.'
+                    : isDayOpened
+                    ? `Opened at ${dm.openingTime ? new Date(dm.openingTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '—'} by ${dm.openedBy || 'Staff'}`
+                    : 'Business day has not been opened yet. Please open to begin operations.'}
+                </p>
+              </div>
+            </div>
+
+            {/* Direct Action Buttons */}
+            <div className="flex flex-wrap items-center gap-2">
+              {!isDayOpened && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setOpeningActualCash(dm.expectedOpeningCash ? dm.expectedOpeningCash.toString() : '0');
+                    setShowOpenModal(true);
+                  }}
+                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-sm transition-all flex items-center gap-1.5 cursor-pointer"
+                >
+                  <FiCheckCircle /> Open Business Day
+                </button>
+              )}
+              {isDayOpened && !isDayClosed && (
+                <button
+                  type="button"
+                  onClick={() => router.push('/settings/day-close')}
+                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-sm transition-all flex items-center gap-1.5 cursor-pointer"
+                >
+                  <FiLock /> Verify & Close Day
+                </button>
+              )}
+              {isDayClosed && (
+                <button
+                  type="button"
+                  onClick={() => router.push(`/reports/sales?businessDate=${dm.businessDate}`)}
+                  className="px-4 py-2 bg-slate-700 hover:bg-slate-800 text-white font-bold text-xs rounded-xl shadow-sm transition-all flex items-center gap-1.5 cursor-pointer"
+                >
+                  <FiEye /> View Closing Report
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => router.push('/settings/day-close')}
+                className="px-3.5 py-2 bg-slate-50 hover:bg-slate-100 text-slate-600 font-semibold text-xs rounded-xl border border-slate-200 transition-all flex items-center gap-1"
+              >
+                <FiSearch /> Find Open Days
+              </button>
+              <button
+                type="button"
+                onClick={() => router.push('/reports/sales')}
+                className="px-3.5 py-2 bg-slate-50 hover:bg-slate-100 text-slate-600 font-semibold text-xs rounded-xl border border-slate-200 transition-all flex items-center gap-1"
+              >
+                <FiTrendingUp /> Sales Report
+              </button>
+            </div>
+          </div>
+
+          {/* Quick Metrics Strip */}
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 text-xs">
+            <div className="p-2.5 bg-slate-50 rounded-xl space-y-0.5">
+              <span className="text-[10px] text-slate-400 font-bold uppercase">Opening Cash</span>
+              <p className="font-extrabold text-slate-800">
+                {formatAmountWithCurrency(dm.openingCash, activeCurrencyCode, activeCurrencySymbol)}
+              </p>
+            </div>
+            <div className="p-2.5 bg-slate-50 rounded-xl space-y-0.5">
+              <span className="text-[10px] text-slate-400 font-bold uppercase">Today's Sales</span>
+              <p className="font-extrabold text-emerald-600">
+                {formatAmountWithCurrency(data.sales.today, activeCurrencyCode, activeCurrencySymbol)}
+              </p>
+            </div>
+            <div className="p-2.5 bg-slate-50 rounded-xl space-y-0.5">
+              <span className="text-[10px] text-slate-400 font-bold uppercase">Today's Orders</span>
+              <p className="font-extrabold text-slate-800">{data.sales.todayCount} completed</p>
+            </div>
+            <div className="p-2.5 bg-slate-50 rounded-xl space-y-0.5">
+              <span className="text-[10px] text-slate-400 font-bold uppercase">Cancelled Invoices</span>
+              <p className={`font-extrabold ${dm.todayCancelledCount > 0 ? 'text-red-600' : 'text-slate-800'}`}>
+                {dm.todayCancelledCount} cancelled
+              </p>
+            </div>
+            <div className="p-2.5 bg-slate-50 rounded-xl space-y-0.5">
+              <span className="text-[10px] text-slate-400 font-bold uppercase">Today's Expenses</span>
+              <p className="font-extrabold text-slate-800">
+                {formatAmountWithCurrency(dm.todayExpenses, activeCurrencyCode, activeCurrencySymbol)}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Top Stats Grid - Dark Theme */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
@@ -332,6 +502,113 @@ export default function Dashboard() {
           invoiceSettings={invoiceSettings}
         />
       </div>
+
+      {/* Day Opening Modal */}
+      {showOpenModal && (
+        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-xl border border-slate-100 max-w-md w-full p-6 space-y-4">
+            <div className="flex items-center justify-between border-b pb-3">
+              <h3 className="font-bold text-slate-800 text-base flex items-center gap-2">
+                <FiClock className="text-emerald-600" /> Open Business Day
+              </h3>
+              <button onClick={() => setShowOpenModal(false)} className="text-slate-400 hover:text-slate-600">
+                <FiX size={18} />
+              </button>
+            </div>
+
+            <form onSubmit={handleOpenDaySubmit} className="space-y-4">
+              <div className="grid grid-cols-2 gap-3 text-xs">
+                <div className="p-2.5 bg-slate-50 rounded-lg">
+                  <span className="text-[10px] text-slate-400 font-semibold uppercase">Business Date</span>
+                  <p className="font-bold text-slate-800">{dm?.businessDateDisplay || dm?.businessDate || 'Today'}</p>
+                </div>
+                <div className="p-2.5 bg-slate-50 rounded-lg">
+                  <span className="text-[10px] text-slate-400 font-semibold uppercase">Previous Closing Cash</span>
+                  <p className="font-bold text-slate-800">
+                    {formatAmountWithCurrency(dm?.expectedOpeningCash || 0, activeCurrencyCode, activeCurrencySymbol)}
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-3 text-xs">
+                <div>
+                  <label className="font-semibold text-slate-600">Additional Cash Added to Till (₹)</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={openingAddCash}
+                    onChange={(e) => setOpeningAddCash(e.target.value)}
+                    className="w-full mt-1 p-2 bg-slate-50 border border-slate-200 rounded-lg font-bold"
+                  />
+                </div>
+
+                <div>
+                  <label className="font-semibold text-slate-600">Cash Removed Before Opening (₹)</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={openingRemCash}
+                    onChange={(e) => setOpeningRemCash(e.target.value)}
+                    className="w-full mt-1 p-2 bg-slate-50 border border-slate-200 rounded-lg font-bold"
+                  />
+                </div>
+
+                <div>
+                  <label className="font-semibold text-slate-600">Actual Opening Cash Counted (₹)</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    required
+                    value={openingActualCash}
+                    onChange={(e) => setOpeningActualCash(e.target.value)}
+                    placeholder="Enter physical cash in drawer"
+                    className="w-full mt-1 p-2 bg-white border border-emerald-400 rounded-lg font-extrabold text-sm text-slate-900"
+                  />
+                </div>
+
+                <div>
+                  <label className="font-semibold text-slate-600">Discrepancy Explanation (if difference is not zero)</label>
+                  <textarea
+                    rows={2}
+                    value={openingReason}
+                    onChange={(e) => setOpeningReason(e.target.value)}
+                    placeholder="Explanation for any cash variance..."
+                    className="w-full mt-1 p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs"
+                  />
+                </div>
+
+                <div>
+                  <label className="font-semibold text-slate-600">Opening Remarks (Optional)</label>
+                  <input
+                    type="text"
+                    value={openingRemarks}
+                    onChange={(e) => setOpeningRemarks(e.target.value)}
+                    placeholder="Opening remarks or shift notes"
+                    className="w-full mt-1 p-2 bg-slate-50 border border-slate-200 rounded-lg"
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-2 justify-end pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowOpenModal(false)}
+                  className="px-4 py-2 bg-slate-100 text-slate-700 text-xs font-semibold rounded-xl"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={submittingOpen}
+                  className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-sm"
+                >
+                  {submittingOpen ? 'Opening...' : 'Confirm & Open Day'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

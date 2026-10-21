@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { useRouter } from 'next/router';
 import api from '@/lib/api';
 import {
     FiDownload, FiEye, FiPrinter, FiX, FiCalendar, FiSearch, FiRefreshCw,
     FiTrendingUp, FiDollarSign, FiShoppingBag, FiCreditCard, FiPercent,
     FiBox, FiUser, FiSliders, FiCheckCircle, FiChevronRight, FiLayers,
-    FiArrowUpRight, FiTag, FiFileText, FiPieChart
+    FiArrowUpRight, FiTag, FiFileText, FiPieChart, FiLock, FiClock, FiAlertTriangle, FiActivity
 } from 'react-icons/fi';
 import { useReactToPrint } from 'react-to-print';
 import { toast } from 'react-toastify';
@@ -47,9 +48,23 @@ const formatDisplayDate = (dateVal) => {
 
 export default function SalesReport() {
     const { theme } = useTheme();
+    const router = useRouter();
 
-    // Active Navigation Tab: 'dashboard' | 'summary' | 'detailed'
+    // Active Navigation Tab: 'dashboard' | 'summary' | 'detailed' | 'dailyActivity'
     const [activeTab, setActiveTab] = useState('dashboard');
+    const [dateMode, setDateMode] = useState('range'); // 'range' | 'single'
+    const [singleDate, setSingleDate] = useState(() => toLocalDateInputString(new Date()));
+
+    // Sync with URL query parameter (e.g. from Day Close / Dashboard)
+    useEffect(() => {
+        if (router.query.businessDate) {
+            setDateMode('single');
+            setSingleDate(router.query.businessDate);
+            setStartDate(router.query.businessDate);
+            setEndDate(router.query.businessDate);
+            setActiveTab('dailyActivity');
+        }
+    }, [router.query.businessDate]);
 
     // Filter States (Default to current month in Asia/Kolkata)
     const [startDate, setStartDate] = useState(() => {
@@ -65,6 +80,7 @@ export default function SalesReport() {
     const [selectedSalesman, setSelectedSalesman] = useState('all');
     const [selectedStatus, setSelectedStatus] = useState('all');
     const [showMoreFilters, setShowMoreFilters] = useState(false);
+    const [dailySection, setDailySection] = useState('all');
 
     // Data States
     const [loading, setLoading] = useState(true);
@@ -184,9 +200,13 @@ export default function SalesReport() {
             setLoading(true);
             const queryBranchId = selectedBranch === 'all' ? undefined : selectedBranch;
 
+            const effectiveStart = dateMode === 'single' ? singleDate : startDate;
+            const effectiveEnd = dateMode === 'single' ? singleDate : endDate;
+
             const params = {
-                startDate,
-                endDate,
+                startDate: effectiveStart,
+                endDate: effectiveEnd,
+                businessDate: dateMode === 'single' ? singleDate : undefined,
                 branchId: queryBranchId,
                 paymentMethod: selectedPaymentMethod !== 'all' ? selectedPaymentMethod : undefined,
                 salesmanId: selectedSalesman !== 'all' ? selectedSalesman : undefined,
@@ -212,7 +232,7 @@ export default function SalesReport() {
         if (selectedBranch !== '') {
             fetchAnalytics();
         }
-    }, [selectedBranch, startDate, endDate, selectedPaymentMethod, selectedSalesman, selectedStatus]);
+    }, [selectedBranch, startDate, endDate, singleDate, dateMode, selectedPaymentMethod, selectedSalesman, selectedStatus]);
 
     // Quick Date Presets in Asia/Kolkata
     const applyDatePreset = (preset) => {
@@ -446,10 +466,10 @@ export default function SalesReport() {
                 </div>
 
                 {/* Main Tab Navigation */}
-                <div className="flex items-center bg-slate-100/80 p-1.5 rounded-xl border border-slate-200/70 w-full sm:w-auto">
+                <div className="flex flex-wrap items-center bg-slate-100/80 p-1.5 rounded-xl border border-slate-200/70 w-full sm:w-auto gap-1">
                     <button
                         onClick={() => setActiveTab('dashboard')}
-                        className={`flex-1 sm:flex-none px-4 py-2 rounded-lg font-semibold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 ${
+                        className={`flex-1 sm:flex-none px-3.5 py-2 rounded-lg font-semibold text-xs sm:text-sm transition-all flex items-center justify-center gap-1.5 ${
                             activeTab === 'dashboard'
                                 ? 'bg-white text-slate-900 shadow-xs border border-slate-200/50'
                                 : 'text-slate-600 hover:text-slate-900'
@@ -460,7 +480,7 @@ export default function SalesReport() {
                     </button>
                     <button
                         onClick={() => setActiveTab('summary')}
-                        className={`flex-1 sm:flex-none px-4 py-2 rounded-lg font-semibold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 ${
+                        className={`flex-1 sm:flex-none px-3.5 py-2 rounded-lg font-semibold text-xs sm:text-sm transition-all flex items-center justify-center gap-1.5 ${
                             activeTab === 'summary'
                                 ? 'bg-white text-slate-900 shadow-xs border border-slate-200/50'
                                 : 'text-slate-600 hover:text-slate-900'
@@ -471,7 +491,7 @@ export default function SalesReport() {
                     </button>
                     <button
                         onClick={() => setActiveTab('detailed')}
-                        className={`flex-1 sm:flex-none px-4 py-2 rounded-lg font-semibold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 ${
+                        className={`flex-1 sm:flex-none px-3.5 py-2 rounded-lg font-semibold text-xs sm:text-sm transition-all flex items-center justify-center gap-1.5 ${
                             activeTab === 'detailed'
                                 ? 'bg-white text-slate-900 shadow-xs border border-slate-200/50'
                                 : 'text-slate-600 hover:text-slate-900'
@@ -480,38 +500,97 @@ export default function SalesReport() {
                     >
                         <FiLayers size={15} /> Detailed Report
                     </button>
+                    <button
+                        onClick={() => setActiveTab('dailyActivity')}
+                        className={`flex-1 sm:flex-none px-3.5 py-2 rounded-lg font-semibold text-xs sm:text-sm transition-all flex items-center justify-center gap-1.5 ${
+                            activeTab === 'dailyActivity'
+                                ? 'bg-white text-slate-900 shadow-xs border border-slate-200/50'
+                                : 'text-slate-600 hover:text-slate-900'
+                        }`}
+                        style={activeTab === 'dailyActivity' ? { color: theme.primaryColor } : {}}
+                    >
+                        <FiActivity size={15} /> Daily Activity
+                    </button>
                 </div>
             </div>
 
             {/* COMMON FILTER BAR */}
             <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-4 print:hidden">
+                {/* Mode Selector Toggle: Specific Business Date vs Date Range */}
+                <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
+                    <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Date Mode:</span>
+                    <button
+                        type="button"
+                        onClick={() => setDateMode('range')}
+                        className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                            dateMode === 'range' ? 'bg-emerald-600 text-white shadow-xs' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                        }`}
+                    >
+                        Date Range
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => {
+                            setDateMode('single');
+                            setStartDate(singleDate);
+                            setEndDate(singleDate);
+                        }}
+                        className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                            dateMode === 'single' ? 'bg-emerald-600 text-white shadow-xs' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                        }`}
+                    >
+                        Specific Business Date
+                    </button>
+                </div>
+
                 {/* Row 1: Dates, Branch, Search & Actions */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3 items-end">
-                    {/* From Date */}
-                    <div className="lg:col-span-2">
-                        <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1 mb-1">
-                            <FiCalendar size={12} /> From Date
-                        </label>
-                        <input
-                            type="date"
-                            className="w-full h-10 px-3 border border-slate-200 rounded-xl text-sm text-slate-700 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary transition-all font-medium"
-                            value={startDate}
-                            onChange={e => setStartDate(e.target.value)}
-                        />
-                    </div>
+                    {dateMode === 'single' ? (
+                        /* Single Business Date Selector */
+                        <div className="lg:col-span-4">
+                            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1 mb-1">
+                                <FiCalendar size={12} /> Select Business Date
+                            </label>
+                            <input
+                                type="date"
+                                className="w-full h-10 px-3 border border-slate-200 rounded-xl text-sm text-slate-700 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary transition-all font-bold"
+                                value={singleDate}
+                                onChange={e => {
+                                    setSingleDate(e.target.value);
+                                    setStartDate(e.target.value);
+                                    setEndDate(e.target.value);
+                                }}
+                            />
+                        </div>
+                    ) : (
+                        <>
+                            {/* From Date */}
+                            <div className="lg:col-span-2">
+                                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1 mb-1">
+                                    <FiCalendar size={12} /> From Date
+                                </label>
+                                <input
+                                    type="date"
+                                    className="w-full h-10 px-3 border border-slate-200 rounded-xl text-sm text-slate-700 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary transition-all font-medium"
+                                    value={startDate}
+                                    onChange={e => setStartDate(e.target.value)}
+                                />
+                            </div>
 
-                    {/* To Date */}
-                    <div className="lg:col-span-2">
-                        <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1 mb-1">
-                            <FiCalendar size={12} /> To Date
-                        </label>
-                        <input
-                            type="date"
-                            className="w-full h-10 px-3 border border-slate-200 rounded-xl text-sm text-slate-700 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary transition-all font-medium"
-                            value={endDate}
-                            onChange={e => setEndDate(e.target.value)}
-                        />
-                    </div>
+                            {/* To Date */}
+                            <div className="lg:col-span-2">
+                                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1 mb-1">
+                                    <FiCalendar size={12} /> To Date
+                                </label>
+                                <input
+                                    type="date"
+                                    className="w-full h-10 px-3 border border-slate-200 rounded-xl text-sm text-slate-700 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary transition-all font-medium"
+                                    value={endDate}
+                                    onChange={e => setEndDate(e.target.value)}
+                                />
+                            </div>
+                        </>
+                    )}
 
                     {/* Branch Filter (for Admin) */}
                     {user?.role === 'admin' ? (
@@ -1297,6 +1376,606 @@ export default function SalesReport() {
                             </div>
                         </div>
                     </div>
+                </div>
+            )}
+
+            {/* ========================================================================= */}
+            {/* SECTION 4: DAILY ACTIVITY INSPECTION (SINGLE BUSINESS DATE) */}
+            {/* ========================================================================= */}
+            {activeTab === 'dailyActivity' && (
+                <div className="space-y-6">
+                    {dateMode !== 'single' ? (
+                        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-6 text-center">
+                            <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-3 text-amber-600">
+                                <FiCalendar size={24} />
+                            </div>
+                            <h3 className="text-base font-bold text-amber-900 mb-1">Single Business Date Required</h3>
+                            <p className="text-xs text-amber-700 max-w-md mx-auto mb-4">
+                                Daily Activity Inspection provides a comprehensive single-day operational audit including sessions, invoices, cancellations, refunds, cash movements, and stock ledger.
+                            </p>
+                            <button
+                                onClick={() => {
+                                    setDateMode('single');
+                                    setStartDate(singleDate);
+                                    setEndDate(singleDate);
+                                }}
+                                className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold transition-all shadow-xs"
+                            >
+                                Switch to Specific Business Date ({singleDate})
+                            </button>
+                        </div>
+                    ) : (
+                        <>
+                            {/* 1. Day Opening & Closing Session Banner */}
+                            {reportData?.dailyActivity?.dayCloseRecord ? (
+                                <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+                                    <div className="px-6 py-4 bg-slate-50/80 border-b border-slate-200 flex flex-wrap justify-between items-center gap-3">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center">
+                                                <FiLock size={20} />
+                                            </div>
+                                            <div>
+                                                <div className="flex items-center gap-2">
+                                                    <h3 className="text-sm font-bold text-slate-800">
+                                                        Business Day Session: {formatDisplayDate(reportData.dailyActivity.businessDate)}
+                                                    </h3>
+                                                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase ${
+                                                        reportData.dailyActivity.dayCloseRecord.status === 'CLOSED' || reportData.dailyActivity.dayCloseRecord.status === 'ADMIN_CLOSED'
+                                                            ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+                                                            : (reportData.dailyActivity.dayCloseRecord.status === 'OPEN' ? 'bg-blue-100 text-blue-800 border border-blue-200' : 'bg-amber-100 text-amber-800 border border-amber-200')
+                                                    }`}>
+                                                        {reportData.dailyActivity.dayCloseRecord.status}
+                                                    </span>
+                                                </div>
+                                                <p className="text-[11px] text-slate-500">
+                                                    Official Register & Shift Session Records
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <button
+                                                onClick={triggerReportPrint}
+                                                className="px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold flex items-center gap-1.5 transition-all shadow-2xs"
+                                            >
+                                                <FiPrinter size={13} /> Print Daily Report
+                                            </button>
+                                            <button
+                                                onClick={() => router.push('/settings/day-close')}
+                                                className="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-black text-white text-xs font-bold transition-all shadow-xs"
+                                            >
+                                                Day Close Console &rarr;
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div className="p-5 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 text-xs">
+                                        <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
+                                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Opening Cash</span>
+                                            <span className="text-sm font-extrabold text-slate-800 mt-0.5 block">
+                                                {formatCurrency(reportData.dailyActivity.dayCloseRecord.actualOpeningCash ?? reportData.dailyActivity.dayCloseRecord.openingCash ?? 0, activeCurrencyCode)}
+                                            </span>
+                                            <span className="text-[10px] text-slate-500">
+                                                By: {reportData.dailyActivity.dayCloseRecord.openedBy || 'System'}
+                                            </span>
+                                        </div>
+                                        <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
+                                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Expected Closing</span>
+                                            <span className="text-sm font-extrabold text-slate-800 mt-0.5 block">
+                                                {formatCurrency(reportData.dailyActivity.dayCloseRecord.closingExpectedCash ?? 0, activeCurrencyCode)}
+                                            </span>
+                                            <span className="text-[10px] text-slate-500">System register formula</span>
+                                        </div>
+                                        <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
+                                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Actual Closing Cash</span>
+                                            <span className="text-sm font-extrabold text-slate-800 mt-0.5 block">
+                                                {formatCurrency(reportData.dailyActivity.dayCloseRecord.closingActualCash ?? 0, activeCurrencyCode)}
+                                            </span>
+                                            <span className="text-[10px] text-slate-500">Counted by cashier</span>
+                                        </div>
+                                        <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
+                                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Closing Discrepancy</span>
+                                            <span className={`text-sm font-extrabold mt-0.5 block ${
+                                                Number(reportData.dailyActivity.dayCloseRecord.closingDifference || 0) === 0
+                                                    ? 'text-emerald-600'
+                                                    : 'text-rose-600'
+                                            }`}>
+                                                {Number(reportData.dailyActivity.dayCloseRecord.closingDifference || 0) > 0 ? '+' : ''}
+                                                {formatCurrency(reportData.dailyActivity.dayCloseRecord.closingDifference || 0, activeCurrencyCode)}
+                                            </span>
+                                            <span className="text-[10px] text-slate-500">
+                                                {Number(reportData.dailyActivity.dayCloseRecord.closingDifference || 0) === 0 ? 'Balanced' : 'Discrepancy logged'}
+                                            </span>
+                                        </div>
+                                        <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
+                                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Closed By</span>
+                                            <span className="text-xs font-bold text-slate-800 mt-0.5 block truncate">
+                                                {reportData.dailyActivity.dayCloseRecord.closedBy || '—'}
+                                            </span>
+                                            <span className="text-[10px] text-slate-500">
+                                                {reportData.dailyActivity.dayCloseRecord.closedAt ? new Date(reportData.dailyActivity.dayCloseRecord.closedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '—'}
+                                            </span>
+                                        </div>
+                                        <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
+                                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Remarks</span>
+                                            <span className="text-xs text-slate-600 mt-0.5 block line-clamp-2" title={reportData.dailyActivity.dayCloseRecord.remarks}>
+                                                {reportData.dailyActivity.dayCloseRecord.remarks || 'No closing notes'}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-800 flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                        <FiAlertTriangle className="text-amber-600" size={20} />
+                                        <div>
+                                            <span className="font-bold text-sm">No Day Session Record Found for {formatDisplayDate(singleDate)}</span>
+                                            <p className="text-xs text-amber-700">This business date has not been formally opened or closed in the POS register.</p>
+                                        </div>
+                                    </div>
+                                    <button
+                                        onClick={() => router.push('/settings/day-close')}
+                                        className="px-3 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs"
+                                    >
+                                        Open Day Close
+                                    </button>
+                                </div>
+                            )}
+
+                            {/* 2. Operations KPI Bar */}
+                            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                                <div className="bg-white p-3.5 rounded-2xl border border-slate-100 shadow-xs">
+                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Invoices</span>
+                                    <p className="text-lg font-black text-slate-800 mt-0.5">{reportData.dailyActivity?.counts?.totalInvoicesCount || 0}</p>
+                                    <span className="text-[10px] text-slate-400">Created today</span>
+                                </div>
+                                <div className={`p-3.5 rounded-2xl border shadow-xs ${
+                                    (reportData.dailyActivity?.counts?.cancelledCount || 0) > 0 ? 'bg-rose-50/60 border-rose-200' : 'bg-white border-slate-100'
+                                }`}>
+                                    <span className="text-[10px] font-bold text-rose-500 uppercase tracking-wider">Cancelled Invoices</span>
+                                    <p className="text-lg font-black text-rose-700 mt-0.5">{reportData.dailyActivity?.counts?.cancelledCount || 0}</p>
+                                    <span className="text-[10px] text-rose-400">Voided / Cancelled</span>
+                                </div>
+                                <div className="bg-white p-3.5 rounded-2xl border border-slate-100 shadow-xs">
+                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Sales Returns</span>
+                                    <p className="text-lg font-black text-amber-700 mt-0.5">{reportData.dailyActivity?.counts?.returnsCount || 0}</p>
+                                    <span className="text-[10px] text-slate-400">Credit notes / returns</span>
+                                </div>
+                                <div className="bg-white p-3.5 rounded-2xl border border-slate-100 shadow-xs">
+                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Daily Expenses</span>
+                                    <p className="text-lg font-black text-slate-800 mt-0.5">{reportData.dailyActivity?.counts?.expensesCount || 0}</p>
+                                    <span className="text-[10px] text-slate-400">Petty cash & bills</span>
+                                </div>
+                                <div className="bg-white p-3.5 rounded-2xl border border-slate-100 shadow-xs">
+                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Sales</span>
+                                    <p className="text-lg font-black text-emerald-700 mt-0.5">
+                                        {formatCurrency(reportData.dashboard?.kpis?.totalSales || 0, activeCurrencyCode)}
+                                    </p>
+                                    <span className="text-[10px] text-slate-400">Gross revenue</span>
+                                </div>
+                                <div className="bg-white p-3.5 rounded-2xl border border-slate-100 shadow-xs">
+                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">GST Collection</span>
+                                    <p className="text-lg font-black text-indigo-700 mt-0.5">
+                                        {formatCurrency(reportData.dailyActivity?.gstSummary?.totalTax || 0, activeCurrencyCode)}
+                                    </p>
+                                    <span className="text-[10px] text-slate-400">CGST + SGST + IGST</span>
+                                </div>
+                            </div>
+
+                            {/* 3. Sub-domain Tabs */}
+                            <div className="flex flex-wrap items-center gap-1.5 p-1.5 bg-slate-100/90 rounded-2xl border border-slate-200/80">
+                                {[
+                                    { id: 'all', label: 'All Operations' },
+                                    { id: 'invoices', label: `Invoices (${reportData.dailyActivity?.invoices?.length || 0})` },
+                                    { id: 'cancelled', label: `Cancelled (${reportData.dailyActivity?.cancelledInvoices?.length || 0})`, alert: (reportData.dailyActivity?.cancelledInvoices?.length || 0) > 0 },
+                                    { id: 'returns', label: `Returns (${reportData.dailyActivity?.returns?.length || 0})` },
+                                    { id: 'payments', label: `Payments (${reportData.dailyActivity?.payments?.length || 0})` },
+                                    { id: 'expenses', label: `Expenses (${reportData.dailyActivity?.expenses?.length || 0})` },
+                                    { id: 'stock', label: `Stock Movements (${reportData.dailyActivity?.stockMovements?.length || 0})` },
+                                    { id: 'gst', label: 'GST Tax Summary' }
+                                ].map(tab => (
+                                    <button
+                                        key={tab.id}
+                                        onClick={() => setDailySection(tab.id)}
+                                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                                            dailySection === tab.id
+                                                ? 'bg-white text-slate-900 shadow-xs'
+                                                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
+                                        } ${tab.alert && dailySection !== tab.id ? 'text-rose-600 font-extrabold' : ''}`}
+                                    >
+                                        {tab.alert && <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>}
+                                        {tab.label}
+                                    </button>
+                                ))}
+                            </div>
+
+                            {/* Sub-domain Content Sections */}
+
+                            {/* DOMAIN A: INVOICES REGISTER */}
+                            {(dailySection === 'all' || dailySection === 'invoices') && (
+                                <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+                                    <div className="px-5 py-3.5 bg-slate-50/75 border-b border-slate-200 flex justify-between items-center">
+                                        <div className="flex items-center gap-2">
+                                            <FiFileText className="text-emerald-600" size={16} />
+                                            <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider">
+                                                Invoices Register ({reportData.dailyActivity?.invoices?.length || 0})
+                                            </h4>
+                                        </div>
+                                    </div>
+                                    <div className="overflow-x-auto">
+                                        <table className="w-full text-xs text-left">
+                                            <thead>
+                                                <tr className="bg-slate-50/60 text-slate-500 uppercase text-[10px] font-bold border-b border-slate-200">
+                                                    <th className="p-3">Invoice #</th>
+                                                    <th className="p-3">Time</th>
+                                                    <th className="p-3">Customer</th>
+                                                    <th className="p-3">Payment Method</th>
+                                                    <th className="p-3 text-right">Amount</th>
+                                                    <th className="p-3 text-center">Status</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="divide-y divide-slate-100">
+                                                {!reportData.dailyActivity?.invoices || reportData.dailyActivity.invoices.length === 0 ? (
+                                                    <tr>
+                                                        <td colSpan="6" className="p-6 text-center text-slate-400 italic">No invoices created for this business date</td>
+                                                    </tr>
+                                                ) : (
+                                                    reportData.dailyActivity.invoices.map(inv => (
+                                                        <tr key={inv.id} className="hover:bg-slate-50/60 transition-colors">
+                                                            <td className="p-3 font-bold text-slate-900">#{inv.invoiceNumber}</td>
+                                                            <td className="p-3 text-slate-500 font-medium">
+                                                                {new Date(inv.saleDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                            </td>
+                                                            <td className="p-3 font-semibold text-slate-700">{inv.customerName || 'Walk-in'}</td>
+                                                            <td className="p-3">
+                                                                <span className="px-2 py-0.5 rounded bg-slate-100 font-semibold text-[10px] text-slate-700">
+                                                                    {inv.paymentMethod}
+                                                                </span>
+                                                            </td>
+                                                            <td className="p-3 text-right font-black text-slate-900 tabular-nums">
+                                                                {formatCurrency(inv.totalAmount, activeCurrencyCode)}
+                                                            </td>
+                                                            <td className="p-3 text-center">
+                                                                <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
+                                                                    inv.status === 'cancelled'
+                                                                        ? 'bg-rose-100 text-rose-700 border border-rose-200'
+                                                                        : (inv.isReturn ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700')
+                                                                }`}>
+                                                                    {inv.status === 'cancelled' ? 'Cancelled' : (inv.isReturn ? 'Return' : 'Active')}
+                                                                </span>
+                                                            </td>
+                                                        </tr>
+                                                    ))
+                                                )}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* DOMAIN B: CANCELLED INVOICES AUDIT */}
+                            {(dailySection === 'all' || dailySection === 'cancelled') && (
+                                <div className="bg-white rounded-2xl border border-rose-200 shadow-sm overflow-hidden">
+                                    <div className="px-5 py-3.5 bg-rose-50/80 border-b border-rose-200 flex justify-between items-center">
+                                        <div className="flex items-center gap-2">
+                                            <FiAlertTriangle className="text-rose-600" size={16} />
+                                            <h4 className="text-xs font-bold text-rose-900 uppercase tracking-wider">
+                                                Cancelled Invoices Audit ({reportData.dailyActivity?.cancelledInvoices?.length || 0})
+                                            </h4>
+                                        </div>
+                                        <span className="text-[10px] font-bold text-rose-600 bg-white px-2 py-0.5 rounded-full border border-rose-200">
+                                            Audit Preserved
+                                        </span>
+                                    </div>
+                                    <div className="overflow-x-auto">
+                                        <table className="w-full text-xs text-left">
+                                            <thead>
+                                                <tr className="bg-rose-50/40 text-slate-500 uppercase text-[10px] font-bold border-b border-rose-100">
+                                                    <th className="p-3">Invoice #</th>
+                                                    <th className="p-3">Original Date/Time</th>
+                                                    <th className="p-3 text-right">Original Amount</th>
+                                                    <th className="p-3">Cancelled By</th>
+                                                    <th className="p-3">Cancelled Timestamp</th>
+                                                    <th className="p-3">Reason for Cancellation</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="divide-y divide-rose-50">
+                                                {!reportData.dailyActivity?.cancelledInvoices || reportData.dailyActivity.cancelledInvoices.length === 0 ? (
+                                                    <tr>
+                                                        <td colSpan="6" className="p-6 text-center text-slate-400 italic">No cancelled invoices for this business date</td>
+                                                    </tr>
+                                                ) : (
+                                                    reportData.dailyActivity.cancelledInvoices.map(inv => (
+                                                        <tr key={inv.id} className="hover:bg-rose-50/30 transition-colors">
+                                                            <td className="p-3 font-bold text-rose-700">#{inv.invoiceNumber}</td>
+                                                            <td className="p-3 text-slate-500">
+                                                                {new Date(inv.saleDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                            </td>
+                                                            <td className="p-3 text-right font-black text-slate-800 tabular-nums">
+                                                                {formatCurrency(inv.originalAmount, activeCurrencyCode)}
+                                                            </td>
+                                                            <td className="p-3 font-bold text-slate-700">{inv.cancelledBy || 'Admin'}</td>
+                                                            <td className="p-3 text-slate-500">
+                                                                {inv.cancelledAt ? new Date(inv.cancelledAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '—'}
+                                                            </td>
+                                                            <td className="p-3 text-rose-800 font-semibold bg-rose-50/50 rounded-lg">
+                                                                {inv.cancelReason || 'No reason specified'}
+                                                            </td>
+                                                        </tr>
+                                                    ))
+                                                )}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* DOMAIN C: SALES RETURNS & REFUNDS */}
+                            {(dailySection === 'all' || dailySection === 'returns') && (
+                                <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+                                    <div className="px-5 py-3.5 bg-slate-50/75 border-b border-slate-200 flex justify-between items-center">
+                                        <div className="flex items-center gap-2">
+                                            <FiRefreshCw className="text-amber-600" size={16} />
+                                            <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider">
+                                                Sales Returns & Refunds ({reportData.dailyActivity?.returns?.length || 0})
+                                            </h4>
+                                        </div>
+                                    </div>
+                                    <div className="overflow-x-auto">
+                                        <table className="w-full text-xs text-left">
+                                            <thead>
+                                                <tr className="bg-slate-50/60 text-slate-500 uppercase text-[10px] font-bold border-b border-slate-200">
+                                                    <th className="p-3">Return #</th>
+                                                    <th className="p-3">Ref Invoice #</th>
+                                                    <th className="p-3 text-center">Items Returned</th>
+                                                    <th className="p-3 text-right">Refund Amount</th>
+                                                    <th className="p-3">Refund Method</th>
+                                                    <th className="p-3">Return Reason</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="divide-y divide-slate-100">
+                                                {!reportData.dailyActivity?.returns || reportData.dailyActivity.returns.length === 0 ? (
+                                                    <tr>
+                                                        <td colSpan="6" className="p-6 text-center text-slate-400 italic">No sales returns recorded for this business date</td>
+                                                    </tr>
+                                                ) : (
+                                                    reportData.dailyActivity.returns.map(ret => (
+                                                        <tr key={ret.id} className="hover:bg-slate-50/60 transition-colors">
+                                                            <td className="p-3 font-bold text-amber-700">#{ret.returnNumber}</td>
+                                                            <td className="p-3 font-semibold text-slate-700">#{ret.originalInvoiceNumber}</td>
+                                                            <td className="p-3 text-center font-bold text-slate-800">{ret.itemsCount}</td>
+                                                            <td className="p-3 text-right font-black text-rose-600 tabular-nums">
+                                                                {formatCurrency(ret.totalRefund, activeCurrencyCode)}
+                                                            </td>
+                                                            <td className="p-3">
+                                                                <span className="px-2 py-0.5 rounded bg-slate-100 font-semibold text-[10px] text-slate-700">
+                                                                    {ret.refundMethod}
+                                                                </span>
+                                                            </td>
+                                                            <td className="p-3 text-slate-600">{ret.reason || 'Customer Return'}</td>
+                                                        </tr>
+                                                    ))
+                                                )}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* DOMAIN D: PAYMENT COLLECTIONS */}
+                            {(dailySection === 'all' || dailySection === 'payments') && (
+                                <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+                                    <div className="px-5 py-3.5 bg-slate-50/75 border-b border-slate-200 flex justify-between items-center">
+                                        <div className="flex items-center gap-2">
+                                            <FiCreditCard className="text-blue-600" size={16} />
+                                            <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider">
+                                                Payment Collections Breakdown ({reportData.dailyActivity?.payments?.length || 0})
+                                            </h4>
+                                        </div>
+                                    </div>
+                                    <div className="overflow-x-auto">
+                                        <table className="w-full text-xs text-left">
+                                            <thead>
+                                                <tr className="bg-slate-50/60 text-slate-500 uppercase text-[10px] font-bold border-b border-slate-200">
+                                                    <th className="p-3">Time</th>
+                                                    <th className="p-3">Invoice #</th>
+                                                    <th className="p-3">Payment Method</th>
+                                                    <th className="p-3 text-right">Amount</th>
+                                                    <th className="p-3">Cashier / Staff</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="divide-y divide-slate-100">
+                                                {!reportData.dailyActivity?.payments || reportData.dailyActivity.payments.length === 0 ? (
+                                                    <tr>
+                                                        <td colSpan="5" className="p-6 text-center text-slate-400 italic">No payments recorded for this business date</td>
+                                                    </tr>
+                                                ) : (
+                                                    reportData.dailyActivity.payments.map(p => (
+                                                        <tr key={p.id} className="hover:bg-slate-50/60 transition-colors">
+                                                            <td className="p-3 text-slate-500">
+                                                                {new Date(p.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                            </td>
+                                                            <td className="p-3 font-bold text-slate-800">#{p.invoiceNumber}</td>
+                                                            <td className="p-3">
+                                                                <span className="px-2 py-0.5 rounded bg-blue-50 text-blue-700 font-bold text-[10px] border border-blue-100">
+                                                                    {p.method}
+                                                                </span>
+                                                            </td>
+                                                            <td className="p-3 text-right font-black text-slate-900 tabular-nums">
+                                                                {formatCurrency(p.amount, activeCurrencyCode)}
+                                                            </td>
+                                                            <td className="p-3 text-slate-600 font-semibold">{p.recordedBy || 'System'}</td>
+                                                        </tr>
+                                                    ))
+                                                )}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* DOMAIN E: EXPENSES & CASH MOVEMENTS */}
+                            {(dailySection === 'all' || dailySection === 'expenses') && (
+                                <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+                                    <div className="px-5 py-3.5 bg-slate-50/75 border-b border-slate-200 flex justify-between items-center">
+                                        <div className="flex items-center gap-2">
+                                            <FiDollarSign className="text-amber-600" size={16} />
+                                            <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider">
+                                                Daily Expenses & Cash Movements ({reportData.dailyActivity?.expenses?.length || 0})
+                                            </h4>
+                                        </div>
+                                    </div>
+                                    <div className="overflow-x-auto">
+                                        <table className="w-full text-xs text-left">
+                                            <thead>
+                                                <tr className="bg-slate-50/60 text-slate-500 uppercase text-[10px] font-bold border-b border-slate-200">
+                                                    <th className="p-3">Time</th>
+                                                    <th className="p-3">Expense Title</th>
+                                                    <th className="p-3">Category</th>
+                                                    <th className="p-3">Tender Mode</th>
+                                                    <th className="p-3">Notes</th>
+                                                    <th className="p-3 text-right">Amount</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="divide-y divide-slate-100">
+                                                {!reportData.dailyActivity?.expenses || reportData.dailyActivity.expenses.length === 0 ? (
+                                                    <tr>
+                                                        <td colSpan="6" className="p-6 text-center text-slate-400 italic">No business expenses recorded for this business date</td>
+                                                    </tr>
+                                                ) : (
+                                                    reportData.dailyActivity.expenses.map(exp => (
+                                                        <tr key={exp.id} className="hover:bg-slate-50/60 transition-colors">
+                                                            <td className="p-3 text-slate-500">
+                                                                {new Date(exp.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                            </td>
+                                                            <td className="p-3 font-bold text-slate-800">{exp.title}</td>
+                                                            <td className="p-3 text-slate-600">{exp.category || 'General'}</td>
+                                                            <td className="p-3">
+                                                                <span className="px-2 py-0.5 rounded bg-slate-100 font-semibold text-[10px]">
+                                                                    {exp.paymentMethod || 'Cash'}
+                                                                </span>
+                                                            </td>
+                                                            <td className="p-3 text-slate-500">{exp.notes || '—'}</td>
+                                                            <td className="p-3 text-right font-black text-rose-600 tabular-nums">
+                                                                {formatCurrency(exp.amount, activeCurrencyCode)}
+                                                            </td>
+                                                        </tr>
+                                                    ))
+                                                )}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* DOMAIN F: STOCK MOVEMENTS */}
+                            {(dailySection === 'all' || dailySection === 'stock') && (
+                                <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+                                    <div className="px-5 py-3.5 bg-slate-50/75 border-b border-slate-200 flex justify-between items-center">
+                                        <div className="flex items-center gap-2">
+                                            <FiBox className="text-indigo-600" size={16} />
+                                            <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider">
+                                                Daily Stock Movements ({reportData.dailyActivity?.stockMovements?.length || 0} products)
+                                            </h4>
+                                        </div>
+                                    </div>
+                                    <div className="overflow-x-auto">
+                                        <table className="w-full text-xs text-left">
+                                            <thead>
+                                                <tr className="bg-slate-50/60 text-slate-500 uppercase text-[10px] font-bold border-b border-slate-200">
+                                                    <th className="p-3">SKU</th>
+                                                    <th className="p-3">Product Name</th>
+                                                    <th className="p-3 text-center">Units Sold</th>
+                                                    <th className="p-3 text-center">Units Returned</th>
+                                                    <th className="p-3 text-right">Net Inventory Impact</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="divide-y divide-slate-100">
+                                                {!reportData.dailyActivity?.stockMovements || reportData.dailyActivity.stockMovements.length === 0 ? (
+                                                    <tr>
+                                                        <td colSpan="5" className="p-6 text-center text-slate-400 italic">No inventory movements recorded for this business date</td>
+                                                    </tr>
+                                                ) : (
+                                                    reportData.dailyActivity.stockMovements.map(sm => (
+                                                        <tr key={sm.productId} className="hover:bg-slate-50/60 transition-colors">
+                                                            <td className="p-3 font-mono font-bold text-slate-600">{sm.sku || '—'}</td>
+                                                            <td className="p-3 font-semibold text-slate-800">{sm.productName}</td>
+                                                            <td className="p-3 text-center font-bold text-slate-700">{sm.unitsSold}</td>
+                                                            <td className="p-3 text-center font-bold text-amber-600">{sm.unitsReturned}</td>
+                                                            <td className="p-3 text-right font-black tabular-nums">
+                                                                <span className={sm.netChange < 0 ? 'text-rose-600' : 'text-slate-800'}>
+                                                                    {sm.netChange}
+                                                                </span>
+                                                            </td>
+                                                        </tr>
+                                                    ))
+                                                )}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* DOMAIN G: GST SUMMARY */}
+                            {(dailySection === 'all' || dailySection === 'gst') && (
+                                <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 space-y-4">
+                                    <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
+                                        <FiPercent className="text-primary" size={18} style={{ color: theme.primaryColor }} />
+                                        <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider">
+                                            GST & Tax Summary for {formatDisplayDate(singleDate)}
+                                        </h4>
+                                    </div>
+                                    <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                                        <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-100">
+                                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Taxable Turnover</span>
+                                            <span className="text-base font-extrabold text-slate-900 mt-1 block">
+                                                {formatCurrency(reportData.dailyActivity?.gstSummary?.taxableAmount || 0, activeCurrencyCode)}
+                                            </span>
+                                        </div>
+                                        <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-100">
+                                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">CGST</span>
+                                            <span className="text-base font-extrabold text-slate-900 mt-1 block">
+                                                {formatCurrency(reportData.dailyActivity?.gstSummary?.cgst || 0, activeCurrencyCode)}
+                                            </span>
+                                        </div>
+                                        <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-100">
+                                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">SGST</span>
+                                            <span className="text-base font-extrabold text-slate-900 mt-1 block">
+                                                {formatCurrency(reportData.dailyActivity?.gstSummary?.sgst || 0, activeCurrencyCode)}
+                                            </span>
+                                        </div>
+                                        <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-100">
+                                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">IGST</span>
+                                            <span className="text-base font-extrabold text-slate-900 mt-1 block">
+                                                {formatCurrency(reportData.dailyActivity?.gstSummary?.igst || 0, activeCurrencyCode)}
+                                            </span>
+                                        </div>
+                                        <div className="p-3.5 bg-emerald-50 rounded-xl border border-emerald-100">
+                                            <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider block">Total Tax Collected</span>
+                                            <span className="text-base font-black text-emerald-800 mt-1 block">
+                                                {formatCurrency(reportData.dailyActivity?.gstSummary?.totalTax || 0, activeCurrencyCode)}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    {/* Rate-wise tax breakdown */}
+                                    <div className="mt-4 pt-3 border-t border-slate-100">
+                                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-2">
+                                            Tax Collections by GST Rate Slab
+                                        </span>
+                                        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+                                            {Object.entries(reportData.dailyActivity?.gstSummary?.rates || {}).map(([rate, amt]) => (
+                                                <div key={rate} className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 flex justify-between items-center text-xs">
+                                                    <span className="font-bold text-slate-600">{rate}</span>
+                                                    <span className="font-extrabold text-slate-900 tabular-nums">
+                                                        {formatCurrency(amt, activeCurrencyCode)}
+                                                    </span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </>
+                    )}
                 </div>
             )}
 
