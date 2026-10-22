@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import api from '@/lib/api';
 import { toast } from 'react-toastify';
 import { FiBarChart2, FiDownload, FiCheckCircle, FiAlertCircle, FiSearch, FiFileText } from 'react-icons/fi';
+import { formatCurrency } from '@/lib/currency';
 
 export default function TrialBalance() {
     const router = useRouter();
@@ -14,16 +15,32 @@ export default function TrialBalance() {
         endDate: ''
     });
 
+    // Branch Filtering
+    const [branches, setBranches] = useState([]);
+    const [selectedBranch, setSelectedBranch] = useState('');
+
     useEffect(() => {
+        fetchBranches();
         fetchTrialBalance();
     }, []);
 
-    const fetchTrialBalance = async () => {
+    const fetchBranches = async () => {
+        try {
+            const res = await api.get('/branches');
+            setBranches(res.data || []);
+        } catch (err) {
+            console.error('Failed to load branches', err);
+        }
+    };
+
+    const fetchTrialBalance = async (overrideBranchId) => {
         setLoading(true);
+        const targetBranchId = overrideBranchId !== undefined ? overrideBranchId : selectedBranch;
         try {
             const params = new URLSearchParams();
             if (dateRange.startDate) params.append('startDate', dateRange.startDate);
             if (dateRange.endDate) params.append('endDate', dateRange.endDate);
+            if (targetBranchId) params.append('branchId', targetBranchId);
             
             const res = await api.get(`/accounting/reports/trial-balance?${params}`);
             setData(res.data);
@@ -39,18 +56,27 @@ export default function TrialBalance() {
         fetchTrialBalance();
     };
 
-    const filteredData = data?.trialBalance.filter(item =>
+    const filteredData = data?.trialBalance?.filter(item =>
         item.ledgerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         item.groupName.toLowerCase().includes(searchTerm.toLowerCase())
     ) || [];
 
+    const activeCurrency = data?.currency || { code: 'INR', symbol: '₹' };
+    const branchLabel = data?.branch ? data.branch.name : 'All Branches (Consolidated)';
+
     const handleExport = () => {
         if (!data) return;
+        const currLabel = activeCurrency?.code || 'INR';
         const csvContent = [
-            ['Ledger Name', 'Group', 'Group Type', 'Opening Balance', 'Debit', 'Credit', 'Closing Balance'],
+            ['Report', 'Trial Balance'],
+            ['Branch', `"${branchLabel.replace(/"/g, '""')}"`],
+            ['Currency', currLabel],
+            ['Period', `${dateRange.startDate || 'Beginning'} to ${dateRange.endDate || 'Present'}`],
+            [],
+            ['Ledger Name', 'Group', 'Group Type', `Opening Balance [${currLabel}]`, `Debit [${currLabel}]`, `Credit [${currLabel}]`, `Closing Balance [${currLabel}]`],
             ...filteredData.map(item => [
-                item.ledgerName,
-                item.groupName,
+                `"${(item.ledgerName || '').replace(/"/g, '""')}"`,
+                `"${(item.groupName || '').replace(/"/g, '""')}"`,
                 item.groupType,
                 (item.openingBalance || 0).toFixed(2),
                 (item.debit || 0).toFixed(2),
@@ -64,7 +90,8 @@ export default function TrialBalance() {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `trial-balance-${new Date().toISOString().split('T')[0]}.csv`;
+        const branchFilename = data?.branch ? `_${data.branch.name.replace(/[^a-zA-Z0-9]/g, '_')}` : '_AllBranches';
+        a.download = `trial-balance${branchFilename}-${new Date().toISOString().split('T')[0]}.csv`;
         a.click();
     };
 
@@ -72,6 +99,8 @@ export default function TrialBalance() {
         if (!data) return;
         const exportData = {
             reportType: 'Trial Balance',
+            branch: branchLabel,
+            currency: activeCurrency,
             generatedAt: new Date().toISOString(),
             dateRange: dateRange,
             summary: {
@@ -81,6 +110,7 @@ export default function TrialBalance() {
                 totalClosing: data.totalClosing,
                 isBalanced: data.balanced
             },
+            multiCurrencyBreakdown: data.currencyBreakdown || null,
             ledgers: filteredData.map(item => ({
                 ledgerName: item.ledgerName,
                 groupName: item.groupName,
@@ -96,7 +126,8 @@ export default function TrialBalance() {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `trial-balance-${new Date().toISOString().split('T')[0]}.json`;
+        const branchFilename = data?.branch ? `_${data.branch.name.replace(/[^a-zA-Z0-9]/g, '_')}` : '_AllBranches';
+        a.download = `trial-balance${branchFilename}-${new Date().toISOString().split('T')[0]}.json`;
         a.click();
     };
 
@@ -111,11 +142,33 @@ export default function TrialBalance() {
                         </div>
                         <div>
                             <h1 className="text-lg font-normal text-white leading-tight">Trial Balance</h1>
-                            <p className="text-white/80 text-[10px] uppercase font-normal tracking-widest mt-0.5">Corporate Accounting Division</p>
+                            <p className="text-white/80 text-[10px] uppercase font-normal tracking-widest mt-0.5">
+                                Corporate Accounting Division • {branchLabel} ({activeCurrency.code})
+                            </p>
                         </div>
                     </div>
                     <div className="hidden xl:block h-8 border-l border-white/10 mx-2" />
                     <div className="flex flex-col md:flex-row items-start md:items-center gap-4 w-full xl:w-auto mt-2 xl:mt-0">
+                        {/* Branch Selector */}
+                        <div className="flex items-center gap-2 bg-white/5 px-2.5 py-1 rounded border border-white/10">
+                            <span className="text-[9px] text-white/60 uppercase tracking-tighter">Branch:</span>
+                            <select
+                                className="bg-transparent border-none p-0 text-xs text-white focus:ring-0 cursor-pointer font-normal [color-scheme:dark]"
+                                value={selectedBranch}
+                                onChange={(e) => {
+                                    const val = e.target.value;
+                                    setSelectedBranch(val);
+                                    fetchTrialBalance(val);
+                                }}
+                            >
+                                <option value="" className="text-slate-800">All Branches (Consolidated)</option>
+                                {branches.map(b => (
+                                    <option key={b.id} value={b.id} className="text-slate-800">
+                                        {b.name} ({b.currencyCode || 'INR'})
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
                         <div className="flex flex-wrap items-center gap-2">
                             <span className="text-[9px] text-white/60 uppercase tracking-tighter">Period</span>
                             <div className="flex flex-wrap items-center gap-2 bg-white/5 px-2 py-1 rounded border border-white/10">
@@ -146,7 +199,7 @@ export default function TrialBalance() {
                         </div>
                         <button
                             onClick={handleFilter}
-                            className="bg-white/20 hover:bg-white/30 text-white px-4 py-1.5 rounded-lg transition-all text-xs font-normal shadow-sm active:scale-95"
+                            className="bg-white/20 hover:bg-white/30 text-white px-4 py-1.5 rounded-lg transition-all text-xs font-normal shadow-sm active:scale-95 cursor-pointer"
                         >
                             Apply
                         </button>
@@ -155,13 +208,13 @@ export default function TrialBalance() {
                 <div className="flex gap-2">
                     <button
                         onClick={handleExport}
-                        className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-3 py-2 rounded-lg transition-all text-[11px] font-normal border border-white/10 backdrop-blur-sm shadow-sm"
+                        className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-3 py-2 rounded-lg transition-all text-[11px] font-normal border border-white/10 backdrop-blur-sm shadow-sm cursor-pointer"
                     >
                         <FiDownload size={14} className="text-white" /> Export CSV
                     </button>
                     <button
                         onClick={handleExportJSON}
-                        className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-3 py-2 rounded-lg transition-all text-[11px] font-normal border border-white/10 backdrop-blur-sm shadow-sm"
+                        className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-3 py-2 rounded-lg transition-all text-[11px] font-normal border border-white/10 backdrop-blur-sm shadow-sm cursor-pointer"
                     >
                         <FiFileText size={14} className="text-blue-400" /> Export JSON
                     </button>
@@ -181,21 +234,56 @@ export default function TrialBalance() {
                         <div className="grid grid-cols-2 sm:flex sm:flex-row sm:gap-6 gap-4 items-start sm:items-center tabular-nums w-full lg:w-auto pt-3 lg:pt-0 border-t lg:border-t-0 border-slate-200/60 lg:border-none">
                             <div className="flex flex-col items-start sm:items-end">
                                 <span className="text-[9px] opacity-60 uppercase">Net Opening</span>
-                                <span className="text-sm font-normal">₹{(data.totalOpening || 0).toLocaleString('en-IN', {minimumFractionDigits: 2})}</span>
+                                <span className="text-sm font-normal">{formatCurrency(data.totalOpening || 0, activeCurrency)}</span>
                             </div>
                             <div className="flex flex-col items-start sm:items-end">
                                 <span className="text-[9px] opacity-60 uppercase">Total Debits</span>
-                                <span className="text-sm font-normal">₹{(data.totalDebit || 0).toLocaleString('en-IN', {minimumFractionDigits: 2})}</span>
+                                <span className="text-sm font-normal">{formatCurrency(data.totalDebit || 0, activeCurrency)}</span>
                             </div>
                             <div className="flex flex-col items-start sm:items-end">
                                 <span className="text-[9px] opacity-60 uppercase">Total Credits</span>
-                                <span className="text-sm font-normal">₹{(data.totalCredit || 0).toLocaleString('en-IN', {minimumFractionDigits: 2})}</span>
+                                <span className="text-sm font-normal">{formatCurrency(data.totalCredit || 0, activeCurrency)}</span>
                             </div>
                             <div className={`flex flex-col items-start sm:items-end px-0 sm:px-4 border-none sm:border-l ${data.balanced ? 'border-primary-light' : 'border-red-200'}`}>
                                 <span className="text-[9px] opacity-60 uppercase">Net Closing</span>
-                                <span className="text-sm font-normal">₹{(data.totalClosing || 0).toLocaleString('en-IN', {minimumFractionDigits: 2})}</span>
+                                <span className="text-sm font-normal">{formatCurrency(data.totalClosing || 0, activeCurrency)}</span>
                             </div>
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Multi-Currency Consolidated Breakdown (When consolidated) */}
+            {data && data.isConsolidated && data.currencyBreakdown && data.currencyBreakdown.length > 0 && (
+                <div className="mb-6 p-4 bg-white border border-slate-200 rounded-xl shadow-sm">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-3">
+                        <div className="flex items-center gap-2">
+                            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+                            <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider">Multi-Currency Branch Breakdown</h3>
+                        </div>
+                        <span className="text-[11px] text-slate-500 font-medium">Distinct currency accounts are isolated to prevent cross-currency summation</span>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                        {data.currencyBreakdown.map((cb, idx) => (
+                            <div key={idx} className="p-3 bg-slate-50 rounded-lg border border-slate-200/80">
+                                <div className="flex items-center justify-between text-xs font-semibold text-slate-800 border-b border-slate-200/60 pb-1.5">
+                                    <span>{cb.currencyCode} ({cb.currencySymbol})</span>
+                                    <span className="text-[10px] text-slate-500 font-normal truncate max-w-[140px]" title={cb.branchNames.join(', ')}>
+                                        {cb.branchNames.join(', ')}
+                                    </span>
+                                </div>
+                                <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
+                                    <div>
+                                        <span className="text-[10px] text-slate-400 block uppercase">Debits</span>
+                                        <span className="font-mono font-medium text-slate-700">{formatCurrency(cb.totalDebit, cb.currencyCode)}</span>
+                                    </div>
+                                    <div>
+                                        <span className="text-[10px] text-slate-400 block uppercase">Credits</span>
+                                        <span className="font-mono font-medium text-slate-700">{formatCurrency(cb.totalCredit, cb.currencyCode)}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 </div>
             )}
@@ -211,10 +299,10 @@ export default function TrialBalance() {
                                     <th className="px-4 py-2 text-left font-normal border-r border-slate-200 w-12">#</th>
                                     <th className="px-4 py-2 text-left font-normal border-r border-slate-200">Account Particulars</th>
                                     <th className="px-4 py-2 text-left font-normal border-r border-slate-200 w-32">Classification</th>
-                                    <th className="px-4 py-2 text-right font-normal border-r border-slate-200 w-32">Opening (₹)</th>
-                                    <th className="px-4 py-2 text-right font-normal border-r border-slate-200 w-32">Debit (₹)</th>
-                                    <th className="px-4 py-2 text-right font-normal border-r border-slate-200 w-32">Credit (₹)</th>
-                                    <th className="px-4 py-2 text-right font-normal w-32">Closing (₹)</th>
+                                    <th className="px-4 py-2 text-right font-normal border-r border-slate-200 w-32">Opening ({activeCurrency.symbol})</th>
+                                    <th className="px-4 py-2 text-right font-normal border-r border-slate-200 w-32">Debit ({activeCurrency.symbol})</th>
+                                    <th className="px-4 py-2 text-right font-normal border-r border-slate-200 w-32">Credit ({activeCurrency.symbol})</th>
+                                    <th className="px-4 py-2 text-right font-normal w-32">Closing ({activeCurrency.symbol})</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100 font-normal">
@@ -227,7 +315,7 @@ export default function TrialBalance() {
                                             <td className="px-4 py-1.5 border-r border-slate-100">
                                                 <div 
                                                     className="font-normal text-slate-800 hover:text-primary hover:underline cursor-pointer transition-colors"
-                                                    onClick={() => router.push(`/accounting/reports/ledger?ledgerId=${item.ledgerId}&startDate=${dateRange.startDate}&endDate=${dateRange.endDate}`)}
+                                                    onClick={() => router.push(`/accounting/reports/ledger?ledgerId=${item.ledgerId}&startDate=${dateRange.startDate}&endDate=${dateRange.endDate}${selectedBranch ? `&branchId=${selectedBranch}` : ''}`)}
                                                 >
                                                     {item.ledgerName}
                                                 </div>
@@ -246,16 +334,16 @@ export default function TrialBalance() {
                                                 </span>
                                             </td>
                                             <td className={`px-4 py-1.5 text-right tabular-nums border-r border-slate-100 font-normal ${(item.openingBalance || 0) >= 0 ? 'text-slate-600' : 'text-rose-600'}`}>
-                                                {(item.openingBalance || 0).toLocaleString('en-IN', {minimumFractionDigits: 2})}
+                                                {formatCurrency(item.openingBalance || 0, activeCurrency)}
                                             </td>
                                             <td className="px-4 py-1.5 text-right tabular-nums border-r border-slate-100 font-normal text-slate-600">
-                                                {item.debit > 0 ? (item.debit || 0).toLocaleString('en-IN', {minimumFractionDigits: 2}) : '-'}
+                                                {item.debit > 0 ? formatCurrency(item.debit, activeCurrency) : '-'}
                                             </td>
                                             <td className="px-4 py-1.5 text-right tabular-nums border-r border-slate-100 font-normal text-slate-600">
-                                                {item.credit > 0 ? (item.credit || 0).toLocaleString('en-IN', {minimumFractionDigits: 2}) : '-'}
+                                                {item.credit > 0 ? formatCurrency(item.credit, activeCurrency) : '-'}
                                             </td>
                                             <td className={`px-4 py-1.5 text-right tabular-nums font-normal ${(item.closingBalance || 0) >= 0 ? 'text-primary-dark' : 'text-rose-600'}`}>
-                                                {(item.closingBalance || 0).toLocaleString('en-IN', {minimumFractionDigits: 2})}
+                                                {formatCurrency(item.closingBalance || 0, activeCurrency)}
                                             </td>
                                         </tr>
                                     ))
@@ -277,16 +365,16 @@ export default function TrialBalance() {
                                 <tr className="bg-gradient-to-r from-primary-dark to-primary border-t border-slate-300">
                                     <td className="px-4 py-3 font-normal text-white border-r border-white/10 uppercase text-xs" colSpan="3">Grand Trial Totals</td>
                                     <td className="px-4 py-3 text-right tabular-nums text-white font-normal text-sm border-r border-white/10">
-                                        {(data.totalOpening || 0).toLocaleString('en-IN', {minimumFractionDigits: 2})}
+                                        {formatCurrency(data.totalOpening || 0, activeCurrency)}
                                     </td>
                                     <td className="px-4 py-3 text-right tabular-nums text-white font-normal text-sm border-r border-white/10">
-                                        {(data.totalDebit || 0).toLocaleString('en-IN', {minimumFractionDigits: 2})}
+                                        {formatCurrency(data.totalDebit || 0, activeCurrency)}
                                     </td>
                                     <td className="px-4 py-3 text-right tabular-nums text-white font-normal text-sm border-r border-white/10">
-                                        {(data.totalCredit || 0).toLocaleString('en-IN', {minimumFractionDigits: 2})}
+                                        {formatCurrency(data.totalCredit || 0, activeCurrency)}
                                     </td>
                                     <td className="px-4 py-3 text-right tabular-nums text-white font-normal text-sm">
-                                        {(data.totalClosing || 0).toLocaleString('en-IN', {minimumFractionDigits: 2})}
+                                        {formatCurrency(data.totalClosing || 0, activeCurrency)}
                                     </td>
                                 </tr>
                             </tfoot>

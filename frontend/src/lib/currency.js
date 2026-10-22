@@ -48,20 +48,52 @@ export const CURRENCY_LOCALES = {
   BHD: 'en-US'
 };
 
-export const formatCurrency = (amount, currencyCode = 'INR', locale) => {
-  const num = Number(amount) || 0;
-  const code = (currencyCode || 'INR').toUpperCase();
-  const defaultLocale = locale || CURRENCY_LOCALES[code] || 'en-IN';
+export function extractCurrencyMeta(branchOrCurrency) {
+  if (!branchOrCurrency) {
+    return { code: 'INR', symbol: '₹', locale: 'en-IN' };
+  }
+  if (typeof branchOrCurrency === 'string') {
+    const code = branchOrCurrency.trim().toUpperCase() || 'INR';
+    return {
+      code,
+      symbol: getCurrencySymbol(code),
+      locale: CURRENCY_LOCALES[code] || (code === 'INR' ? 'en-IN' : 'en-US')
+    };
+  }
+  if (typeof branchOrCurrency === 'object') {
+    const code = (branchOrCurrency.currencyCode || branchOrCurrency.code || 'INR').trim().toUpperCase();
+    const symbol = branchOrCurrency.currencySymbol || branchOrCurrency.symbol || getCurrencySymbol(code);
+    const locale = branchOrCurrency.locale || CURRENCY_LOCALES[code] || (code === 'INR' ? 'en-IN' : 'en-US');
+    return { code, symbol, locale };
+  }
+  return { code: 'INR', symbol: '₹', locale: 'en-IN' };
+}
+
+export const formatCurrency = (amount, branchOrCurrency = 'INR', locale) => {
+  const num = typeof amount === 'number' ? amount : (parseFloat(amount) || 0);
+  const safeNum = isNaN(num) ? 0 : num;
+  const meta = extractCurrencyMeta(branchOrCurrency);
+  const code = meta.code;
+  const targetLocale = locale || meta.locale || CURRENCY_LOCALES[code] || 'en-IN';
+
   try {
-    return new Intl.NumberFormat(defaultLocale, {
+    return new Intl.NumberFormat(targetLocale, {
       style: 'currency',
       currency: code,
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
-    }).format(num);
+    }).format(safeNum);
   } catch (e) {
-    const sym = getCurrencySymbol(code);
-    return `${sym}${num.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    const isNegative = safeNum < 0;
+    const absVal = Math.abs(safeNum).toLocaleString(targetLocale, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+    const sym = meta.symbol || getCurrencySymbol(code);
+    if (code === 'AED') {
+      return isNegative ? `-AED ${absVal}` : `AED ${absVal}`;
+    }
+    return isNegative ? `-${sym}${absVal}` : `${sym}${absVal}`;
   }
 };
 

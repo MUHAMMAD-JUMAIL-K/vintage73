@@ -6,6 +6,7 @@ import ConfirmationModal from '@/components/ConfirmationModal';
 import ProfessionalModal from '@/components/ProfessionalModal';
 import VoucherPrint from '@/components/VoucherPrint';
 import SearchableSelect from '@/components/SearchableSelect';
+import { formatCurrency } from '@/lib/currency';
 
 export default function JournalEntry() {
     const [ledgers, setLedgers] = useState([]);
@@ -131,7 +132,7 @@ export default function JournalEntry() {
         e.preventDefault();
 
         if (!isBalanced) {
-            toast.error(`Voucher is not balanced. Current Difference: ₹${difference.toFixed(2)}`);
+            toast.error(`Voucher is not balanced. Current Difference: ${formatCurrency(difference, 'INR')}`);
             return;
         }
 
@@ -285,7 +286,7 @@ export default function JournalEntry() {
                             <div className="flex items-center gap-4">
                                 <span className="text-[10px] font-medium text-white/70 uppercase tracking-widest">Transaction Status:</span>
                                 <span className="text-xs font-medium text-white uppercase tracking-wider">
-                                    {isBalanced ? 'READY TO POST (BALANCED)' : `UNBALANCED (DIFF: ₹${difference.toFixed(2)})`}
+                                    {isBalanced ? 'READY TO POST (BALANCED)' : `UNBALANCED (DIFF: ${formatCurrency(difference, 'INR')})`}
                                 </span>
                             </div>
                             {editId && (
@@ -364,7 +365,7 @@ export default function JournalEntry() {
                                                                 <div className="flex items-center gap-2 pl-2">
                                                                     <div className={`w-1.5 h-1.5 rounded-full ${selectedLedger.currentBalance >= 0 ? 'bg-primary' : 'bg-red-500'}`} />
                                                                     <span className="text-[10px] font-semibold text-slate-400">
-                                                                        Balance: ₹{Math.abs(selectedLedger.currentBalance).toFixed(2)} {selectedLedger.currentBalance >= 0 ? 'Dr' : 'Cr'}
+                                                                        Balance: {formatCurrency(Math.abs(selectedLedger.currentBalance), 'INR')} {selectedLedger.currentBalance >= 0 ? 'Dr' : 'Cr'}
                                                                     </span>
                                                                 </div>
                                                             )}
@@ -372,11 +373,11 @@ export default function JournalEntry() {
                                                     </td>
                                                     <td className="px-3 py-2 bg-red-50/10 group-hover:bg-red-50/30 transition-colors">
                                                         <div className="relative">
-                                                            <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] font-medium text-red-300">₹</span>
+                                                            <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] font-medium text-red-400">Dr</span>
                                                             <input
                                                                 type="number"
                                                                 step="0.01"
-                                                                className="w-full pl-5 pr-2 py-2 bg-transparent border border-transparent focus:border-red-500 focus:ring-0 rounded-lg text-sm font-medium text-red-600 text-right tabular-nums transition-all outline-none"
+                                                                className="w-full pl-7 pr-2 py-2 bg-transparent border border-transparent focus:border-red-500 focus:ring-0 rounded-lg text-sm font-medium text-red-600 text-right tabular-nums transition-all outline-none"
                                                                 value={entry.debitAmount}
                                                                 onChange={e => updateEntry(idx, 'debitAmount', e.target.value)}
                                                                 placeholder="0.00"
@@ -385,11 +386,11 @@ export default function JournalEntry() {
                                                     </td>
                                                     <td className="px-3 py-2 bg-primary-light/10 group-hover:bg-primary-light/30 transition-colors">
                                                         <div className="relative">
-                                                            <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] font-medium text-primary-light">₹</span>
+                                                            <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] font-medium text-primary">Cr</span>
                                                             <input
                                                                 type="number"
                                                                 step="0.01"
-                                                                className="w-full pl-5 pr-2 py-2 bg-transparent border border-transparent focus:border-primary focus:ring-0 rounded-lg text-sm font-medium text-primary text-right tabular-nums transition-all outline-none"
+                                                                className="w-full pl-7 pr-2 py-2 bg-transparent border border-transparent focus:border-primary focus:ring-0 rounded-lg text-sm font-medium text-primary text-right tabular-nums transition-all outline-none"
                                                                 value={entry.creditAmount}
                                                                 onChange={e => updateEntry(idx, 'creditAmount', e.target.value)}
                                                                 placeholder="0.00"
@@ -433,20 +434,20 @@ export default function JournalEntry() {
                                             <td className="px-5 py-3 text-right bg-primary-dark/80">
                                                 <div className="flex flex-col text-right">
                                                     <span className="text-[9px] font-medium text-white/50 uppercase tracking-widest">Total DR</span>
-                                                    <span className="text-sm font-medium tabular-nums">₹{totalDebit.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+                                                    <span className="text-sm font-medium tabular-nums">{formatCurrency(totalDebit, 'INR')}</span>
                                                 </div>
                                             </td>
                                             <td className="px-5 py-3 text-right bg-primary-dark/80">
                                                 <div className="flex flex-col text-right">
                                                     <span className="text-[9px] font-medium text-white/50 uppercase tracking-widest">Total CR</span>
-                                                    <span className="text-sm font-medium tabular-nums">₹{totalCredit.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+                                                    <span className="text-sm font-medium tabular-nums">{formatCurrency(totalCredit, 'INR')}</span>
                                                 </div>
                                             </td>
                                             <td colSpan="2" className="px-5 py-3 bg-primary-darker/20">
                                                 <div className="flex flex-col items-center">
                                                     <span className="text-[9px] font-medium text-white/50 uppercase tracking-widest">Difference</span>
                                                     <span className={`text-sm font-medium tabular-nums ${difference === 0 ? 'text-primary' : 'text-orange-400'}`}>
-                                                        ₹{difference.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                                                        {formatCurrency(difference, 'INR')}
                                                     </span>
                                                 </div>
                                             </td>
@@ -611,7 +612,7 @@ export default function JournalEntry() {
                                                 </td>
                                                 <td className="px-6 py-4 text-right">
                                                     <span className="text-sm font-medium text-slate-900 tabular-nums">
-                                                        ₹{parseFloat(v.totalAmount).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                                                        {formatCurrency(v.totalAmount, v.branch || 'INR')}
                                                     </span>
                                                 </td>
                                                 <td className="px-6 py-4">
@@ -668,7 +669,7 @@ export default function JournalEntry() {
                 details={[
                     { label: 'Voucher Date', value: formData.date },
                     { label: 'Account Items', value: entries.filter(e => e.ledgerId).length },
-                    { label: 'Total Value', value: `₹${totalDebit.toLocaleString('en-IN', { minimumFractionDigits: 2 })}` },
+                    { label: 'Total Value', value: formatCurrency(totalDebit, 'INR') },
                     { label: 'Status', value: 'BALANCED' }
                 ]}
             />

@@ -148,6 +148,12 @@ const getDayCloseStatus = asyncHandler(async (req, res) => {
     pendingDate: activeDateInfo.isPendingPrevious ? activeDateInfo.dateStr : null,
     pendingDateDisplay: activeDateInfo.isPendingPrevious ? formatDisplayDate(activeDateInfo.dateStr) : null,
     status: currentStatus,
+    branch: branch ? {
+      id: branch.id,
+      name: branch.name,
+      currencyCode: branch.currencyCode,
+      currencySymbol: branch.currencySymbol
+    } : null,
     dayCloseId: dayCloseRecord?.id || null,
     terminalId: dayCloseRecord?.terminalId || null,
     terminalName: dayCloseRecord?.terminal?.name || null,
@@ -958,7 +964,9 @@ const confirmDayClose = asyncHandler(async (req, res) => {
     .reduce((sum, r) => sum + Number(r.totalAmount || 0), 0);
 
   const openingCash = Number(existingRecord?.actualOpeningCash || existingRecord?.openingCash || 0);
-  const closingExpectedCash = Number((openingCash + cashSales - totalExpenseAmount - cashRefunds).toFixed(2));
+  const additionalCashAdded = Number(existingRecord?.additionalCashAdded || 0);
+  const cashRemovedBeforeOpening = Number(existingRecord?.cashRemovedBeforeOpening || 0);
+  const closingExpectedCash = Number((openingCash + cashSales + additionalCashAdded - cashRemovedBeforeOpening - totalExpenseAmount - cashRefunds).toFixed(2));
   const expectedClosingCash = closingExpectedCash;
 
   const physicalCash = inputPhysicalCash !== undefined ? parseFloat(inputPhysicalCash) || 0 : closingExpectedCash;

@@ -20,7 +20,9 @@ exports.getUnreconciledTransactions = asyncHandler(async (req, res) => {
             }
         },
         include: {
-            voucher: true,
+            voucher: {
+                include: { branch: true }
+            },
             debitLedger: { select: { name: true } },
             creditLedger: { select: { name: true } }
         },

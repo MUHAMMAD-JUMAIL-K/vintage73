@@ -5,6 +5,7 @@ import { toast } from 'react-toastify';
 import { FiDownload, FiPrinter, FiFilter, FiSearch, FiBook } from 'react-icons/fi';
 import SearchableSelect from '@/components/SearchableSelect';
 import { useTheme } from '@/context/ThemeContext';
+import { formatCurrency } from '@/lib/currency';
 
 export default function LedgerReport() {
     const router = useRouter();
@@ -19,6 +20,12 @@ export default function LedgerReport() {
     const [ledgers, setLedgers] = useState([]);
     const [selectedLedgerId, setSelectedLedgerId] = useState('');
 
+    // Branch Filtering & Currency
+    const [branches, setBranches] = useState([]);
+    const [selectedBranch, setSelectedBranch] = useState('');
+    const [activeBranch, setActiveBranch] = useState(null);
+    const [activeCurrency, setActiveCurrency] = useState({ code: 'INR', symbol: '₹' });
+
     // Date Filtering (Default to current month)
     const date = new Date();
     const [startDate, setStartDate] = useState(new Date(date.getFullYear(), date.getMonth(), 1).toISOString().split('T')[0]);
@@ -27,7 +34,17 @@ export default function LedgerReport() {
     useEffect(() => {
         fetchCompanyProfile();
         fetchLedgers();
+        fetchBranches();
     }, []);
+
+    const fetchBranches = async () => {
+        try {
+            const res = await api.get('/branches');
+            setBranches(res.data || []);
+        } catch (err) {
+            console.error('Failed to load branches', err);
+        }
+    };
 
     const fetchCompanyProfile = async () => {
         try {
@@ -53,11 +70,12 @@ export default function LedgerReport() {
     // Auto-fetch if ledgerId is in query
     useEffect(() => {
         if (router.isReady && router.query.ledgerId) {
-            const { ledgerId, startDate: qStart, endDate: qEnd } = router.query;
+            const { ledgerId, startDate: qStart, endDate: qEnd, branchId: qBranch } = router.query;
 
             setSelectedLedgerId(ledgerId);
             if (qStart) setStartDate(qStart);
             if (qEnd) setEndDate(qEnd);
+            if (qBranch) setSelectedBranch(qBranch);
 
             const autoFetch = async () => {
                 setLoading(true);
@@ -66,12 +84,15 @@ export default function LedgerReport() {
                         params: {
                             ledgerId: ledgerId,
                             startDate: qStart || startDate,
-                            endDate: qEnd || endDate
+                            endDate: qEnd || endDate,
+                            branchId: qBranch || undefined
                         }
                     });
 
                     setLedgerInfo(res.data.ledger);
                     setTransactions(res.data.statement || []);
+                    setActiveBranch(res.data.branch || null);
+                    setActiveCurrency(res.data.currency || { code: 'INR', symbol: '₹' });
                 } catch (err) {
                     console.error(err);
                     toast.error('Failed to load Ledger Report');
@@ -83,24 +104,28 @@ export default function LedgerReport() {
         }
     }, [router.isReady, router.query]);
 
-    const fetchReport = async () => {
+    const fetchReport = async (overrideBranchId) => {
         if (!selectedLedgerId) {
             toast.error("Please select a ledger");
             return;
         }
 
         setLoading(true);
+        const targetBranchId = overrideBranchId !== undefined ? overrideBranchId : selectedBranch;
         try {
             const res = await api.get('/accounting/reports/ledger-statement', {
                 params: {
                     ledgerId: selectedLedgerId,
                     startDate,
-                    endDate
+                    endDate,
+                    branchId: targetBranchId || undefined
                 }
             });
 
             setLedgerInfo(res.data.ledger);
             setTransactions(res.data.statement || []);
+            setActiveBranch(res.data.branch || null);
+            setActiveCurrency(res.data.currency || { code: 'INR', symbol: '₹' });
         } catch (err) {
             console.error(err);
             toast.error('Failed to load Ledger Report');
@@ -145,8 +170,16 @@ export default function LedgerReport() {
             ? Math.abs(Number(transactions[transactions.length - 1].balance) || 0)
             : openingBal;
 
+        const branchLabel = activeBranch ? activeBranch.name : 'All Branches (Consolidated)';
+        const currLabel = activeCurrency?.code || 'INR';
+
         const csvContent = [
-            ['Date', 'Voucher No', 'Particulars', 'Debit (Out)', 'Credit (In)', 'Balance'],
+            ['Report', `${ledgerInfo?.name || 'General Ledger'} Statement`],
+            ['Branch', `"${branchLabel.replace(/"/g, '""')}"`],
+            ['Currency', currLabel],
+            ['Period', `${formatDateDMY(startDate)} to ${formatDateDMY(endDate)}`],
+            [],
+            ['Date', 'Voucher No', 'Particulars', `Debit (Out) [${currLabel}]`, `Credit (In) [${currLabel}]`, `Balance [${currLabel}]`],
             // Opening Balance Row
             [
                 formatDateDMY(startDate),
@@ -154,25 +187,25 @@ export default function LedgerReport() {
                 'By Balance b/d (Opening)',
                 '-',
                 '-',
-                `${openingBal} ${ledgerInfo?.balanceType === 'DEBIT' ? 'Dr' : 'Cr'}`
+                `${openingBal.toFixed(2)} ${ledgerInfo?.balanceType === 'DEBIT' ? 'Dr' : 'Cr'}`
             ],
             // Transactions
             ...transactions.map(tx => [
                 formatDateDMY(tx.date),
-                tx.voucherNumber,
-                `"${tx.particulars} - ${tx.narration || ''}"`,
-                tx.debit || 0,
-                tx.credit || 0,
-                `${Math.abs(tx.balance)} ${tx.balance >= 0 ? (ledgerInfo?.balanceType === 'DEBIT' ? 'Dr' : 'Cr') : (ledgerInfo?.balanceType === 'DEBIT' ? 'Cr' : 'Dr')}`
+                `"${(tx.voucherNumber || '-').replace(/"/g, '""')}"`,
+                `"${(tx.particulars || '')}${tx.narration ? ` - ${tx.narration}` : ''}".replace(/"/g, '""')`,
+                (Number(tx.debit) || 0).toFixed(2),
+                (Number(tx.credit) || 0).toFixed(2),
+                `${Math.abs(Number(tx.balance) || 0).toFixed(2)} ${Number(tx.balance) >= 0 ? (ledgerInfo?.balanceType === 'DEBIT' ? 'Dr' : 'Cr') : (ledgerInfo?.balanceType === 'DEBIT' ? 'Cr' : 'Dr')}`
             ]),
             // Closing Balance Row
             [
                 formatDateDMY(endDate),
                 '-',
                 'Total Closing Balance',
-                '-',
-                '-',
-                `${closingBal} ${transactions.length > 0 ? (transactions[transactions.length - 1].balance >= 0 ? (ledgerInfo?.balanceType === 'DEBIT' ? 'Dr' : 'Cr') : (ledgerInfo?.balanceType === 'DEBIT' ? 'Cr' : 'Dr')) : (ledgerInfo?.balanceType === 'DEBIT' ? 'Dr' : 'Cr')}`
+                totalDebit.toFixed(2),
+                totalCredit.toFixed(2),
+                `${closingBal.toFixed(2)} ${transactions.length > 0 ? (Number(transactions[transactions.length - 1].balance) >= 0 ? (ledgerInfo?.balanceType === 'DEBIT' ? 'Dr' : 'Cr') : (ledgerInfo?.balanceType === 'DEBIT' ? 'Cr' : 'Dr')) : (ledgerInfo?.balanceType === 'DEBIT' ? 'Dr' : 'Cr')}`
             ]
         ].map(row => row.join(',')).join('\n');
 
@@ -180,7 +213,8 @@ export default function LedgerReport() {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `Ledger_${ledgerInfo?.name || 'Report'}_${startDate}_to_${endDate}.csv`;
+        const branchFilename = activeBranch ? `_${activeBranch.name.replace(/[^a-zA-Z0-9]/g, '_')}` : '_AllBranches';
+        a.download = `Ledger_${ledgerInfo?.name || 'Report'}${branchFilename}_${startDate}_to_${endDate}.csv`;
         a.click();
     };
 
@@ -241,6 +275,25 @@ export default function LedgerReport() {
             {/* Controls (Hidden in Print) */}
             <div className="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 print:hidden bg-slate-50/80 p-4 sm:p-5 rounded-2xl border border-slate-200/80">
                 <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+                    <div className="w-full sm:w-auto sm:min-w-[200px]">
+                        <label className="block text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1">Branch</label>
+                        <select
+                            className="border border-slate-200 rounded-xl px-3 py-2 text-xs w-full bg-white text-slate-700 font-medium shadow-sm focus:ring-2 focus:outline-none h-[38px] cursor-pointer"
+                            value={selectedBranch}
+                            onChange={(e) => {
+                                const val = e.target.value;
+                                setSelectedBranch(val);
+                                if (selectedLedgerId) fetchReport(val);
+                            }}
+                        >
+                            <option value="">All Branches (Consolidated)</option>
+                            {branches.map(b => (
+                                <option key={b.id} value={b.id}>
+                                    {b.name} ({b.currencyCode || 'INR'})
+                                </option>
+                            ))}
+                        </select>
+                    </div>
                     <div className="w-full sm:w-auto sm:min-w-[240px]">
                         <label className="block text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1">Select Ledger</label>
                         <SearchableSelect
@@ -322,6 +375,14 @@ export default function LedgerReport() {
                             <h2 className="text-xl sm:text-2xl font-bold text-slate-800 tracking-tight">
                                 {ledgerInfo.name} Report
                             </h2>
+                            <div className="flex flex-wrap items-center justify-center gap-2 mt-2">
+                                <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200">
+                                    {activeBranch ? `Branch: ${activeBranch.name}` : 'All Branches (Consolidated)'}
+                                </span>
+                                <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                    Currency: {activeCurrency?.code || 'INR'} ({activeCurrency?.symbol || '₹'})
+                                </span>
+                            </div>
                             <p className="text-xs text-slate-500 font-semibold mt-1 uppercase tracking-wider">
                                 Period: {formatDateDMY(startDate)} to {formatDateDMY(endDate)}
                             </p>
@@ -348,13 +409,13 @@ export default function LedgerReport() {
                                     <td className="border-b border-r border-slate-200 px-4 py-2.5 text-slate-400">-</td>
                                     <td className="border-b border-r border-slate-200 px-4 py-2.5 italic">By Balance b/d (Opening)</td>
                                     <td className="border-b border-r border-slate-200 px-4 py-2.5 text-right text-slate-700">
-                                        {ledgerInfo?.openingDebit ? `₹${Number(ledgerInfo.openingDebit).toLocaleString('en-IN', { minimumFractionDigits: 2 })}` : '-'}
+                                        {ledgerInfo?.openingDebit ? formatCurrency(ledgerInfo.openingDebit, activeCurrency) : '-'}
                                     </td>
                                     <td className="border-b border-r border-slate-200 px-4 py-2.5 text-right text-slate-700">
-                                        {ledgerInfo?.openingCredit ? `₹${Number(ledgerInfo.openingCredit).toLocaleString('en-IN', { minimumFractionDigits: 2 })}` : '-'}
+                                        {ledgerInfo?.openingCredit ? formatCurrency(ledgerInfo.openingCredit, activeCurrency) : '-'}
                                     </td>
                                     <td className="border-b border-slate-200 px-4 py-2.5 text-right font-mono font-medium text-slate-800">
-                                        ₹{openingBalNum.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                                        {formatCurrency(openingBalNum, activeCurrency)}
                                         <span className="text-[10px] ml-1 text-slate-500 font-bold">
                                             {ledgerInfo?.openingBalance >= 0 ? (ledgerInfo?.balanceType === 'DEBIT' ? 'Dr' : 'Cr') : (ledgerInfo?.balanceType === 'DEBIT' ? 'Cr' : 'Dr')}
                                         </span>
@@ -379,13 +440,13 @@ export default function LedgerReport() {
                                             )}
                                         </td>
                                         <td className="border-b border-r border-slate-200 px-4 py-2.5 text-right font-medium text-red-700">
-                                            {tx.debit > 0 ? `₹${Number(tx.debit).toLocaleString('en-IN', { minimumFractionDigits: 2 })}` : '-'}
+                                            {tx.debit > 0 ? formatCurrency(tx.debit, activeCurrency) : '-'}
                                         </td>
                                         <td className="border-b border-r border-slate-200 px-4 py-2.5 text-right font-medium text-emerald-700">
-                                            {tx.credit > 0 ? `₹${Number(tx.credit).toLocaleString('en-IN', { minimumFractionDigits: 2 })}` : '-'}
+                                            {tx.credit > 0 ? formatCurrency(tx.credit, activeCurrency) : '-'}
                                         </td>
                                         <td className="border-b border-slate-200 px-4 py-2.5 text-right font-mono text-slate-800 bg-slate-50/40">
-                                            ₹{Math.abs(Number(tx.balance) || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                                            {formatCurrency(Math.abs(Number(tx.balance) || 0), activeCurrency)}
                                             <span className="text-[10px] ml-1 text-slate-400 font-semibold">
                                                 {tx.balance >= 0 ? (ledgerInfo.balanceType === 'DEBIT' ? 'Dr' : 'Cr') : (ledgerInfo.balanceType === 'DEBIT' ? 'Cr' : 'Dr')}
                                             </span>
@@ -407,13 +468,13 @@ export default function LedgerReport() {
                                 <tr className="bg-slate-100/90 font-bold border-t-2 border-slate-800 text-slate-900">
                                     <td className="border-r border-slate-300 px-4 py-3" colSpan="3">Total Closing Balance</td>
                                     <td className="border-r border-slate-300 px-4 py-3 text-right text-red-700">
-                                        {totalDebit > 0 ? `₹${totalDebit.toLocaleString('en-IN', { minimumFractionDigits: 2 })}` : '-'}
+                                        {totalDebit > 0 ? formatCurrency(totalDebit, activeCurrency) : '-'}
                                     </td>
                                     <td className="border-r border-slate-300 px-4 py-3 text-right text-emerald-700">
-                                        {totalCredit > 0 ? `₹${totalCredit.toLocaleString('en-IN', { minimumFractionDigits: 2 })}` : '-'}
+                                        {totalCredit > 0 ? formatCurrency(totalCredit, activeCurrency) : '-'}
                                     </td>
                                     <td className="px-4 py-3 text-right text-base text-slate-900 font-extrabold font-mono">
-                                        ₹{closingBalNum.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                                        {formatCurrency(closingBalNum, activeCurrency)}
                                         <span className="text-xs ml-1 text-slate-600 font-bold">
                                             {closingBalType}
                                         </span>

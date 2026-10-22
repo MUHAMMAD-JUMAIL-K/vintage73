@@ -1,11 +1,14 @@
 const prisma = require('../config/prisma');
 const { calculateLedgerBalance } = require('./accountingController');
 const asyncHandler = require('../middleware/asyncHandler');
+const { resolveBranchFilter } = require('../utils/accountingHelper');
 
 // ==================== TRIAL BALANCE ====================
 
 exports.getTrialBalance = asyncHandler(async (req, res) => {
-  const { startDate, endDate } = req.query;
+  const { startDate, endDate, branchId: requestedBranchId } = req.query;
+  const { branchId, isConsolidated, activeBranch, branches, branchFilter } = await resolveBranchFilter(req, requestedBranchId);
+
   const start = startDate ? new Date(startDate) : null;
   const end = endDate ? new Date(endDate) : new Date();
   end.setHours(23, 59, 59, 999);
@@ -16,13 +19,18 @@ exports.getTrialBalance = asyncHandler(async (req, res) => {
     orderBy: { name: 'asc' }
   });
 
+  const baseVoucherWhere = {
+    status: 'POSTED',
+    ...branchFilter
+  };
+
   // 1. Get Pre-Period Totals (Opening Balances)
   const preDebits = await prisma.journalEntry.groupBy({
     by: ['debitLedgerId'],
     _sum: { amount: true },
     where: {
       debitLedgerId: { not: null },
-      voucher: { status: 'POSTED', ...(start ? { date: { lt: start } } : { id: -1 }) } // If no start, no pre-entries
+      voucher: { ...baseVoucherWhere, ...(start ? { date: { lt: start } } : { id: -1 }) }
     }
   });
 
@@ -31,7 +39,7 @@ exports.getTrialBalance = asyncHandler(async (req, res) => {
     _sum: { amount: true },
     where: {
       creditLedgerId: { not: null },
-      voucher: { status: 'POSTED', ...(start ? { date: { lt: start } } : { id: -1 }) }
+      voucher: { ...baseVoucherWhere, ...(start ? { date: { lt: start } } : { id: -1 }) }
     }
   });
 
@@ -42,7 +50,7 @@ exports.getTrialBalance = asyncHandler(async (req, res) => {
     where: {
       debitLedgerId: { not: null },
       voucher: {
-        status: 'POSTED',
+        ...baseVoucherWhere,
         date: { gte: start || new Date(0), lte: end }
       }
     }
@@ -54,7 +62,7 @@ exports.getTrialBalance = asyncHandler(async (req, res) => {
     where: {
       creditLedgerId: { not: null },
       voucher: {
-        status: 'POSTED',
+        ...baseVoucherWhere,
         date: { gte: start || new Date(0), lte: end }
       }
     }
@@ -72,8 +80,7 @@ exports.getTrialBalance = asyncHandler(async (req, res) => {
     const perDeb = perDebMap.get(ledger.id) || 0;
     const perCred = perCredMap.get(ledger.id) || 0;
 
-    let openingBalance = Number(ledger.openingBalance);
-    // Adjust opening if a start date was provided
+    let openingBalance = isConsolidated ? Number(ledger.openingBalance) : 0;
     if (start) {
       if (ledger.balanceType === 'DEBIT') {
         openingBalance += preDeb - preCred;
@@ -98,10 +105,10 @@ exports.getTrialBalance = asyncHandler(async (req, res) => {
       groupName: ledger.group.name,
       groupType: ledger.group.groupType,
       balanceType: ledger.balanceType,
-      openingBalance,
-      debit: debitValue,
-      credit: creditValue,
-      closingBalance
+      openingBalance: Math.round(openingBalance * 100) / 100,
+      debit: Math.round(debitValue * 100) / 100,
+      credit: Math.round(creditValue * 100) / 100,
+      closingBalance: Math.round(closingBalance * 100) / 100
     };
   });
 
@@ -112,19 +119,71 @@ exports.getTrialBalance = asyncHandler(async (req, res) => {
     Math.abs(item.closingBalance) > 0.01
   );
 
+  const totalDebit = filteredResults.reduce((sum, i) => sum + i.debit, 0);
+  const totalCredit = filteredResults.reduce((sum, i) => sum + i.credit, 0);
+  const isBalanced = Math.abs(totalDebit - totalCredit) <= 0.05;
+
+  let currencyBreakdown = null;
+  if (isConsolidated) {
+    const currencyTotals = {};
+    for (const b of (branches || [])) {
+      const bCode = b.currencyCode || 'INR';
+      if (!currencyTotals[bCode]) {
+        currencyTotals[bCode] = {
+          currencyCode: bCode,
+          currencySymbol: b.currencySymbol || '₹',
+          branchNames: [b.name],
+          totalDebit: 0,
+          totalCredit: 0
+        };
+      } else {
+        currencyTotals[bCode].branchNames.push(b.name);
+      }
+    }
+
+    const vouchersByBranch = await prisma.voucher.groupBy({
+      by: ['branchId'],
+      _sum: { totalAmount: true },
+      where: {
+        status: 'POSTED',
+        date: { gte: start || new Date(0), lte: end }
+      }
+    });
+
+    for (const vb of vouchersByBranch) {
+      const b = (branches || []).find(br => br.id === vb.branchId);
+      const bCode = b?.currencyCode || 'INR';
+      if (currencyTotals[bCode]) {
+        currencyTotals[bCode].totalDebit += Number(vb._sum.totalAmount || 0);
+        currencyTotals[bCode].totalCredit += Number(vb._sum.totalAmount || 0);
+      }
+    }
+    currencyBreakdown = Object.values(currencyTotals);
+  }
+
   res.json({
     trialBalance: filteredResults,
-    totalOpening: filteredResults.reduce((sum, i) => sum + i.openingBalance, 0),
-    totalDebit: filteredResults.reduce((sum, i) => sum + i.debit, 0),
-    totalCredit: filteredResults.reduce((sum, i) => sum + i.credit, 0),
-    totalClosing: filteredResults.reduce((sum, i) => sum + i.closingBalance, 0)
+    totalOpening: Math.round(filteredResults.reduce((sum, i) => sum + i.openingBalance, 0) * 100) / 100,
+    totalDebit: Math.round(totalDebit * 100) / 100,
+    totalCredit: Math.round(totalCredit * 100) / 100,
+    totalClosing: Math.round(filteredResults.reduce((sum, i) => sum + i.closingBalance, 0) * 100) / 100,
+    balanced: isBalanced,
+    branch: activeBranch,
+    isConsolidated,
+    currency: activeBranch ? {
+      code: activeBranch.currencyCode || 'INR',
+      symbol: activeBranch.currencySymbol || '₹'
+    } : { code: 'INR', symbol: '₹' },
+    currencyBreakdown
   });
 });
 
 // ==================== PROFIT & LOSS ====================
 
 exports.getProfitLoss = asyncHandler(async (req, res) => {
-  const { startDate, endDate } = req.query;
+  const { startDate, endDate, branchId: requestedBranchId } = req.query;
+  const { branchId, isConsolidated, activeBranch, branches, branchFilter } = await resolveBranchFilter(req, requestedBranchId);
+
   const start = startDate ? new Date(startDate) : null;
   const end = endDate ? new Date(endDate) : new Date();
   end.setHours(23, 59, 59, 999);
@@ -138,6 +197,12 @@ exports.getProfitLoss = asyncHandler(async (req, res) => {
     include: { group: true }
   });
 
+  const baseVoucherWhere = {
+    status: 'POSTED',
+    ...branchFilter,
+    date: { gte: start || new Date(0), lte: end }
+  };
+
   // Calculate balances in bulk
   const [debitSums, creditSums] = await Promise.all([
     prisma.journalEntry.groupBy({
@@ -145,7 +210,7 @@ exports.getProfitLoss = asyncHandler(async (req, res) => {
       _sum: { amount: true },
       where: {
         debitLedgerId: { in: ledgers.map(l => l.id) },
-        voucher: { status: 'POSTED', date: { gte: start || new Date(0), lte: end } }
+        voucher: baseVoucherWhere
       }
     }),
     prisma.journalEntry.groupBy({
@@ -153,7 +218,7 @@ exports.getProfitLoss = asyncHandler(async (req, res) => {
       _sum: { amount: true },
       where: {
         creditLedgerId: { in: ledgers.map(l => l.id) },
-        voucher: { status: 'POSTED', date: { gte: start || new Date(0), lte: end } }
+        voucher: baseVoucherWhere
       }
     })
   ]);
@@ -183,7 +248,7 @@ exports.getProfitLoss = asyncHandler(async (req, res) => {
         ledgerId: ledger.id,
         ledgerName: ledger.name,
         groupName: ledger.group.name,
-        amount: balance
+        amount: Math.round(balance * 100) / 100
       };
 
       if (ledger.group.groupType === 'INCOME') {
@@ -194,9 +259,9 @@ exports.getProfitLoss = asyncHandler(async (req, res) => {
     }
   }
 
-  const totalIncome = incomeItems.reduce((sum, item) => sum + item.amount, 0);
-  const totalExpenses = expenseItems.reduce((sum, item) => sum + item.amount, 0);
-  const netProfit = totalIncome - totalExpenses;
+  const totalIncome = Math.round(incomeItems.reduce((sum, item) => sum + item.amount, 0) * 100) / 100;
+  const totalExpenses = Math.round(expenseItems.reduce((sum, item) => sum + item.amount, 0) * 100) / 100;
+  const netProfit = Math.round((totalIncome - totalExpenses) * 100) / 100;
 
   res.json({
     income: incomeItems,
@@ -204,14 +269,22 @@ exports.getProfitLoss = asyncHandler(async (req, res) => {
     totalIncome,
     totalExpenses,
     netProfit,
-    isProfitable: netProfit >= 0
+    isProfitable: netProfit >= 0,
+    branch: activeBranch,
+    isConsolidated,
+    currency: activeBranch ? {
+      code: activeBranch.currencyCode || 'INR',
+      symbol: activeBranch.currencySymbol || '₹'
+    } : { code: 'INR', symbol: '₹' }
   });
 });
 
 // ==================== BALANCE SHEET ====================
 
 exports.getBalanceSheet = asyncHandler(async (req, res) => {
-  const { asOfDate } = req.query;
+  const { asOfDate, branchId: requestedBranchId } = req.query;
+  const { branchId, isConsolidated, activeBranch, branches, branchFilter } = await resolveBranchFilter(req, requestedBranchId);
+
   const end = asOfDate ? new Date(asOfDate) : new Date();
   end.setHours(23, 59, 59, 999);
 
@@ -224,13 +297,19 @@ exports.getBalanceSheet = asyncHandler(async (req, res) => {
     include: { group: true }
   });
 
+  const baseVoucherWhere = {
+    status: 'POSTED',
+    ...branchFilter,
+    date: { lte: end }
+  };
+
   const [debitSums, creditSums] = await Promise.all([
     prisma.journalEntry.groupBy({
       by: ['debitLedgerId'],
       _sum: { amount: true },
       where: {
         debitLedgerId: { in: ledgers.map(l => l.id) },
-        voucher: { status: 'POSTED', date: { lte: end } }
+        voucher: baseVoucherWhere
       }
     }),
     prisma.journalEntry.groupBy({
@@ -238,7 +317,7 @@ exports.getBalanceSheet = asyncHandler(async (req, res) => {
       _sum: { amount: true },
       where: {
         creditLedgerId: { in: ledgers.map(l => l.id) },
-        voucher: { status: 'POSTED', date: { lte: end } }
+        voucher: baseVoucherWhere
       }
     })
   ]);
@@ -254,7 +333,7 @@ exports.getBalanceSheet = asyncHandler(async (req, res) => {
     const totalDebit = debMap.get(ledger.id) || 0;
     const totalCredit = credMap.get(ledger.id) || 0;
 
-    let balance = Number(ledger.openingBalance);
+    let balance = isConsolidated ? Number(ledger.openingBalance) : 0;
     if (ledger.balanceType === 'DEBIT') {
       balance = balance + totalDebit - totalCredit;
     } else {
@@ -266,7 +345,7 @@ exports.getBalanceSheet = asyncHandler(async (req, res) => {
         ledgerId: ledger.id,
         ledgerName: ledger.name,
         groupName: ledger.group.name,
-        amount: balance
+        amount: Math.round(balance * 100) / 100
       };
 
       if (ledger.group.groupType === 'ASSETS') {
@@ -279,8 +358,8 @@ exports.getBalanceSheet = asyncHandler(async (req, res) => {
     }
   }
 
-  // Calculate P&L (net profit) as of Date
-  const plResult = await getProfitLossData(end);
+  // Calculate P&L (net profit) as of Date with branchFilter
+  const plResult = await getProfitLossData(end, branchFilter);
   if (plResult.netProfit !== 0) {
     equity.push({
       ledgerId: null,
@@ -291,18 +370,15 @@ exports.getBalanceSheet = asyncHandler(async (req, res) => {
     });
   }
 
-  const totalAssets = assets.reduce((sum, item) => sum + item.amount, 0);
-  const totalLiabilities = liabilities.reduce((sum, item) => sum + item.amount, 0);
+  const totalAssets = Math.round(assets.reduce((sum, item) => sum + item.amount, 0) * 100) / 100;
+  const totalLiabilities = Math.round(liabilities.reduce((sum, item) => sum + item.amount, 0) * 100) / 100;
 
-  // For equity, if it's a loss, we should subtract it if it's stored as positive.
-  // Actually, to balance: Assets = Liabilities + Equity
-  // Let's adjust totalEquity calculation:
-  const totalEquity = equity.reduce((sum, item) => {
+  const totalEquity = Math.round(equity.reduce((sum, item) => {
     if (item.ledgerName.includes('Net Loss')) return sum - item.amount;
     return sum + item.amount;
-  }, 0);
+  }, 0) * 100) / 100;
 
-  const balanced = Math.abs(totalAssets - (totalLiabilities + totalEquity)) < 0.01;
+  const balanced = Math.abs(totalAssets - (totalLiabilities + totalEquity)) < 0.05;
 
   res.json({
     assets,
@@ -312,14 +388,21 @@ exports.getBalanceSheet = asyncHandler(async (req, res) => {
     totalLiabilities,
     totalEquity,
     balanced,
-    difference: totalAssets - (totalLiabilities + totalEquity)
+    difference: Math.round((totalAssets - (totalLiabilities + totalEquity)) * 100) / 100,
+    branch: activeBranch,
+    isConsolidated,
+    currency: activeBranch ? {
+      code: activeBranch.currencyCode || 'INR',
+      symbol: activeBranch.currencySymbol || '₹'
+    } : { code: 'INR', symbol: '₹' }
   });
 });
 
 // ==================== LEDGER STATEMENT ====================
 
 exports.getLedgerStatement = asyncHandler(async (req, res) => {
-  const { ledgerId, startDate, endDate } = req.query;
+  const { ledgerId, startDate, endDate, branchId: requestedBranchId } = req.query;
+  const { branchId, isConsolidated, activeBranch, branches, branchFilter } = await resolveBranchFilter(req, requestedBranchId);
 
   if (!ledgerId) {
     res.status(400);
@@ -563,7 +646,13 @@ exports.getLedgerStatement = asyncHandler(async (req, res) => {
         openingCredit: openingBalance < 0 ? Math.abs(openingBalance) : 0
       },
       statement,
-      closingBalance: Math.abs(runningBalance) < 0.001 ? 0 : runningBalance
+      closingBalance: Math.abs(runningBalance) < 0.001 ? 0 : runningBalance,
+      branch: activeBranch,
+      isConsolidated,
+      currency: activeBranch ? {
+        code: activeBranch.currencyCode || 'INR',
+        symbol: activeBranch.currencySymbol || '₹'
+      } : { code: 'INR', symbol: '₹' }
     });
   }
 
@@ -731,7 +820,13 @@ exports.getLedgerStatement = asyncHandler(async (req, res) => {
       openingCredit
     },
     statement,
-    closingBalance: Math.abs(runningBalance) < 0.001 ? 0 : runningBalance
+    closingBalance: Math.abs(runningBalance) < 0.001 ? 0 : runningBalance,
+    branch: activeBranch,
+    isConsolidated,
+    currency: activeBranch ? {
+      code: activeBranch.currencyCode || 'INR',
+      symbol: activeBranch.currencySymbol || '₹'
+    } : { code: 'INR', symbol: '₹' }
   });
 });
 
@@ -934,7 +1029,8 @@ function buildDailySaleAndCreditRows(daySales) {
 }
 
 exports.getCashBook = asyncHandler(async (req, res) => {
-  const { startDate, endDate, branchId, ledgerId } = req.query;
+  const { startDate, endDate, branchId: requestedBranchId, ledgerId } = req.query;
+  const { branchId, isConsolidated, activeBranch, branches, branchFilter } = await resolveBranchFilter(req, requestedBranchId);
 
   const start = startDate ? new Date(startDate) : null;
   if (start) start.setHours(0, 0, 0, 0);
@@ -967,8 +1063,7 @@ exports.getCashBook = asyncHandler(async (req, res) => {
     });
   }
 
-  const masterOpening = parseFloat(cashLedger?.openingBalance || 0);
-  const branchFilter = branchId ? { branchId: parseInt(branchId) } : {};
+  const masterOpening = isConsolidated ? parseFloat(cashLedger?.openingBalance || 0) : 0;
 
   // 2. Fetch Period Sales
   const periodSales = await prisma.sale.findMany({
@@ -1049,6 +1144,7 @@ exports.getCashBook = asyncHandler(async (req, res) => {
         ],
         voucher: {
           status: 'POSTED',
+          ...branchFilter,
           voucherType: { not: 'SALES' },
           reference: {
             notIn: [...saleInvoices, ...expIds, ...payRefs]
@@ -1144,6 +1240,7 @@ exports.getCashBook = asyncHandler(async (req, res) => {
           ],
           voucher: {
             status: 'POSTED',
+            ...branchFilter,
             voucherType: { not: 'SALES' },
             date: { lt: start }
           }
@@ -1304,7 +1401,13 @@ exports.getCashBook = asyncHandler(async (req, res) => {
     statement,
     closingBalance,
     totalDebit,
-    totalCredit
+    totalCredit,
+    branch: activeBranch,
+    isConsolidated,
+    currency: activeBranch ? {
+      code: activeBranch.currencyCode || 'INR',
+      symbol: activeBranch.currencySymbol || '₹'
+    } : { code: 'INR', symbol: '₹' }
   });
 });
 
@@ -1356,7 +1459,7 @@ exports.getDayBook = asyncHandler(async (req, res) => {
 
 // ==================== HELPER FUNCTIONS ====================
 
-async function getProfitLossData(endDate) {
+async function getProfitLossData(endDate, branchFilter = {}) {
   const end = endDate || new Date();
 
   const ledgers = await prisma.ledger.findMany({
@@ -1367,13 +1470,19 @@ async function getProfitLossData(endDate) {
     include: { group: true }
   });
 
+  const baseVoucherWhere = {
+    status: 'POSTED',
+    ...branchFilter,
+    date: { lte: end }
+  };
+
   const [debitSums, creditSums] = await Promise.all([
     prisma.journalEntry.groupBy({
       by: ['debitLedgerId'],
       _sum: { amount: true },
       where: {
         debitLedgerId: { in: ledgers.map(l => l.id) },
-        voucher: { status: 'POSTED', date: { lte: end } }
+        voucher: baseVoucherWhere
       }
     }),
     prisma.journalEntry.groupBy({
@@ -1381,7 +1490,7 @@ async function getProfitLossData(endDate) {
       _sum: { amount: true },
       where: {
         creditLedgerId: { in: ledgers.map(l => l.id) },
-        voucher: { status: 'POSTED', date: { lte: end } }
+        voucher: baseVoucherWhere
       }
     })
   ]);

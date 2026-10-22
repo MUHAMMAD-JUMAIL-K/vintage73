@@ -240,7 +240,8 @@ exports.createB2BInvoice = asyncHandler(async (req, res) => {
         amount: grandTotal,
         narration: `B2B Invoice #${invoiceNumber}`,
         reference: invoiceNumber,
-        createdBy: userId
+        createdBy: userId,
+        branchId: parseInt(branchId)
       }, entries);
 
       // Payment entry if paid
@@ -252,7 +253,8 @@ exports.createB2BInvoice = asyncHandler(async (req, res) => {
           amount: finalPaidAmount,
           narration: `Payment for B2B Invoice #${invoiceNumber}`,
           reference: invoiceNumber,
-          createdBy: userId
+          createdBy: userId,
+          branchId: parseInt(branchId)
         }, [
           { ledgerId: cashLedger.id, type: 'DEBIT', amount: finalPaidAmount },
           { ledgerId: customerLedger.id, type: 'CREDIT', amount: finalPaidAmount }

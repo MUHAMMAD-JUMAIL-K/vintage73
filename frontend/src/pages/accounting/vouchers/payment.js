@@ -7,6 +7,7 @@ import ProfessionalModal from '@/components/ProfessionalModal';
 import VoucherPrint from '@/components/VoucherPrint';
 import SearchableSelect from '@/components/SearchableSelect';
 import { useTheme } from '@/context/ThemeContext';
+import { formatCurrency } from '@/lib/currency';
 
 export default function PaymentVoucher() {
     const { theme } = useTheme();
@@ -290,15 +291,14 @@ export default function PaymentVoucher() {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-[10px] font-medium text-slate-400 uppercase tracking-wider mb-2 text-red-600">Disbursement Amount (₹)</label>
+                                    <label className="block text-[10px] font-medium text-slate-400 uppercase tracking-wider mb-2 text-red-600">Disbursement Amount</label>
                                     <div className="relative">
-                                        <span className="absolute left-4 top-1/2 -translate-y-1/2 font-medium text-red-400">₹</span>
                                         <input
                                             required
                                             type="number"
                                             step="0.01"
                                             min="0.01"
-                                            className="w-full pl-8 pr-4 py-3 bg-red-50/30 border border-red-100 rounded-lg focus:ring-2 focus:ring-red-600 focus:border-transparent focus:bg-white text-lg font-medium text-red-600 tabular-nums transition-all"
+                                            className="w-full px-4 py-3 bg-red-50/30 border border-red-100 rounded-lg focus:ring-2 focus:ring-red-600 focus:border-transparent focus:bg-white text-lg font-medium text-red-600 tabular-nums transition-all"
                                             value={formData.amount}
                                             onChange={e => setFormData({ ...formData, amount: e.target.value })}
                                             placeholder="0.00"
@@ -317,7 +317,7 @@ export default function PaymentVoucher() {
                                             <div className="flex items-center gap-2">
                                                 <div className={`w-1.5 h-1.5 rounded-full ${selectedPaymentAccount.currentBalance >= 0 ? 'bg-primary' : 'bg-red-500'}`} />
                                                 <span className="text-[10px] font-medium text-slate-500">
-                                                    Bal: ₹{Math.abs(selectedPaymentAccount.currentBalance).toFixed(2)} {selectedPaymentAccount.currentBalance >= 0 ? 'Dr' : 'Cr'}
+                                                    Bal: {formatCurrency(Math.abs(selectedPaymentAccount.currentBalance), 'INR')} {selectedPaymentAccount.currentBalance >= 0 ? 'Dr' : 'Cr'}
                                                 </span>
                                             </div>
                                         )}
@@ -340,7 +340,7 @@ export default function PaymentVoucher() {
                                             <div className="flex items-center gap-2">
                                                 <div className={`w-1.5 h-1.5 rounded-full ${selectedExpenseAccount.currentBalance >= 0 ? 'bg-primary' : 'bg-red-500'}`} />
                                                 <span className="text-[10px] font-medium text-slate-500">
-                                                    Bal: ₹{Math.abs(selectedExpenseAccount.currentBalance).toFixed(2)} {selectedExpenseAccount.currentBalance >= 0 ? 'Dr' : 'Cr'}
+                                                    Bal: {formatCurrency(Math.abs(selectedExpenseAccount.currentBalance), 'INR')} {selectedExpenseAccount.currentBalance >= 0 ? 'Dr' : 'Cr'}
                                                 </span>
                                             </div>
                                         )}
@@ -514,7 +514,7 @@ export default function PaymentVoucher() {
                                                     <td className="px-6 py-4 text-right">
                                                         <div className="flex flex-col items-end">
                                                             <span className="text-sm font-medium text-slate-900 tabular-nums">
-                                                                ₹{parseFloat(v.totalAmount).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                                                                {formatCurrency(v.totalAmount, v.branch || 'INR')}
                                                             </span>
                                                             {v.status === 'CANCELLED' ? (
                                                                 <span className="mt-1 px-1.5 py-0.5 rounded bg-red-100 text-red-600 text-[8px] font-medium uppercase tracking-widest ring-1 ring-red-200">Voided</span>
@@ -578,7 +578,7 @@ export default function PaymentVoucher() {
                 details={[
                     { label: 'Voucher Date', value: formData.date },
                     { label: 'Payment From', value: ledgers.find(l => l.id == formData.paymentAccount)?.name || 'N/A' },
-                    { label: 'Amount', value: `₹${parseFloat(formData.amount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}` },
+                    { label: 'Amount', value: formatCurrency(formData.amount || 0, 'INR') },
                     { label: 'Reference', value: formData.reference || 'N/A' }
                 ]}
             />
