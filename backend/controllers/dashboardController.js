@@ -6,6 +6,7 @@ const {
     formatDisplayDate,
     getBranchActiveBusinessDate
 } = require('../utils/businessDateHelper');
+const { calculateSessionCashDrawer } = require('../utils/cashDrawerHelper');
 
 exports.getDashboardStats = asyncHandler(async (req, res) => {
     const { branchId: queryBranchId } = req.query;
@@ -175,12 +176,16 @@ exports.getDashboardStats = asyncHandler(async (req, res) => {
         }));
     } catch (e) { console.error("Dashboard Fast moving products error:", e); }
 
-    // 7. Day Opening & Closing Status
+    // 7. Day Opening & Closing Status (Authoritative Cash Drawer Calculations)
     let dayManagement = {
         businessDate: null,
         businessDateDisplay: null,
         status: 'NOT_OPENED',
         openingCash: 0,
+        previousClosingCash: 0,
+        previousClosingDate: null,
+        previousClosingDateDisplay: null,
+        hasPreviousClosedDay: false,
         additionalCashAdded: 0,
         cashRemovedBeforeOpening: 0,
         expectedOpeningCash: 0,
@@ -188,31 +193,30 @@ exports.getDashboardStats = asyncHandler(async (req, res) => {
         openingDifference: 0,
         openingTime: null,
         openedBy: null,
+        totalCashReceived: 0,
+        totalCashPaid: 0,
+        transfersIn: 0,
+        transfersOut: 0,
+        expectedClosingCash: 0,
+        actualClosingCash: null,
+        cashDifference: null,
         closingStatus: 'NOT_OPENED',
+        closedAt: null,
+        closedBy: null,
         todayCancelledCount: 0,
         todayExpenses: 0,
         hasPendingPrevious: false,
-        pendingDateDisplay: null
+        pendingDateDisplay: null,
+        hasPriorDayDiscrepancy: false,
+        priorDayDiscrepancyAmount: 0
     };
 
     try {
         const targetBId = parsedBranchId || 1;
         const activeDateInfo = await getBranchActiveBusinessDate(targetBId);
         const dateStr = activeDateInfo.dateStr;
-        const dateUtc = getUtcDateObj(dateStr);
 
-        const dc = await prisma.dayClose.findUnique({
-            where: {
-                branchId_businessDate: {
-                    branchId: targetBId,
-                    businessDate: dateUtc
-                }
-            },
-            include: {
-                openedBy: { select: { id: true, name: true, username: true } },
-                finalizedBy: { select: { id: true, name: true, username: true } }
-            }
-        });
+        const drawer = await calculateSessionCashDrawer(targetBId, dateStr);
 
         const cancelledCount = await prisma.sale.count({
             where: {
@@ -222,32 +226,39 @@ exports.getDashboardStats = asyncHandler(async (req, res) => {
             }
         });
 
-        const todayExpensesAgg = await prisma.expense.aggregate({
-            where: {
-                ...(parsedBranchId ? { branchId: parsedBranchId } : {}),
-                date: { gte: today }
-            },
-            _sum: { amount: true }
-        });
-
         dayManagement = {
             businessDate: dateStr,
             businessDateDisplay: formatDisplayDate(dateStr),
-            status: dc ? dc.status : 'NOT_OPENED',
-            openingCash: Number(dc?.actualOpeningCash || dc?.openingCash || 0),
-            additionalCashAdded: Number(dc?.additionalCashAdded || 0),
-            cashRemovedBeforeOpening: Number(dc?.cashRemovedBeforeOpening || 0),
-            expectedOpeningCash: Number(dc?.expectedOpeningCash || 0),
-            actualOpeningCash: Number(dc?.actualOpeningCash || 0),
-            openingDifference: Number(dc?.openingDifference || 0),
-            openingTime: dc?.openedAt || null,
-            openedBy: dc?.openedBy ? (dc.openedBy.name || dc.openedBy.username) : null,
-            closingStatus: dc ? dc.status : 'NOT_OPENED',
+            status: drawer.status,
+            openingCash: drawer.openingCash,
+            previousClosingCash: drawer.previousClosingCash !== null ? drawer.previousClosingCash : 0,
+            previousClosingDate: drawer.previousClosingDate,
+            previousClosingDateDisplay: drawer.previousClosingDateDisplay,
+            hasPreviousClosedDay: drawer.hasPreviousClosedDay,
+            additionalCashAdded: drawer.additionalCashAdded,
+            cashRemovedBeforeOpening: drawer.cashRemovedBeforeOpening,
+            expectedOpeningCash: drawer.expectedOpeningCash,
+            actualOpeningCash: drawer.actualOpeningCash,
+            openingDifference: drawer.openingDifference,
+            openingTime: drawer.openedAt,
+            openedBy: drawer.openedBy,
+            totalCashReceived: drawer.totalCashReceived,
+            totalCashPaid: drawer.totalCashPaid,
+            transfersIn: drawer.transfersIn,
+            transfersOut: drawer.transfersOut,
+            expectedClosingCash: drawer.expectedClosingCash,
+            actualClosingCash: drawer.physicalCash,
+            cashDifference: drawer.cashDifference,
+            closingStatus: drawer.status,
+            closedAt: drawer.finalizedAt,
+            closedBy: drawer.finalizedBy,
             todayCancelledCount: cancelledCount,
-            todayExpenses: Number(todayExpensesAgg._sum.amount || 0),
+            todayExpenses: drawer.cashExpenses,
             hasPendingPrevious: activeDateInfo.isPendingPrevious,
             pendingDate: activeDateInfo.isPendingPrevious ? activeDateInfo.dateStr : null,
-            pendingDateDisplay: activeDateInfo.isPendingPrevious ? formatDisplayDate(activeDateInfo.dateStr) : null
+            pendingDateDisplay: activeDateInfo.isPendingPrevious ? formatDisplayDate(activeDateInfo.dateStr) : null,
+            hasPriorDayDiscrepancy: drawer.hasPriorDayDiscrepancy,
+            priorDayDiscrepancyAmount: drawer.priorDayDiscrepancyAmount
         };
     } catch (e) {
         console.error("Dashboard Day Management error:", e);

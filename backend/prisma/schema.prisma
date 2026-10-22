@@ -1225,6 +1225,7 @@ model DayClose {
   notes                     String?
   finalizedById             Int?
   finalizedAt               DateTime?
+  adjustments               Json?           @default("[]")
   createdAt                 DateTime        @default(now())
   updatedAt                 DateTime        @updatedAt
 

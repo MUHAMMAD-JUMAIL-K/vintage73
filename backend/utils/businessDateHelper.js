@@ -43,25 +43,42 @@ async function getBranchActiveBusinessDate(branchId) {
     };
   }
 
-  // Look back up to 30 days for any unclosed dates with sales
-  const thirtyDaysAgo = new Date(todayUtc);
-  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+  // Look back up to 60 days for any unclosed dates with activity or opened sessions
+  const sixtyDaysAgo = new Date(todayUtc);
+  sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
 
-  const pastSales = await prisma.sale.findMany({
-    where: {
-      branchId: parseInt(branchId),
-      saleDate: {
-        gte: thirtyDaysAgo,
-        lt: todayUtc  // strictly before today — today's sales are added to today's open date
+  const [pastSales, pastOpenedSessions] = await Promise.all([
+    prisma.sale.findMany({
+      where: {
+        branchId: parseInt(branchId),
+        saleDate: {
+          gte: sixtyDaysAgo,
+          lt: todayUtc  // strictly before today — today's activity is added to today
+        },
+        status: { not: 'cancelled' }
       },
-      status: { not: 'cancelled' }
-    },
-    select: { saleDate: true },
-    orderBy: { saleDate: 'asc' }
-  });
+      select: { saleDate: true },
+      orderBy: { saleDate: 'asc' }
+    }),
+    prisma.dayClose.findMany({
+      where: {
+        branchId: parseInt(branchId),
+        businessDate: {
+          gte: sixtyDaysAgo,
+          lt: todayUtc
+        },
+        status: { notIn: ['CLOSED', 'ADMIN_CLOSED'] }
+      },
+      select: { businessDate: true },
+      orderBy: { businessDate: 'asc' }
+    })
+  ]);
 
-  // Get sorted distinct past date strings (IST)
-  const distinctPastDates = Array.from(new Set(pastSales.map(s => getLocalDateString(s.saleDate))));
+  // Combine and sort all distinct past dates (IST)
+  const distinctPastDates = Array.from(new Set([
+    ...pastSales.map(s => getLocalDateString(s.saleDate)),
+    ...pastOpenedSessions.map(o => getLocalDateString(o.businessDate))
+  ])).sort((a, b) => a.localeCompare(b));
 
   for (const pDateStr of distinctPastDates) {
     const pUtc = getUtcDateObj(pDateStr);

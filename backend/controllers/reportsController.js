@@ -494,10 +494,19 @@ exports.getSalesAnalyticsReport = asyncHandler(async (req, res) => {
     const dateFilter = {};
     if (startUTC) dateFilter.gte = startUTC;
     if (endUTC) dateFilter.lte = endUTC;
-    where.createdAt = dateFilter;
+    where.OR = [
+      { saleDate: dateFilter },
+      { createdAt: dateFilter }
+    ];
   }
 
-  if (salesmanId && salesmanId !== 'all') where.salesmanId = parseInt(salesmanId);
+  if (salesmanId && salesmanId !== 'all') {
+    if (salesmanId === 'unassigned' || salesmanId === 'none' || salesmanId === '0') {
+      where.salesmanId = null;
+    } else {
+      where.salesmanId = parseInt(salesmanId);
+    }
+  }
   if (customerId && customerId !== 'all') where.customerId = parseInt(customerId);
 
   if (status && status !== 'all') {
@@ -536,10 +545,14 @@ exports.getSalesAnalyticsReport = asyncHandler(async (req, res) => {
   if (paymentMethod && paymentMethod !== 'all') {
     const targetMethod = paymentMethod.trim().toLowerCase();
     sales = sales.filter(s => {
-      if (s.payments && s.payments.length > 0) {
-        return s.payments.some(p => p.method && p.method.toLowerCase() === targetMethod);
+      if (targetMethod === 'split') {
+        return (s.paymentMethod && s.paymentMethod.toLowerCase() === 'split') || (s.payments && s.payments.length > 1);
       }
-      return s.paymentMethod && s.paymentMethod.toLowerCase() === targetMethod;
+      if (s.payments && s.payments.length > 0) {
+        return s.payments.some(p => p.method && p.method.toLowerCase().includes(targetMethod)) ||
+               (s.paymentMethod && s.paymentMethod.toLowerCase().includes(targetMethod));
+      }
+      return s.paymentMethod && s.paymentMethod.toLowerCase().includes(targetMethod);
     });
   }
 
@@ -858,9 +871,10 @@ exports.getSalesAnalyticsReport = asyncHandler(async (req, res) => {
   const paymentRecords = [];
   sales.forEach(s => {
     if (s.payments && s.payments.length > 0) {
-      s.payments.forEach(p => {
+      s.payments.forEach((p, pIdx) => {
         paymentRecords.push({
-          id: p.id,
+          id: `pay_${p.id}_${s.id}_${pIdx}`,
+          rawId: p.id,
           reference: p.reference || s.invoiceNumber,
           invoiceNumber: s.invoiceNumber,
           customer: s.customer?.name || 'Walk-in',
@@ -873,7 +887,8 @@ exports.getSalesAnalyticsReport = asyncHandler(async (req, res) => {
       });
     } else if (s.paymentMethod && s.status !== 'cancelled') {
       paymentRecords.push({
-        id: s.id,
+        id: `sale_pay_${s.id}`,
+        rawId: s.id,
         reference: s.invoiceNumber,
         invoiceNumber: s.invoiceNumber,
         customer: s.customer?.name || 'Walk-in',

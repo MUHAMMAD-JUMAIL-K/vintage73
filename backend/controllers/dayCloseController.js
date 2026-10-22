@@ -1,41 +1,17 @@
 const prisma = require('../config/prisma');
 const asyncHandler = require('../middleware/asyncHandler');
-const { getBranchActiveBusinessDate } = require('../utils/businessDateHelper');
-
-// TIMEZONE: Asia/Kolkata (IST, UTC+5:30)
-const IST_TIMEZONE = 'Asia/Kolkata';
-
-// Helper to format date to YYYY-MM-DD string in Asia/Kolkata (IST) timezone
-const getLocalDateString = (d = new Date()) => {
-  return new Intl.DateTimeFormat('en-CA', { timeZone: IST_TIMEZONE }).format(new Date(d));
-};
-
-// Helper to get Date object at start of UTC day for @db.Date storage
-const getUtcDateObj = (dateStr) => {
-  const [y, m, d] = dateStr.split('-').map(Number);
-  return new Date(Date.UTC(y, m - 1, d));
-};
-
-// Helper to format date for UI display (DD/MM/YYYY)
-const formatDisplayDate = (dateStr) => {
-  if (!dateStr) return '';
-  const [y, m, d] = dateStr.split('-');
-  return `${d}/${m}/${y}`;
-};
-
-// Helper to parse start of day in IST (00:00:00.000+05:30)
-const parseBusinessDateStart = (dateStr) => {
-  if (!dateStr) return null;
-  const clean = dateStr.includes('T') ? dateStr.split('T')[0] : dateStr;
-  return new Date(`${clean}T00:00:00.000+05:30`);
-};
-
-// Helper to parse end of day in IST (23:59:59.999+05:30)
-const parseBusinessDateEnd = (dateStr) => {
-  if (!dateStr) return null;
-  const clean = dateStr.includes('T') ? dateStr.split('T')[0] : dateStr;
-  return new Date(`${clean}T23:59:59.999+05:30`);
-};
+const {
+  getBranchActiveBusinessDate,
+  getLocalDateString,
+  getUtcDateObj,
+  formatDisplayDate
+} = require('../utils/businessDateHelper');
+const {
+  findPreviousClosedSession,
+  calculateSessionCashDrawer,
+  parseBusinessDateStart,
+  parseBusinessDateEnd
+} = require('../utils/cashDrawerHelper');
 
 // Resolves effective branch id respecting user permissions
 const resolveEffectiveBranchId = async (req) => {
@@ -80,59 +56,12 @@ const getDayCloseStatus = asyncHandler(async (req, res) => {
 
   // Determine authoritative active business date
   const activeDateInfo = await getBranchActiveBusinessDate(targetBranchId);
-  // If specific date requested in query and user is admin or viewing history, allow inspecting that date
   const selectedDateStr = req.query.date || activeDateInfo.dateStr;
-  const selectedUtc = getUtcDateObj(selectedDateStr);
 
-  // Fetch or find DayClose record for this branch and date
-  const dayCloseRecord = await prisma.dayClose.findUnique({
-    where: {
-      branchId_businessDate: {
-        branchId: targetBranchId,
-        businessDate: selectedUtc
-      }
-    },
-    include: {
-      branch: { select: { id: true, name: true } },
-      terminal: { select: { id: true, terminalCode: true, name: true } },
-      openedBy: { select: { id: true, name: true, username: true } },
-      openingApprovedBy: { select: { id: true, name: true, username: true } },
-      finalizedBy: { select: { id: true, name: true, username: true } },
-      exceptionApprovedBy: { select: { id: true, name: true, username: true } }
-    }
-  });
+  // Calculate comprehensive cash drawer and session status
+  const drawer = await calculateSessionCashDrawer(targetBranchId, selectedDateStr);
 
-  // Find previous closed day reference to determine expected opening cash
-  const previousClosedDay = await prisma.dayClose.findFirst({
-    where: {
-      branchId: targetBranchId,
-      status: { in: ['CLOSED', 'ADMIN_CLOSED'] },
-      businessDate: { lt: selectedUtc }
-    },
-    orderBy: { businessDate: 'desc' },
-    select: {
-      id: true,
-      businessDate: true,
-      physicalCash: true,
-      closingExpectedCash: true,
-      finalizedAt: true
-    }
-  });
-
-  const previousClosingCash = previousClosedDay
-    ? Number(previousClosedDay.physicalCash || previousClosedDay.closingExpectedCash || 0)
-    : 0;
-
-  const isClosed = dayCloseRecord && (dayCloseRecord.status === 'CLOSED' || dayCloseRecord.status === 'ADMIN_CLOSED');
-  const isOpen = dayCloseRecord && dayCloseRecord.status === 'OPEN';
-  const isClosingPending = dayCloseRecord && dayCloseRecord.status === 'CLOSING_PENDING';
-  
-  // Status: NOT_OPENED, OPEN, CLOSING_PENDING, CLOSED
-  let currentStatus = 'NOT_OPENED';
-  if (isClosed) currentStatus = 'CLOSED';
-  else if (isClosingPending) currentStatus = 'CLOSING_PENDING';
-  else if (isOpen) currentStatus = 'OPEN';
-  else if (dayCloseRecord) currentStatus = dayCloseRecord.status;
+  const dayCloseRecord = drawer.dayCloseRecord;
 
   res.json({
     success: true,
@@ -147,45 +76,70 @@ const getDayCloseStatus = asyncHandler(async (req, res) => {
     hasPendingPrevious: activeDateInfo.isPendingPrevious,
     pendingDate: activeDateInfo.isPendingPrevious ? activeDateInfo.dateStr : null,
     pendingDateDisplay: activeDateInfo.isPendingPrevious ? formatDisplayDate(activeDateInfo.dateStr) : null,
-    status: currentStatus,
+    status: drawer.status,
     branch: branch ? {
       id: branch.id,
       name: branch.name,
       currencyCode: branch.currencyCode,
       currencySymbol: branch.currencySymbol
     } : null,
-    dayCloseId: dayCloseRecord?.id || null,
-    terminalId: dayCloseRecord?.terminalId || null,
-    terminalName: dayCloseRecord?.terminal?.name || null,
+    dayCloseId: drawer.dayCloseId,
+    terminalId: drawer.terminalId,
+    terminalName: drawer.terminalName,
+
     // Day Opening Details
-    openedBy: dayCloseRecord?.openedBy ? (dayCloseRecord.openedBy.name || dayCloseRecord.openedBy.username) : null,
+    openedBy: drawer.openedBy,
     openedById: dayCloseRecord?.openedById || null,
-    openedAt: dayCloseRecord?.openedAt || null,
-    openingCash: Number(dayCloseRecord?.openingCash || dayCloseRecord?.actualOpeningCash || 0),
-    previousClosingCash: dayCloseRecord ? Number(dayCloseRecord.previousClosingCash || previousClosingCash) : previousClosingCash,
-    previousClosingDate: previousClosedDay ? getLocalDateString(previousClosedDay.businessDate) : null,
-    previousClosingDateDisplay: previousClosedDay ? formatDisplayDate(getLocalDateString(previousClosedDay.businessDate)) : null,
-    additionalCashAdded: Number(dayCloseRecord?.additionalCashAdded || 0),
-    cashRemovedBeforeOpening: Number(dayCloseRecord?.cashRemovedBeforeOpening || 0),
-    expectedOpeningCash: Number(dayCloseRecord?.expectedOpeningCash || previousClosingCash),
-    actualOpeningCash: Number(dayCloseRecord?.actualOpeningCash || dayCloseRecord?.openingCash || 0),
-    openingDifference: Number(dayCloseRecord?.openingDifference || 0),
-    openingDiscrepancyReason: dayCloseRecord?.openingDiscrepancyReason || null,
-    openingApprovedBy: dayCloseRecord?.openingApprovedBy ? (dayCloseRecord.openingApprovedBy.name || dayCloseRecord.openingApprovedBy.username) : null,
-    openingDenominations: dayCloseRecord?.openingDenominations || null,
-    openingRemarks: dayCloseRecord?.openingRemarks || null,
+    openedAt: drawer.openedAt,
+    openingCash: drawer.openingCash,
+    previousClosingCash: drawer.previousClosingCash,
+    previousClosingDate: drawer.previousClosingDate,
+    previousClosingDateDisplay: drawer.previousClosingDateDisplay,
+    previousClosingId: drawer.previousClosingId,
+    hasPreviousClosedDay: drawer.hasPreviousClosedDay,
+    additionalCashAdded: drawer.additionalCashAdded,
+    cashRemovedBeforeOpening: drawer.cashRemovedBeforeOpening,
+    expectedOpeningCash: drawer.expectedOpeningCash,
+    actualOpeningCash: drawer.actualOpeningCash,
+    openingDifference: drawer.openingDifference,
+    openingDiscrepancyReason: drawer.openingDiscrepancyReason,
+    openingApprovedBy: drawer.openingApprovedBy,
+    openingDenominations: drawer.openingDenominations,
+    openingRemarks: drawer.openingRemarks,
+
+    // Prior-Day Discrepancy flags (if Day 1 was corrected after Day 2 opened)
+    hasPriorDayDiscrepancy: drawer.hasPriorDayDiscrepancy,
+    priorDayDiscrepancyAmount: drawer.priorDayDiscrepancyAmount,
+    priorDayCurrentClosingCash: drawer.priorDayCurrentClosingCash,
+    priorDayRecordedClosingCash: drawer.priorDayRecordedClosingCash,
+
+    // Real-Time Cash Movements
+    cashSalesCollections: drawer.cashSalesCollections,
+    otherCashReceipts: drawer.otherCashReceipts,
+    totalCashReceived: drawer.totalCashReceived,
+    cashExpenses: drawer.cashExpenses,
+    cashRefunds: drawer.cashRefunds,
+    supplierCashPayments: drawer.supplierCashPayments,
+    totalCashPaid: drawer.totalCashPaid,
+    transfersIn: drawer.transfersIn,
+    transfersOut: drawer.transfersOut,
+    netTransfers: drawer.netTransfers,
+
     // Verification & Closing Details
     verificationChecks: dayCloseRecord?.verificationChecks || null,
     verificationExceptions: dayCloseRecord?.verificationExceptions || null,
     exceptionApprovedBy: dayCloseRecord?.exceptionApprovedBy ? (dayCloseRecord.exceptionApprovedBy.name || dayCloseRecord.exceptionApprovedBy.username) : null,
     exceptionApprovalReason: dayCloseRecord?.exceptionApprovalReason || null,
-    closingExpectedCash: dayCloseRecord?.closingExpectedCash ? Number(dayCloseRecord.closingExpectedCash) : null,
-    physicalCash: dayCloseRecord?.physicalCash ? Number(dayCloseRecord.physicalCash) : null,
-    cashDifference: dayCloseRecord?.cashDifference ? Number(dayCloseRecord.cashDifference) : null,
-    closingDenominations: dayCloseRecord?.closingDenominations || null,
-    notes: dayCloseRecord?.notes || null,
-    closedAt: dayCloseRecord?.finalizedAt || null,
-    closedBy: dayCloseRecord?.finalizedBy ? (dayCloseRecord.finalizedBy.name || dayCloseRecord.finalizedBy.username) : null
+    closingExpectedCash: drawer.expectedClosingCash,
+    physicalCash: drawer.physicalCash,
+    cashDifference: drawer.cashDifference,
+    closingDenominations: drawer.closingDenominations,
+    notes: drawer.notes,
+    closedAt: drawer.finalizedAt,
+    closedBy: drawer.finalizedBy,
+
+    // Audit Trail
+    adjustments: drawer.adjustments
   });
 });
 
@@ -233,25 +187,77 @@ const openDay = asyncHandler(async (req, res) => {
     throw new Error(`Business date ${formatDisplayDate(dateStr)} is already closed.`);
   }
 
-  // Find previous closed day reference
-  const previousClosedDay = await prisma.dayClose.findFirst({
-    where: {
-      branchId: targetBranchId,
-      status: { in: ['CLOSED', 'ADMIN_CLOSED'] },
-      businessDate: { lt: dateUtc }
-    },
-    orderBy: { businessDate: 'desc' }
-  });
+  // Rule: Chronological Check: Verify no earlier date before dateStr is unclosed
+  const sixtyDaysAgo = new Date(dateUtc);
+  sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
 
-  const prevCash = inputPrevCash !== undefined
-    ? parseFloat(inputPrevCash) || 0
-    : (previousClosedDay ? Number(previousClosedDay.physicalCash || previousClosedDay.closingExpectedCash || 0) : 0);
+  const [pastSales, pastOpenedSessions] = await Promise.all([
+    prisma.sale.findMany({
+      where: {
+        branchId: targetBranchId,
+        saleDate: { gte: sixtyDaysAgo, lt: dateUtc },
+        status: { not: 'cancelled' }
+      },
+      select: { saleDate: true },
+      orderBy: { saleDate: 'asc' }
+    }),
+    prisma.dayClose.findMany({
+      where: {
+        branchId: targetBranchId,
+        businessDate: { gte: sixtyDaysAgo, lt: dateUtc },
+        status: { notIn: ['CLOSED', 'ADMIN_CLOSED'] }
+      },
+      select: { businessDate: true },
+      orderBy: { businessDate: 'asc' }
+    })
+  ]);
+
+  const distinctPastDates = Array.from(new Set([
+    ...pastSales.map(s => getLocalDateString(s.saleDate)),
+    ...pastOpenedSessions.map(o => getLocalDateString(o.businessDate))
+  ])).sort((a, b) => a.localeCompare(b));
+
+  for (const pDateStr of distinctPastDates) {
+    const pUtc = getUtcDateObj(pDateStr);
+    const prevDayRecord = await prisma.dayClose.findUnique({
+      where: {
+        branchId_businessDate: {
+          branchId: targetBranchId,
+          businessDate: pUtc
+        }
+      }
+    });
+
+    if (!prevDayRecord || (prevDayRecord.status !== 'CLOSED' && prevDayRecord.status !== 'ADMIN_CLOSED')) {
+      res.status(400);
+      throw new Error(`Day Close Pending! You have not closed the business date ${formatDisplayDate(pDateStr)}. Please complete the pending Day Close before proceeding to a later date.`);
+    }
+  }
+
+  // Automatic Opening Balance Carry-Forward:
+  // Retrieve the immediately preceding valid closed business session
+  const prevSession = await findPreviousClosedSession(targetBranchId, dateUtc, terminalId);
+
+  let prevCash = 0;
+  if (prevSession.exists && prevSession.closingCash !== null) {
+    // Automatically carry forward previous closing balance
+    prevCash = Number(prevSession.closingCash);
+  } else if (inputPrevCash !== undefined && inputPrevCash !== null && inputPrevCash !== '') {
+    // First business day or fresh terminal: allow authorized user to establish initial opening balance
+    prevCash = parseFloat(inputPrevCash) || 0;
+  } else {
+    prevCash = 0;
+  }
 
   const addCash = parseFloat(inputAddCash) || 0;
   const remCash = parseFloat(inputRemCash) || 0;
-  const actualCash = parseFloat(inputActualCash) || 0;
-
   const expectedOpeningCash = Number((prevCash + addCash - remCash).toFixed(2));
+
+  // If actualOpeningCash is not provided, default to expectedOpeningCash
+  const actualCash = (inputActualCash !== undefined && inputActualCash !== null && inputActualCash !== '')
+    ? parseFloat(inputActualCash)
+    : expectedOpeningCash;
+
   const openingDifference = Number((actualCash - expectedOpeningCash).toFixed(2));
 
   // If opening difference is not zero, require an explanation
@@ -260,57 +266,512 @@ const openDay = asyncHandler(async (req, res) => {
     throw new Error(`Opening difference of ₹${openingDifference.toFixed(2)} requires an explanation before opening.`);
   }
 
-  const dayCloseRecord = await prisma.dayClose.upsert({
+  // Perform database upsert in a safe transaction
+  const dayCloseRecord = await prisma.$transaction(async (tx) => {
+    return await tx.dayClose.upsert({
+      where: {
+        branchId_businessDate: {
+          branchId: targetBranchId,
+          businessDate: dateUtc
+        }
+      },
+      update: {
+        status: 'OPEN',
+        terminalId: terminalId ? parseInt(terminalId) : undefined,
+        openedById: req.user.id,
+        openedAt: existing?.openedAt || new Date(),
+        openingCash: actualCash,
+        previousClosingCash: prevCash,
+        additionalCashAdded: addCash,
+        cashRemovedBeforeOpening: remCash,
+        expectedOpeningCash,
+        actualOpeningCash: actualCash,
+        openingDifference,
+        openingDiscrepancyReason: openingDiscrepancyReason || null,
+        openingRemarks: openingRemarks || null,
+        openingDenominations: openingDenominations || null
+      },
+      create: {
+        branchId: targetBranchId,
+        businessDate: dateUtc,
+        status: 'OPEN',
+        terminalId: terminalId ? parseInt(terminalId) : null,
+        openedById: req.user.id,
+        openedAt: new Date(),
+        openingCash: actualCash,
+        previousClosingCash: prevCash,
+        additionalCashAdded: addCash,
+        cashRemovedBeforeOpening: remCash,
+        expectedOpeningCash,
+        actualOpeningCash: actualCash,
+        openingDifference,
+        openingDiscrepancyReason: openingDiscrepancyReason || null,
+        openingRemarks: openingRemarks || null,
+        openingDenominations: openingDenominations || null,
+        adjustments: []
+      },
+      include: {
+        openedBy: { select: { id: true, name: true, username: true } },
+        branch: { select: { id: true, name: true } }
+      }
+    });
+  });
+
+  // Calculate and store initial expected closing cash
+  const updatedDrawer = await calculateSessionCashDrawer(targetBranchId, dateStr);
+  await prisma.dayClose.update({
+    where: { id: dayCloseRecord.id },
+    data: { closingExpectedCash: updatedDrawer.expectedClosingCash }
+  });
+
+  res.json({
+    success: true,
+    message: `Business Day ${formatDisplayDate(dateStr)} opened successfully with balance ₹${actualCash.toFixed(2)}.`,
+    dayClose: {
+      ...dayCloseRecord,
+      closingExpectedCash: updatedDrawer.expectedClosingCash
+    }
+  });
+});
+
+/**
+ * @desc Edit opening amount while session is OPEN with mandatory reason and audit trail
+ * @route POST /api/day-close/edit-opening
+ * @access Private (Authorized users)
+ */
+const editOpeningAmount = asyncHandler(async (req, res) => {
+  const targetBranchId = await resolveEffectiveBranchId(req);
+  const {
+    businessDate: inputDateStr,
+    actualOpeningCash: inputCorrectedCash,
+    reason
+  } = req.body;
+
+  if (inputCorrectedCash === undefined || inputCorrectedCash === null || isNaN(inputCorrectedCash)) {
+    res.status(400);
+    throw new Error('A valid numeric opening cash amount is required.');
+  }
+
+  const correctedCash = parseFloat(inputCorrectedCash);
+  if (correctedCash < 0) {
+    res.status(400);
+    throw new Error('Opening cash amount cannot be negative.');
+  }
+
+  if (!reason || !reason.trim()) {
+    res.status(400);
+    throw new Error('A mandatory reason is required to edit the opening amount.');
+  }
+
+  const activeDateInfo = await getBranchActiveBusinessDate(targetBranchId);
+  const dateStr = inputDateStr || activeDateInfo.dateStr;
+  const dateUtc = getUtcDateObj(dateStr);
+
+  const existing = await prisma.dayClose.findUnique({
     where: {
       branchId_businessDate: {
         branchId: targetBranchId,
         businessDate: dateUtc
       }
-    },
-    update: {
-      status: 'OPEN',
-      terminalId: terminalId ? parseInt(terminalId) : undefined,
-      openedById: req.user.id,
-      openedAt: new Date(),
-      openingCash: actualCash,
-      previousClosingCash: prevCash,
-      additionalCashAdded: addCash,
-      cashRemovedBeforeOpening: remCash,
-      expectedOpeningCash,
-      actualOpeningCash: actualCash,
-      openingDifference,
-      openingDiscrepancyReason: openingDiscrepancyReason || null,
-      openingRemarks: openingRemarks || null,
-      openingDenominations: openingDenominations || null
-    },
-    create: {
-      branchId: targetBranchId,
-      businessDate: dateUtc,
-      status: 'OPEN',
-      terminalId: terminalId ? parseInt(terminalId) : null,
-      openedById: req.user.id,
-      openedAt: new Date(),
-      openingCash: actualCash,
-      previousClosingCash: prevCash,
-      additionalCashAdded: addCash,
-      cashRemovedBeforeOpening: remCash,
-      expectedOpeningCash,
-      actualOpeningCash: actualCash,
-      openingDifference,
-      openingDiscrepancyReason: openingDiscrepancyReason || null,
-      openingRemarks: openingRemarks || null,
-      openingDenominations: openingDenominations || null
-    },
-    include: {
-      openedBy: { select: { id: true, name: true, username: true } },
-      branch: { select: { id: true, name: true } }
+    }
+  });
+
+  if (!existing) {
+    res.status(404);
+    throw new Error(`Business date ${formatDisplayDate(dateStr)} has not been opened yet.`);
+  }
+
+  if (existing.status === 'CLOSED' || existing.status === 'ADMIN_CLOSED') {
+    res.status(400);
+    throw new Error('This business day is already closed. Please use the post-closing adjustment workflow.');
+  }
+
+  const prevCash = Number(existing.previousClosingCash || 0);
+  const addCash = Number(existing.additionalCashAdded || 0);
+  const remCash = Number(existing.cashRemovedBeforeOpening || 0);
+  const expectedOpeningCash = Number((prevCash + addCash - remCash).toFixed(2));
+  const newOpeningDifference = Number((correctedCash - expectedOpeningCash).toFixed(2));
+  const oldActualOpeningCash = Number(existing.actualOpeningCash ?? existing.openingCash ?? 0);
+
+  // Build audit trail entry
+  const auditEntry = {
+    id: `adj-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+    type: 'OPENING_AMOUNT_EDIT',
+    field: 'actualOpeningCash',
+    oldValue: oldActualOpeningCash,
+    newValue: correctedCash,
+    expectedValue: expectedOpeningCash,
+    difference: newOpeningDifference,
+    reason: reason.trim(),
+    userId: req.user.id,
+    userName: req.user.name || req.user.username,
+    userRole: req.user.role,
+    timestamp: new Date().toISOString()
+  };
+
+  const existingAdjustments = Array.isArray(existing.adjustments) ? existing.adjustments : [];
+  existingAdjustments.push(auditEntry);
+
+  const updatedRecord = await prisma.$transaction(async (tx) => {
+    return await tx.dayClose.update({
+      where: { id: existing.id },
+      data: {
+        openingCash: correctedCash,
+        actualOpeningCash: correctedCash,
+        openingDifference: newOpeningDifference,
+        openingDiscrepancyReason: newOpeningDifference !== 0 ? reason.trim() : existing.openingDiscrepancyReason,
+        adjustments: existingAdjustments
+      },
+      include: {
+        openedBy: { select: { id: true, name: true, username: true } },
+        branch: { select: { id: true, name: true } }
+      }
+    });
+  });
+
+  // Recalculate cash drawer and update dependent expected closing cash
+  const updatedDrawer = await calculateSessionCashDrawer(targetBranchId, dateStr);
+  await prisma.dayClose.update({
+    where: { id: updatedRecord.id },
+    data: {
+      closingExpectedCash: updatedDrawer.expectedClosingCash,
+      cashDifference: updatedRecord.physicalCash !== null
+        ? Number((Number(updatedRecord.physicalCash) - updatedDrawer.expectedClosingCash).toFixed(2))
+        : null
     }
   });
 
   res.json({
     success: true,
-    message: `Business Day ${formatDisplayDate(dateStr)} opened successfully.`,
-    dayClose: dayCloseRecord
+    message: `Opening amount successfully updated to ₹${correctedCash.toFixed(2)}.`,
+    dayClose: {
+      ...updatedRecord,
+      closingExpectedCash: updatedDrawer.expectedClosingCash,
+      cashDifference: updatedRecord.physicalCash !== null
+        ? Number((Number(updatedRecord.physicalCash) - updatedDrawer.expectedClosingCash).toFixed(2))
+        : null
+    },
+    auditEntry
+  });
+});
+
+/**
+ * @desc Edit physical closing cash count before final closure with mandatory reason
+ * @route POST /api/day-close/edit-closing-cash
+ * @access Private (Authorized users)
+ */
+const editClosingCash = asyncHandler(async (req, res) => {
+  const targetBranchId = await resolveEffectiveBranchId(req);
+  const {
+    businessDate: inputDateStr,
+    physicalCash: inputPhysicalCash,
+    closingDenominations,
+    notes,
+    reason
+  } = req.body;
+
+  if (inputPhysicalCash === undefined || inputPhysicalCash === null || isNaN(inputPhysicalCash)) {
+    res.status(400);
+    throw new Error('A valid numeric physical cash amount is required.');
+  }
+
+  const physicalCash = parseFloat(inputPhysicalCash);
+  if (physicalCash < 0) {
+    res.status(400);
+    throw new Error('Physical cash count cannot be negative.');
+  }
+
+  const activeDateInfo = await getBranchActiveBusinessDate(targetBranchId);
+  const dateStr = inputDateStr || activeDateInfo.dateStr;
+  const dateUtc = getUtcDateObj(dateStr);
+
+  const existing = await prisma.dayClose.findUnique({
+    where: {
+      branchId_businessDate: {
+        branchId: targetBranchId,
+        businessDate: dateUtc
+      }
+    }
+  });
+
+  if (!existing) {
+    res.status(404);
+    throw new Error(`Business date ${formatDisplayDate(dateStr)} has not been opened yet.`);
+  }
+
+  if (existing.status === 'CLOSED' || existing.status === 'ADMIN_CLOSED') {
+    res.status(400);
+    throw new Error('This business day is already closed. Please use the post-closing adjustment workflow.');
+  }
+
+  // Recalculate authoritative expected closing cash from transactions
+  const drawer = await calculateSessionCashDrawer(targetBranchId, dateStr);
+  const expectedClosingCash = drawer.expectedClosingCash;
+  const cashDifference = Number((physicalCash - expectedClosingCash).toFixed(2));
+
+  const oldPhysicalCash = existing.physicalCash !== null ? Number(existing.physicalCash) : null;
+
+  // Build audit trail entry if changing an existing count
+  const existingAdjustments = Array.isArray(existing.adjustments) ? existing.adjustments : [];
+  let auditEntry = null;
+
+  if (oldPhysicalCash !== null && Math.abs(oldPhysicalCash - physicalCash) > 0.01) {
+    if (!reason || !reason.trim()) {
+      res.status(400);
+      throw new Error('A mandatory reason is required to correct an existing physical cash count.');
+    }
+    auditEntry = {
+      id: `adj-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+      type: 'CLOSING_CASH_EDIT',
+      field: 'physicalCash',
+      oldValue: oldPhysicalCash,
+      newValue: physicalCash,
+      expectedClosingCash,
+      cashDifference,
+      reason: reason.trim(),
+      userId: req.user.id,
+      userName: req.user.name || req.user.username,
+      userRole: req.user.role,
+      timestamp: new Date().toISOString()
+    };
+    existingAdjustments.push(auditEntry);
+  }
+
+  const updatedRecord = await prisma.$transaction(async (tx) => {
+    return await tx.dayClose.update({
+      where: { id: existing.id },
+      data: {
+        closingExpectedCash: expectedClosingCash,
+        physicalCash,
+        cashDifference,
+        closingDenominations: closingDenominations !== undefined ? closingDenominations : existing.closingDenominations,
+        notes: notes !== undefined ? notes : existing.notes,
+        adjustments: existingAdjustments
+      },
+      include: {
+        openedBy: { select: { id: true, name: true, username: true } },
+        branch: { select: { id: true, name: true } }
+      }
+    });
+  });
+
+  res.json({
+    success: true,
+    message: `Physical cash count updated to ₹${physicalCash.toFixed(2)}. Difference: ₹${cashDifference.toFixed(2)}.`,
+    dayClose: updatedRecord,
+    auditEntry
+  });
+});
+
+/**
+ * @desc Post-Closing Adjustment or Reopening workflow for closed days (Admin only)
+ * @route POST /api/day-close/post-close-adjust
+ * @access Private (Admin only)
+ */
+const postCloseAdjust = asyncHandler(async (req, res) => {
+  if (req.user.role !== 'admin') {
+    res.status(403);
+    throw new Error('Only administrators can perform post-closing adjustments or reopen a closed day.');
+  }
+
+  const targetBranchId = await resolveEffectiveBranchId(req);
+  const {
+    businessDate: inputDateStr,
+    action, // 'REOPEN', 'ADJUST_AMOUNTS', 'RECONCILE_PRIOR_DAY'
+    reason,
+    correctedOpeningCash,
+    correctedClosingCash
+  } = req.body;
+
+  if (!reason || !reason.trim()) {
+    res.status(400);
+    throw new Error('A detailed reason is required for any post-closing adjustment or reopening.');
+  }
+
+  const dateStr = inputDateStr;
+  if (!dateStr) {
+    res.status(400);
+    throw new Error('Business date is required.');
+  }
+
+  const dateUtc = getUtcDateObj(dateStr);
+
+  const existing = await prisma.dayClose.findUnique({
+    where: {
+      branchId_businessDate: {
+        branchId: targetBranchId,
+        businessDate: dateUtc
+      }
+    }
+  });
+
+  if (!existing) {
+    res.status(404);
+    throw new Error(`Business session for date ${formatDisplayDate(dateStr)} does not exist.`);
+  }
+
+  const existingAdjustments = Array.isArray(existing.adjustments) ? existing.adjustments : [];
+
+  if (action === 'REOPEN') {
+    // Reopen business day
+    const auditEntry = {
+      id: `adj-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+      type: 'DAY_REOPENED',
+      previousStatus: existing.status,
+      closedAt: existing.finalizedAt,
+      closedById: existing.finalizedById,
+      reason: reason.trim(),
+      userId: req.user.id,
+      userName: req.user.name || req.user.username,
+      userRole: req.user.role,
+      timestamp: new Date().toISOString()
+    };
+    existingAdjustments.push(auditEntry);
+
+    const updated = await prisma.dayClose.update({
+      where: { id: existing.id },
+      data: {
+        status: 'OPEN',
+        finalizedAt: null,
+        finalizedById: null,
+        adjustments: existingAdjustments
+      }
+    });
+
+    return res.json({
+      success: true,
+      message: `Business day ${formatDisplayDate(dateStr)} has been reopened.`,
+      dayClose: updated,
+      auditEntry
+    });
+  }
+
+  if (action === 'ADJUST_AMOUNTS') {
+    const oldOpening = Number(existing.actualOpeningCash ?? existing.openingCash ?? 0);
+    const oldClosing = existing.physicalCash !== null ? Number(existing.physicalCash) : null;
+
+    const newOpening = correctedOpeningCash !== undefined && correctedOpeningCash !== null
+      ? parseFloat(correctedOpeningCash)
+      : oldOpening;
+
+    const newClosing = correctedClosingCash !== undefined && correctedClosingCash !== null
+      ? parseFloat(correctedClosingCash)
+      : oldClosing;
+
+    // Recalculate expected closing balance
+    const drawer = await calculateSessionCashDrawer(targetBranchId, dateStr);
+    const expectedClosingCash = Number((newOpening + drawer.totalCashReceived - drawer.totalCashPaid + drawer.transfersIn - drawer.transfersOut).toFixed(2));
+    const cashDifference = newClosing !== null ? Number((newClosing - expectedClosingCash).toFixed(2)) : null;
+
+    const auditEntry = {
+      id: `adj-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+      type: 'POST_CLOSE_ADJUSTMENT',
+      oldOpeningCash: oldOpening,
+      newOpeningCash: newOpening,
+      oldPhysicalCash: oldClosing,
+      newPhysicalCash: newClosing,
+      expectedClosingCash,
+      cashDifference,
+      reason: reason.trim(),
+      userId: req.user.id,
+      userName: req.user.name || req.user.username,
+      userRole: req.user.role,
+      timestamp: new Date().toISOString()
+    };
+    existingAdjustments.push(auditEntry);
+
+    const updated = await prisma.dayClose.update({
+      where: { id: existing.id },
+      data: {
+        openingCash: newOpening,
+        actualOpeningCash: newOpening,
+        physicalCash: newClosing,
+        closingExpectedCash: expectedClosingCash,
+        cashDifference,
+        adjustments: existingAdjustments
+      }
+    });
+
+    return res.json({
+      success: true,
+      message: `Post-closing adjustments applied for ${formatDisplayDate(dateStr)}.`,
+      dayClose: updated,
+      auditEntry
+    });
+  }
+
+  if (action === 'RECONCILE_PRIOR_DAY') {
+    // Controlled reconciliation when prior day closing was adjusted after this day opened
+    const prevSession = await findPreviousClosedSession(targetBranchId, dateUtc, existing.terminalId);
+    if (!prevSession.exists || prevSession.closingCash === null) {
+      res.status(400);
+      throw new Error('No prior closed session found to reconcile against.');
+    }
+
+    const currentPriorClose = prevSession.closingCash;
+    const oldRecordedPriorClose = Number(existing.previousClosingCash || 0);
+
+    const auditEntry = {
+      id: `adj-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+      type: 'PRIOR_DAY_RECONCILIATION',
+      priorBusinessDate: prevSession.businessDateStr,
+      oldRecordedPreviousClose: oldRecordedPriorClose,
+      currentActualPreviousClose: currentPriorClose,
+      variance: Number((currentPriorClose - oldRecordedPriorClose).toFixed(2)),
+      reason: reason.trim(),
+      userId: req.user.id,
+      userName: req.user.name || req.user.username,
+      userRole: req.user.role,
+      timestamp: new Date().toISOString()
+    };
+    existingAdjustments.push(auditEntry);
+
+    const updated = await prisma.dayClose.update({
+      where: { id: existing.id },
+      data: {
+        previousClosingCash: currentPriorClose,
+        adjustments: existingAdjustments
+      }
+    });
+
+    return res.json({
+      success: true,
+      message: `Prior day adjustment reconciled for ${formatDisplayDate(dateStr)}.`,
+      dayClose: updated,
+      auditEntry
+    });
+  }
+
+  res.status(400);
+  throw new Error(`Invalid action "${action}". Allowed: REOPEN, ADJUST_AMOUNTS, RECONCILE_PRIOR_DAY.`);
+});
+
+/**
+ * @desc Historical Opening and Closing Report for a specific business date
+ * @route GET /api/day-close/session-report
+ * @access Private
+ */
+const getSessionReport = asyncHandler(async (req, res) => {
+  const targetBranchId = await resolveEffectiveBranchId(req);
+  const activeDateInfo = await getBranchActiveBusinessDate(targetBranchId);
+  const dateStr = req.query.date || activeDateInfo.dateStr;
+
+  const branch = await prisma.branch.findUnique({
+    where: { id: targetBranchId },
+    select: { id: true, name: true, currencyCode: true, currencySymbol: true }
+  });
+
+  const drawer = await calculateSessionCashDrawer(targetBranchId, dateStr);
+
+  res.json({
+    success: true,
+    branchId: targetBranchId,
+    branchName: branch?.name || 'Branch',
+    currencySymbol: branch?.currencySymbol || '₹',
+    currencyCode: branch?.currencyCode || 'INR',
+    businessDate: dateStr,
+    businessDateDisplay: formatDisplayDate(dateStr),
+    report: drawer
   });
 });
 
@@ -343,7 +804,10 @@ const getVerificationData = asyncHandler(async (req, res) => {
     }
   });
 
-  // 2. Fetch all sales for this branch and date
+  // 2. Compute authoritative Cash Drawer movements
+  const drawer = await calculateSessionCashDrawer(targetBranchId, dateStr);
+
+  // 3. Fetch all sales for this branch and date
   const sales = await prisma.sale.findMany({
     where: {
       branchId: targetBranchId,
@@ -422,33 +886,6 @@ const getVerificationData = asyncHandler(async (req, res) => {
     }
   });
 
-  // Section C: Cash & Cashbook
-  const openingCash = Number(dayCloseRecord?.actualOpeningCash || dayCloseRecord?.openingCash || 0);
-  const cashSalesReceived = paymentBreakdown.Cash;
-  const additionalCashAdded = Number(dayCloseRecord?.additionalCashAdded || 0);
-
-  // Fetch expenses for this branch and date
-  const expenses = await prisma.expense.findMany({
-    where: {
-      branchId: targetBranchId,
-      date: {
-        gte: startUtc,
-        lte: endUtc
-      }
-    },
-    orderBy: { createdAt: 'asc' }
-  });
-
-  const totalExpenses = expenses.reduce((sum, e) => sum + Number(e.amount || 0), 0);
-  const cashExpenses = totalExpenses; // All logged petty/operating expenses
-
-  // Cash refunds paid on returns
-  const cashRefunds = returnSales
-    .filter(r => (r.paymentMethod || 'Cash').toLowerCase() === 'cash')
-    .reduce((sum, r) => sum + Number(r.totalAmount || 0), 0);
-
-  const expectedClosingCash = Number((openingCash + cashSalesReceived + additionalCashAdded - cashExpenses - cashRefunds).toFixed(2));
-
   // Section D: Inventory & Stock Balance
   let totalUnitsSold = 0;
   completedSales.forEach(s => {
@@ -502,14 +939,7 @@ const getVerificationData = asyncHandler(async (req, res) => {
   };
 
   // Section G: Expenses & Other Entries
-  const expenseList = expenses.map(e => ({
-    id: e.id,
-    title: e.title,
-    category: e.category || 'General',
-    amount: Number(e.amount),
-    description: e.description,
-    date: e.date
-  }));
+  const expenseList = drawer.expenseList;
 
   // Section H: Branch & Session Verification
   const orphanTransactionsCount = sales.filter(s => s.branchId !== targetBranchId).length;
@@ -564,17 +994,30 @@ const getVerificationData = asyncHandler(async (req, res) => {
     cashbook: {
       key: 'cashbook',
       title: 'Cash & Cashbook Reconciliation',
-      summary: `Opening: ₹${openingCash} + Cash Sales: ₹${cashSalesReceived} - Expenses: ₹${cashExpenses} = Expected Closing Cash: ₹${expectedClosingCash}`,
+      summary: `Opening: ₹${drawer.openingCash.toLocaleString('en-IN')} + Receipts: ₹${drawer.totalCashReceived.toLocaleString('en-IN')} - Payments: ₹${drawer.totalCashPaid.toLocaleString('en-IN')} + Transfers: ₹${drawer.netTransfers.toLocaleString('en-IN')} = Expected Closing Cash: ₹${drawer.expectedClosingCash.toLocaleString('en-IN')}`,
       details: {
-        openingCash,
-        cashSalesReceived,
-        additionalCashAdded,
-        cashExpenses,
-        cashRefunds,
-        expectedClosingCash
+        openingCash: drawer.openingCash,
+        previousClosingCash: drawer.previousClosingCash,
+        additionalCashAdded: drawer.additionalCashAdded,
+        cashRemovedBeforeOpening: drawer.cashRemovedBeforeOpening,
+        cashSalesCollections: drawer.cashSalesCollections,
+        otherCashReceipts: drawer.otherCashReceipts,
+        totalCashReceived: drawer.totalCashReceived,
+        cashExpenses: drawer.cashExpenses,
+        cashRefunds: drawer.cashRefunds,
+        supplierCashPayments: drawer.supplierCashPayments,
+        totalCashPaid: drawer.totalCashPaid,
+        transfersIn: drawer.transfersIn,
+        transfersOut: drawer.transfersOut,
+        netTransfers: drawer.netTransfers,
+        expectedClosingCash: drawer.expectedClosingCash,
+        physicalCash: drawer.physicalCash,
+        cashDifference: drawer.cashDifference
       },
-      hasDiscrepancy: false,
-      discrepancyMessage: null,
+      hasDiscrepancy: drawer.cashDifference !== null && Math.abs(drawer.cashDifference) > 10,
+      discrepancyMessage: drawer.cashDifference !== null && Math.abs(drawer.cashDifference) > 10
+        ? `Cash difference of ₹${drawer.cashDifference.toFixed(2)} between physical count and expected balance.`
+        : null,
       isReviewed: Boolean(savedChecks.cashbook?.reviewed),
       reviewedAt: savedChecks.cashbook?.verifiedAt || null,
       reviewedBy: savedChecks.cashbook?.verifiedBy || null,
@@ -639,10 +1082,10 @@ const getVerificationData = asyncHandler(async (req, res) => {
     expenses: {
       key: 'expenses',
       title: 'Expenses & Cash Entries',
-      summary: `${expenses.length} expense entries recorded totaling ₹${totalExpenses.toLocaleString('en-IN')}`,
+      summary: `${expenseList.length} expense entries recorded totaling ₹${drawer.cashExpenses.toLocaleString('en-IN')}`,
       details: {
-        expenseCount: expenses.length,
-        totalExpenses,
+        expenseCount: expenseList.length,
+        totalExpenses: drawer.cashExpenses,
         expenseList
       },
       hasDiscrepancy: false,
@@ -688,7 +1131,8 @@ const getVerificationData = asyncHandler(async (req, res) => {
     canClose: allReviewed && criticalDiscrepancies.length === 0,
     criticalDiscrepancies,
     savedExceptions,
-    expectedClosingCash
+    expectedClosingCash: drawer.expectedClosingCash,
+    drawer
   });
 });
 
@@ -750,7 +1194,8 @@ const saveVerificationProgress = asyncHandler(async (req, res) => {
       status: 'OPEN',
       openedById: req.user.id,
       openedAt: new Date(),
-      verificationChecks: updatedChecks
+      verificationChecks: updatedChecks,
+      adjustments: []
     }
   });
 
@@ -762,7 +1207,7 @@ const saveVerificationProgress = asyncHandler(async (req, res) => {
 });
 
 /**
- * @desc Manager/Admin approval for verification exceptions (e.g. approved cash variance or negative stock)
+ * @desc Manager/Admin approval for verification exceptions
  * @route POST /api/day-close/resolve-exception
  * @access Private (Admin/Manager only)
  */
@@ -820,7 +1265,8 @@ const resolveException = asyncHandler(async (req, res) => {
       status: 'OPEN',
       verificationExceptions: existingExceptions,
       exceptionApprovedById: req.user.id,
-      exceptionApprovalReason: reason.trim()
+      exceptionApprovalReason: reason.trim(),
+      adjustments: []
     }
   });
 
@@ -859,23 +1305,34 @@ const confirmDayClose = asyncHandler(async (req, res) => {
   const dateUtc = getUtcDateObj(dateStr);
 
   // Rule 2: Chronological Check: Verify no earlier date before dateStr is unclosed
-  const thirtyDaysAgo = new Date(dateUtc);
-  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+  const sixtyDaysAgo = new Date(dateUtc);
+  sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
 
-  const pastSales = await prisma.sale.findMany({
-    where: {
-      branchId: targetBranchId,
-      saleDate: {
-        gte: thirtyDaysAgo,
-        lt: dateUtc
+  const [pastSales, pastOpenedSessions] = await Promise.all([
+    prisma.sale.findMany({
+      where: {
+        branchId: targetBranchId,
+        saleDate: { gte: sixtyDaysAgo, lt: dateUtc },
+        status: { not: 'cancelled' }
       },
-      status: { not: 'cancelled' }
-    },
-    select: { saleDate: true },
-    orderBy: { saleDate: 'asc' }
-  });
+      select: { saleDate: true },
+      orderBy: { saleDate: 'asc' }
+    }),
+    prisma.dayClose.findMany({
+      where: {
+        branchId: targetBranchId,
+        businessDate: { gte: sixtyDaysAgo, lt: dateUtc },
+        status: { notIn: ['CLOSED', 'ADMIN_CLOSED'] }
+      },
+      select: { businessDate: true },
+      orderBy: { businessDate: 'asc' }
+    })
+  ]);
 
-  const distinctPastDates = Array.from(new Set(pastSales.map(s => getLocalDateString(s.saleDate))));
+  const distinctPastDates = Array.from(new Set([
+    ...pastSales.map(s => getLocalDateString(s.saleDate)),
+    ...pastOpenedSessions.map(o => getLocalDateString(o.businessDate))
+  ])).sort((a, b) => a.localeCompare(b));
 
   for (const pDateStr of distinctPastDates) {
     const pUtc = getUtcDateObj(pDateStr);
@@ -920,56 +1377,24 @@ const confirmDayClose = asyncHandler(async (req, res) => {
     throw new Error(`Cannot close day: Mandatory verification checklist is incomplete. Missing: ${missingChecks.join(', ')}.`);
   }
 
-  // Calculate actual financial summary for snapshot
-  const startUtc = parseBusinessDateStart(dateStr);
-  const endUtc = parseBusinessDateEnd(dateStr);
+  // Check negative inventory exception
+  const negativeStocks = await prisma.productStock.count({
+    where: { branchId: targetBranchId, quantity: { lt: 0 } }
+  });
 
-  const [sales, expenses, negativeStocks] = await Promise.all([
-    prisma.sale.findMany({
-      where: { branchId: targetBranchId, saleDate: { gte: startUtc, lte: endUtc } },
-      include: { items: true, payments: true }
-    }),
-    prisma.expense.findMany({
-      where: { branchId: targetBranchId, date: { gte: startUtc, lte: endUtc } }
-    }),
-    prisma.productStock.count({
-      where: { branchId: targetBranchId, quantity: { lt: 0 } }
-    })
-  ]);
-
-  // If negative stock exists and no manager approval was recorded, block closing
   if (negativeStocks > 0 && !savedExceptions.inventory) {
     res.status(400);
     throw new Error(`Cannot close day: ${negativeStocks} inventory items have negative stock. A manager must approve this exception.`);
   }
 
-  const completedSales = sales.filter(s => s.status !== 'cancelled' && !s.isReturn);
-  const returnSales = sales.filter(s => s.isReturn && s.status !== 'cancelled');
-  const cancelledSales = sales.filter(s => s.status === 'cancelled');
+  // Authoritative financial calculations
+  const drawer = await calculateSessionCashDrawer(targetBranchId, dateStr);
+  const closingExpectedCash = drawer.expectedClosingCash;
 
-  let cashSales = 0;
-  completedSales.forEach(s => {
-    if (s.payments && s.payments.length > 0) {
-      s.payments.forEach(p => {
-        if ((p.method || 'Cash').toLowerCase() === 'cash') cashSales += Number(p.amount || 0);
-      });
-    } else if ((s.paymentMethod || 'Cash').toLowerCase() === 'cash') {
-      cashSales += Number(s.paidAmount || s.totalAmount || 0);
-    }
-  });
+  const physicalCash = inputPhysicalCash !== undefined && inputPhysicalCash !== null && inputPhysicalCash !== ''
+    ? parseFloat(inputPhysicalCash)
+    : (existingRecord?.physicalCash !== null ? Number(existingRecord.physicalCash) : closingExpectedCash);
 
-  const totalExpenseAmount = expenses.reduce((sum, e) => sum + Number(e.amount || 0), 0);
-  const cashRefunds = returnSales
-    .filter(r => (r.paymentMethod || 'Cash').toLowerCase() === 'cash')
-    .reduce((sum, r) => sum + Number(r.totalAmount || 0), 0);
-
-  const openingCash = Number(existingRecord?.actualOpeningCash || existingRecord?.openingCash || 0);
-  const additionalCashAdded = Number(existingRecord?.additionalCashAdded || 0);
-  const cashRemovedBeforeOpening = Number(existingRecord?.cashRemovedBeforeOpening || 0);
-  const closingExpectedCash = Number((openingCash + cashSales + additionalCashAdded - cashRemovedBeforeOpening - totalExpenseAmount - cashRefunds).toFixed(2));
-  const expectedClosingCash = closingExpectedCash;
-
-  const physicalCash = inputPhysicalCash !== undefined ? parseFloat(inputPhysicalCash) || 0 : closingExpectedCash;
   const cashDifference = Number((physicalCash - closingExpectedCash).toFixed(2));
 
   // If cash difference is significant (> ₹10) and no note / manager approval, warn
@@ -977,6 +1402,18 @@ const confirmDayClose = asyncHandler(async (req, res) => {
     res.status(400);
     throw new Error(`Cash difference of ₹${cashDifference.toFixed(2)} requires an explanation note or manager approval before closing.`);
   }
+
+  const startUtc = parseBusinessDateStart(dateStr);
+  const endUtc = parseBusinessDateEnd(dateStr);
+
+  const sales = await prisma.sale.findMany({
+    where: { branchId: targetBranchId, saleDate: { gte: startUtc, lte: endUtc } },
+    include: { items: true, payments: true }
+  });
+
+  const completedSales = sales.filter(s => s.status !== 'cancelled' && !s.isReturn);
+  const returnSales = sales.filter(s => s.isReturn && s.status !== 'cancelled');
+  const cancelledSales = sales.filter(s => s.status === 'cancelled');
 
   const salesSummary = {
     totalInvoices: completedSales.length,
@@ -986,56 +1423,70 @@ const confirmDayClose = asyncHandler(async (req, res) => {
     totalDiscounts: completedSales.reduce((sum, s) => sum + Number(s.discount || 0) + Number(s.voucherDiscount || 0), 0),
     taxTotal: completedSales.reduce((sum, s) => sum + Number(s.taxAmount || 0), 0),
     netSales: completedSales.reduce((sum, s) => sum + Number(s.totalAmount || 0), 0),
-    cashCollections: cashSales,
-    totalExpenses: totalExpenseAmount,
-    openingCash,
+    cashCollections: drawer.cashSalesCollections,
+    otherCashReceipts: drawer.otherCashReceipts,
+    totalCashReceived: drawer.totalCashReceived,
+    totalExpenses: drawer.cashExpenses,
+    cashRefunds: drawer.cashRefunds,
+    supplierCashPayments: drawer.supplierCashPayments,
+    totalCashPaid: drawer.totalCashPaid,
+    transfersIn: drawer.transfersIn,
+    transfersOut: drawer.transfersOut,
+    netTransfers: drawer.netTransfers,
+    openingCash: drawer.openingCash,
     expectedClosingCash,
     physicalCash,
     cashDifference
   };
 
   // Save Day Close record as CLOSED
-  const dayCloseRecord = await prisma.dayClose.upsert({
-    where: {
-      branchId_businessDate: {
+  const dayCloseRecord = await prisma.$transaction(async (tx) => {
+    return await tx.dayClose.upsert({
+      where: {
+        branchId_businessDate: {
+          branchId: targetBranchId,
+          businessDate: dateUtc
+        }
+      },
+      update: {
+        status: 'CLOSED',
+        closingExpectedCash,
+        physicalCash,
+        cashDifference,
+        closingDenominations: closingDenominations || existingRecord?.closingDenominations || null,
+        salesSummary,
+        notes: notes || existingRecord?.notes || null,
+        finalizedById: req.user.id,
+        finalizedAt: new Date()
+      },
+      create: {
         branchId: targetBranchId,
-        businessDate: dateUtc
+        businessDate: dateUtc,
+        status: 'CLOSED',
+        openingCash: drawer.openingCash,
+        actualOpeningCash: drawer.openingCash,
+        previousClosingCash: drawer.previousClosingCash || 0,
+        expectedOpeningCash: drawer.expectedOpeningCash || 0,
+        closingExpectedCash,
+        physicalCash,
+        cashDifference,
+        closingDenominations: closingDenominations || null,
+        salesSummary,
+        notes: notes || null,
+        finalizedById: req.user.id,
+        finalizedAt: new Date(),
+        adjustments: []
+      },
+      include: {
+        finalizedBy: { select: { id: true, name: true, username: true } },
+        branch: { select: { id: true, name: true } }
       }
-    },
-    update: {
-      status: 'CLOSED',
-      closingExpectedCash,
-      physicalCash,
-      cashDifference,
-      closingDenominations: closingDenominations || null,
-      salesSummary,
-      notes: notes || null,
-      finalizedById: req.user.id,
-      finalizedAt: new Date()
-    },
-    create: {
-      branchId: targetBranchId,
-      businessDate: dateUtc,
-      status: 'CLOSED',
-      openingCash,
-      closingExpectedCash,
-      physicalCash,
-      cashDifference,
-      closingDenominations: closingDenominations || null,
-      salesSummary,
-      notes: notes || null,
-      finalizedById: req.user.id,
-      finalizedAt: new Date()
-    },
-    include: {
-      finalizedBy: { select: { id: true, name: true, username: true } },
-      branch: { select: { id: true, name: true } }
-    }
+    });
   });
 
   res.json({
     success: true,
-    message: `Day Close for ${formatDisplayDate(dateStr)} saved successfully.`,
+    message: `Day Close for ${formatDisplayDate(dateStr)} saved successfully with final closing cash ₹${physicalCash.toFixed(2)}.`,
     dayClose: dayCloseRecord
   });
 });
@@ -1159,7 +1610,7 @@ const findOpenDays = asyncHandler(async (req, res) => {
       cashCollections: sInfo.cashCollections,
       expectedCash,
       currentStatus: sessionStatus,
-      isPendingClosure: dStr < todayStr && sInfo.salesCount > 0,
+      isPendingClosure: dStr < todayStr && (sInfo.salesCount > 0 || dc?.status === 'OPEN'),
       action: sessionStatus === 'NOT_OPENED' ? 'Open Day' : 'Resume Closing'
     });
   }
@@ -1187,23 +1638,34 @@ const checkUnclosed = asyncHandler(async (req, res) => {
   const todayStr = getLocalDateString();
   const todayUtc = getUtcDateObj(todayStr);
 
-  const thirtyDaysAgo = new Date(todayUtc);
-  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+  const sixtyDaysAgo = new Date(todayUtc);
+  sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
 
-  const pastSales = await prisma.sale.findMany({
-    where: {
-      branchId: targetBranchId,
-      saleDate: {
-        gte: thirtyDaysAgo,
-        lt: todayUtc
+  const [pastSales, pastOpenedSessions] = await Promise.all([
+    prisma.sale.findMany({
+      where: {
+        branchId: targetBranchId,
+        saleDate: { gte: sixtyDaysAgo, lt: todayUtc },
+        status: { not: 'cancelled' }
       },
-      status: { not: 'cancelled' }
-    },
-    select: { saleDate: true },
-    orderBy: { saleDate: 'asc' }
-  });
+      select: { saleDate: true },
+      orderBy: { saleDate: 'asc' }
+    }),
+    prisma.dayClose.findMany({
+      where: {
+        branchId: targetBranchId,
+        businessDate: { gte: sixtyDaysAgo, lt: todayUtc },
+        status: { notIn: ['CLOSED', 'ADMIN_CLOSED'] }
+      },
+      select: { businessDate: true },
+      orderBy: { businessDate: 'asc' }
+    })
+  ]);
 
-  const distinctPastDates = Array.from(new Set(pastSales.map(s => getLocalDateString(s.saleDate))));
+  const distinctPastDates = Array.from(new Set([
+    ...pastSales.map(s => getLocalDateString(s.saleDate)),
+    ...pastOpenedSessions.map(o => getLocalDateString(o.businessDate))
+  ])).sort((a, b) => a.localeCompare(b));
 
   for (const pDateStr of distinctPastDates) {
     const pUtc = getUtcDateObj(pDateStr);
@@ -1250,6 +1712,7 @@ const getDayCloseHistory = asyncHandler(async (req, res) => {
       include: {
         openedBy: { select: { id: true, name: true, username: true } },
         finalizedBy: { select: { id: true, name: true, username: true } },
+        openingApprovedBy: { select: { id: true, name: true, username: true } },
         branch: { select: { id: true, name: true } },
         terminal: { select: { id: true, name: true } }
       },
@@ -1271,6 +1734,10 @@ const getDayCloseHistory = asyncHandler(async (req, res) => {
 module.exports = {
   getDayCloseStatus,
   openDay,
+  editOpeningAmount,
+  editClosingCash,
+  postCloseAdjust,
+  getSessionReport,
   getVerificationData,
   saveVerificationProgress,
   resolveException,

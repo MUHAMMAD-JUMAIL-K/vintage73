@@ -3,6 +3,10 @@ const router = express.Router();
 const {
   getDayCloseStatus,
   openDay,
+  editOpeningAmount,
+  editClosingCash,
+  postCloseAdjust,
+  getSessionReport,
   getVerificationData,
   saveVerificationProgress,
   resolveException,
@@ -19,6 +23,12 @@ router.use(authMiddleware);
 router.get('/status', getDayCloseStatus);
 router.get('/summary', getDayCloseStatus); // Backward compatibility alias
 router.post('/open', openDay);
+router.post('/edit-opening', editOpeningAmount);
+
+// Day Closing & Adjustments
+router.post('/edit-closing-cash', editClosingCash);
+router.post('/post-close-adjust', postCloseAdjust);
+router.get('/session-report', getSessionReport);
 
 // Daily Activity Verification & Reconciliation
 router.get('/verification-data', getVerificationData);

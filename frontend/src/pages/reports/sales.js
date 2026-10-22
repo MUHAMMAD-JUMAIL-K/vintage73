@@ -245,24 +245,38 @@ export default function SalesReport() {
         if (preset === 'today') {
             s = localToday;
             e = localToday;
+            const targetIso = toLocalDateInputString(s);
+            setSingleDate(targetIso);
+            setStartDate(targetIso);
+            setEndDate(targetIso);
         } else if (preset === 'yesterday') {
             s = new Date(year, month - 1, day - 1);
             e = new Date(year, month - 1, day - 1);
+            const targetIso = toLocalDateInputString(s);
+            setSingleDate(targetIso);
+            setStartDate(targetIso);
+            setEndDate(targetIso);
         } else if (preset === 'this_week') {
             const dayOfWeek = localToday.getDay(); // 0 is Sunday
             const diffToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
             s = new Date(year, month - 1, day - diffToMonday);
             e = localToday;
+            setDateMode('range');
+            setStartDate(toLocalDateInputString(s));
+            setEndDate(toLocalDateInputString(e));
         } else if (preset === 'this_month') {
             s = new Date(year, month - 1, 1);
             e = localToday;
+            setDateMode('range');
+            setStartDate(toLocalDateInputString(s));
+            setEndDate(toLocalDateInputString(e));
         } else if (preset === 'last_month') {
             s = new Date(year, month - 2, 1);
             e = new Date(year, month - 1, 0);
+            setDateMode('range');
+            setStartDate(toLocalDateInputString(s));
+            setEndDate(toLocalDateInputString(e));
         }
-
-        setStartDate(toLocalDateInputString(s));
-        setEndDate(toLocalDateInputString(e));
     };
 
     // Printing single invoice
@@ -602,19 +616,56 @@ export default function SalesReport() {
                     {dateMode === 'single' ? (
                         /* Single Business Date Selector */
                         <div className="lg:col-span-4">
-                            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1 mb-1">
-                                <FiCalendar size={12} /> Select Business Date
-                            </label>
-                            <input
-                                type="date"
-                                className="w-full h-10 px-3 border border-slate-200 rounded-xl text-sm text-slate-700 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary transition-all font-bold"
-                                value={singleDate}
-                                onChange={e => {
-                                    setSingleDate(e.target.value);
-                                    setStartDate(e.target.value);
-                                    setEndDate(e.target.value);
-                                }}
-                            />
+                            <div className="flex items-center justify-between mb-1">
+                                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1">
+                                    <FiCalendar size={12} /> Specific Business Date
+                                </label>
+                                <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100">
+                                    Single Day
+                                </span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                                <button
+                                    type="button"
+                                    title="Previous Day"
+                                    onClick={() => {
+                                        const [y, m, d] = singleDate.split('-').map(Number);
+                                        const prev = new Date(y, m - 1, d - 1);
+                                        const prevStr = toLocalDateInputString(prev);
+                                        setSingleDate(prevStr);
+                                        setStartDate(prevStr);
+                                        setEndDate(prevStr);
+                                    }}
+                                    className="h-10 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold text-xs transition-colors shrink-0 flex items-center justify-center cursor-pointer shadow-xs"
+                                >
+                                    ←
+                                </button>
+                                <input
+                                    type="date"
+                                    className="w-full h-10 px-3 border border-slate-200 rounded-xl text-sm text-slate-800 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary transition-all font-bold"
+                                    value={singleDate}
+                                    onChange={e => {
+                                        setSingleDate(e.target.value);
+                                        setStartDate(e.target.value);
+                                        setEndDate(e.target.value);
+                                    }}
+                                />
+                                <button
+                                    type="button"
+                                    title="Next Day"
+                                    onClick={() => {
+                                        const [y, m, d] = singleDate.split('-').map(Number);
+                                        const next = new Date(y, m - 1, d + 1);
+                                        const nextStr = toLocalDateInputString(next);
+                                        setSingleDate(nextStr);
+                                        setStartDate(nextStr);
+                                        setEndDate(nextStr);
+                                    }}
+                                    className="h-10 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold text-xs transition-colors shrink-0 flex items-center justify-center cursor-pointer shadow-xs"
+                                >
+                                    →
+                                </button>
+                            </div>
                         </div>
                     ) : (
                         <>
@@ -727,84 +778,171 @@ export default function SalesReport() {
                 <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-100">
                     <div className="flex flex-wrap items-center gap-1.5 text-xs">
                         <span className="text-slate-400 font-medium text-[11px] mr-1">Quick Range:</span>
-                        <button onClick={() => applyDatePreset('today')} className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium transition-colors">Today</button>
-                        <button onClick={() => applyDatePreset('yesterday')} className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium transition-colors">Yesterday</button>
-                        <button onClick={() => applyDatePreset('this_week')} className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium transition-colors">This Week</button>
-                        <button onClick={() => applyDatePreset('this_month')} className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium transition-colors">This Month</button>
-                        <button onClick={() => applyDatePreset('last_month')} className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium transition-colors">Last Month</button>
+                        {(() => {
+                            const todayIso = toLocalDateInputString(new Date());
+                            const [year, month, day] = todayIso.split('-').map(Number);
+                            const yestIso = toLocalDateInputString(new Date(year, month - 1, day - 1));
+                            const currentTarget = dateMode === 'single' ? singleDate : (startDate === endDate ? startDate : null);
+
+                            return (
+                                <>
+                                    <button
+                                        type="button"
+                                        onClick={() => applyDatePreset('today')}
+                                        className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                                            currentTarget === todayIso
+                                                ? 'bg-emerald-600 text-white shadow-xs'
+                                                : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+                                        }`}
+                                    >
+                                        Today
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => applyDatePreset('yesterday')}
+                                        className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                                            currentTarget === yestIso
+                                                ? 'bg-emerald-600 text-white shadow-xs'
+                                                : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+                                        }`}
+                                    >
+                                        Yesterday
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => applyDatePreset('this_week')}
+                                        className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium transition-colors cursor-pointer"
+                                    >
+                                        This Week
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => applyDatePreset('this_month')}
+                                        className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium transition-colors cursor-pointer"
+                                    >
+                                        This Month
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => applyDatePreset('last_month')}
+                                        className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium transition-colors cursor-pointer"
+                                    >
+                                        Last Month
+                                    </button>
+                                </>
+                            );
+                        })()}
                     </div>
 
-                    <button
-                        onClick={() => setShowMoreFilters(!showMoreFilters)}
-                        className={`text-xs font-semibold px-3 py-1 rounded-lg border transition-all flex items-center gap-1.5 ${
-                            showMoreFilters || selectedPaymentMethod !== 'all' || selectedSalesman !== 'all' || selectedStatus !== 'all'
-                                ? 'bg-primary/10 border-primary/30 text-primary'
-                                : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
-                        }`}
-                        style={showMoreFilters ? { color: theme.primaryColor, borderColor: `${theme.primaryColor}55` } : {}}
-                    >
-                        <FiSliders size={12} />
-                        <span>{showMoreFilters ? 'Hide Advanced Filters' : 'More Filters'}</span>
-                        {(selectedPaymentMethod !== 'all' || selectedSalesman !== 'all' || selectedStatus !== 'all') && (
-                            <span className="w-2 h-2 rounded-full bg-primary inline-block ml-0.5" style={{ backgroundColor: theme.primaryColor }}></span>
-                        )}
-                    </button>
+                    {(() => {
+                        const activeCount = [
+                            selectedPaymentMethod !== 'all',
+                            selectedSalesman !== 'all',
+                            selectedStatus !== 'all'
+                        ].filter(Boolean).length;
+                        return (
+                            <button
+                                type="button"
+                                onClick={() => setShowMoreFilters(!showMoreFilters)}
+                                className={`text-xs font-semibold px-3 py-1.5 rounded-lg border transition-all flex items-center gap-1.5 cursor-pointer ${
+                                    showMoreFilters || activeCount > 0
+                                        ? 'bg-primary/10 border-primary/40 text-primary'
+                                        : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                                }`}
+                                style={showMoreFilters || activeCount > 0 ? { color: theme.primaryColor, borderColor: `${theme.primaryColor}55` } : {}}
+                            >
+                                <FiSliders size={13} />
+                                <span>{showMoreFilters ? 'Hide Advanced Filters' : 'More Filters'}</span>
+                                {activeCount > 0 && (
+                                    <span className="px-1.5 py-0.2 text-[10px] rounded-full bg-emerald-600 text-white font-bold">
+                                        {activeCount}
+                                    </span>
+                                )}
+                            </button>
+                        );
+                    })()}
                 </div>
 
                 {/* Expandable Advanced Filters */}
                 {showMoreFilters && (
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-3 border-t border-slate-100 bg-slate-50/50 p-4 rounded-xl">
-                        {/* Payment Method Filter */}
-                        <div>
-                            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1 block">
-                                Payment Method
-                            </label>
-                            <select
-                                className="w-full h-9 px-3 border border-slate-200 rounded-lg text-xs bg-white focus:outline-none focus:ring-2 focus:ring-primary font-medium"
-                                value={selectedPaymentMethod}
-                                onChange={e => setSelectedPaymentMethod(e.target.value)}
-                            >
-                                <option value="all">All Payment Methods</option>
-                                <option value="Cash">Cash</option>
-                                <option value="UPI">UPI</option>
-                                <option value="Card">Card</option>
-                                <option value="Credit">Credit</option>
-                                <option value="Split">Split</option>
-                            </select>
+                    <div className="pt-3 border-t border-slate-100 bg-slate-50/70 p-4 rounded-xl space-y-3">
+                        <div className="flex items-center justify-between pb-2 border-b border-slate-200/60">
+                            <span className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                                <FiSliders size={13} className="text-primary" style={{ color: theme.primaryColor }} />
+                                Advanced Filters
+                            </span>
+                            {(selectedPaymentMethod !== 'all' || selectedSalesman !== 'all' || selectedStatus !== 'all' || searchTerm.trim()) && (
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setSelectedPaymentMethod('all');
+                                        setSelectedSalesman('all');
+                                        setSelectedStatus('all');
+                                        setSearchTerm('');
+                                    }}
+                                    className="text-xs font-bold text-rose-600 hover:text-rose-700 flex items-center gap-1 cursor-pointer"
+                                >
+                                    <FiX size={13} /> Reset All Filters
+                                </button>
+                            )}
                         </div>
 
-                        {/* Salesman Filter */}
-                        <div>
-                            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1 block">
-                                Salesman / Cashier
-                            </label>
-                            <select
-                                className="w-full h-9 px-3 border border-slate-200 rounded-lg text-xs bg-white focus:outline-none focus:ring-2 focus:ring-primary font-medium"
-                                value={selectedSalesman}
-                                onChange={e => setSelectedSalesman(e.target.value)}
-                            >
-                                <option value="all">All Salesmen</option>
-                                {salesmen.map(s => (
-                                    <option key={s.id} value={s.id}>{s.name || s.username}</option>
-                                ))}
-                            </select>
-                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            {/* Payment Method Filter */}
+                            <div>
+                                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1 block">
+                                    Payment Method
+                                </label>
+                                <select
+                                    className="w-full h-9 px-3 border border-slate-200 rounded-lg text-xs bg-white focus:outline-none focus:ring-2 focus:ring-primary font-medium"
+                                    value={selectedPaymentMethod}
+                                    onChange={e => setSelectedPaymentMethod(e.target.value)}
+                                >
+                                    <option value="all">All Payment Methods</option>
+                                    <option value="Cash">Cash</option>
+                                    <option value="UPI">UPI</option>
+                                    <option value="Card">Card</option>
+                                    <option value="Credit">Credit</option>
+                                    <option value="Split">Split</option>
+                                    <option value="Bank">Bank Transfer</option>
+                                    <option value="Cheque">Cheque</option>
+                                </select>
+                            </div>
 
-                        {/* Invoice Status Filter */}
-                        <div>
-                            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1 block">
-                                Invoice Status
-                            </label>
-                            <select
-                                className="w-full h-9 px-3 border border-slate-200 rounded-lg text-xs bg-white focus:outline-none focus:ring-2 focus:ring-primary font-medium"
-                                value={selectedStatus}
-                                onChange={e => setSelectedStatus(e.target.value)}
-                            >
-                                <option value="all">All Statuses</option>
-                                <option value="active">Active Sales</option>
-                                <option value="return">Returns Only</option>
-                                <option value="cancelled">Void / Cancelled</option>
-                            </select>
+                            {/* Salesman Filter */}
+                            <div>
+                                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1 block">
+                                    Salesman / Cashier
+                                </label>
+                                <select
+                                    className="w-full h-9 px-3 border border-slate-200 rounded-lg text-xs bg-white focus:outline-none focus:ring-2 focus:ring-primary font-medium"
+                                    value={selectedSalesman}
+                                    onChange={e => setSelectedSalesman(e.target.value)}
+                                >
+                                    <option value="all">All Salesmen</option>
+                                    <option value="unassigned">Unassigned / System</option>
+                                    {salesmen.map(s => (
+                                        <option key={s.id} value={s.id}>{s.name || s.username}</option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            {/* Invoice Status Filter */}
+                            <div>
+                                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1 block">
+                                    Invoice Status
+                                </label>
+                                <select
+                                    className="w-full h-9 px-3 border border-slate-200 rounded-lg text-xs bg-white focus:outline-none focus:ring-2 focus:ring-primary font-medium"
+                                    value={selectedStatus}
+                                    onChange={e => setSelectedStatus(e.target.value)}
+                                >
+                                    <option value="all">All Statuses</option>
+                                    <option value="active">Active Sales (Completed)</option>
+                                    <option value="return">Returns Only</option>
+                                    <option value="cancelled">Void / Cancelled</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
                 )}
@@ -1065,7 +1203,7 @@ export default function SalesReport() {
                                                 </tr>
                                             ) : (
                                                 topProducts.map((tp, idx) => (
-                                                    <tr key={tp.productId || idx} className="hover:bg-slate-50/60 transition-colors">
+                                                    <tr key={`tp-${tp.productId || 'p'}-${idx}`} className="hover:bg-slate-50/60 transition-colors">
                                                         <td className="py-3 font-semibold text-slate-800">
                                                             <div className="flex items-center gap-2">
                                                                 <span className="w-5 h-5 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center text-[10px] font-bold">
@@ -1159,8 +1297,8 @@ export default function SalesReport() {
                                             </td>
                                         </tr>
                                     ) : (
-                                        paginatedSummary.map(sale => (
-                                            <tr key={sale.id} className="hover:bg-slate-50/70 transition-colors">
+                                        paginatedSummary.map((sale, idx) => (
+                                            <tr key={`sale-${sale.id}-${idx}`} className="hover:bg-slate-50/70 transition-colors">
                                                 <td className="p-3.5 font-bold text-primary whitespace-nowrap" style={{ color: theme.primaryColor }}>
                                                     #{sale.invoiceNumber}
                                                 </td>
@@ -1332,8 +1470,8 @@ export default function SalesReport() {
                                             </td>
                                         </tr>
                                     ) : (
-                                        paginatedDetailed.map(row => (
-                                            <tr key={row.id} className="hover:bg-slate-50/70 transition-colors">
+                                        paginatedDetailed.map((row, idx) => (
+                                            <tr key={`det-${row.id || 'r'}-${idx}`} className="hover:bg-slate-50/70 transition-colors">
                                                 <td className="p-3 font-bold text-primary whitespace-nowrap" style={{ color: theme.primaryColor }}>
                                                     #{row.invoiceNumber}
                                                 </td>
@@ -1733,8 +1871,8 @@ export default function SalesReport() {
                                                         <td colSpan="6" className="p-6 text-center text-slate-400 italic">No invoices created for this business date</td>
                                                     </tr>
                                                 ) : (
-                                                    reportData.dailyActivity.invoices.map(inv => (
-                                                        <tr key={inv.id} className="hover:bg-slate-50/60 transition-colors">
+                                                    reportData.dailyActivity.invoices.map((inv, idx) => (
+                                                        <tr key={`inv-${inv.id}-${idx}`} className="hover:bg-slate-50/60 transition-colors">
                                                             <td className="p-3 font-bold text-slate-900">#{inv.invoiceNumber}</td>
                                                             <td className="p-3 text-slate-500 font-medium">
                                                                 {new Date(inv.saleDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -1798,8 +1936,8 @@ export default function SalesReport() {
                                                         <td colSpan="6" className="p-6 text-center text-slate-400 italic">No cancelled invoices for this business date</td>
                                                     </tr>
                                                 ) : (
-                                                    reportData.dailyActivity.cancelledInvoices.map(inv => (
-                                                        <tr key={inv.id} className="hover:bg-rose-50/30 transition-colors">
+                                                    reportData.dailyActivity.cancelledInvoices.map((inv, idx) => (
+                                                        <tr key={`can-${inv.id}-${idx}`} className="hover:bg-rose-50/30 transition-colors">
                                                             <td className="p-3 font-bold text-rose-700">#{inv.invoiceNumber}</td>
                                                             <td className="p-3 text-slate-500">
                                                                 {new Date(inv.saleDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -1852,8 +1990,8 @@ export default function SalesReport() {
                                                         <td colSpan="6" className="p-6 text-center text-slate-400 italic">No sales returns recorded for this business date</td>
                                                     </tr>
                                                 ) : (
-                                                    reportData.dailyActivity.returns.map(ret => (
-                                                        <tr key={ret.id} className="hover:bg-slate-50/60 transition-colors">
+                                                    reportData.dailyActivity.returns.map((ret, idx) => (
+                                                        <tr key={`ret-${ret.id}-${idx}`} className="hover:bg-slate-50/60 transition-colors">
                                                             <td className="p-3 font-bold text-amber-700">#{ret.returnNumber}</td>
                                                             <td className="p-3 font-semibold text-slate-700">#{ret.originalInvoiceNumber}</td>
                                                             <td className="p-3 text-center font-bold text-slate-800">{ret.itemsCount}</td>
@@ -1903,8 +2041,8 @@ export default function SalesReport() {
                                                         <td colSpan="5" className="p-6 text-center text-slate-400 italic">No payments recorded for this business date</td>
                                                     </tr>
                                                 ) : (
-                                                    reportData.dailyActivity.payments.map(p => (
-                                                        <tr key={p.id} className="hover:bg-slate-50/60 transition-colors">
+                                                    reportData.dailyActivity.payments.map((p, idx) => (
+                                                        <tr key={`pay-${p.id || 'p'}-${idx}`} className="hover:bg-slate-50/60 transition-colors">
                                                             <td className="p-3 text-slate-500">
                                                                 {new Date(p.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                                             </td>
@@ -1956,8 +2094,8 @@ export default function SalesReport() {
                                                         <td colSpan="6" className="p-6 text-center text-slate-400 italic">No business expenses recorded for this business date</td>
                                                     </tr>
                                                 ) : (
-                                                    reportData.dailyActivity.expenses.map(exp => (
-                                                        <tr key={exp.id} className="hover:bg-slate-50/60 transition-colors">
+                                                    reportData.dailyActivity.expenses.map((exp, idx) => (
+                                                        <tr key={`exp-${exp.id}-${idx}`} className="hover:bg-slate-50/60 transition-colors">
                                                             <td className="p-3 text-slate-500">
                                                                 {new Date(exp.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                                             </td>
@@ -2009,8 +2147,8 @@ export default function SalesReport() {
                                                         <td colSpan="5" className="p-6 text-center text-slate-400 italic">No inventory movements recorded for this business date</td>
                                                     </tr>
                                                 ) : (
-                                                    reportData.dailyActivity.stockMovements.map(sm => (
-                                                        <tr key={sm.productId} className="hover:bg-slate-50/60 transition-colors">
+                                                    reportData.dailyActivity.stockMovements.map((sm, idx) => (
+                                                        <tr key={`sm-${sm.productId || 'p'}-${idx}`} className="hover:bg-slate-50/60 transition-colors">
                                                             <td className="p-3 font-mono font-bold text-slate-600">{sm.sku || '—'}</td>
                                                             <td className="p-3 font-semibold text-slate-800">{sm.productName}</td>
                                                             <td className="p-3 text-center font-bold text-slate-700">{sm.unitsSold}</td>
@@ -2174,8 +2312,8 @@ export default function SalesReport() {
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-slate-50">
-                                        {selectedSale.items?.map(item => (
-                                            <tr key={item.id}>
+                                        {selectedSale.items?.map((item, idx) => (
+                                            <tr key={`item-${item.id}-${idx}`}>
                                                 <td className="py-2.5 font-semibold text-slate-800">{item.productName}</td>
                                                 <td className="py-2.5 text-slate-500">
                                                     {item.productTypeName !== '—' && <span className="font-medium mr-1.5">{item.productTypeName}</span>}
