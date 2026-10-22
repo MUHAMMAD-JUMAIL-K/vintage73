@@ -505,8 +505,8 @@ export default function Dashboard() {
 
       {/* Day Opening Modal */}
       {showOpenModal && (
-        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-xl border border-slate-100 max-w-md w-full p-6 space-y-4">
+        <div className="fixed inset-0 z-[100000] bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 pt-16 sm:pt-20 overflow-y-auto">
+          <div className="bg-white rounded-2xl shadow-xl border border-slate-100 max-w-md w-full p-6 space-y-4 my-auto translate-y-4 sm:translate-y-6">
             <div className="flex items-center justify-between border-b pb-3">
               <h3 className="font-bold text-slate-800 text-base flex items-center gap-2">
                 <FiClock className="text-emerald-600" /> Open Business Day

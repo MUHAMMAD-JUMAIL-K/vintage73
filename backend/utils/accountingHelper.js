@@ -77,11 +77,11 @@ async function ensureLedger(tx, name, groupName) {
 /**
  * Create a specialized Voucher (Sales, Receipt, etc.) with Journal Entries
  * @param {Object} tx - Prisma Transaction Client
- * @param {Object} params - { type: 'SALES'|'RECEIPT', date: Date, amount: Float, narration: string, reference: string, createdBy: Int }
+ * @param {Object} params - { type: 'SALES'|'RECEIPT', date: Date, amount: Float, narration: string, reference: string, createdBy: Int, branchId: Int }
  * @param {Array} entries - Array of { ledgerId: Int, type: 'DEBIT'|'CREDIT', amount: Float }
  */
 async function postVoucher(tx, params, entries) {
-  const { type, date, amount, narration, reference, createdBy } = params;
+  const { type, date, amount, narration, reference, createdBy, branchId } = params;
 
   const { generateVoucherNumber } = require('../services/dynamicPostingService');
   const voucherNumber = await generateVoucherNumber(tx, type);
@@ -110,6 +110,7 @@ async function postVoucher(tx, params, entries) {
       reference,
       status: 'POSTED',
       createdBy: createdBy || 1, // Default admin if null
+      branchId: branchId ? parseInt(branchId) : null,
       entries: {
         create: entries.map(e => ({
           debitLedgerId: e.type === 'DEBIT' ? e.ledgerId : null,
@@ -236,7 +237,8 @@ async function processSalePosting(tx, sale, userId) {
         amount: grandTotal,
         narration: `Sales Return Credit Note for #${invoiceNumber}${sale.originalInvoice ? ` (Orig: ${sale.originalInvoice})` : ''}`,
         reference: invoiceNumber,
-        createdBy: userId
+        createdBy: userId,
+        branchId: sale.branchId
       }, entries);
     } else {
       entries.push({ ledgerId: customerLedger.id, type: 'DEBIT', amount: grandTotal });
@@ -260,7 +262,8 @@ async function processSalePosting(tx, sale, userId) {
         amount: grandTotal,
         narration: `Sales Invoice #${invoiceNumber}${voucherNarration}`,
         reference: invoiceNumber,
-        createdBy: userId
+        createdBy: userId,
+        branchId: sale.branchId
       }, entries);
     }
   }
@@ -296,7 +299,8 @@ async function processSalePosting(tx, sale, userId) {
       amount: paid,
       narration: `Payment for #${invoiceNumber}`,
       reference: invoiceNumber,
-      createdBy: userId
+      createdBy: userId,
+      branchId: sale.branchId
     }, [
       { ledgerId: assetLedger.id, type: 'DEBIT', amount: paid },
       { ledgerId: customerLedger.id, type: 'CREDIT', amount: paid }
@@ -349,7 +353,8 @@ async function processPurchasePosting(tx, purchase, userId) {
     amount: totalAmount,
     narration: mainNarration,
     reference: reference,
-    createdBy: userId
+    createdBy: userId,
+    branchId: purchase.branchId
   }, entries);
 
   // 3. If Payment is not Credit, also settle the Supplier Ledger (Cr Bank/Cash, Dr Supplier)
@@ -370,12 +375,79 @@ async function processPurchasePosting(tx, purchase, userId) {
       amount: totalAmount,
       narration: `${paymentMethod} Settlement for Bill #${reference}`,
       reference: reference,
-      createdBy: userId
+      createdBy: userId,
+      branchId: purchase.branchId
     }, [
       { ledgerId: supplierLedger.id, type: 'DEBIT', amount: totalAmount },
       { ledgerId: paymentLedger.id, type: 'CREDIT', amount: totalAmount }
     ]);
   }
+}
+
+/**
+ * Validate and resolve branch filtering for accounting reports and operations.
+ * Enforces strict user authorization:
+ * - If user is bound to a branch (req.user.branchId is set):
+ *     - Only permitted to access their assigned branch.
+ *     - Requesting another branch returns 403 Forbidden.
+ *     - Requesting 'all' resolves safely to their assigned branch.
+ * - If user is global admin (req.user.role === 'admin' && !req.user.branchId):
+ *     - Can request any specific branch or 'all' (consolidated).
+ * @param {Object} req - Express request
+ * @param {string|number} requestedBranchId - Query param branchId
+ * @returns {Promise<Object>} { branchId, isConsolidated, activeBranch, branches, branchFilter }
+ */
+async function resolveBranchFilter(req, requestedBranchId) {
+  const user = req.user || {};
+  const allBranches = await prisma.branch.findMany({
+    where: { isActive: true },
+    select: { id: true, name: true, currencyCode: true, currencySymbol: true },
+    orderBy: { id: 'asc' }
+  });
+
+  // User restricted to a specific branch
+  if (user.branchId) {
+    if (requestedBranchId && requestedBranchId !== 'all' && parseInt(requestedBranchId) !== user.branchId) {
+      const err = new Error('Access denied: You do not have permission to access another branch');
+      err.status = 403;
+      throw err;
+    }
+    const userBranch = allBranches.find(b => b.id === user.branchId) || null;
+    return {
+      branchId: user.branchId,
+      isConsolidated: false,
+      activeBranch: userBranch,
+      branches: userBranch ? [userBranch] : [],
+      branchFilter: { branchId: user.branchId }
+    };
+  }
+
+  // Global Admin
+  if (!requestedBranchId || requestedBranchId === 'all') {
+    return {
+      branchId: null,
+      isConsolidated: true,
+      activeBranch: null,
+      branches: allBranches,
+      branchFilter: {}
+    };
+  }
+
+  const parsedId = parseInt(requestedBranchId);
+  const targetBranch = allBranches.find(b => b.id === parsedId);
+  if (!targetBranch) {
+    const err = new Error('Branch not found');
+    err.status = 404;
+    throw err;
+  }
+
+  return {
+    branchId: parsedId,
+    isConsolidated: false,
+    activeBranch: targetBranch,
+    branches: allBranches,
+    branchFilter: { branchId: parsedId }
+  };
 }
 
 module.exports = {
@@ -384,5 +456,6 @@ module.exports = {
   getLedgerByRole,
   evaluateFormula,
   processSalePosting,
-  processPurchasePosting
+  processPurchasePosting,
+  resolveBranchFilter
 };

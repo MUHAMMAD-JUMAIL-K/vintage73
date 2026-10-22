@@ -100,6 +100,7 @@ model Branch {
   users             User[]
   dayCloses         DayClose[]
   customerVouchers  CustomerVoucher[]
+  vouchers          Voucher[]
 }
 
 model CompanyProfile {
@@ -886,12 +887,16 @@ model Voucher {
   status         String          @default("POSTED")
   reference      String?
   createdBy      Int
+  branchId       Int?
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
   entries        JournalEntry[]
   payrolls       Payroll[]
   salaryAdvances SalaryAdvance[]
   creator        User            @relation(fields: [createdBy], references: [id])
+  branch         Branch?         @relation(fields: [branchId], references: [id])
+
+  @@index([branchId])
 }
 
 model JournalEntry {

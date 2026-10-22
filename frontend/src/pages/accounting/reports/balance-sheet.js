@@ -2,21 +2,38 @@ import { useState, useEffect } from 'react';
 import api from '@/lib/api';
 import { toast } from 'react-toastify';
 import { FiLayers, FiDownload, FiCheckCircle, FiAlertCircle } from 'react-icons/fi';
+import { formatCurrency } from '@/lib/currency';
 
 export default function BalanceSheet() {
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [asOfDate, setAsOfDate] = useState(new Date().toISOString().split('T')[0]);
 
+    // Branch Filtering
+    const [branches, setBranches] = useState([]);
+    const [selectedBranch, setSelectedBranch] = useState('');
+
     useEffect(() => {
+        fetchBranches();
         fetchBalanceSheet();
     }, []);
 
-    const fetchBalanceSheet = async () => {
+    const fetchBranches = async () => {
+        try {
+            const res = await api.get('/branches');
+            setBranches(res.data || []);
+        } catch (err) {
+            console.error('Failed to load branches', err);
+        }
+    };
+
+    const fetchBalanceSheet = async (overrideBranchId) => {
         setLoading(true);
+        const targetBranchId = overrideBranchId !== undefined ? overrideBranchId : selectedBranch;
         try {
             const params = new URLSearchParams();
             if (asOfDate) params.append('asOfDate', asOfDate);
+            if (targetBranchId) params.append('branchId', targetBranchId);
             
             const res = await api.get(`/accounting/reports/balance-sheet?${params}`);
             setData(res.data);
@@ -27,6 +44,9 @@ export default function BalanceSheet() {
             setLoading(false);
         }
     };
+
+    const activeCurrency = data?.currency || { code: 'INR', symbol: '₹' };
+    const branchLabel = data?.branch ? data.branch.name : 'All Branches (Consolidated)';
 
     return (
         <div className="p-4 bg-[#f8fafc] min-h-screen text-slate-700">
@@ -39,11 +59,33 @@ export default function BalanceSheet() {
                         </div>
                         <div>
                             <h1 className="text-lg font-normal text-white leading-tight">Financial Balance Sheet</h1>
-                            <p className="text-white/80 text-[10px] uppercase font-normal tracking-widest mt-0.5">Corporate Accounting Division</p>
+                            <p className="text-white/80 text-[10px] uppercase font-normal tracking-widest mt-0.5">
+                                Corporate Accounting Division • {branchLabel} ({activeCurrency.code})
+                            </p>
                         </div>
                     </div>
                     <div className="hidden xl:block h-8 border-l border-white/10 mx-2" />
-                    <div className="flex items-center gap-3 w-full md:w-auto">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full md:w-auto">
+                        {/* Branch Selector */}
+                        <div className="flex items-center gap-2 bg-white/5 px-2.5 py-1 rounded border border-white/10">
+                            <span className="text-[9px] text-white/60 uppercase tracking-tighter">Branch:</span>
+                            <select
+                                className="bg-transparent border-none p-0 text-xs text-white focus:ring-0 cursor-pointer font-normal [color-scheme:dark]"
+                                value={selectedBranch}
+                                onChange={(e) => {
+                                    const val = e.target.value;
+                                    setSelectedBranch(val);
+                                    fetchBalanceSheet(val);
+                                }}
+                            >
+                                <option value="" className="text-slate-800">All Branches (Consolidated)</option>
+                                {branches.map(b => (
+                                    <option key={b.id} value={b.id} className="text-slate-800">
+                                        {b.name} ({b.currencyCode || 'INR'})
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
                         <div className="flex flex-col flex-1 md:flex-none">
                             <span className="text-[9px] text-white/60 uppercase tracking-tighter">Reporting Date</span>
                             <input
@@ -54,8 +96,8 @@ export default function BalanceSheet() {
                             />
                         </div>
                         <button
-                            onClick={fetchBalanceSheet}
-                            className="bg-white/20 hover:bg-white/30 text-white px-4 py-1.5 rounded-lg transition-all text-xs font-normal shadow-sm active:scale-95 whitespace-nowrap"
+                            onClick={() => fetchBalanceSheet()}
+                            className="bg-white/20 hover:bg-white/30 text-white px-4 py-1.5 rounded-lg transition-all text-xs font-normal shadow-sm active:scale-95 whitespace-nowrap cursor-pointer"
                         >
                             Update Report
                         </button>
@@ -63,7 +105,7 @@ export default function BalanceSheet() {
                 </div>
                 <button
                     onClick={() => window.print()}
-                    className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg transition-all text-xs font-normal border border-white/10 backdrop-blur-sm shadow-sm"
+                    className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg transition-all text-xs font-normal border border-white/10 backdrop-blur-sm shadow-sm cursor-pointer"
                 >
                     <FiDownload size={14} className="text-white" /> Export PDF / Print
                 </button>
@@ -74,16 +116,16 @@ export default function BalanceSheet() {
             ) : data ? (
                 <div className="overflow-x-auto text-[13px] font-normal">
                     {/* Integrity Summary Row */}
-                    <div className={`mb-4 px-4 py-2 border ${data.balanced ? 'bg-primary-light/20 border-primary-light text-primary-dark' : 'bg-red-50 border-red-200 text-red-800'}`}>
+                    <div className={`mb-4 px-4 py-2 border rounded-xl shadow-sm ${data.balanced ? 'bg-primary-light/20 border-primary-light text-primary-dark' : 'bg-red-50 border-red-200 text-red-800'}`}>
                         <div className="flex justify-between items-center text-xs">
                             <div className="flex items-center gap-2">
                                 {data.balanced ? <FiCheckCircle size={14} /> : <FiAlertCircle size={14} />}
                                 <span>{data.balanced ? 'Equilibrium Maintained' : 'Out of Balance!'}</span>
                             </div>
-                            <div className="flex flex-wrap gap-2 md:gap-6 mt-2 sm:mt-0">
-                                <span>Assets: {data.totalAssets.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
-                                <span>Lia + Eq: {(data.totalLiabilities + data.totalEquity).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
-                                <span>Variance: {(data.totalAssets - (data.totalLiabilities + data.totalEquity)).toFixed(2)}</span>
+                            <div className="flex flex-wrap gap-2 md:gap-6 mt-2 sm:mt-0 font-mono">
+                                <span>Assets: {formatCurrency(data.totalAssets, activeCurrency)}</span>
+                                <span>Lia + Eq: {formatCurrency(data.totalLiabilities + data.totalEquity, activeCurrency)}</span>
+                                <span>Variance: {formatCurrency(Math.abs(data.totalAssets - (data.totalLiabilities + data.totalEquity)), activeCurrency)}</span>
                             </div>
                         </div>
                     </div>
@@ -100,7 +142,7 @@ export default function BalanceSheet() {
                                         <tr className="whitespace-nowrap">
                                             <th className="px-4 py-2.5 text-left font-medium border-r border-slate-200 w-12">#</th>
                                             <th className="px-4 py-2.5 text-left font-medium border-r border-slate-200">Account Name</th>
-                                            <th className="px-4 py-2.5 text-right font-medium">Amount</th>
+                                            <th className="px-4 py-2.5 text-right font-medium">Amount ({activeCurrency.symbol})</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-slate-100">
@@ -115,7 +157,7 @@ export default function BalanceSheet() {
                                                         <div className="text-[10px] text-slate-500 uppercase tracking-tighter mt-0.5">{item.groupName}</div>
                                                     </td>
                                                     <td className="px-4 py-2 text-right tabular-nums font-medium">
-                                                        {item.amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                                                        {formatCurrency(item.amount, activeCurrency)}
                                                     </td>
                                                 </tr>
                                             ))
@@ -133,7 +175,7 @@ export default function BalanceSheet() {
                             </div>
                             <div className="bg-gradient-to-r from-primary-dark to-primary border-t border-slate-300 px-4 py-3 flex justify-between items-center text-white shrink-0 mt-auto">
                                 <span className="font-normal uppercase text-xs">Total Assets</span>
-                                <span className="tabular-nums font-medium text-sm">{data.totalAssets.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+                                <span className="tabular-nums font-medium text-sm">{formatCurrency(data.totalAssets, activeCurrency)}</span>
                             </div>
                         </div>
 
@@ -149,7 +191,7 @@ export default function BalanceSheet() {
                                         <tr className="whitespace-nowrap">
                                             <th className="px-4 py-2.5 text-left font-medium border-r border-slate-200 w-12">#</th>
                                             <th className="px-4 py-2.5 text-left font-medium border-r border-slate-200">Account Name</th>
-                                            <th className="px-4 py-2.5 text-right font-medium">Amount</th>
+                                            <th className="px-4 py-2.5 text-right font-medium">Amount ({activeCurrency.symbol})</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-slate-100">
@@ -166,7 +208,7 @@ export default function BalanceSheet() {
                                                     <div className="text-[10px] text-slate-500 uppercase tracking-tighter mt-0.5">{item.groupName}</div>
                                                 </td>
                                                 <td className="px-4 py-2 text-right tabular-nums font-medium">
-                                                    {item.amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                                                    {formatCurrency(item.amount, activeCurrency)}
                                                 </td>
                                             </tr>
                                         ))}
@@ -184,7 +226,7 @@ export default function BalanceSheet() {
                                                     <div className="text-[10px] text-slate-500 uppercase tracking-tighter mt-0.5">{item.groupName}</div>
                                                 </td>
                                                 <td className="px-4 py-2 text-right tabular-nums font-medium text-primary-dark">
-                                                    {item.amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                                                    {formatCurrency(item.amount, activeCurrency)}
                                                 </td>
                                             </tr>
                                         ))}
@@ -202,7 +244,7 @@ export default function BalanceSheet() {
                             </div>
                             <div className="bg-gradient-to-r from-primary-dark to-primary border-t border-slate-300 px-4 py-3 flex justify-between items-center text-white shrink-0 mt-auto">
                                 <span className="font-normal uppercase text-xs">Total Lia + Eq</span>
-                                <span className="tabular-nums font-medium text-sm">{(data.totalLiabilities + data.totalEquity).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+                                <span className="tabular-nums font-medium text-sm">{formatCurrency(data.totalLiabilities + data.totalEquity, activeCurrency)}</span>
                             </div>
                         </div>
                     </div>

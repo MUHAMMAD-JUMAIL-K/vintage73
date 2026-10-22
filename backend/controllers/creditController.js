@@ -131,7 +131,8 @@ exports.settleCredit = asyncHandler(async (req, res) => {
                 amount: payAmount,
                 narration: notes || `Credit Settlement for ${updatedSales.length} invoice(s)`,
                 reference: reference || `SETTLE-${payment.id}`,
-                createdBy: req.user ? req.user.id : 1
+                createdBy: req.user ? req.user.id : 1,
+                branchId: payment.branchId
             }, [
                 { ledgerId: assetLedger.id, type: 'DEBIT', amount: payAmount },
                 { ledgerId: customerLedger.id, type: 'CREDIT', amount: payAmount }

@@ -410,6 +410,60 @@ export default function SalesReport() {
                     `"${row.status}"`
                 ])
             ];
+        } else if (activeTab === 'dailyActivity') {
+            const da = reportData.dailyActivity || {};
+            const dc = da.dayCloseRecord || {};
+            const openingVal = da.openingAmount ?? dc.actualOpeningCash ?? dc.openingCash ?? 0;
+            const closingVal = da.closingAmount ?? dc.closingActualCash ?? dc.closingExpectedCash ?? 0;
+            const expClosingVal = dc.closingExpectedCash ?? da.closingExpectedCash ?? 0;
+            const totalExpVal = da.totalExpensesAmount ?? (da.expenses || []).reduce((sum, e) => sum + Number(e.amount || 0), 0);
+
+            csvRows = [
+                ['Daily Activity Operational Audit', `Business Date: ${formatDisplayDate(da.businessDate || singleDate)}`],
+                ['Branch', `"${dc.branchName || 'All Branches'}"`],
+                ['Session Status', `"${dc.status || 'UNREGISTERED'}"`],
+                [],
+                ['Operational KPI', `Amount / Count (${activeCurrencyCode})`],
+                ['Opening Amount', openingVal],
+                ['Total Sales', reportData.dashboard?.kpis?.totalSales || 0],
+                ['Closing Amount (Actual / Final)', closingVal],
+                ['Expected Closing Amount', expClosingVal],
+                ['Daily Expenses Total', totalExpVal],
+                ['Total Invoices Count', da.counts?.totalInvoicesCount || 0],
+                ['Cancelled Invoices Count', da.counts?.cancelledCount || 0],
+                ['Sales Returns Count', da.counts?.returnsCount || 0],
+                ['GST Total Tax Collection', da.gstSummary?.totalTax || 0],
+                [],
+                ['Invoices Register'],
+                ['Invoice #', 'Sale Date', 'Customer', 'Payment Method', `Total (${activeCurrencyCode})`, 'Status'],
+                ...(da.invoices || []).map(inv => [
+                    `"${inv.invoiceNumber}"`,
+                    `"${formatDisplayDate(inv.saleDate)}"`,
+                    `"${inv.customerName}"`,
+                    `"${inv.paymentMethod}"`,
+                    inv.totalAmount,
+                    `"${inv.status}"`
+                ]),
+                [],
+                ['Payment Collections Breakdown'],
+                ['Payment Date', 'Invoice #', 'Customer', 'Method', `Amount (${activeCurrencyCode})`],
+                ...(da.payments || []).map(p => [
+                    `"${formatDisplayDate(p.date)}"`,
+                    `"${p.invoiceNumber}"`,
+                    `"${p.customer}"`,
+                    `"${p.method}"`,
+                    p.amount
+                ]),
+                [],
+                ['Daily Expenses & Cash Outflows'],
+                ['Title', 'Category', `Amount (${activeCurrencyCode})`, 'Description'],
+                ...(da.expenses || []).map(e => [
+                    `"${e.title}"`,
+                    `"${e.category}"`,
+                    e.amount,
+                    `"${e.description || '—'}"`
+                ])
+            ];
         } else {
             // Dashboard Export
             const kpis = reportData.dashboard.kpis;
@@ -1449,9 +1503,9 @@ export default function SalesReport() {
                                     </div>
                                     <div className="p-5 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 text-xs">
                                         <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
-                                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Opening Cash</span>
+                                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Opening Amount</span>
                                             <span className="text-sm font-extrabold text-slate-800 mt-0.5 block">
-                                                {formatCurrency(reportData.dailyActivity.dayCloseRecord.actualOpeningCash ?? reportData.dailyActivity.dayCloseRecord.openingCash ?? 0, activeCurrencyCode)}
+                                                {formatCurrency(reportData.dailyActivity.dayCloseRecord.actualOpeningCash ?? reportData.dailyActivity.dayCloseRecord.openingCash ?? reportData.dailyActivity.openingAmount ?? 0, activeCurrencyCode)}
                                             </span>
                                             <span className="text-[10px] text-slate-500">
                                                 By: {reportData.dailyActivity.dayCloseRecord.openedBy || 'System'}
@@ -1460,29 +1514,33 @@ export default function SalesReport() {
                                         <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
                                             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Expected Closing</span>
                                             <span className="text-sm font-extrabold text-slate-800 mt-0.5 block">
-                                                {formatCurrency(reportData.dailyActivity.dayCloseRecord.closingExpectedCash ?? 0, activeCurrencyCode)}
+                                                {formatCurrency(reportData.dailyActivity.dayCloseRecord.closingExpectedCash ?? reportData.dailyActivity.closingExpectedCash ?? 0, activeCurrencyCode)}
                                             </span>
                                             <span className="text-[10px] text-slate-500">System register formula</span>
                                         </div>
                                         <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
-                                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Actual Closing Cash</span>
+                                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Closing Amount</span>
                                             <span className="text-sm font-extrabold text-slate-800 mt-0.5 block">
-                                                {formatCurrency(reportData.dailyActivity.dayCloseRecord.closingActualCash ?? 0, activeCurrencyCode)}
+                                                {formatCurrency(reportData.dailyActivity.dayCloseRecord.closingActualCash ?? reportData.dailyActivity.dayCloseRecord.closingExpectedCash ?? reportData.dailyActivity.closingAmount ?? 0, activeCurrencyCode)}
                                             </span>
-                                            <span className="text-[10px] text-slate-500">Counted by cashier</span>
+                                            <span className="text-[10px] text-slate-500">
+                                                {reportData.dailyActivity.dayCloseRecord.status === 'CLOSED' || reportData.dailyActivity.dayCloseRecord.status === 'ADMIN_CLOSED'
+                                                    ? 'Counted & closed'
+                                                    : 'Estimated closing'}
+                                            </span>
                                         </div>
                                         <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
                                             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Closing Discrepancy</span>
                                             <span className={`text-sm font-extrabold mt-0.5 block ${
-                                                Number(reportData.dailyActivity.dayCloseRecord.closingDifference || 0) === 0
+                                                Number(reportData.dailyActivity.dayCloseRecord.closingDifference ?? reportData.dailyActivity.dayCloseRecord.cashDifference ?? 0) === 0
                                                     ? 'text-emerald-600'
                                                     : 'text-rose-600'
                                             }`}>
-                                                {Number(reportData.dailyActivity.dayCloseRecord.closingDifference || 0) > 0 ? '+' : ''}
-                                                {formatCurrency(reportData.dailyActivity.dayCloseRecord.closingDifference || 0, activeCurrencyCode)}
+                                                {Number(reportData.dailyActivity.dayCloseRecord.closingDifference ?? reportData.dailyActivity.dayCloseRecord.cashDifference ?? 0) > 0 ? '+' : ''}
+                                                {formatCurrency(reportData.dailyActivity.dayCloseRecord.closingDifference ?? reportData.dailyActivity.dayCloseRecord.cashDifference ?? 0, activeCurrencyCode)}
                                             </span>
                                             <span className="text-[10px] text-slate-500">
-                                                {Number(reportData.dailyActivity.dayCloseRecord.closingDifference || 0) === 0 ? 'Balanced' : 'Discrepancy logged'}
+                                                {Number(reportData.dailyActivity.dayCloseRecord.closingDifference ?? reportData.dailyActivity.dayCloseRecord.cashDifference ?? 0) === 0 ? 'Balanced' : 'Discrepancy logged'}
                                             </span>
                                         </div>
                                         <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
@@ -1491,72 +1549,129 @@ export default function SalesReport() {
                                                 {reportData.dailyActivity.dayCloseRecord.closedBy || '—'}
                                             </span>
                                             <span className="text-[10px] text-slate-500">
-                                                {reportData.dailyActivity.dayCloseRecord.closedAt ? new Date(reportData.dailyActivity.dayCloseRecord.closedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '—'}
+                                                {reportData.dailyActivity.dayCloseRecord.closedAt || reportData.dailyActivity.dayCloseRecord.closingTime ? new Date(reportData.dailyActivity.dayCloseRecord.closedAt || reportData.dailyActivity.dayCloseRecord.closingTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '—'}
                                             </span>
                                         </div>
                                         <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
                                             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Remarks</span>
-                                            <span className="text-xs text-slate-600 mt-0.5 block line-clamp-2" title={reportData.dailyActivity.dayCloseRecord.remarks}>
-                                                {reportData.dailyActivity.dayCloseRecord.remarks || 'No closing notes'}
+                                            <span className="text-xs text-slate-600 mt-0.5 block line-clamp-2" title={reportData.dailyActivity.dayCloseRecord.remarks || reportData.dailyActivity.dayCloseRecord.notes}>
+                                                {reportData.dailyActivity.dayCloseRecord.remarks || reportData.dailyActivity.dayCloseRecord.notes || 'No closing notes'}
                                             </span>
                                         </div>
                                     </div>
                                 </div>
                             ) : (
-                                <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-800 flex items-center justify-between">
+                                <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-800 flex flex-wrap items-center justify-between gap-3">
                                     <div className="flex items-center gap-3">
-                                        <FiAlertTriangle className="text-amber-600" size={20} />
+                                        <FiAlertTriangle className="text-amber-600 shrink-0" size={20} />
                                         <div>
-                                            <span className="font-bold text-sm">No Day Session Record Found for {formatDisplayDate(singleDate)}</span>
+                                            <div className="flex items-center gap-2">
+                                                <span className="font-bold text-sm">No Day Session Record Found for {formatDisplayDate(singleDate)}</span>
+                                                <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-amber-100 text-amber-800 border border-amber-200">
+                                                    Not Registered
+                                                </span>
+                                            </div>
                                             <p className="text-xs text-amber-700">This business date has not been formally opened or closed in the POS register.</p>
                                         </div>
                                     </div>
-                                    <button
-                                        onClick={() => router.push('/settings/day-close')}
-                                        className="px-3 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs"
-                                    >
-                                        Open Day Close
-                                    </button>
+                                    <div className="flex items-center gap-3">
+                                        <div className="px-3 py-1.5 bg-white/80 rounded-xl border border-amber-200 text-xs shadow-2xs">
+                                            <span className="text-[10px] font-bold text-slate-500 uppercase block">Opening Amount</span>
+                                            <span className="font-black text-slate-800">
+                                                {formatCurrency(reportData.dailyActivity?.openingAmount || 0, activeCurrencyCode)}
+                                            </span>
+                                        </div>
+                                        <div className="px-3 py-1.5 bg-white/80 rounded-xl border border-amber-200 text-xs shadow-2xs">
+                                            <span className="text-[10px] font-bold text-slate-500 uppercase block">Closing Amount</span>
+                                            <span className="font-black text-indigo-700">
+                                                {formatCurrency(reportData.dailyActivity?.closingAmount || 0, activeCurrencyCode)}
+                                            </span>
+                                        </div>
+                                        <button
+                                            onClick={() => router.push('/settings/day-close')}
+                                            className="px-3 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs transition-all shadow-xs"
+                                        >
+                                            Open Day Close &rarr;
+                                        </button>
+                                    </div>
                                 </div>
                             )}
 
                             {/* 2. Operations KPI Bar */}
-                            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-4 xl:grid-cols-8 gap-3">
                                 <div className="bg-white p-3.5 rounded-2xl border border-slate-100 shadow-xs">
-                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Invoices</span>
+                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Opening Amount</span>
+                                    <p className="text-lg font-black text-slate-800 mt-0.5">
+                                        {formatCurrency(
+                                            reportData.dailyActivity?.openingAmount ??
+                                            reportData.dailyActivity?.dayCloseRecord?.actualOpeningCash ??
+                                            reportData.dailyActivity?.dayCloseRecord?.openingCash ?? 0,
+                                            activeCurrencyCode
+                                        )}
+                                    </p>
+                                    <span className="text-[10px] text-slate-400 block truncate">
+                                        {reportData.dailyActivity?.dayCloseRecord?.openedBy ? `By: ${reportData.dailyActivity.dayCloseRecord.openedBy}` : 'Register opening'}
+                                    </span>
+                                </div>
+                                <div className="bg-white p-3.5 rounded-2xl border border-slate-100 shadow-xs">
+                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Total Sales</span>
+                                    <p className="text-lg font-black text-emerald-700 mt-0.5">
+                                        {formatCurrency(reportData.dashboard?.kpis?.totalSales || 0, activeCurrencyCode)}
+                                    </p>
+                                    <span className="text-[10px] text-slate-400 block">Gross revenue</span>
+                                </div>
+                                <div className="bg-white p-3.5 rounded-2xl border border-slate-100 shadow-xs">
+                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Closing Amount</span>
+                                    <p className="text-lg font-black text-indigo-700 mt-0.5">
+                                        {formatCurrency(
+                                            reportData.dailyActivity?.closingAmount ??
+                                            reportData.dailyActivity?.dayCloseRecord?.closingActualCash ??
+                                            reportData.dailyActivity?.dayCloseRecord?.closingExpectedCash ?? 0,
+                                            activeCurrencyCode
+                                        )}
+                                    </p>
+                                    <span className="text-[10px] text-slate-400 block truncate">
+                                        {reportData.dailyActivity?.dayCloseRecord?.status === 'CLOSED' || reportData.dailyActivity?.dayCloseRecord?.status === 'ADMIN_CLOSED'
+                                            ? 'Actual closed cash'
+                                            : 'Expected closing'}
+                                    </span>
+                                </div>
+                                <div className="bg-white p-3.5 rounded-2xl border border-slate-100 shadow-xs">
+                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Daily Expenses</span>
+                                    <p className="text-lg font-black text-slate-800 mt-0.5">
+                                        {formatCurrency(
+                                            reportData.dailyActivity?.totalExpensesAmount ??
+                                            (reportData.dailyActivity?.expenses || []).reduce((sum, e) => sum + Number(e.amount || 0), 0),
+                                            activeCurrencyCode
+                                        )}
+                                    </p>
+                                    <span className="text-[10px] text-slate-400 block">
+                                        {reportData.dailyActivity?.counts?.expensesCount || 0} bills logged
+                                    </span>
+                                </div>
+                                <div className="bg-white p-3.5 rounded-2xl border border-slate-100 shadow-xs">
+                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Total Invoices</span>
                                     <p className="text-lg font-black text-slate-800 mt-0.5">{reportData.dailyActivity?.counts?.totalInvoicesCount || 0}</p>
-                                    <span className="text-[10px] text-slate-400">Created today</span>
+                                    <span className="text-[10px] text-slate-400 block">Created today</span>
                                 </div>
                                 <div className={`p-3.5 rounded-2xl border shadow-xs ${
                                     (reportData.dailyActivity?.counts?.cancelledCount || 0) > 0 ? 'bg-rose-50/60 border-rose-200' : 'bg-white border-slate-100'
                                 }`}>
-                                    <span className="text-[10px] font-bold text-rose-500 uppercase tracking-wider">Cancelled Invoices</span>
+                                    <span className="text-[10px] font-bold text-rose-500 uppercase tracking-wider block">Cancelled Invoices</span>
                                     <p className="text-lg font-black text-rose-700 mt-0.5">{reportData.dailyActivity?.counts?.cancelledCount || 0}</p>
-                                    <span className="text-[10px] text-rose-400">Voided / Cancelled</span>
+                                    <span className="text-[10px] text-rose-400 block">Voided / Cancelled</span>
                                 </div>
                                 <div className="bg-white p-3.5 rounded-2xl border border-slate-100 shadow-xs">
-                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Sales Returns</span>
+                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Sales Returns</span>
                                     <p className="text-lg font-black text-amber-700 mt-0.5">{reportData.dailyActivity?.counts?.returnsCount || 0}</p>
-                                    <span className="text-[10px] text-slate-400">Credit notes / returns</span>
+                                    <span className="text-[10px] text-slate-400 block">Credit notes / returns</span>
                                 </div>
                                 <div className="bg-white p-3.5 rounded-2xl border border-slate-100 shadow-xs">
-                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Daily Expenses</span>
-                                    <p className="text-lg font-black text-slate-800 mt-0.5">{reportData.dailyActivity?.counts?.expensesCount || 0}</p>
-                                    <span className="text-[10px] text-slate-400">Petty cash & bills</span>
-                                </div>
-                                <div className="bg-white p-3.5 rounded-2xl border border-slate-100 shadow-xs">
-                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Sales</span>
-                                    <p className="text-lg font-black text-emerald-700 mt-0.5">
-                                        {formatCurrency(reportData.dashboard?.kpis?.totalSales || 0, activeCurrencyCode)}
-                                    </p>
-                                    <span className="text-[10px] text-slate-400">Gross revenue</span>
-                                </div>
-                                <div className="bg-white p-3.5 rounded-2xl border border-slate-100 shadow-xs">
-                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">GST Collection</span>
+                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">GST Collection</span>
                                     <p className="text-lg font-black text-indigo-700 mt-0.5">
                                         {formatCurrency(reportData.dailyActivity?.gstSummary?.totalTax || 0, activeCurrencyCode)}
                                     </p>
-                                    <span className="text-[10px] text-slate-400">CGST + SGST + IGST</span>
+                                    <span className="text-[10px] text-slate-400 block">CGST + SGST + IGST</span>
                                 </div>
                             </div>
 

@@ -107,7 +107,8 @@ exports.addAdvance = asyncHandler(async (req, res) => {
                 amount: amount,
                 narration: `Customer Advance Received: ${customer.name}${notes ? ' - ' + notes : ''}`,
                 reference: 'ADVANCE',
-                createdBy: req.user?.id || 1
+                createdBy: req.user?.id || 1,
+                branchId: customer?.branchId || req.user?.branchId || null
             }, [
                 { ledgerId: assetLedger.id, type: 'DEBIT', amount: amount },
                 { ledgerId: customerLedger.id, type: 'CREDIT', amount: amount }

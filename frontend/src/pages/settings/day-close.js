@@ -8,6 +8,7 @@ import {
   FiChevronRight
 } from 'react-icons/fi';
 import { useRouter } from 'next/router';
+import { formatCurrency, extractCurrencyMeta } from '@/lib/currency';
 
 const formatDisplayFromIso = (isoStr) => {
   if (!isoStr) return '';
@@ -162,7 +163,8 @@ export default function DayClosePage() {
       const diff = actualCash - expectedCash;
 
       if (Math.abs(diff) > 0.01 && !openingReason.trim()) {
-        toast.warn(`Please provide an explanation for the opening difference of ₹${diff.toFixed(2)}.`);
+        const branchCurr = statusData?.branch || currentUser?.branch || 'INR';
+        toast.warn(`Please provide an explanation for the opening difference of ${formatCurrency(diff, branchCurr)}.`);
         setSubmitting(false);
         return;
       }
@@ -281,6 +283,10 @@ export default function DayClosePage() {
   const expectedClosing = verificationData?.expectedClosingCash !== undefined ? Number(verificationData.expectedClosingCash) : 0;
   const actualClosingNum = parseFloat(physicalCash) || 0;
   const closingDiffCalc = Number((actualClosingNum - expectedClosing).toFixed(2));
+
+  const branchCurrency = statusData?.branch || currentUser?.branch || 'INR';
+  const currencyMeta = extractCurrencyMeta(branchCurrency);
+  const currencySymbol = currencyMeta.symbol;
 
   // Verification readiness check
   const checklist = verificationData?.checklist || {};
@@ -423,7 +429,7 @@ export default function DayClosePage() {
               </div>
               <div className="p-3 bg-gray-50 rounded-xl space-y-0.5">
                 <span className="text-[10px] text-gray-400 font-semibold uppercase">Opening Cash</span>
-                <p className="font-bold text-emerald-600">₹{statusData.openingCash.toLocaleString('en-IN')}</p>
+                <p className="font-bold text-emerald-600">{formatCurrency(statusData.openingCash, branchCurrency)}</p>
               </div>
             </div>
 
@@ -432,7 +438,7 @@ export default function DayClosePage() {
               <div className="text-[11px] text-gray-500 bg-slate-50 p-2.5 rounded-lg border border-slate-100 flex items-center gap-2">
                 <FiLock className="text-slate-400" />
                 <span>
-                  Previous Closing Reference: Closed on <span className="font-bold text-gray-700">{statusData.previousClosingDateDisplay}</span> with <span className="font-bold text-gray-700">₹{statusData.previousClosingCash.toLocaleString('en-IN')}</span> closing cash.
+                  Previous Closing Reference: Closed on <span className="font-bold text-gray-700">{statusData.previousClosingDateDisplay}</span> with <span className="font-bold text-gray-700">{formatCurrency(statusData.previousClosingCash, branchCurrency)}</span> closing cash.
                 </span>
               </div>
             )}
@@ -588,7 +594,7 @@ export default function DayClosePage() {
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div className="p-3 bg-gray-50 rounded-xl space-y-1">
                     <span className="text-[10px] text-gray-400 font-semibold uppercase">Expected Closing Cash</span>
-                    <p className="text-lg font-extrabold text-gray-800">₹{expectedClosing.toLocaleString('en-IN')}</p>
+                    <p className="text-lg font-extrabold text-gray-800">{formatCurrency(expectedClosing, branchCurrency)}</p>
                     <span className="text-[10px] text-gray-400">Opening + Cash Sales - Expenses</span>
                   </div>
 
@@ -613,7 +619,7 @@ export default function DayClosePage() {
                         ? 'text-blue-600'
                         : 'text-red-600'
                     }`}>
-                      {closingDiffCalc >= 0 ? `+₹${closingDiffCalc}` : `-₹${Math.abs(closingDiffCalc)}`}
+                      {closingDiffCalc >= 0 ? `+${formatCurrency(closingDiffCalc, branchCurrency)}` : `-${formatCurrency(Math.abs(closingDiffCalc), branchCurrency)}`}
                     </p>
                     <span className="text-[10px] text-gray-400">{closingDiffCalc === 0 ? 'Exact match' : 'Difference'}</span>
                   </div>
@@ -666,8 +672,8 @@ export default function DayClosePage() {
 
       {/* MODAL 1: Day Opening Modal */}
       {showOpenModal && (
-        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-xl border border-gray-100 max-w-md w-full p-6 space-y-4">
+        <div className="fixed inset-0 z-[100000] bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 pt-16 sm:pt-20 overflow-y-auto">
+          <div className="bg-white rounded-2xl shadow-xl border border-gray-100 max-w-md w-full p-6 space-y-4 my-auto translate-y-4 sm:translate-y-6">
             <div className="flex items-center justify-between border-b pb-3">
               <h3 className="font-bold text-gray-800 text-base flex items-center gap-2">
                 <FiClock className="text-emerald-600" /> Open Business Day
@@ -685,13 +691,13 @@ export default function DayClosePage() {
                 </div>
                 <div className="p-2.5 bg-gray-50 rounded-lg">
                   <span className="text-[10px] text-gray-400 font-semibold uppercase">Previous Closing Cash</span>
-                  <p className="font-bold text-gray-800">₹{prevClosingCash.toLocaleString('en-IN')}</p>
+                  <p className="font-bold text-gray-800">{formatCurrency(prevClosingCash, branchCurrency)}</p>
                 </div>
               </div>
 
               <div className="space-y-3 text-xs">
                 <div>
-                  <label className="font-semibold text-gray-600">Additional Cash Added to Till (₹)</label>
+                  <label className="font-semibold text-gray-600">Additional Cash Added to Till ({currencySymbol})</label>
                   <input
                     type="number"
                     step="0.01"
@@ -702,7 +708,7 @@ export default function DayClosePage() {
                 </div>
 
                 <div>
-                  <label className="font-semibold text-gray-600">Cash Removed Before Opening (₹)</label>
+                  <label className="font-semibold text-gray-600">Cash Removed Before Opening ({currencySymbol})</label>
                   <input
                     type="number"
                     step="0.01"
@@ -714,11 +720,11 @@ export default function DayClosePage() {
 
                 <div className="p-2.5 bg-emerald-50 rounded-lg border border-emerald-100 flex justify-between items-center">
                   <span className="text-emerald-800 font-bold">Expected Opening Cash:</span>
-                  <span className="text-emerald-900 font-extrabold text-sm">₹{expectedOpenCalc.toFixed(2)}</span>
+                  <span className="text-emerald-900 font-extrabold text-sm">{formatCurrency(expectedOpenCalc, branchCurrency)}</span>
                 </div>
 
                 <div>
-                  <label className="font-semibold text-gray-600">Actual Opening Cash Counted (₹)</label>
+                  <label className="font-semibold text-gray-600">Actual Opening Cash Counted ({currencySymbol})</label>
                   <input
                     type="number"
                     step="0.01"
@@ -734,7 +740,7 @@ export default function DayClosePage() {
                   <div className="space-y-2 p-3 bg-amber-50 border border-amber-200 rounded-lg">
                     <div className="flex justify-between items-center text-amber-800 font-bold">
                       <span>Opening Difference:</span>
-                      <span>{openDiffCalc > 0 ? `+₹${openDiffCalc.toFixed(2)}` : `-₹${Math.abs(openDiffCalc).toFixed(2)}`}</span>
+                      <span>{openDiffCalc > 0 ? `+${formatCurrency(openDiffCalc, branchCurrency)}` : `-${formatCurrency(Math.abs(openDiffCalc), branchCurrency)}`}</span>
                     </div>
                     <label className="block text-[10px] font-bold text-amber-900 uppercase">Reason / Explanation (Required):</label>
                     <textarea
@@ -783,7 +789,7 @@ export default function DayClosePage() {
 
       {/* MODAL 2: Find Open Days Modal */}
       {showOpenDaysModal && (
-        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[100000] bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
           <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 max-w-5xl w-full p-6 space-y-4 max-h-[90vh] flex flex-col">
             <div className="flex items-center justify-between border-b pb-3">
               <div>
@@ -874,8 +880,8 @@ export default function DayClosePage() {
                         <td className="p-3 text-gray-600">{od.branchName}</td>
                         <td className="p-3 text-gray-600">{od.cashier}</td>
                         <td className="p-3 text-right text-gray-800">{od.salesCount}</td>
-                        <td className="p-3 text-right font-bold text-gray-900">₹{od.totalSales.toLocaleString('en-IN')}</td>
-                        <td className="p-3 text-right text-emerald-600 font-bold">₹{od.cashCollections.toLocaleString('en-IN')}</td>
+                        <td className="p-3 text-right font-bold text-gray-900">{formatCurrency(od.totalSales, branchCurrency)}</td>
+                        <td className="p-3 text-right text-emerald-600 font-bold">{formatCurrency(od.cashCollections, branchCurrency)}</td>
                         <td className="p-3">
                           <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
                             od.isPendingClosure
@@ -909,7 +915,7 @@ export default function DayClosePage() {
 
       {/* MODAL 3: Quick Inspector Modal for Verification Items */}
       {inspectingItem && (
-        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[100000] bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
           <div className="bg-white rounded-2xl shadow-xl border border-gray-100 max-w-lg w-full p-6 space-y-4">
             <div className="flex items-center justify-between border-b pb-3">
               <h3 className="font-bold text-gray-800 text-base">{inspectingItem.title} - Detailed Inspection</h3>
@@ -950,7 +956,7 @@ export default function DayClosePage() {
 
       {/* MODAL 4: Exception Approval Modal */}
       {showExceptionModal && (
-        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[100000] bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
           <div className="bg-white rounded-2xl shadow-xl border border-gray-100 max-w-sm w-full p-6 space-y-4">
             <div className="flex items-center justify-between border-b pb-3">
               <h3 className="font-bold text-gray-800 text-base flex items-center gap-2 text-red-600">
@@ -1000,8 +1006,8 @@ export default function DayClosePage() {
 
       {/* MODAL 5: Pre-Closing Confirmation Modal */}
       {showConfirmModal && (
-        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 max-w-md w-full p-6 space-y-4 text-center">
+        <div className="fixed inset-0 z-[100000] bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 pt-16 sm:pt-20 overflow-y-auto">
+          <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 max-w-md w-full p-6 space-y-4 text-center my-auto translate-y-4 sm:translate-y-6">
             <div className="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-2xl font-bold">
               <FiLock />
             </div>
@@ -1017,20 +1023,20 @@ export default function DayClosePage() {
             <div className="p-3 bg-gray-50 rounded-xl text-left text-xs space-y-1.5 border border-gray-100 font-medium">
               <div className="flex justify-between">
                 <span className="text-gray-500">Opening Cash:</span>
-                <span className="font-bold text-gray-800">₹{statusData.openingCash.toLocaleString('en-IN')}</span>
+                <span className="font-bold text-gray-800">{formatCurrency(statusData.openingCash, branchCurrency)}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-500">Expected Closing Cash:</span>
-                <span className="font-bold text-gray-800">₹{expectedClosing.toLocaleString('en-IN')}</span>
+                <span className="font-bold text-gray-800">{formatCurrency(expectedClosing, branchCurrency)}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-500">Actual Physical Cash:</span>
-                <span className="font-bold text-emerald-600">₹{actualClosingNum.toLocaleString('en-IN')}</span>
+                <span className="font-bold text-emerald-600">{formatCurrency(actualClosingNum, branchCurrency)}</span>
               </div>
               <div className="flex justify-between border-t pt-1">
                 <span className="text-gray-500">Cash Difference:</span>
                 <span className={`font-bold ${closingDiffCalc === 0 ? 'text-gray-700' : 'text-red-600'}`}>
-                  ₹{closingDiffCalc.toFixed(2)}
+                  {formatCurrency(closingDiffCalc, branchCurrency)}
                 </span>
               </div>
             </div>

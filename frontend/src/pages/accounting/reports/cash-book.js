@@ -3,6 +3,7 @@ import api from '@/lib/api';
 import { toast } from 'react-toastify';
 import { FiDownload, FiPrinter, FiFilter, FiChevronDown, FiChevronRight, FiPhone, FiCalendar } from 'react-icons/fi';
 import { useTheme } from '@/context/ThemeContext';
+import { formatCurrency, extractCurrencyMeta } from '@/lib/currency';
 
 export default function CashBookReport() {
     const { theme } = useTheme();
@@ -12,6 +13,12 @@ export default function CashBookReport() {
     const [company, setCompany] = useState(null);
     const [loading, setLoading] = useState(false);
     const [expandedRows, setExpandedRows] = useState({});
+
+    // Branch Filtering & Currency
+    const [branches, setBranches] = useState([]);
+    const [selectedBranch, setSelectedBranch] = useState('');
+    const [activeBranch, setActiveBranch] = useState(null);
+    const [reportCurrency, setReportCurrency] = useState({ code: 'INR', symbol: '₹' });
 
     const toggleRow = (id) => {
         setExpandedRows(prev => ({
@@ -27,8 +34,18 @@ export default function CashBookReport() {
 
     useEffect(() => {
         fetchCompanyProfile();
+        fetchBranches();
         fetchCashReport();
     }, []); // Initial load
+
+    const fetchBranches = async () => {
+        try {
+            const res = await api.get('/branches');
+            setBranches(res.data || []);
+        } catch (err) {
+            console.error("Failed to load branches", err);
+        }
+    };
 
     const fetchCompanyProfile = async () => {
         try {
@@ -39,19 +56,32 @@ export default function CashBookReport() {
         }
     };
 
-    const fetchCashReport = async () => {
+    const fetchCashReport = async (overrideBranchId) => {
         setLoading(true);
+        const targetBranchId = overrideBranchId !== undefined ? overrideBranchId : selectedBranch;
         try {
-            // Call dedicated Cash Book report endpoint
+            // Call dedicated Cash Book report endpoint with branchId
             const res = await api.get('/accounting/reports/cash-book', {
                 params: {
                     startDate,
-                    endDate
+                    endDate,
+                    branchId: targetBranchId || undefined
                 }
             });
 
             setLedgerInfo(res.data.ledger);
             setTransactions(res.data.statement || []);
+            setActiveBranch(res.data.branch || null);
+            if (res.data.currency) {
+                setReportCurrency(res.data.currency);
+            } else if (res.data.branch) {
+                setReportCurrency({
+                    code: res.data.branch.currencyCode || 'INR',
+                    symbol: res.data.branch.currencySymbol || '₹'
+                });
+            } else {
+                setReportCurrency({ code: 'INR', symbol: '₹' });
+            }
         } catch (err) {
             console.error("Cash Book fetch error:", err);
             // Fallback to ledger-statement with isCashBook=true
@@ -68,11 +98,16 @@ export default function CashBookReport() {
                             ledgerId: cashLedger.id,
                             startDate,
                             endDate,
+                            branchId: targetBranchId || undefined,
                             isCashBook: 'true'
                         }
                     });
                     setLedgerInfo(fallbackRes.data.ledger);
                     setTransactions(fallbackRes.data.statement || []);
+                    setActiveBranch(fallbackRes.data.branch || null);
+                    if (fallbackRes.data.currency) {
+                        setReportCurrency(fallbackRes.data.currency);
+                    }
                     return;
                 }
             } catch (fallbackErr) {
@@ -98,8 +133,16 @@ export default function CashBookReport() {
             ? Math.abs(Number(transactions[transactions.length - 1].balance) || 0)
             : openingBal;
 
+        const branchLabel = activeBranch ? activeBranch.name : 'All Branches (Consolidated)';
+        const currLabel = reportCurrency?.code || 'INR';
+
         const csvContent = [
-            ['Date', 'Voucher No', 'Particulars', 'Debit (Out)', 'Credit (In)', 'Balance'],
+            ['Report', 'Cash Book Report'],
+            ['Branch', `"${branchLabel.replace(/"/g, '""')}"`],
+            ['Currency', currLabel],
+            ['Period', `${startDate} to ${endDate}`],
+            [],
+            ['Date', 'Voucher No', 'Particulars', `Debit (Out) [${currLabel}]`, `Credit (In) [${currLabel}]`, `Balance [${currLabel}]`],
             // Opening Balance Row
             [
                 startDate,
@@ -107,25 +150,25 @@ export default function CashBookReport() {
                 'By Balance b/d (Opening)',
                 '-',
                 '-',
-                `${openingBal} ${ledgerInfo?.balanceType === 'DEBIT' ? 'Dr' : 'Cr'}`
+                `${openingBal.toFixed(2)} ${ledgerInfo?.balanceType === 'DEBIT' ? 'Dr' : 'Cr'}`
             ],
             // Transactions
             ...transactions.map(tx => [
                 new Date(tx.date).toLocaleDateString(),
                 `"${(tx.voucherNumber || '-').replace(/"/g, '""')}"`,
                 `"${(tx.particulars || 'Sale').replace(/"/g, '""')}"`,
-                tx.debit || 0,
-                tx.credit || 0,
-                `${Math.abs(tx.balance)} ${tx.balance >= 0 ? 'Dr' : 'Cr'}`
+                (Number(tx.debit) || 0).toFixed(2),
+                (Number(tx.credit) || 0).toFixed(2),
+                `${Math.abs(Number(tx.balance) || 0).toFixed(2)} ${Number(tx.balance) >= 0 ? 'Dr' : 'Cr'}`
             ]),
             // Closing Balance Row
             [
                 endDate,
                 '-',
                 'Total Closing Balance',
-                totalDebit,
-                totalCredit,
-                `${closingBal} ${transactions.length > 0 ? (transactions[transactions.length - 1].balance >= 0 ? 'Dr' : 'Cr') : (ledgerInfo?.balanceType === 'DEBIT' ? 'Dr' : 'Cr')}`
+                totalDebit.toFixed(2),
+                totalCredit.toFixed(2),
+                `${closingBal.toFixed(2)} ${transactions.length > 0 ? (Number(transactions[transactions.length - 1].balance) >= 0 ? 'Dr' : 'Cr') : (ledgerInfo?.balanceType === 'DEBIT' ? 'Dr' : 'Cr')}`
             ]
         ].map(row => row.join(',')).join('\n');
 
@@ -133,7 +176,8 @@ export default function CashBookReport() {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `CashBook_${startDate}_to_${endDate}.csv`;
+        const branchFilename = activeBranch ? `_${activeBranch.name.replace(/[^a-zA-Z0-9]/g, '_')}` : '_AllBranches';
+        a.download = `CashBook${branchFilename}_${startDate}_to_${endDate}.csv`;
         a.click();
     };
 
@@ -198,6 +242,26 @@ export default function CashBookReport() {
             <div className="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 print:hidden bg-slate-50/80 p-4 sm:p-5 rounded-2xl border border-slate-200/80">
                 <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
                     <div className="flex items-center gap-2">
+                        <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Branch:</span>
+                        <select
+                            className="bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-700 shadow-sm focus:outline-none focus:ring-2 transition-all cursor-pointer"
+                            style={{ borderColor: primaryColor + '40' }}
+                            value={selectedBranch}
+                            onChange={(e) => {
+                                const val = e.target.value;
+                                setSelectedBranch(val);
+                                fetchCashReport(val);
+                            }}
+                        >
+                            <option value="">All Branches (Consolidated)</option>
+                            {branches.map(b => (
+                                <option key={b.id} value={b.id}>
+                                    {b.name} ({b.currencyCode || 'INR'})
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                    <div className="flex items-center gap-2">
                         <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">From:</span>
                         <input
                             type="date"
@@ -253,6 +317,14 @@ export default function CashBookReport() {
                     <h2 className="text-xl sm:text-2xl font-bold text-slate-800 tracking-tight">
                         Cash Book Report
                     </h2>
+                    <div className="flex flex-wrap items-center justify-center gap-2 mt-2">
+                        <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200">
+                            {activeBranch ? `Branch: ${activeBranch.name}` : 'All Branches (Consolidated)'}
+                        </span>
+                        <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                            Currency: {reportCurrency?.code || 'INR'} ({reportCurrency?.symbol || '₹'})
+                        </span>
+                    </div>
                     <p className="text-xs text-slate-500 font-semibold mt-1 uppercase tracking-wider">
                         Period: {startDate} to {endDate}
                     </p>
@@ -283,7 +355,7 @@ export default function CashBookReport() {
                             <td className="border-b border-r border-slate-200 px-4 py-2.5 text-right text-slate-400">-</td>
                             <td className="border-b border-r border-slate-200 px-4 py-2.5 text-right text-slate-400">-</td>
                             <td className="border-b border-slate-200 px-4 py-2.5 text-right font-medium text-slate-800">
-                                ₹{openingBalanceNum.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                                {formatCurrency(openingBalanceNum, reportCurrency)}
                                 <span className="text-[10px] ml-1 text-slate-500 font-bold">{ledgerInfo?.balanceType === 'DEBIT' ? 'Dr' : 'Cr'}</span>
                             </td>
                         </tr>
@@ -330,16 +402,16 @@ export default function CashBookReport() {
                                         </td>
                                         <td className="border-b border-r border-slate-200 px-4 py-2.5 text-right font-medium text-red-700">
                                             {Number(tx.debit) > 0
-                                                ? `₹${Number(tx.debit).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`
+                                                ? formatCurrency(tx.debit, reportCurrency)
                                                 : (tx.particulars === 'Customer Credit' || tx.voucherType === 'Credit' || tx.details?.isCustomerCredit
-                                                    ? '₹0.00'
+                                                    ? formatCurrency(0, reportCurrency)
                                                     : '-')}
                                         </td>
                                         <td className="border-b border-r border-slate-200 px-4 py-2.5 text-right font-medium text-emerald-700">
-                                            {Number(tx.credit) > 0 ? `₹${Number(tx.credit).toLocaleString('en-IN', { minimumFractionDigits: 2 })}` : '-'}
+                                            {Number(tx.credit) > 0 ? formatCurrency(tx.credit, reportCurrency) : '-'}
                                         </td>
                                         <td className="border-b border-slate-200 px-4 py-2.5 text-right font-mono text-slate-800 bg-slate-50/40">
-                                            ₹{Math.abs(Number(tx.balance) || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                                            {formatCurrency(Math.abs(Number(tx.balance) || 0), reportCurrency)}
                                             <span className="text-[10px] ml-1 text-slate-400 font-semibold">{tx.balance >= 0 ? 'Dr' : 'Cr'}</span>
                                         </td>
                                     </tr>
@@ -398,7 +470,7 @@ export default function CashBookReport() {
                                                                 <tbody>
                                                                     {tx.details.sales.map((sale, sIdx) => {
                                                                         const fmt = (v) => Number(v || 0) > 0
-                                                                            ? `₹${Number(v).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`
+                                                                            ? formatCurrency(v, reportCurrency)
                                                                             : '—';
                                                                         return (
                                                                             <tr
@@ -422,7 +494,7 @@ export default function CashBookReport() {
                                                                                     </span>
                                                                                 </td>
                                                                                 <td className="px-3 py-2 text-right font-semibold text-slate-900 font-mono whitespace-nowrap">
-                                                                                    ₹{Number(sale.totalAmount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                                                                                    {formatCurrency(sale.totalAmount || 0, reportCurrency)}
                                                                                 </td>
                                                                                 <td className="px-3 py-2 text-right text-slate-700 font-mono whitespace-nowrap">
                                                                                     {fmt(sale.cashAmount)}
@@ -435,7 +507,7 @@ export default function CashBookReport() {
                                                                                 </td>
                                                                                 <td className="px-3 py-2 text-right font-mono whitespace-nowrap">
                                                                                     {Number(sale.creditAmount) > 0
-                                                                                        ? <span className="text-amber-700 font-semibold">₹{Number(sale.creditAmount).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+                                                                                        ? <span className="text-amber-700 font-semibold">{formatCurrency(sale.creditAmount, reportCurrency)}</span>
                                                                                         : <span className="text-slate-400">—</span>}
                                                                                 </td>
                                                                             </tr>
@@ -452,13 +524,13 @@ export default function CashBookReport() {
                                                                         creditAmount:acc.creditAmount+ Number(s.creditAmount|| 0),
                                                                     }), { totalAmount: 0, cashAmount: 0, upiAmount: 0, cardAmount: 0, creditAmount: 0 });
                                                                     const fmtTot = (v) => v > 0
-                                                                        ? `₹${v.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`
+                                                                        ? formatCurrency(v, reportCurrency)
                                                                         : '—';
                                                                     return (
                                                                         <tfoot>
                                                                             <tr className="bg-slate-100 border-t-2 border-slate-300 font-bold text-slate-800">
                                                                                 <td className="px-3 py-2 text-[10px] uppercase tracking-wide text-slate-500" colSpan="4">Total ({tx.details.sales.length} invoices)</td>
-                                                                                <td className="px-3 py-2 text-right font-mono">₹{tot.totalAmount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
+                                                                                <td className="px-3 py-2 text-right font-mono">{formatCurrency(tot.totalAmount, reportCurrency)}</td>
                                                                                 <td className="px-3 py-2 text-right font-mono">{fmtTot(tot.cashAmount)}</td>
                                                                                 <td className="px-3 py-2 text-right font-mono">{fmtTot(tot.upiAmount)}</td>
                                                                                 <td className="px-3 py-2 text-right font-mono">{fmtTot(tot.cardAmount)}</td>
@@ -493,13 +565,13 @@ export default function CashBookReport() {
                             <td className="border-r border-slate-300 px-4 py-3 print:hidden" colSpan="1"></td>
                             <td className="border-r border-slate-300 px-4 py-3" colSpan="3">Total Closing Balance</td>
                             <td className="border-r border-slate-300 px-4 py-3 text-right text-red-700">
-                                {totalDebit > 0 ? `₹${totalDebit.toLocaleString('en-IN', { minimumFractionDigits: 2 })}` : '-'}
+                                {totalDebit > 0 ? formatCurrency(totalDebit, reportCurrency) : '-'}
                             </td>
                             <td className="border-r border-slate-300 px-4 py-3 text-right text-emerald-700">
-                                {totalCredit > 0 ? `₹${totalCredit.toLocaleString('en-IN', { minimumFractionDigits: 2 })}` : '-'}
+                                {totalCredit > 0 ? formatCurrency(totalCredit, reportCurrency) : '-'}
                             </td>
                             <td className="px-4 py-3 text-right text-base text-slate-900 font-extrabold font-mono">
-                                ₹{closingBalanceNum.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                                {formatCurrency(closingBalanceNum, reportCurrency)}
                                 <span className="text-xs ml-1 text-slate-600 font-bold">
                                     {closingBalanceType}
                                 </span>

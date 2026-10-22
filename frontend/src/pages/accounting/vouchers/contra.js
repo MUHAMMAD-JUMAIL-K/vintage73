@@ -6,6 +6,7 @@ import ConfirmationModal from '@/components/ConfirmationModal';
 import ProfessionalModal from '@/components/ProfessionalModal';
 import VoucherPrint from '@/components/VoucherPrint';
 import SearchableSelect from '@/components/SearchableSelect';
+import { formatCurrency } from '@/lib/currency';
 
 export default function ContraEntry() {
     const [ledgers, setLedgers] = useState([]);
@@ -280,15 +281,14 @@ export default function ContraEntry() {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-2 text-primary">Transfer Amount (₹)</label>
+                                    <label className="block text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-2 text-primary">Transfer Amount</label>
                                     <div className="relative">
-                                        <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-primary">₹</span>
                                         <input
                                             required
                                             type="number"
                                             step="0.01"
                                             min="0.01"
-                                            className="w-full pl-8 pr-4 py-3 bg-primary-light/30 border border-primary-light rounded-2xl focus:ring-2 focus:ring-primary focus:border-transparent focus:bg-white text-lg font-bold text-primary tabular-nums transition-all"
+                                            className="w-full px-4 py-3 bg-primary-light/30 border border-primary-light rounded-2xl focus:ring-2 focus:ring-primary focus:border-transparent focus:bg-white text-lg font-bold text-primary tabular-nums transition-all"
                                             value={formData.amount}
                                             onChange={e => setFormData({ ...formData, amount: e.target.value })}
                                             placeholder="0.00"
@@ -307,7 +307,7 @@ export default function ContraEntry() {
                                             <div className="flex items-center gap-2">
                                                 <div className={`w-2 h-2 rounded-full ${selectedFromAccount.currentBalance >= 0 ? 'bg-primary' : 'bg-red-500'}`} />
                                                 <span className="text-[11px] font-semibold text-slate-600">
-                                                    Bal: ₹{Math.abs(selectedFromAccount.currentBalance).toFixed(2)} {selectedFromAccount.currentBalance >= 0 ? 'Dr' : 'Cr'}
+                                                    Bal: {formatCurrency(Math.abs(selectedFromAccount.currentBalance), 'INR')} {selectedFromAccount.currentBalance >= 0 ? 'Dr' : 'Cr'}
                                                 </span>
                                             </div>
                                         )}
@@ -334,7 +334,7 @@ export default function ContraEntry() {
                                             <div className="flex items-center gap-2">
                                                 <div className={`w-2 h-2 rounded-full ${selectedToAccount.currentBalance >= 0 ? 'bg-primary' : 'bg-red-500'}`} />
                                                 <span className="text-[11px] font-semibold text-slate-600">
-                                                    Bal: ₹{Math.abs(selectedToAccount.currentBalance).toFixed(2)} {selectedToAccount.currentBalance >= 0 ? 'Dr' : 'Cr'}
+                                                    Bal: {formatCurrency(Math.abs(selectedToAccount.currentBalance), 'INR')} {selectedToAccount.currentBalance >= 0 ? 'Dr' : 'Cr'}
                                                 </span>
                                             </div>
                                         )}
@@ -507,7 +507,7 @@ export default function ContraEntry() {
                                                     <td className="px-6 py-4 text-right">
                                                         <div className="flex flex-col items-end">
                                                             <span className="text-sm font-medium text-slate-900 tabular-nums">
-                                                                ₹{parseFloat(v.totalAmount).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                                                                {formatCurrency(v.totalAmount, v.branch || 'INR')}
                                                             </span>
                                                             {v.status === 'CANCELLED' ? (
                                                                 <span className="mt-1 px-1.5 py-0.5 rounded bg-red-100 text-red-600 text-[8px] font-medium uppercase tracking-widest ring-1 ring-red-200">Reversed</span>
@@ -572,7 +572,7 @@ export default function ContraEntry() {
                     { label: 'Voucher Date', value: formData.date },
                     { label: 'Transfer From', value: ledgers.find(l => l.id == formData.fromAccount)?.name || 'N/A' },
                     { label: 'Transfer To', value: ledgers.find(l => l.id == formData.toAccount)?.name || 'N/A' },
-                    { label: 'Amount', value: `₹${parseFloat(formData.amount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}` }
+                    { label: 'Amount', value: formatCurrency(formData.amount || 0, 'INR') }
                 ]}
             />
         </div>

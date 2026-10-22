@@ -6,6 +6,7 @@ import ConfirmationModal from '@/components/ConfirmationModal';
 import ProfessionalModal from '@/components/ProfessionalModal';
 import VoucherPrint from '@/components/VoucherPrint';
 import SearchableSelect from '@/components/SearchableSelect';
+import { formatCurrency } from '@/lib/currency';
 
 export default function ReceiptVoucher() {
     const [ledgers, setLedgers] = useState([]);
@@ -130,7 +131,7 @@ export default function ReceiptVoucher() {
                     if (phone) {
                         let msg = wsSettings.paymentTemplate || 'Hello [[customer_name]], we have received your payment of [[total_amount]]. Reference: [[reference]].';
                         msg = msg.replace(/\[\[customer_name\]\]/g, customer.name)
-                            .replace(/\[\[total_amount\]\]/g, `₹${parseFloat(formData.amount).toFixed(2)}`)
+                            .replace(/\[\[total_amount\]\]/g, formatCurrency(formData.amount, res.data?.branch || 'INR'))
                             .replace(/\[\[reference\]\]/g, res.data.voucherNumber || formData.reference || 'N/A')
                             .replace(/\[\[company_name\]\]/g, 'Our Store');
 
@@ -305,15 +306,14 @@ export default function ReceiptVoucher() {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-[10px] font-medium text-slate-400 uppercase tracking-wider mb-2 text-primary">Total Amount Received (₹)</label>
+                                    <label className="block text-[10px] font-medium text-slate-400 uppercase tracking-wider mb-2 text-primary">Total Amount Received</label>
                                     <div className="relative">
-                                        <span className="absolute left-4 top-1/2 -translate-y-1/2 font-medium text-primary">₹</span>
                                         <input
                                             required
                                             type="number"
                                             step="0.01"
                                             min="0.01"
-                                            className="w-full pl-8 pr-4 py-3 bg-primary-light/30 border border-primary-light rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent focus:bg-white text-lg font-medium text-primary tabular-nums transition-all"
+                                            className="w-full px-4 py-3 bg-primary-light/30 border border-primary-light rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent focus:bg-white text-lg font-medium text-primary tabular-nums transition-all"
                                             value={formData.amount}
                                             onChange={e => setFormData({ ...formData, amount: e.target.value })}
                                             placeholder="0.00"
@@ -332,7 +332,7 @@ export default function ReceiptVoucher() {
                                             <div className="flex items-center gap-2">
                                                 <div className={`w-1.5 h-1.5 rounded-full ${selectedReceiptAccount.currentBalance >= 0 ? 'bg-primary' : 'bg-red-500'}`} />
                                                 <span className="text-[10px] font-medium text-slate-500">
-                                                    Bal: ₹{Math.abs(selectedReceiptAccount.currentBalance).toFixed(2)} {selectedReceiptAccount.currentBalance >= 0 ? 'Dr' : 'Cr'}
+                                                    Bal: {formatCurrency(Math.abs(selectedReceiptAccount.currentBalance), 'INR')} {selectedReceiptAccount.currentBalance >= 0 ? 'Dr' : 'Cr'}
                                                 </span>
                                             </div>
                                         )}
@@ -355,7 +355,7 @@ export default function ReceiptVoucher() {
                                             <div className="flex items-center gap-2">
                                                 <div className={`w-1.5 h-1.5 rounded-full ${selectedIncomeAccount.currentBalance >= 0 ? 'bg-primary' : 'bg-red-500'}`} />
                                                 <span className="text-[10px] font-medium text-slate-500">
-                                                    Bal: ₹{Math.abs(selectedIncomeAccount.currentBalance).toFixed(2)} {selectedIncomeAccount.currentBalance >= 0 ? 'Dr' : 'Cr'}
+                                                    Bal: {formatCurrency(Math.abs(selectedIncomeAccount.currentBalance), 'INR')} {selectedIncomeAccount.currentBalance >= 0 ? 'Dr' : 'Cr'}
                                                 </span>
                                             </div>
                                         )}
@@ -528,7 +528,7 @@ export default function ReceiptVoucher() {
                                                     <td className="px-6 py-4 text-right">
                                                         <div className="flex flex-col items-end">
                                                             <span className="text-sm font-medium text-slate-900 tabular-nums">
-                                                                ₹{parseFloat(v.totalAmount).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                                                                {formatCurrency(v.totalAmount, v.branch || 'INR')}
                                                             </span>
                                                             {v.status === 'CANCELLED' ? (
                                                                 <span className="mt-1 px-1.5 py-0.5 rounded bg-red-100 text-red-600 text-[8px] font-medium uppercase tracking-widest ring-1 ring-red-200">Invalid</span>
@@ -567,7 +567,7 @@ export default function ReceiptVoucher() {
 
                                                                     let msg = wsSettings.paymentTemplate || '';
                                                                     msg = msg.replace(/\[\[customer_name\]\]/g, customer.name)
-                                                                        .replace(/\[\[total_amount\]\]/g, `₹${parseFloat(v.totalAmount).toFixed(2)}`)
+                                                                        .replace(/\[\[total_amount\]\]/g, formatCurrency(v.totalAmount, v.branch || 'INR'))
                                                                         .replace(/\[\[reference\]\]/g, v.voucherNumber)
                                                                         .replace(/\[\[company_name\]\]/g, 'Our Store');
 
@@ -622,7 +622,7 @@ export default function ReceiptVoucher() {
                 details={[
                     { label: 'Voucher Date', value: formData.date },
                     { label: 'Received To', value: ledgers.find(l => l.id == formData.receiptAccount)?.name || 'N/A' },
-                    { label: 'Amount', value: `₹${parseFloat(formData.amount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}` },
+                    { label: 'Amount', value: formatCurrency(formData.amount || 0, 'INR') },
                     { label: 'Reference', value: formData.reference || 'N/A' }
                 ]}
             />

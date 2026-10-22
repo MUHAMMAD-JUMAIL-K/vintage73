@@ -1,6 +1,6 @@
 const prisma = require('../config/prisma');
 const asyncHandler = require('../middleware/asyncHandler');
-const { processSalePosting, processPurchasePosting, postTransaction } = require('../utils/accountingHelper');
+const { processSalePosting, processPurchasePosting, postTransaction, resolveBranchFilter } = require('../utils/accountingHelper');
 
 // ==================== ACCOUNT GROUPS ====================
 
@@ -33,22 +33,39 @@ exports.createAccountGroup = asyncHandler(async (req, res) => {
 // ==================== LEDGERS ====================
 
 exports.getLedgers = asyncHandler(async (req, res) => {
+  const { branchId: requestedBranchId, search, details } = req.query;
+  const { branchId, isConsolidated, activeBranch, branchFilter } = await resolveBranchFilter(req, requestedBranchId);
+
+  const ledgersWhere = { isActive: true };
+  if (search) {
+    ledgersWhere.OR = [
+      { name: { contains: search, mode: 'insensitive' } },
+      { group: { name: { contains: search, mode: 'insensitive' } } }
+    ];
+  }
+
   const ledgers = await prisma.ledger.findMany({
+    where: ledgersWhere,
     include: { group: true },
     orderBy: { name: 'asc' }
   });
 
-  // Optimize: Get all debit and credit sums for all ledgers in two queries
+  const voucherWhere = {
+    status: 'POSTED',
+    ...branchFilter
+  };
+
+  // Get debit and credit sums filtered by branch
   const [debitSums, creditSums] = await Promise.all([
     prisma.journalEntry.groupBy({
       by: ['debitLedgerId'],
       _sum: { amount: true },
-      where: { voucher: { status: 'POSTED' } }
+      where: { voucher: voucherWhere }
     }),
     prisma.journalEntry.groupBy({
       by: ['creditLedgerId'],
       _sum: { amount: true },
-      where: { voucher: { status: 'POSTED' } }
+      where: { voucher: voucherWhere }
     })
   ]);
 
@@ -59,7 +76,9 @@ exports.getLedgers = asyncHandler(async (req, res) => {
     const totalDebit = debitMap.get(ledger.id) || 0;
     const totalCredit = creditMap.get(ledger.id) || 0;
     
-    let balance = Number(ledger.openingBalance);
+    // For single branch, opening balance is 0 unless ledger is global or specifically configured.
+    // If consolidated, ledger openingBalance is included.
+    let balance = isConsolidated ? Number(ledger.openingBalance) : 0;
     if (ledger.balanceType === 'DEBIT') {
       balance = balance + totalDebit - totalCredit;
     } else {
@@ -68,9 +87,23 @@ exports.getLedgers = asyncHandler(async (req, res) => {
 
     return {
       ...ledger,
-      currentBalance: balance
+      currentBalance: Math.round(balance * 100) / 100,
+      totalDebit: Math.round(totalDebit * 100) / 100,
+      totalCredit: Math.round(totalCredit * 100) / 100
     };
   });
+
+  if (details === 'true') {
+    return res.json({
+      ledgers: ledgersWithBalance,
+      branch: activeBranch,
+      isConsolidated,
+      currency: activeBranch ? {
+        code: activeBranch.currencyCode || 'INR',
+        symbol: activeBranch.currencySymbol || '₹'
+      } : { code: 'INR', symbol: '₹' }
+    });
+  }
 
   res.json(ledgersWithBalance);
 });
@@ -186,7 +219,7 @@ async function generateVoucherNumber(voucherType) {
 
 // Create Payment Voucher
 exports.createPaymentVoucher = asyncHandler(async (req, res) => {
-  const { date, paymentAccount, expenseAccount, amount, narration, reference } = req.body;
+  const { date, paymentAccount, expenseAccount, amount, narration, reference, branchId } = req.body;
   const user = req.user;
 
   if (!paymentAccount || !expenseAccount || !amount) {
@@ -196,6 +229,7 @@ exports.createPaymentVoucher = asyncHandler(async (req, res) => {
   }
 
   const voucherNumber = await generateVoucherNumber('PAYMENT');
+  const targetBranchId = branchId ? parseInt(branchId) : (user?.branchId || null);
 
   const voucher = await prisma.voucher.create({
     data: {
@@ -206,6 +240,7 @@ exports.createPaymentVoucher = asyncHandler(async (req, res) => {
       reference,
       totalAmount: parseFloat(amount),
       createdBy: user.id,
+      branchId: targetBranchId,
       entries: {
         create: [
           {
@@ -236,7 +271,7 @@ exports.createPaymentVoucher = asyncHandler(async (req, res) => {
 
 // Create Receipt Voucher
 exports.createReceiptVoucher = asyncHandler(async (req, res) => {
-  const { date, receiptAccount, incomeAccount, amount, narration, reference } = req.body;
+  const { date, receiptAccount, incomeAccount, amount, narration, reference, branchId } = req.body;
   const user = req.user;
 
   if (!receiptAccount || !incomeAccount || !amount) {
@@ -245,6 +280,7 @@ exports.createReceiptVoucher = asyncHandler(async (req, res) => {
   }
 
   const voucherNumber = await generateVoucherNumber('RECEIPT');
+  const targetBranchId = branchId ? parseInt(branchId) : (user?.branchId || null);
 
   const voucher = await prisma.voucher.create({
     data: {
@@ -255,6 +291,7 @@ exports.createReceiptVoucher = asyncHandler(async (req, res) => {
       reference,
       totalAmount: parseFloat(amount),
       createdBy: user.id,
+      branchId: targetBranchId,
       entries: {
         create: [
           {
@@ -285,7 +322,7 @@ exports.createReceiptVoucher = asyncHandler(async (req, res) => {
 
 // Create Journal Entry
 exports.createJournalEntry = asyncHandler(async (req, res) => {
-  const { date, entries, narration, reference } = req.body;
+  const { date, entries, narration, reference, branchId } = req.body;
   const user = req.user;
 
   if (!entries || entries.length < 2) {
@@ -308,6 +345,7 @@ exports.createJournalEntry = asyncHandler(async (req, res) => {
   }
 
   const voucherNumber = await generateVoucherNumber('JOURNAL');
+  const targetBranchId = branchId ? parseInt(branchId) : (user?.branchId || null);
 
   const journalEntries = entries.map(entry => ({
     debitLedgerId: entry.type === 'DEBIT' ? parseInt(entry.ledgerId) : null,
@@ -325,6 +363,7 @@ exports.createJournalEntry = asyncHandler(async (req, res) => {
       reference,
       totalAmount: totalDebit,
       createdBy: user.id,
+      branchId: targetBranchId,
       entries: {
         create: journalEntries
       }
@@ -344,7 +383,7 @@ exports.createJournalEntry = asyncHandler(async (req, res) => {
 
 // Create Contra Entry
 exports.createContraEntry = asyncHandler(async (req, res) => {
-  const { date, fromAccount, toAccount, amount, narration, reference } = req.body;
+  const { date, fromAccount, toAccount, amount, narration, reference, branchId } = req.body;
   const user = req.user;
 
   if (!fromAccount || !toAccount || !amount) {
@@ -353,6 +392,7 @@ exports.createContraEntry = asyncHandler(async (req, res) => {
   }
 
   const voucherNumber = await generateVoucherNumber('CONTRA');
+  const targetBranchId = branchId ? parseInt(branchId) : (user?.branchId || null);
 
   const voucher = await prisma.voucher.create({
     data: {
@@ -363,6 +403,7 @@ exports.createContraEntry = asyncHandler(async (req, res) => {
       reference,
       totalAmount: parseFloat(amount),
       createdBy: user.id,
+      branchId: targetBranchId,
       entries: {
         create: [
           {
@@ -393,9 +434,10 @@ exports.createContraEntry = asyncHandler(async (req, res) => {
 
 // Get all vouchers
 exports.getVouchers = asyncHandler(async (req, res) => {
-  const { voucherType, startDate, endDate, ledgerId, status } = req.query;
+  const { voucherType, startDate, endDate, ledgerId, status, branchId: requestedBranchId } = req.query;
+  const { branchFilter } = await resolveBranchFilter(req, requestedBranchId);
 
-  const where = {};
+  const where = { ...branchFilter };
   if (voucherType) where.voucherType = voucherType;
   if (status) where.status = status;
   if (startDate && endDate) {
@@ -419,6 +461,7 @@ exports.getVouchers = asyncHandler(async (req, res) => {
   const vouchers = await prisma.voucher.findMany({
     where,
     include: {
+      branch: true,
       entries: {
         include: {
           debitLedger: true,
@@ -430,6 +473,14 @@ exports.getVouchers = asyncHandler(async (req, res) => {
           id: true,
           name: true,
           username: true
+        }
+      },
+      branch: {
+        select: {
+          id: true,
+          name: true,
+          currencyCode: true,
+          currencySymbol: true
         }
       }
     },
@@ -446,6 +497,7 @@ exports.getVoucher = asyncHandler(async (req, res) => {
   const voucher = await prisma.voucher.findUnique({
     where: { id: parseInt(id) },
     include: {
+      branch: true,
       entries: {
         include: {
           debitLedger: true,

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import api from '@/lib/api';
 import { toast } from 'react-toastify';
 import { FiTrendingUp, FiDownload, FiSearch } from 'react-icons/fi';
+import { formatCurrency } from '@/lib/currency';
 
 export default function ProfitLoss() {
     const [data, setData] = useState(null);
@@ -12,16 +13,32 @@ export default function ProfitLoss() {
         endDate: ''
     });
 
+    // Branch Filtering
+    const [branches, setBranches] = useState([]);
+    const [selectedBranch, setSelectedBranch] = useState('');
+
     useEffect(() => {
+        fetchBranches();
         fetchProfitLoss();
     }, []);
 
-    const fetchProfitLoss = async () => {
+    const fetchBranches = async () => {
+        try {
+            const res = await api.get('/branches');
+            setBranches(res.data || []);
+        } catch (err) {
+            console.error('Failed to load branches', err);
+        }
+    };
+
+    const fetchProfitLoss = async (overrideBranchId) => {
         setLoading(true);
+        const targetBranchId = overrideBranchId !== undefined ? overrideBranchId : selectedBranch;
         try {
             const params = new URLSearchParams();
             if (dateRange.startDate) params.append('startDate', dateRange.startDate);
             if (dateRange.endDate) params.append('endDate', dateRange.endDate);
+            if (targetBranchId) params.append('branchId', targetBranchId);
             
             const res = await api.get(`/accounting/reports/profit-loss?${params}`);
             setData(res.data);
@@ -37,35 +54,46 @@ export default function ProfitLoss() {
         fetchProfitLoss();
     };
 
-    const filteredIncome = data?.income.filter(item =>
+    const activeCurrency = data?.currency || { code: 'INR', symbol: '₹' };
+    const branchLabel = data?.branch ? data.branch.name : 'All Branches (Consolidated)';
+
+    const filteredIncome = data?.income?.filter(item =>
         item.ledgerName.toLowerCase().includes(searchTerm.toLowerCase())
     ) || [];
 
-    const filteredExpenses = data?.expenses.filter(item =>
+    const filteredExpenses = data?.expenses?.filter(item =>
         item.ledgerName.toLowerCase().includes(searchTerm.toLowerCase())
     ) || [];
 
     const handleExport = () => {
         if (!data) return;
+        const currLabel = activeCurrency?.code || 'INR';
         const csvContent = [
+            ['Report', 'Profit & Loss Statement'],
+            ['Branch', `"${branchLabel.replace(/"/g, '""')}"`],
+            ['Currency', currLabel],
+            ['Period', `${dateRange.startDate || 'Beginning'} to ${dateRange.endDate || 'Present'}`],
+            [],
             ['INCOME'],
-            ['Ledger Name', 'Group', 'Amount'],
-            ...filteredIncome.map(item => [item.ledgerName, item.groupName, item.amount.toFixed(2)]),
+            ['Ledger Name', 'Group', `Amount [${currLabel}]`],
+            ...filteredIncome.map(item => [`"${(item.ledgerName || '').replace(/"/g, '""')}"`, `"${(item.groupName || '').replace(/"/g, '""')}"`, item.amount.toFixed(2)]),
             ['', 'TOTAL INCOME', data.totalIncome.toFixed(2)],
             [''],
             ['EXPENSES'],
-            ['Ledger Name', 'Group', 'Amount'],
-            ...filteredExpenses.map(item => [item.ledgerName, item.groupName, item.amount.toFixed(2)]),
+            ['Ledger Name', 'Group', `Amount [${currLabel}]`],
+            ...filteredExpenses.map(item => [`"${(item.ledgerName || '').replace(/"/g, '""')}"`, `"${(item.groupName || '').replace(/"/g, '""')}"`, item.amount.toFixed(2)]),
             ['', 'TOTAL EXPENSES', data.totalExpenses.toFixed(2)],
             [''],
-            ['', data.isProfitable ? 'NET PROFIT' : 'NET LOSS', Math.abs(data.netProfit).toFixed(2)]
+            ['SUMMARY'],
+            [data.isProfitable ? 'Net Profit' : 'Net Loss', '', (Math.abs(data.netProfit) || 0).toFixed(2)]
         ].map(row => row.join(',')).join('\n');
 
         const blob = new Blob([csvContent], { type: 'text/csv' });
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'profit-loss.csv';
+        const branchFilename = data?.branch ? `_${data.branch.name.replace(/[^a-zA-Z0-9]/g, '_')}` : '_AllBranches';
+        a.download = `profit-loss${branchFilename}-${new Date().toISOString().split('T')[0]}.csv`;
         a.click();
     };
 
@@ -80,11 +108,33 @@ export default function ProfitLoss() {
                         </div>
                         <div>
                             <h1 className="text-lg font-normal text-white leading-tight">Profit & Loss Statement</h1>
-                            <p className="text-white/80 text-[10px] uppercase font-normal tracking-widest mt-0.5">Corporate Accounting Division</p>
+                            <p className="text-white/80 text-[10px] uppercase font-normal tracking-widest mt-0.5">
+                                Corporate Accounting Division • {branchLabel} ({activeCurrency.code})
+                            </p>
                         </div>
                     </div>
                     <div className="hidden xl:block h-8 border-l border-white/10 mx-2" />
                     <div className="flex flex-col md:flex-row items-start md:items-center gap-4 w-full xl:w-auto mt-2 xl:mt-0">
+                        {/* Branch Selector */}
+                        <div className="flex items-center gap-2 bg-white/5 px-2.5 py-1 rounded border border-white/10">
+                            <span className="text-[9px] text-white/60 uppercase tracking-tighter">Branch:</span>
+                            <select
+                                className="bg-transparent border-none p-0 text-xs text-white focus:ring-0 cursor-pointer font-normal [color-scheme:dark]"
+                                value={selectedBranch}
+                                onChange={(e) => {
+                                    const val = e.target.value;
+                                    setSelectedBranch(val);
+                                    fetchProfitLoss(val);
+                                }}
+                            >
+                                <option value="" className="text-slate-800">All Branches (Consolidated)</option>
+                                {branches.map(b => (
+                                    <option key={b.id} value={b.id} className="text-slate-800">
+                                        {b.name} ({b.currencyCode || 'INR'})
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
                         <div className="flex items-center gap-2">
                             <span className="text-[9px] text-white/60 uppercase tracking-tighter">Period</span>
                             <div className="flex items-center gap-2 bg-white/5 px-2 py-1 rounded border border-white/10">
@@ -115,7 +165,7 @@ export default function ProfitLoss() {
                         </div>
                         <button
                             onClick={handleFilter}
-                            className="bg-white/20 hover:bg-white/30 text-white px-4 py-1.5 rounded-lg transition-all text-xs font-normal shadow-sm active:scale-95"
+                            className="bg-white/20 hover:bg-white/30 text-white px-4 py-1.5 rounded-lg transition-all text-xs font-normal shadow-sm active:scale-95 cursor-pointer"
                         >
                             Apply
                         </button>
@@ -123,7 +173,7 @@ export default function ProfitLoss() {
                 </div>
                 <button
                     onClick={handleExport}
-                    className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg transition-all text-xs font-normal border border-white/10 backdrop-blur-sm shadow-sm"
+                    className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg transition-all text-xs font-normal border border-white/10 backdrop-blur-sm shadow-sm cursor-pointer"
                 >
                     <FiDownload size={14} className="text-white" /> Export CSV
                 </button>
@@ -145,7 +195,7 @@ export default function ProfitLoss() {
                                         <tr className="whitespace-nowrap">
                                             <th className="px-4 py-2.5 text-left font-medium border-r border-slate-200 w-12">#</th>
                                             <th className="px-4 py-2.5 text-left font-medium border-r border-slate-200">Particulars</th>
-                                            <th className="px-4 py-2.5 text-right font-medium">Amount (₹)</th>
+                                            <th className="px-4 py-2.5 text-right font-medium">Amount ({activeCurrency.symbol})</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-slate-100 font-normal">
@@ -160,7 +210,7 @@ export default function ProfitLoss() {
                                                         <div className="text-[10px] text-slate-500 uppercase tracking-tighter mt-0.5">{item.groupName}</div>
                                                     </td>
                                                     <td className="px-4 py-2 text-right tabular-nums text-primary-dark font-medium">
-                                                        {item.amount.toLocaleString('en-IN', {minimumFractionDigits: 2})}
+                                                        {formatCurrency(item.amount, activeCurrency)}
                                                     </td>
                                                 </tr>
                                             ))
@@ -179,7 +229,7 @@ export default function ProfitLoss() {
                             <div className="bg-gradient-to-r from-primary-dark to-primary border-t border-slate-300 px-4 py-3 flex justify-between items-center text-white shrink-0 mt-auto">
                                 <span className="font-normal uppercase text-xs">Total Operating Income</span>
                                 <span className="tabular-nums font-medium text-sm">
-                                    {data.totalIncome.toLocaleString('en-IN', {minimumFractionDigits: 2})}
+                                    {formatCurrency(data.totalIncome, activeCurrency)}
                                 </span>
                             </div>
                         </div>
@@ -195,7 +245,7 @@ export default function ProfitLoss() {
                                         <tr className="whitespace-nowrap">
                                             <th className="px-4 py-2.5 text-left font-medium border-r border-slate-200 w-12">#</th>
                                             <th className="px-4 py-2.5 text-left font-medium border-r border-slate-200">Particulars</th>
-                                            <th className="px-4 py-2.5 text-right font-medium">Amount (₹)</th>
+                                            <th className="px-4 py-2.5 text-right font-medium">Amount ({activeCurrency.symbol})</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-slate-100 font-normal">
@@ -210,7 +260,7 @@ export default function ProfitLoss() {
                                                         <div className="text-[10px] text-slate-500 uppercase tracking-tighter mt-0.5">{item.groupName}</div>
                                                     </td>
                                                     <td className="px-4 py-2 text-right tabular-nums text-rose-600 font-medium">
-                                                        {item.amount.toLocaleString('en-IN', {minimumFractionDigits: 2})}
+                                                        {formatCurrency(item.amount, activeCurrency)}
                                                     </td>
                                                 </tr>
                                             ))
@@ -229,7 +279,7 @@ export default function ProfitLoss() {
                             <div className="bg-gradient-to-r from-primary-dark to-primary border-t border-slate-300 px-4 py-3 flex justify-between items-center text-white shrink-0 mt-auto">
                                 <span className="font-normal uppercase text-xs">Total Operating Expenses</span>
                                 <span className="tabular-nums font-medium text-sm">
-                                    {data.totalExpenses.toLocaleString('en-IN', {minimumFractionDigits: 2})}
+                                    {formatCurrency(data.totalExpenses, activeCurrency)}
                                 </span>
                             </div>
                         </div>
@@ -246,8 +296,7 @@ export default function ProfitLoss() {
                             </div>
                             <div className="text-left md:text-right">
                                 <span className="text-3xl font-normal text-white tabular-nums tracking-tighter">
-                                    <span className="text-sm mr-2 opacity-60">₹</span>
-                                    {Math.abs(data.netProfit).toLocaleString('en-IN', {minimumFractionDigits: 2})}
+                                    {formatCurrency(Math.abs(data.netProfit), activeCurrency)}
                                 </span>
                                 <p className="text-[10px] text-white/50 uppercase tracking-widest mt-1">Reflected in Retained Earnings</p>
                             </div>

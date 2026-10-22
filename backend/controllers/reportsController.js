@@ -924,47 +924,119 @@ exports.getSalesAnalyticsReport = asyncHandler(async (req, res) => {
 
   let dayCloseSummary = null;
   let expensesList = [];
-  if (targetSingleDate && effectiveBranchId) {
+  if (targetSingleDate) {
     try {
       const [ty, tm, td] = targetSingleDate.split('-').map(Number);
       const targetUtc = new Date(Date.UTC(ty, tm - 1, td));
-      const dc = await prisma.dayClose.findUnique({
-        where: {
-          branchId_businessDate: {
-            branchId: effectiveBranchId,
-            businessDate: targetUtc
-          }
-        },
+
+      const dayCloseWhere = { businessDate: targetUtc };
+      if (effectiveBranchId) {
+        dayCloseWhere.branchId = effectiveBranchId;
+      }
+
+      const dayCloses = await prisma.dayClose.findMany({
+        where: dayCloseWhere,
         include: {
+          branch: { select: { id: true, name: true } },
           openedBy: { select: { id: true, name: true, username: true } },
           finalizedBy: { select: { id: true, name: true, username: true } }
-        }
+        },
+        orderBy: { id: 'desc' }
       });
-      if (dc) {
-        dayCloseSummary = {
-          id: dc.id,
-          businessDate: targetSingleDate,
-          status: dc.status,
-          openingTime: dc.openedAt,
-          openedBy: dc.openedBy ? (dc.openedBy.name || dc.openedBy.username) : null,
-          openingCash: Number(dc.actualOpeningCash || dc.openingCash || 0),
-          openingDifference: Number(dc.openingDifference || 0),
-          closingTime: dc.finalizedAt,
-          closedBy: dc.finalizedBy ? (dc.finalizedBy.name || dc.finalizedBy.username) : null,
-          physicalCash: dc.physicalCash ? Number(dc.physicalCash) : null,
-          closingExpectedCash: dc.closingExpectedCash ? Number(dc.closingExpectedCash) : null,
-          cashDifference: dc.cashDifference ? Number(dc.cashDifference) : null,
-          verificationChecks: dc.verificationChecks
-        };
+
+      if (dayCloses.length > 0) {
+        if (dayCloses.length === 1) {
+          const dc = dayCloses[0];
+          const openingAmt = Number(dc.actualOpeningCash || dc.openingCash || dc.salesSummary?.openingCash || 0);
+          const expClosingAmt = dc.closingExpectedCash !== null && dc.closingExpectedCash !== undefined
+            ? Number(dc.closingExpectedCash)
+            : (dc.salesSummary?.expectedClosingCash !== null && dc.salesSummary?.expectedClosingCash !== undefined
+                ? Number(dc.salesSummary.expectedClosingCash)
+                : null);
+          const physCash = dc.physicalCash !== null && dc.physicalCash !== undefined
+            ? Number(dc.physicalCash)
+            : (dc.salesSummary?.physicalCash !== null && dc.salesSummary?.physicalCash !== undefined
+                ? Number(dc.salesSummary.physicalCash)
+                : null);
+          const diff = dc.cashDifference !== null && dc.cashDifference !== undefined
+            ? Number(dc.cashDifference)
+            : (dc.salesSummary?.cashDifference !== null && dc.salesSummary?.cashDifference !== undefined
+                ? Number(dc.salesSummary.cashDifference)
+                : Number(dc.openingDifference || 0));
+
+          dayCloseSummary = {
+            id: dc.id,
+            branchId: dc.branchId,
+            branchName: dc.branch?.name || (effectiveBranchId ? 'Selected Branch' : 'All Branches'),
+            businessDate: targetSingleDate,
+            status: dc.status,
+            openingTime: dc.openedAt,
+            openedAt: dc.openedAt,
+            openedBy: dc.openedBy ? (dc.openedBy.name || dc.openedBy.username) : null,
+            openingCash: openingAmt,
+            actualOpeningCash: openingAmt,
+            openingAmount: openingAmt,
+            openingDifference: Number(dc.openingDifference || 0),
+            closingTime: dc.finalizedAt,
+            closedAt: dc.finalizedAt,
+            closedBy: dc.finalizedBy ? (dc.finalizedBy.name || dc.finalizedBy.username) : null,
+            physicalCash: physCash,
+            closingActualCash: physCash,
+            closingExpectedCash: expClosingAmt,
+            closingAmount: physCash ?? expClosingAmt,
+            cashDifference: diff,
+            closingDifference: diff,
+            verificationChecks: dc.verificationChecks,
+            remarks: dc.notes || dc.openingRemarks || null,
+            notes: dc.notes || null
+          };
+        } else {
+          // Multiple branches day close aggregation
+          const totalOpening = dayCloses.reduce((sum, d) => sum + Number(d.actualOpeningCash || d.openingCash || d.salesSummary?.openingCash || 0), 0);
+          const totalExpClosing = dayCloses.reduce((sum, d) => sum + Number(d.closingExpectedCash || d.salesSummary?.expectedClosingCash || 0), 0);
+          const totalPhysCash = dayCloses.reduce((sum, d) => sum + Number(d.physicalCash || d.salesSummary?.physicalCash || 0), 0);
+          const totalDiff = dayCloses.reduce((sum, d) => sum + Number(d.cashDifference || d.salesSummary?.cashDifference || 0), 0);
+          const allClosed = dayCloses.every(d => d.status === 'CLOSED' || d.status === 'ADMIN_CLOSED');
+          const anyOpen = dayCloses.some(d => d.status === 'OPEN');
+
+          dayCloseSummary = {
+            id: 'multi',
+            branchName: 'All Branches',
+            businessDate: targetSingleDate,
+            status: allClosed ? 'CLOSED' : (anyOpen ? 'OPEN' : 'PARTIAL'),
+            openingTime: dayCloses[0].openedAt,
+            openedAt: dayCloses[0].openedAt,
+            openedBy: dayCloses.map(d => d.openedBy?.name || d.openedBy?.username).filter(Boolean).join(', ') || 'Multiple Staff',
+            openingCash: totalOpening,
+            actualOpeningCash: totalOpening,
+            openingAmount: totalOpening,
+            openingDifference: dayCloses.reduce((sum, d) => sum + Number(d.openingDifference || 0), 0),
+            closingTime: dayCloses[0].finalizedAt,
+            closedAt: dayCloses[0].finalizedAt,
+            closedBy: dayCloses.map(d => d.finalizedBy?.name || d.finalizedBy?.username).filter(Boolean).join(', ') || 'Multiple Staff',
+            physicalCash: totalPhysCash,
+            closingActualCash: totalPhysCash,
+            closingExpectedCash: totalExpClosing,
+            closingAmount: totalPhysCash || totalExpClosing,
+            cashDifference: totalDiff,
+            closingDifference: totalDiff,
+            verificationChecks: null,
+            remarks: `${dayCloses.length} branch day sessions aggregated.`,
+            notes: `${dayCloses.length} branch day sessions aggregated.`
+          };
+        }
       }
 
       const startUTC = parseBusinessDateStart(targetSingleDate);
       const endUTC = parseBusinessDateEnd(targetSingleDate);
+      const expenseWhere = {
+        date: { gte: startUTC, lte: endUTC }
+      };
+      if (effectiveBranchId) {
+        expenseWhere.branchId = effectiveBranchId;
+      }
       const exps = await prisma.expense.findMany({
-        where: {
-          branchId: effectiveBranchId,
-          date: { gte: startUTC, lte: endUTC }
-        },
+        where: expenseWhere,
         orderBy: { createdAt: 'asc' }
       });
       expensesList = exps.map(e => ({
@@ -978,6 +1050,60 @@ exports.getSalesAnalyticsReport = asyncHandler(async (req, res) => {
     } catch (err) {
       console.error('Error fetching daily activity dayClose/expenses:', err);
     }
+  }
+
+  // Calculate Cash Sales & Cash Refunds for cashbook calculations
+  let cashSalesReceived = 0;
+  activeSales.forEach(s => {
+    if (s.payments && s.payments.length > 0) {
+      s.payments.forEach(p => {
+        if ((p.method || '').toLowerCase() === 'cash') {
+          cashSalesReceived += parseFloat(p.amount) || 0;
+        }
+      });
+    } else if ((s.paymentMethod || '').toLowerCase() === 'cash') {
+      cashSalesReceived += parseFloat(s.paidAmount || s.totalAmount) || 0;
+    }
+  });
+
+  let cashRefunds = 0;
+  returnSales.forEach(s => {
+    if ((s.paymentMethod || '').toLowerCase() === 'cash') {
+      cashRefunds += parseFloat(s.totalAmount) || 0;
+    }
+  });
+
+  const totalExpensesAmount = Number(expensesList.reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0).toFixed(2));
+
+  const dailyOpeningAmount = dayCloseSummary
+    ? Number(dayCloseSummary.actualOpeningCash ?? dayCloseSummary.openingCash ?? 0)
+    : 0;
+
+  const fallbackExpectedClosing = Number((dailyOpeningAmount + cashSalesReceived - totalExpensesAmount - cashRefunds).toFixed(2));
+
+  const dailyExpectedClosing = dayCloseSummary && dayCloseSummary.closingExpectedCash !== null && dayCloseSummary.closingExpectedCash !== undefined
+    ? Number(dayCloseSummary.closingExpectedCash)
+    : fallbackExpectedClosing;
+
+  const dailyActualClosing = dayCloseSummary && dayCloseSummary.closingActualCash !== null && dayCloseSummary.closingActualCash !== undefined
+    ? Number(dayCloseSummary.closingActualCash)
+    : (dayCloseSummary && (dayCloseSummary.status === 'CLOSED' || dayCloseSummary.status === 'ADMIN_CLOSED') ? dailyExpectedClosing : null);
+
+  const dailyClosingAmount = dailyActualClosing !== null && dailyActualClosing !== undefined
+    ? dailyActualClosing
+    : dailyExpectedClosing;
+
+  if (dayCloseSummary) {
+    if (dayCloseSummary.closingExpectedCash === null || dayCloseSummary.closingExpectedCash === undefined) {
+      dayCloseSummary.closingExpectedCash = dailyExpectedClosing;
+    }
+    if ((dayCloseSummary.status === 'CLOSED' || dayCloseSummary.status === 'ADMIN_CLOSED') &&
+        (dayCloseSummary.closingActualCash === null || dayCloseSummary.closingActualCash === undefined)) {
+      dayCloseSummary.closingActualCash = dailyClosingAmount;
+      dayCloseSummary.physicalCash = dailyClosingAmount;
+    }
+    dayCloseSummary.openingAmount = dailyOpeningAmount;
+    dayCloseSummary.closingAmount = dailyClosingAmount;
   }
 
   res.json({
@@ -1004,6 +1130,13 @@ exports.getSalesAnalyticsReport = asyncHandler(async (req, res) => {
     dailyActivity: {
       targetDate: targetSingleDate,
       businessDate: targetSingleDate,
+      openingAmount: dailyOpeningAmount,
+      closingAmount: dailyClosingAmount,
+      closingExpectedCash: dailyExpectedClosing,
+      closingActualCash: dailyActualClosing,
+      cashSalesReceived,
+      cashRefunds,
+      totalExpensesAmount,
       invoices: activeSales.map(s => ({
         id: s.id,
         invoiceNumber: s.invoiceNumber,
@@ -1028,7 +1161,8 @@ exports.getSalesAnalyticsReport = asyncHandler(async (req, res) => {
         totalInvoicesCount: activeSales.length + cancelledInvoicesList.length,
         cancelledCount: cancelledInvoicesList.length,
         returnsCount: returnsList.length,
-        expensesCount: expensesList.length
+        expensesCount: expensesList.length,
+        totalExpensesAmount
       }
     },
     currency
