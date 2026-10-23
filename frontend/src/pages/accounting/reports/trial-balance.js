@@ -315,7 +315,10 @@ export default function TrialBalance() {
                                             <td className="px-4 py-1.5 border-r border-slate-100">
                                                 <div 
                                                     className="font-normal text-slate-800 hover:text-primary hover:underline cursor-pointer transition-colors"
-                                                    onClick={() => router.push(`/accounting/reports/ledger?ledgerId=${item.ledgerId}&startDate=${dateRange.startDate}&endDate=${dateRange.endDate}${selectedBranch ? `&branchId=${selectedBranch}` : ''}`)}
+                                                    onClick={() => {
+                                                        const cleanBranch = typeof selectedBranch === 'object' ? (selectedBranch?.id || '') : (selectedBranch || '');
+                                                        router.push(`/accounting/reports/ledger?ledgerId=${item.ledgerId}&startDate=${dateRange.startDate}&endDate=${dateRange.endDate}${cleanBranch && cleanBranch !== 'all' ? `&branchId=${cleanBranch}` : ''}`);
+                                                    }}
                                                 >
                                                     {item.ledgerName}
                                                 </div>

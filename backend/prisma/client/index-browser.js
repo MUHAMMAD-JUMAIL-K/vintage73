@@ -379,6 +379,8 @@ exports.Prisma.SaleScalarFieldEnum = {
   deliveryCharge: 'deliveryCharge',
   hasDeliveryCharge: 'hasDeliveryCharge',
   voucherCode: 'voucherCode',
+  voucherName: 'voucherName',
+  showVoucherOnBill: 'showVoucherOnBill',
   voucherDiscount: 'voucherDiscount'
 };
 

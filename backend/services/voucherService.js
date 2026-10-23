@@ -107,33 +107,36 @@ async function validateVoucherForSale(tx, { code, customerId, branchId, items = 
     return { valid: false, message: 'This voucher has already been redeemed.' };
   }
   if (voucher.status === 'EXPIRED') {
-    return { valid: false, message: 'This voucher has expired.' };
+    return { valid: false, message: 'Voucher expired.' };
   }
   if (voucher.status === 'CANCELLED') {
     return { valid: false, message: 'This voucher has been cancelled.' };
   }
   if (voucher.status !== 'ACTIVE') {
-    return { valid: false, message: `Voucher is currently ${voucher.status.toLowerCase()}.` };
+    return { valid: false, message: `Voucher is not active (currently ${voucher.status.toLowerCase()}).` };
   }
 
   // 2. Expiry Check
   if (voucher.expiryDate) {
     const now = new Date();
     const expiry = new Date(voucher.expiryDate);
-    // Set to end of day if it was a date without time
+    // If stored as date-only (midnight UTC), treat as valid until end of that day
+    if (expiry.toISOString().endsWith('T00:00:00.000Z')) {
+      expiry.setUTCHours(23, 59, 59, 999);
+    }
     if (expiry < now) {
       // Opportunistically update status
       await tx.customerVoucher.update({
         where: { id: voucher.id },
         data: { status: 'EXPIRED' }
       });
-      return { valid: false, message: 'This voucher has expired.' };
+      return { valid: false, message: 'Voucher expired.' };
     }
   }
 
   // 3. Usage Limit Check
   if (voucher.usageLimit > 0 && voucher.usageCount >= voucher.usageLimit) {
-    return { valid: false, message: 'This voucher has reached its maximum usage limit.' };
+    return { valid: false, message: 'Voucher usage limit reached.' };
   }
 
   // 4. Customer Restriction Check
@@ -142,7 +145,7 @@ async function validateVoucherForSale(tx, { code, customerId, branchId, items = 
     if (!targetCustId || targetCustId !== voucher.customerId) {
       return { 
         valid: false, 
-        message: 'This voucher is exclusive to a specific customer account.' 
+        message: 'Voucher belongs to another customer.' 
       };
     }
   }
@@ -151,7 +154,7 @@ async function validateVoucherForSale(tx, { code, customerId, branchId, items = 
   if (voucher.branchId) {
     const targetBranchId = branchId ? parseInt(branchId) : null;
     if (!targetBranchId || targetBranchId !== voucher.branchId) {
-      return { valid: false, message: 'This voucher is not valid at this store branch.' };
+      return { valid: false, message: 'Voucher is unavailable at this branch.' };
     }
   }
 
@@ -193,7 +196,7 @@ async function validateVoucherForSale(tx, { code, customerId, branchId, items = 
     const sym = voucher.branch?.currencySymbol || (voucher.branch?.currencyCode === 'INR' ? '₹' : 'AED ');
     return {
       valid: false,
-      message: `Minimum purchase of ${sym}${minSpend.toFixed(2)} required for this voucher (Current eligible: ${sym}${eligibleSubtotal.toFixed(2)}).`
+      message: `Minimum purchase not reached. Minimum purchase of ${sym}${minSpend.toFixed(2)} required (Current eligible: ${sym}${eligibleSubtotal.toFixed(2)}).`
     };
   }
 
@@ -276,24 +279,27 @@ async function redeemVoucherInSale(tx, { voucherId, saleId, customerId, branchId
   }
 
   if (current.usageLimit > 0 && current.usageCount >= current.usageLimit) {
-    throw new Error('Voucher usage limit has already been reached.');
+    throw new Error('Voucher usage limit reached.');
   }
 
-  const newUsageCount = current.usageCount + 1;
-  const isFullyRedeemed = current.usageLimit > 0 && newUsageCount >= current.usageLimit;
+  // Concurrency-safe atomic update
+  const updateCount = await tx.$executeRaw`
+    UPDATE "CustomerVoucher"
+    SET "usageCount" = "usageCount" + 1,
+        "status" = CASE WHEN "usageLimit" > 0 AND "usageCount" + 1 >= "usageLimit" THEN 'REDEEMED' ELSE 'ACTIVE' END,
+        "redeemedSaleId" = ${saleId},
+        "redeemedAt" = NOW(),
+        "updatedAt" = NOW()
+    WHERE "id" = ${voucherId}
+      AND "status" = 'ACTIVE'
+      AND ("usageLimit" = 0 OR "usageCount" < "usageLimit")
+  `;
 
-  // 1. Update Voucher
-  await tx.customerVoucher.update({
-    where: { id: current.id },
-    data: {
-      usageCount: newUsageCount,
-      status: isFullyRedeemed ? 'REDEEMED' : 'ACTIVE',
-      redeemedSaleId: saleId,
-      redeemedAt: new Date()
-    }
-  });
+  if (updateCount === 0) {
+    throw new Error('Voucher usage limit reached or voucher is no longer active.');
+  }
 
-  // 2. Create Audit Redemption Record
+  // Create Audit Redemption Record
   const redemption = await tx.customerVoucherRedemption.create({
     data: {
       voucherId: current.id,

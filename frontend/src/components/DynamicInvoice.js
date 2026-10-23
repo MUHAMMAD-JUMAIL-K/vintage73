@@ -202,6 +202,13 @@ const DynamicInvoice = forwardRef(({ printData, companyProfile, invoiceSettings 
                 </div>
               )}
 
+              {parseFloat(printData.voucherDiscount || 0) > 0 && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', width: '200px', fontSize: '10px', color: '#16a34a', fontWeight: 'bold' }}>
+                  <span>Voucher Discount {printData.voucherCode ? `(${printData.voucherCode})` : ''}:</span>
+                  <span>- {fmt(printData.voucherDiscount)}</span>
+                </div>
+              )}
+
               {Object.entries(taxSummary).map(([type, amount]) => (
                 <div key={type} style={{ display: 'flex', justifyContent: 'space-between', width: '200px', fontSize: '10px' }}>
                   <span>{type}:</span>
@@ -248,6 +255,10 @@ const DynamicInvoice = forwardRef(({ printData, companyProfile, invoiceSettings 
         const statusText = balAmt > 0.01 ? (paidAmt > 0 ? 'Partial' : 'Credit / Unpaid') : 'Paid';
         const statusColor = balAmt > 0.01 ? (paidAmt > 0 ? '#d97706' : '#dc2626') : '#16a34a';
 
+        const vShow = Boolean(printData.showVoucherOnBill);
+        const vCode = printData.voucherCode;
+        const vName = printData.voucherName || 'Discount';
+
         return (
           <div key={id} style={componentStyle}>
             <p style={{ margin: 0 }}>Payment Method: <b>{printData.paymentMethod || 'Cash'}</b> | Status: <b style={{ color: statusColor }}>{statusText}</b></p>
@@ -261,6 +272,18 @@ const DynamicInvoice = forwardRef(({ printData, companyProfile, invoiceSettings 
             <p style={{ margin: '2px 0 0 0', fontSize: '11px' }}>
               Amount Paid: <b>{fmt(paidAmt)}</b> | Balance: <b>{fmt(balAmt)}</b>
             </p>
+            {vShow && vCode && (
+              <div style={{ marginTop: '6px', paddingTop: '4px', borderTop: '1px dashed #9ca3af', fontSize: '11px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span>Voucher Name:</span>
+                  <b>{vName}</b>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '2px' }}>
+                  <span>Voucher Code:</span>
+                  <b style={{ fontFamily: 'monospace' }}>{vCode}</b>
+                </div>
+              </div>
+            )}
           </div>
         );
       }

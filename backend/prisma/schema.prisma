@@ -388,6 +388,8 @@ model Sale {
   deliveryCharge  Decimal        @default(0) @db.Decimal(10, 2)
   hasDeliveryCharge Boolean      @default(false)
   voucherCode     String?
+  voucherName     String?
+  showVoucherOnBill Boolean      @default(false)
   voucherDiscount Decimal        @default(0) @db.Decimal(10, 2)
   payments        Payment[]
   branch          Branch         @relation(fields: [branchId], references: [id])
