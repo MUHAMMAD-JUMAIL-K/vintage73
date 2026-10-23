@@ -23,7 +23,7 @@ export default function App({ Component, pageProps }) {
     const publicPaths = ['/login', '/setup'];
 
     if (!token && !publicPaths.includes(router.pathname)) {
-      router.push('/login');
+      router.replace('/login');
     }
   }, [router.pathname]);
 

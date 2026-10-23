@@ -778,16 +778,49 @@ exports.getSalesAnalyticsReport = asyncHandler(async (req, res) => {
   // 5. Summary Report (Strictly ONE row per invoice, aggregated payments)
   const summary = sales.map(s => {
     let paymentList = [];
+    let paymentsSum = 0;
     if (s.payments && s.payments.length > 0) {
-      paymentList = s.payments.map(p => ({
-        method: p.method || 'Other',
-        amount: Number((parseFloat(p.amount) || 0).toFixed(2))
-      }));
-    } else if (s.paymentMethod) {
+      paymentList = s.payments.map(p => {
+        const amt = Number((parseFloat(p.amount) || 0).toFixed(2));
+        paymentsSum += amt;
+        return {
+          method: p.method || 'Other',
+          amount: amt
+        };
+      });
+    }
+
+    const recordedPaid = parseFloat(s.paidAmount || 0);
+    let actualPaid = 0;
+    if (s.payments && s.payments.length > 0) {
+      actualPaid = Math.max(paymentsSum, recordedPaid);
+    } else if (s.paidAmount !== undefined && s.paidAmount !== null && recordedPaid > 0) {
+      actualPaid = recordedPaid;
+    } else if (s.paymentMethod && s.paymentMethod.toLowerCase() === 'credit') {
+      actualPaid = 0;
+    } else if (s.status === 'completed') {
+      actualPaid = parseFloat(s.totalAmount) || 0;
+    } else {
+      actualPaid = recordedPaid;
+    }
+    actualPaid = Number(actualPaid.toFixed(2));
+
+    if (paymentList.length === 0 && actualPaid > 0) {
       paymentList = [{
-        method: s.paymentMethod,
-        amount: Number((parseFloat(s.totalAmount) || 0).toFixed(2))
+        method: s.paymentMethod || 'Cash',
+        amount: actualPaid
       }];
+    }
+
+    const invoiceTotal = parseFloat(s.totalAmount) || 0;
+    const advanceUsedAmt = parseFloat(s.advanceUsed) || 0;
+    const balanceDue = Math.max(0, Number((invoiceTotal - actualPaid - advanceUsedAmt).toFixed(2)));
+
+    let paymentStatus = 'UNPAID';
+    if (balanceDue <= 0.005) {
+      paymentStatus = 'PAID';
+    } else if (actualPaid > 0.005) {
+      paymentStatus = 'PARTIAL';
     }
 
     const uniqueMethods = [...new Set(paymentList.map(p => p.method))];
@@ -847,6 +880,9 @@ exports.getSalesAnalyticsReport = asyncHandler(async (req, res) => {
       voucherCode: s.voucherCode || null,
       taxAmount: Number((parseFloat(s.taxAmount) || 0).toFixed(2)),
       totalAmount: Number((parseFloat(s.totalAmount) || 0).toFixed(2)),
+      paidAmount: actualPaid,
+      balanceAmount: balanceDue,
+      paymentStatus,
       deliveryCharge: Number((parseFloat(s.deliveryCharge) || 0).toFixed(2)),
       hasDeliveryCharge: Boolean(s.hasDeliveryCharge),
       roundOffAmount: Number((parseFloat(s.roundOffAmount) || 0).toFixed(2)),
@@ -961,6 +997,8 @@ exports.getSalesAnalyticsReport = asyncHandler(async (req, res) => {
     totalDiscount: Number(summary.reduce((sum, s) => sum + s.discount, 0).toFixed(2)),
     totalTax: Number(summary.reduce((sum, s) => sum + s.taxAmount, 0).toFixed(2)),
     netSales: Number(summary.reduce((sum, s) => sum + (s.status !== 'cancelled' ? s.totalAmount : 0), 0).toFixed(2)),
+    totalPaid: Number(summary.reduce((sum, s) => sum + (s.status !== 'cancelled' ? s.paidAmount : 0), 0).toFixed(2)),
+    totalBalanceDue: Number(summary.reduce((sum, s) => sum + (s.status !== 'cancelled' ? s.balanceAmount : 0), 0).toFixed(2)),
     totalCost: Number(summary.reduce((sum, s) => sum + (s.status !== 'cancelled' ? s.totalCost : 0), 0).toFixed(2)),
     grossProfit: Number(summary.reduce((sum, s) => sum + (s.status !== 'cancelled' ? s.grossProfit : 0), 0).toFixed(2))
   };

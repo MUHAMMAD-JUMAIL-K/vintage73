@@ -230,37 +230,49 @@ export default function SalesPerformance() {
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
                         <div className="lg:col-span-2 bg-white rounded-2xl p-6 border border-slate-100 shadow-sm">
                             <h3 className="text-sm font-medium text-slate-800 tracking-tight mb-6 uppercase">Revenue Trajectory</h3>
-                            <div className="h-[300px] w-full">
-                                <ResponsiveContainer width="100%" height="100%">
-                                    <AreaChart data={chartData}>
-                                        <defs>
-                                            <linearGradient id="colorAmount" x1="0" y1="0" x2="0" y2="1">
-                                                <stop offset="5%" stopColor={theme.primaryColor || '#6366f1'} stopOpacity={0.1} />
-                                                <stop offset="95%" stopColor={theme.primaryColor || '#6366f1'} stopOpacity={0} />
-                                            </linearGradient>
-                                        </defs>
-                                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                                        <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 9, fontWeight: 700 }} dy={10} />
-                                        <YAxis axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 9, fontWeight: 700 }} dx={-5} />
-                                        <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', fontSize: '10px', fontWeight: 700 }} />
-                                        <Area type="monotone" dataKey="amount" stroke={theme.primaryColor || '#6366f1'} strokeWidth={3} fill="url(#colorAmount)" />
-                                    </AreaChart>
-                                </ResponsiveContainer>
+                            <div className="h-[300px] w-full min-w-0" style={{ minHeight: 300 }}>
+                                {chartData.length === 0 ? (
+                                    <div className="h-full flex items-center justify-center text-slate-400 text-sm italic">
+                                        No revenue trend data available for this period
+                                    </div>
+                                ) : (
+                                    <ResponsiveContainer width="100%" height={300} minWidth={0} minHeight={300} debounce={50}>
+                                        <AreaChart data={chartData}>
+                                            <defs>
+                                                <linearGradient id="colorAmount" x1="0" y1="0" x2="0" y2="1">
+                                                    <stop offset="5%" stopColor={theme.primaryColor || '#6366f1'} stopOpacity={0.1} />
+                                                    <stop offset="95%" stopColor={theme.primaryColor || '#6366f1'} stopOpacity={0} />
+                                                </linearGradient>
+                                            </defs>
+                                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                                            <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 9, fontWeight: 700 }} dy={10} />
+                                            <YAxis axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 9, fontWeight: 700 }} dx={-5} />
+                                            <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', fontSize: '10px', fontWeight: 700 }} />
+                                            <Area type="monotone" dataKey="amount" stroke={theme.primaryColor || '#6366f1'} strokeWidth={3} fill="url(#colorAmount)" />
+                                        </AreaChart>
+                                    </ResponsiveContainer>
+                                )}
                             </div>
                         </div>
 
                         <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm flex flex-col">
                             <h3 className="text-sm font-medium text-slate-800 tracking-tight mb-6 uppercase">Settlement Channels</h3>
-                            <div className="flex-1 h-[250px]">
-                                <ResponsiveContainer width="100%" height="100%">
-                                    <PieChart>
-                                        <Pie data={pieData} innerRadius={60} outerRadius={85} paddingAngle={5} dataKey="value">
-                                            {pieData.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} cornerRadius={4} />)}
-                                        </Pie>
-                                        <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', fontSize: '10px' }} />
-                                        <Legend verticalAlign="bottom" iconType="circle" wrapperStyle={{ paddingTop: '20px', fontWeight: 700, fontSize: '9px', textTransform: 'uppercase' }} />
-                                    </PieChart>
-                                </ResponsiveContainer>
+                            <div className="flex-1 w-full min-w-0" style={{ minHeight: 250, height: 250 }}>
+                                {pieData.length === 0 ? (
+                                    <div className="h-full flex items-center justify-center text-slate-400 text-sm italic">
+                                        No settlement channels recorded
+                                    </div>
+                                ) : (
+                                    <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={250}>
+                                        <PieChart>
+                                            <Pie data={pieData} innerRadius={60} outerRadius={85} paddingAngle={5} dataKey="value">
+                                                {pieData.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} cornerRadius={4} />)}
+                                            </Pie>
+                                            <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', fontSize: '10px' }} />
+                                            <Legend verticalAlign="bottom" iconType="circle" wrapperStyle={{ paddingTop: '20px', fontWeight: 700, fontSize: '9px', textTransform: 'uppercase' }} />
+                                        </PieChart>
+                                    </ResponsiveContainer>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -271,39 +283,45 @@ export default function SalesPerformance() {
                             <h3 className="text-sm font-medium text-slate-800 tracking-tight uppercase">Sales Representative Performance</h3>
                             <span className="text-[10px] font-medium text-slate-400 uppercase bg-slate-50 px-2 py-1 rounded-lg">Comparative View</span>
                         </div>
-                        <div className="h-[300px] w-full">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <BarChart data={Object.values(activeSales.reduce((acc, sale) => {
-                                    if (sale.salesman) {
-                                        const name = sale.salesman.name || 'Unknown';
-                                        if (!acc[name]) acc[name] = { name, revenue: 0, count: 0 };
-                                        acc[name].revenue += parseFloat(sale.totalAmount);
-                                        acc[name].count++;
-                                    }
-                                    return acc;
-                                }, {})).sort((a, b) => b.revenue - a.revenue)}>
-                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 9, fontWeight: 700 }} dy={10} />
-                                    <YAxis axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 9, fontWeight: 700 }} dx={-5} />
-                                    <Tooltip
-                                        cursor={{ fill: '#f8fafc' }}
-                                        contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', fontSize: '10px', fontWeight: 700 }}
-                                    />
-                                    <Bar dataKey="revenue" radius={[6, 6, 0, 0]} barSize={40}>
-                                        {Object.values(activeSales.reduce((acc, sale) => {
-                                            if (sale.salesman) {
-                                                const name = sale.salesman.name || 'Unknown';
-                                                if (!acc[name]) acc[name] = { name, revenue: 0, count: 0 };
-                                                acc[name].revenue += parseFloat(sale.totalAmount);
-                                                acc[name].count++;
-                                            }
-                                            return acc;
-                                        }, {})).map((entry, index) => (
-                                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                        ))}
-                                    </Bar>
-                                </BarChart>
-                            </ResponsiveContainer>
+                        <div className="h-[300px] w-full min-w-0" style={{ minHeight: 300 }}>
+                            {Object.keys(activeSales.reduce((acc, sale) => { if (sale.salesman) acc[sale.salesman.name || 'Unknown'] = true; return acc; }, {})).length === 0 ? (
+                                <div className="h-full flex items-center justify-center text-slate-400 text-sm italic">
+                                    No sales representative data recorded for this period
+                                </div>
+                            ) : (
+                                <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={300}>
+                                    <BarChart data={Object.values(activeSales.reduce((acc, sale) => {
+                                        if (sale.salesman) {
+                                            const name = sale.salesman.name || 'Unknown';
+                                            if (!acc[name]) acc[name] = { name, revenue: 0, count: 0 };
+                                            acc[name].revenue += parseFloat(sale.totalAmount);
+                                            acc[name].count++;
+                                        }
+                                        return acc;
+                                    }, {})).sort((a, b) => b.revenue - a.revenue)}>
+                                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                                        <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 9, fontWeight: 700 }} dy={10} />
+                                        <YAxis axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 9, fontWeight: 700 }} dx={-5} />
+                                        <Tooltip
+                                            cursor={{ fill: '#f8fafc' }}
+                                            contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', fontSize: '10px', fontWeight: 700 }}
+                                        />
+                                        <Bar dataKey="revenue" radius={[6, 6, 0, 0]} barSize={40}>
+                                            {Object.values(activeSales.reduce((acc, sale) => {
+                                                if (sale.salesman) {
+                                                    const name = sale.salesman.name || 'Unknown';
+                                                    if (!acc[name]) acc[name] = { name, revenue: 0, count: 0 };
+                                                    acc[name].revenue += parseFloat(sale.totalAmount);
+                                                    acc[name].count++;
+                                                }
+                                                return acc;
+                                            }, {})).map((entry, index) => (
+                                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                            ))}
+                                        </Bar>
+                                    </BarChart>
+                                </ResponsiveContainer>
+                            )}
                         </div>
                     </div>
 

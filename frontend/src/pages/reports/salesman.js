@@ -145,8 +145,8 @@ export default function SalesmanReport() {
             {reportData.length > 0 && (
                 <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm mb-6">
                     <h3 className="text-sm font-medium text-slate-800 tracking-tight mb-6">Performance Comparison</h3>
-                    <div className="h-[300px] w-full">
-                        <ResponsiveContainer width="100%" height="100%">
+                    <div className="h-[300px] w-full min-w-0" style={{ minHeight: 300 }}>
+                        <ResponsiveContainer width="100%" height={300} minWidth={0} minHeight={300} debounce={50}>
                             <BarChart data={reportData} margin={{ top: 10, right: 10, left: 10, bottom: 5 }}>
                                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                                 <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 9, fontWeight: 700 }} dy={5} />

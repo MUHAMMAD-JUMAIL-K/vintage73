@@ -6307,7 +6307,10 @@ export namespace Prisma {
     referredLeads: number
     managedStaff: number
     terminals: number
+    dayCloseOpenings: number
+    dayCloseOpeningApprovals: number
     dayCloseFinalizations: number
+    dayCloseExceptionApprovals: number
     staffDayClosings: number
   }
 
@@ -6341,7 +6344,10 @@ export namespace Prisma {
     referredLeads?: boolean | UserCountOutputTypeCountReferredLeadsArgs
     managedStaff?: boolean | UserCountOutputTypeCountManagedStaffArgs
     terminals?: boolean | UserCountOutputTypeCountTerminalsArgs
+    dayCloseOpenings?: boolean | UserCountOutputTypeCountDayCloseOpeningsArgs
+    dayCloseOpeningApprovals?: boolean | UserCountOutputTypeCountDayCloseOpeningApprovalsArgs
     dayCloseFinalizations?: boolean | UserCountOutputTypeCountDayCloseFinalizationsArgs
+    dayCloseExceptionApprovals?: boolean | UserCountOutputTypeCountDayCloseExceptionApprovalsArgs
     staffDayClosings?: boolean | UserCountOutputTypeCountStaffDayClosingsArgs
   }
 
@@ -6593,7 +6599,31 @@ export namespace Prisma {
   /**
    * UserCountOutputType without action
    */
+  export type UserCountOutputTypeCountDayCloseOpeningsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: DayCloseWhereInput
+  }
+
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountDayCloseOpeningApprovalsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: DayCloseWhereInput
+  }
+
+
+  /**
+   * UserCountOutputType without action
+   */
   export type UserCountOutputTypeCountDayCloseFinalizationsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: DayCloseWhereInput
+  }
+
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountDayCloseExceptionApprovalsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: DayCloseWhereInput
   }
 
@@ -6635,6 +6665,7 @@ export namespace Prisma {
     users: number
     dayCloses: number
     customerVouchers: number
+    vouchers: number
   }
 
   export type BranchCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -6661,6 +6692,7 @@ export namespace Prisma {
     users?: boolean | BranchCountOutputTypeCountUsersArgs
     dayCloses?: boolean | BranchCountOutputTypeCountDayClosesArgs
     customerVouchers?: boolean | BranchCountOutputTypeCountCustomerVouchersArgs
+    vouchers?: boolean | BranchCountOutputTypeCountVouchersArgs
   }
 
   // Custom InputTypes
@@ -6857,6 +6889,14 @@ export namespace Prisma {
    */
   export type BranchCountOutputTypeCountCustomerVouchersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: CustomerVoucherWhereInput
+  }
+
+
+  /**
+   * BranchCountOutputType without action
+   */
+  export type BranchCountOutputTypeCountVouchersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: VoucherWhereInput
   }
 
 
@@ -7970,11 +8010,13 @@ export namespace Prisma {
   export type TerminalCountOutputType = {
     sales: number
     users: number
+    dayCloses: number
   }
 
   export type TerminalCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     sales?: boolean | TerminalCountOutputTypeCountSalesArgs
     users?: boolean | TerminalCountOutputTypeCountUsersArgs
+    dayCloses?: boolean | TerminalCountOutputTypeCountDayClosesArgs
   }
 
   // Custom InputTypes
@@ -8003,6 +8045,14 @@ export namespace Prisma {
    */
   export type TerminalCountOutputTypeCountUsersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: UserWhereInput
+  }
+
+
+  /**
+   * TerminalCountOutputType without action
+   */
+  export type TerminalCountOutputTypeCountDayClosesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: DayCloseWhereInput
   }
 
 
@@ -8477,7 +8527,10 @@ export namespace Prisma {
     managedStaff?: boolean | User$managedStaffArgs<ExtArgs>
     branch?: boolean | User$branchArgs<ExtArgs>
     terminals?: boolean | User$terminalsArgs<ExtArgs>
+    dayCloseOpenings?: boolean | User$dayCloseOpeningsArgs<ExtArgs>
+    dayCloseOpeningApprovals?: boolean | User$dayCloseOpeningApprovalsArgs<ExtArgs>
     dayCloseFinalizations?: boolean | User$dayCloseFinalizationsArgs<ExtArgs>
+    dayCloseExceptionApprovals?: boolean | User$dayCloseExceptionApprovalsArgs<ExtArgs>
     staffDayClosings?: boolean | User$staffDayClosingsArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
@@ -8532,7 +8585,10 @@ export namespace Prisma {
     managedStaff?: boolean | User$managedStaffArgs<ExtArgs>
     branch?: boolean | User$branchArgs<ExtArgs>
     terminals?: boolean | User$terminalsArgs<ExtArgs>
+    dayCloseOpenings?: boolean | User$dayCloseOpeningsArgs<ExtArgs>
+    dayCloseOpeningApprovals?: boolean | User$dayCloseOpeningApprovalsArgs<ExtArgs>
     dayCloseFinalizations?: boolean | User$dayCloseFinalizationsArgs<ExtArgs>
+    dayCloseExceptionApprovals?: boolean | User$dayCloseExceptionApprovalsArgs<ExtArgs>
     staffDayClosings?: boolean | User$staffDayClosingsArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }
@@ -8573,7 +8629,10 @@ export namespace Prisma {
       managedStaff: Prisma.$UserPayload<ExtArgs>[]
       branch: Prisma.$BranchPayload<ExtArgs> | null
       terminals: Prisma.$TerminalPayload<ExtArgs>[]
+      dayCloseOpenings: Prisma.$DayClosePayload<ExtArgs>[]
+      dayCloseOpeningApprovals: Prisma.$DayClosePayload<ExtArgs>[]
       dayCloseFinalizations: Prisma.$DayClosePayload<ExtArgs>[]
+      dayCloseExceptionApprovals: Prisma.$DayClosePayload<ExtArgs>[]
       staffDayClosings: Prisma.$StaffDayClosePayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
@@ -9020,7 +9079,13 @@ export namespace Prisma {
 
     terminals<T extends User$terminalsArgs<ExtArgs> = {}>(args?: Subset<T, User$terminalsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TerminalPayload<ExtArgs>, T, 'findMany'> | Null>;
 
+    dayCloseOpenings<T extends User$dayCloseOpeningsArgs<ExtArgs> = {}>(args?: Subset<T, User$dayCloseOpeningsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DayClosePayload<ExtArgs>, T, 'findMany'> | Null>;
+
+    dayCloseOpeningApprovals<T extends User$dayCloseOpeningApprovalsArgs<ExtArgs> = {}>(args?: Subset<T, User$dayCloseOpeningApprovalsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DayClosePayload<ExtArgs>, T, 'findMany'> | Null>;
+
     dayCloseFinalizations<T extends User$dayCloseFinalizationsArgs<ExtArgs> = {}>(args?: Subset<T, User$dayCloseFinalizationsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DayClosePayload<ExtArgs>, T, 'findMany'> | Null>;
+
+    dayCloseExceptionApprovals<T extends User$dayCloseExceptionApprovalsArgs<ExtArgs> = {}>(args?: Subset<T, User$dayCloseExceptionApprovalsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DayClosePayload<ExtArgs>, T, 'findMany'> | Null>;
 
     staffDayClosings<T extends User$staffDayClosingsArgs<ExtArgs> = {}>(args?: Subset<T, User$staffDayClosingsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$StaffDayClosePayload<ExtArgs>, T, 'findMany'> | Null>;
 
@@ -10035,9 +10100,72 @@ export namespace Prisma {
 
 
   /**
+   * User.dayCloseOpenings
+   */
+  export type User$dayCloseOpeningsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DayClose
+     */
+    select?: DayCloseSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well.
+     */
+    include?: DayCloseInclude<ExtArgs> | null
+    where?: DayCloseWhereInput
+    orderBy?: DayCloseOrderByWithRelationInput | DayCloseOrderByWithRelationInput[]
+    cursor?: DayCloseWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: DayCloseScalarFieldEnum | DayCloseScalarFieldEnum[]
+  }
+
+
+  /**
+   * User.dayCloseOpeningApprovals
+   */
+  export type User$dayCloseOpeningApprovalsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DayClose
+     */
+    select?: DayCloseSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well.
+     */
+    include?: DayCloseInclude<ExtArgs> | null
+    where?: DayCloseWhereInput
+    orderBy?: DayCloseOrderByWithRelationInput | DayCloseOrderByWithRelationInput[]
+    cursor?: DayCloseWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: DayCloseScalarFieldEnum | DayCloseScalarFieldEnum[]
+  }
+
+
+  /**
    * User.dayCloseFinalizations
    */
   export type User$dayCloseFinalizationsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DayClose
+     */
+    select?: DayCloseSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well.
+     */
+    include?: DayCloseInclude<ExtArgs> | null
+    where?: DayCloseWhereInput
+    orderBy?: DayCloseOrderByWithRelationInput | DayCloseOrderByWithRelationInput[]
+    cursor?: DayCloseWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: DayCloseScalarFieldEnum | DayCloseScalarFieldEnum[]
+  }
+
+
+  /**
+   * User.dayCloseExceptionApprovals
+   */
+  export type User$dayCloseExceptionApprovalsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
      * Select specific fields to fetch from the DayClose
      */
@@ -10374,6 +10502,7 @@ export namespace Prisma {
     users?: boolean | Branch$usersArgs<ExtArgs>
     dayCloses?: boolean | Branch$dayClosesArgs<ExtArgs>
     customerVouchers?: boolean | Branch$customerVouchersArgs<ExtArgs>
+    vouchers?: boolean | Branch$vouchersArgs<ExtArgs>
     _count?: boolean | BranchCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["branch"]>
 
@@ -10418,6 +10547,7 @@ export namespace Prisma {
     users?: boolean | Branch$usersArgs<ExtArgs>
     dayCloses?: boolean | Branch$dayClosesArgs<ExtArgs>
     customerVouchers?: boolean | Branch$customerVouchersArgs<ExtArgs>
+    vouchers?: boolean | Branch$vouchersArgs<ExtArgs>
     _count?: boolean | BranchCountOutputTypeDefaultArgs<ExtArgs>
   }
 
@@ -10449,6 +10579,7 @@ export namespace Prisma {
       users: Prisma.$UserPayload<ExtArgs>[]
       dayCloses: Prisma.$DayClosePayload<ExtArgs>[]
       customerVouchers: Prisma.$CustomerVoucherPayload<ExtArgs>[]
+      vouchers: Prisma.$VoucherPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
@@ -10876,6 +11007,8 @@ export namespace Prisma {
     dayCloses<T extends Branch$dayClosesArgs<ExtArgs> = {}>(args?: Subset<T, Branch$dayClosesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DayClosePayload<ExtArgs>, T, 'findMany'> | Null>;
 
     customerVouchers<T extends Branch$customerVouchersArgs<ExtArgs> = {}>(args?: Subset<T, Branch$customerVouchersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CustomerVoucherPayload<ExtArgs>, T, 'findMany'> | Null>;
+
+    vouchers<T extends Branch$vouchersArgs<ExtArgs> = {}>(args?: Subset<T, Branch$vouchersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$VoucherPayload<ExtArgs>, T, 'findMany'> | Null>;
 
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -11725,6 +11858,27 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: CustomerVoucherScalarFieldEnum | CustomerVoucherScalarFieldEnum[]
+  }
+
+
+  /**
+   * Branch.vouchers
+   */
+  export type Branch$vouchersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Voucher
+     */
+    select?: VoucherSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well.
+     */
+    include?: VoucherInclude<ExtArgs> | null
+    where?: VoucherWhereInput
+    orderBy?: VoucherOrderByWithRelationInput | VoucherOrderByWithRelationInput[]
+    cursor?: VoucherWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: VoucherScalarFieldEnum | VoucherScalarFieldEnum[]
   }
 
 
@@ -57000,12 +57154,14 @@ export namespace Prisma {
     id: number | null
     totalAmount: Decimal | null
     createdBy: number | null
+    branchId: number | null
   }
 
   export type VoucherSumAggregateOutputType = {
     id: number | null
     totalAmount: Decimal | null
     createdBy: number | null
+    branchId: number | null
   }
 
   export type VoucherMinAggregateOutputType = {
@@ -57018,6 +57174,7 @@ export namespace Prisma {
     status: string | null
     reference: string | null
     createdBy: number | null
+    branchId: number | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -57032,6 +57189,7 @@ export namespace Prisma {
     status: string | null
     reference: string | null
     createdBy: number | null
+    branchId: number | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -57046,6 +57204,7 @@ export namespace Prisma {
     status: number
     reference: number
     createdBy: number
+    branchId: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -57056,12 +57215,14 @@ export namespace Prisma {
     id?: true
     totalAmount?: true
     createdBy?: true
+    branchId?: true
   }
 
   export type VoucherSumAggregateInputType = {
     id?: true
     totalAmount?: true
     createdBy?: true
+    branchId?: true
   }
 
   export type VoucherMinAggregateInputType = {
@@ -57074,6 +57235,7 @@ export namespace Prisma {
     status?: true
     reference?: true
     createdBy?: true
+    branchId?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -57088,6 +57250,7 @@ export namespace Prisma {
     status?: true
     reference?: true
     createdBy?: true
+    branchId?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -57102,6 +57265,7 @@ export namespace Prisma {
     status?: true
     reference?: true
     createdBy?: true
+    branchId?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -57203,6 +57367,7 @@ export namespace Prisma {
     status: string
     reference: string | null
     createdBy: number
+    branchId: number | null
     createdAt: Date
     updatedAt: Date
     _count: VoucherCountAggregateOutputType | null
@@ -57236,12 +57401,14 @@ export namespace Prisma {
     status?: boolean
     reference?: boolean
     createdBy?: boolean
+    branchId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     entries?: boolean | Voucher$entriesArgs<ExtArgs>
     payrolls?: boolean | Voucher$payrollsArgs<ExtArgs>
     salaryAdvances?: boolean | Voucher$salaryAdvancesArgs<ExtArgs>
     creator?: boolean | UserDefaultArgs<ExtArgs>
+    branch?: boolean | Voucher$branchArgs<ExtArgs>
     _count?: boolean | VoucherCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["voucher"]>
 
@@ -57255,6 +57422,7 @@ export namespace Prisma {
     status?: boolean
     reference?: boolean
     createdBy?: boolean
+    branchId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
@@ -57264,6 +57432,7 @@ export namespace Prisma {
     payrolls?: boolean | Voucher$payrollsArgs<ExtArgs>
     salaryAdvances?: boolean | Voucher$salaryAdvancesArgs<ExtArgs>
     creator?: boolean | UserDefaultArgs<ExtArgs>
+    branch?: boolean | Voucher$branchArgs<ExtArgs>
     _count?: boolean | VoucherCountOutputTypeDefaultArgs<ExtArgs>
   }
 
@@ -57275,6 +57444,7 @@ export namespace Prisma {
       payrolls: Prisma.$PayrollPayload<ExtArgs>[]
       salaryAdvances: Prisma.$SalaryAdvancePayload<ExtArgs>[]
       creator: Prisma.$UserPayload<ExtArgs>
+      branch: Prisma.$BranchPayload<ExtArgs> | null
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
@@ -57286,6 +57456,7 @@ export namespace Prisma {
       status: string
       reference: string | null
       createdBy: number
+      branchId: number | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["voucher"]>
@@ -57661,6 +57832,8 @@ export namespace Prisma {
 
     creator<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, 'findUniqueOrThrow'> | Null, Null, ExtArgs>;
 
+    branch<T extends Voucher$branchArgs<ExtArgs> = {}>(args?: Subset<T, Voucher$branchArgs<ExtArgs>>): Prisma__BranchClient<$Result.GetResult<Prisma.$BranchPayload<ExtArgs>, T, 'findUniqueOrThrow'> | null, null, ExtArgs>;
+
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -57698,6 +57871,7 @@ export namespace Prisma {
     readonly status: FieldRef<"Voucher", 'String'>
     readonly reference: FieldRef<"Voucher", 'String'>
     readonly createdBy: FieldRef<"Voucher", 'Int'>
+    readonly branchId: FieldRef<"Voucher", 'Int'>
     readonly createdAt: FieldRef<"Voucher", 'DateTime'>
     readonly updatedAt: FieldRef<"Voucher", 'DateTime'>
   }
@@ -58071,6 +58245,22 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: SalaryAdvanceScalarFieldEnum | SalaryAdvanceScalarFieldEnum[]
+  }
+
+
+  /**
+   * Voucher.branch
+   */
+  export type Voucher$branchArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Branch
+     */
+    select?: BranchSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well.
+     */
+    include?: BranchInclude<ExtArgs> | null
+    where?: BranchWhereInput
   }
 
 
@@ -66736,6 +66926,7 @@ export namespace Prisma {
     sales?: boolean | Terminal$salesArgs<ExtArgs>
     branch?: boolean | Terminal$branchArgs<ExtArgs>
     users?: boolean | Terminal$usersArgs<ExtArgs>
+    dayCloses?: boolean | Terminal$dayClosesArgs<ExtArgs>
     _count?: boolean | TerminalCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["terminal"]>
 
@@ -66755,6 +66946,7 @@ export namespace Prisma {
     sales?: boolean | Terminal$salesArgs<ExtArgs>
     branch?: boolean | Terminal$branchArgs<ExtArgs>
     users?: boolean | Terminal$usersArgs<ExtArgs>
+    dayCloses?: boolean | Terminal$dayClosesArgs<ExtArgs>
     _count?: boolean | TerminalCountOutputTypeDefaultArgs<ExtArgs>
   }
 
@@ -66765,6 +66957,7 @@ export namespace Prisma {
       sales: Prisma.$SalePayload<ExtArgs>[]
       branch: Prisma.$BranchPayload<ExtArgs> | null
       users: Prisma.$UserPayload<ExtArgs>[]
+      dayCloses: Prisma.$DayClosePayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
@@ -67146,6 +67339,8 @@ export namespace Prisma {
     branch<T extends Terminal$branchArgs<ExtArgs> = {}>(args?: Subset<T, Terminal$branchArgs<ExtArgs>>): Prisma__BranchClient<$Result.GetResult<Prisma.$BranchPayload<ExtArgs>, T, 'findUniqueOrThrow'> | null, null, ExtArgs>;
 
     users<T extends Terminal$usersArgs<ExtArgs> = {}>(args?: Subset<T, Terminal$usersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, 'findMany'> | Null>;
+
+    dayCloses<T extends Terminal$dayClosesArgs<ExtArgs> = {}>(args?: Subset<T, Terminal$dayClosesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DayClosePayload<ExtArgs>, T, 'findMany'> | Null>;
 
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -67550,6 +67745,27 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: UserScalarFieldEnum | UserScalarFieldEnum[]
+  }
+
+
+  /**
+   * Terminal.dayCloses
+   */
+  export type Terminal$dayClosesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DayClose
+     */
+    select?: DayCloseSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well.
+     */
+    include?: DayCloseInclude<ExtArgs> | null
+    where?: DayCloseWhereInput
+    orderBy?: DayCloseOrderByWithRelationInput | DayCloseOrderByWithRelationInput[]
+    cursor?: DayCloseWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: DayCloseScalarFieldEnum | DayCloseScalarFieldEnum[]
   }
 
 
@@ -77669,6 +77885,18 @@ export namespace Prisma {
   export type DayCloseAvgAggregateOutputType = {
     id: number | null
     branchId: number | null
+    terminalId: number | null
+    openedById: number | null
+    openingCash: Decimal | null
+    previousClosingCash: Decimal | null
+    additionalCashAdded: Decimal | null
+    cashRemovedBeforeOpening: Decimal | null
+    expectedOpeningCash: Decimal | null
+    actualOpeningCash: Decimal | null
+    openingDifference: Decimal | null
+    openingApprovedById: number | null
+    exceptionApprovedById: number | null
+    closingExpectedCash: Decimal | null
     physicalCash: Decimal | null
     cashDifference: Decimal | null
     finalizedById: number | null
@@ -77677,6 +77905,18 @@ export namespace Prisma {
   export type DayCloseSumAggregateOutputType = {
     id: number | null
     branchId: number | null
+    terminalId: number | null
+    openedById: number | null
+    openingCash: Decimal | null
+    previousClosingCash: Decimal | null
+    additionalCashAdded: Decimal | null
+    cashRemovedBeforeOpening: Decimal | null
+    expectedOpeningCash: Decimal | null
+    actualOpeningCash: Decimal | null
+    openingDifference: Decimal | null
+    openingApprovedById: number | null
+    exceptionApprovedById: number | null
+    closingExpectedCash: Decimal | null
     physicalCash: Decimal | null
     cashDifference: Decimal | null
     finalizedById: number | null
@@ -77687,6 +77927,22 @@ export namespace Prisma {
     branchId: number | null
     businessDate: Date | null
     status: string | null
+    terminalId: number | null
+    openedById: number | null
+    openedAt: Date | null
+    openingCash: Decimal | null
+    previousClosingCash: Decimal | null
+    additionalCashAdded: Decimal | null
+    cashRemovedBeforeOpening: Decimal | null
+    expectedOpeningCash: Decimal | null
+    actualOpeningCash: Decimal | null
+    openingDifference: Decimal | null
+    openingDiscrepancyReason: string | null
+    openingApprovedById: number | null
+    openingRemarks: string | null
+    exceptionApprovedById: number | null
+    exceptionApprovalReason: string | null
+    closingExpectedCash: Decimal | null
     physicalCash: Decimal | null
     cashDifference: Decimal | null
     notes: string | null
@@ -77701,6 +77957,22 @@ export namespace Prisma {
     branchId: number | null
     businessDate: Date | null
     status: string | null
+    terminalId: number | null
+    openedById: number | null
+    openedAt: Date | null
+    openingCash: Decimal | null
+    previousClosingCash: Decimal | null
+    additionalCashAdded: Decimal | null
+    cashRemovedBeforeOpening: Decimal | null
+    expectedOpeningCash: Decimal | null
+    actualOpeningCash: Decimal | null
+    openingDifference: Decimal | null
+    openingDiscrepancyReason: string | null
+    openingApprovedById: number | null
+    openingRemarks: string | null
+    exceptionApprovedById: number | null
+    exceptionApprovalReason: string | null
+    closingExpectedCash: Decimal | null
     physicalCash: Decimal | null
     cashDifference: Decimal | null
     notes: string | null
@@ -77715,12 +77987,33 @@ export namespace Prisma {
     branchId: number
     businessDate: number
     status: number
+    terminalId: number
+    openedById: number
+    openedAt: number
+    openingCash: number
+    previousClosingCash: number
+    additionalCashAdded: number
+    cashRemovedBeforeOpening: number
+    expectedOpeningCash: number
+    actualOpeningCash: number
+    openingDifference: number
+    openingDiscrepancyReason: number
+    openingApprovedById: number
+    openingDenominations: number
+    openingRemarks: number
+    verificationChecks: number
+    verificationExceptions: number
+    exceptionApprovedById: number
+    exceptionApprovalReason: number
     salesSummary: number
+    closingExpectedCash: number
     physicalCash: number
     cashDifference: number
+    closingDenominations: number
     notes: number
     finalizedById: number
     finalizedAt: number
+    adjustments: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -77730,6 +78023,18 @@ export namespace Prisma {
   export type DayCloseAvgAggregateInputType = {
     id?: true
     branchId?: true
+    terminalId?: true
+    openedById?: true
+    openingCash?: true
+    previousClosingCash?: true
+    additionalCashAdded?: true
+    cashRemovedBeforeOpening?: true
+    expectedOpeningCash?: true
+    actualOpeningCash?: true
+    openingDifference?: true
+    openingApprovedById?: true
+    exceptionApprovedById?: true
+    closingExpectedCash?: true
     physicalCash?: true
     cashDifference?: true
     finalizedById?: true
@@ -77738,6 +78043,18 @@ export namespace Prisma {
   export type DayCloseSumAggregateInputType = {
     id?: true
     branchId?: true
+    terminalId?: true
+    openedById?: true
+    openingCash?: true
+    previousClosingCash?: true
+    additionalCashAdded?: true
+    cashRemovedBeforeOpening?: true
+    expectedOpeningCash?: true
+    actualOpeningCash?: true
+    openingDifference?: true
+    openingApprovedById?: true
+    exceptionApprovedById?: true
+    closingExpectedCash?: true
     physicalCash?: true
     cashDifference?: true
     finalizedById?: true
@@ -77748,6 +78065,22 @@ export namespace Prisma {
     branchId?: true
     businessDate?: true
     status?: true
+    terminalId?: true
+    openedById?: true
+    openedAt?: true
+    openingCash?: true
+    previousClosingCash?: true
+    additionalCashAdded?: true
+    cashRemovedBeforeOpening?: true
+    expectedOpeningCash?: true
+    actualOpeningCash?: true
+    openingDifference?: true
+    openingDiscrepancyReason?: true
+    openingApprovedById?: true
+    openingRemarks?: true
+    exceptionApprovedById?: true
+    exceptionApprovalReason?: true
+    closingExpectedCash?: true
     physicalCash?: true
     cashDifference?: true
     notes?: true
@@ -77762,6 +78095,22 @@ export namespace Prisma {
     branchId?: true
     businessDate?: true
     status?: true
+    terminalId?: true
+    openedById?: true
+    openedAt?: true
+    openingCash?: true
+    previousClosingCash?: true
+    additionalCashAdded?: true
+    cashRemovedBeforeOpening?: true
+    expectedOpeningCash?: true
+    actualOpeningCash?: true
+    openingDifference?: true
+    openingDiscrepancyReason?: true
+    openingApprovedById?: true
+    openingRemarks?: true
+    exceptionApprovedById?: true
+    exceptionApprovalReason?: true
+    closingExpectedCash?: true
     physicalCash?: true
     cashDifference?: true
     notes?: true
@@ -77776,12 +78125,33 @@ export namespace Prisma {
     branchId?: true
     businessDate?: true
     status?: true
+    terminalId?: true
+    openedById?: true
+    openedAt?: true
+    openingCash?: true
+    previousClosingCash?: true
+    additionalCashAdded?: true
+    cashRemovedBeforeOpening?: true
+    expectedOpeningCash?: true
+    actualOpeningCash?: true
+    openingDifference?: true
+    openingDiscrepancyReason?: true
+    openingApprovedById?: true
+    openingDenominations?: true
+    openingRemarks?: true
+    verificationChecks?: true
+    verificationExceptions?: true
+    exceptionApprovedById?: true
+    exceptionApprovalReason?: true
     salesSummary?: true
+    closingExpectedCash?: true
     physicalCash?: true
     cashDifference?: true
+    closingDenominations?: true
     notes?: true
     finalizedById?: true
     finalizedAt?: true
+    adjustments?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -77878,12 +78248,33 @@ export namespace Prisma {
     branchId: number
     businessDate: Date
     status: string
+    terminalId: number | null
+    openedById: number | null
+    openedAt: Date | null
+    openingCash: Decimal | null
+    previousClosingCash: Decimal | null
+    additionalCashAdded: Decimal | null
+    cashRemovedBeforeOpening: Decimal | null
+    expectedOpeningCash: Decimal | null
+    actualOpeningCash: Decimal | null
+    openingDifference: Decimal | null
+    openingDiscrepancyReason: string | null
+    openingApprovedById: number | null
+    openingDenominations: JsonValue | null
+    openingRemarks: string | null
+    verificationChecks: JsonValue | null
+    verificationExceptions: JsonValue | null
+    exceptionApprovedById: number | null
+    exceptionApprovalReason: string | null
     salesSummary: JsonValue | null
+    closingExpectedCash: Decimal | null
     physicalCash: Decimal | null
     cashDifference: Decimal | null
+    closingDenominations: JsonValue | null
     notes: string | null
     finalizedById: number | null
     finalizedAt: Date | null
+    adjustments: JsonValue | null
     createdAt: Date
     updatedAt: Date
     _count: DayCloseCountAggregateOutputType | null
@@ -77912,16 +78303,41 @@ export namespace Prisma {
     branchId?: boolean
     businessDate?: boolean
     status?: boolean
+    terminalId?: boolean
+    openedById?: boolean
+    openedAt?: boolean
+    openingCash?: boolean
+    previousClosingCash?: boolean
+    additionalCashAdded?: boolean
+    cashRemovedBeforeOpening?: boolean
+    expectedOpeningCash?: boolean
+    actualOpeningCash?: boolean
+    openingDifference?: boolean
+    openingDiscrepancyReason?: boolean
+    openingApprovedById?: boolean
+    openingDenominations?: boolean
+    openingRemarks?: boolean
+    verificationChecks?: boolean
+    verificationExceptions?: boolean
+    exceptionApprovedById?: boolean
+    exceptionApprovalReason?: boolean
     salesSummary?: boolean
+    closingExpectedCash?: boolean
     physicalCash?: boolean
     cashDifference?: boolean
+    closingDenominations?: boolean
     notes?: boolean
     finalizedById?: boolean
     finalizedAt?: boolean
+    adjustments?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     branch?: boolean | BranchDefaultArgs<ExtArgs>
+    terminal?: boolean | DayClose$terminalArgs<ExtArgs>
+    openedBy?: boolean | DayClose$openedByArgs<ExtArgs>
+    openingApprovedBy?: boolean | DayClose$openingApprovedByArgs<ExtArgs>
     finalizedBy?: boolean | DayClose$finalizedByArgs<ExtArgs>
+    exceptionApprovedBy?: boolean | DayClose$exceptionApprovedByArgs<ExtArgs>
     staffClosings?: boolean | DayClose$staffClosingsArgs<ExtArgs>
     _count?: boolean | DayCloseCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["dayClose"]>
@@ -77931,19 +78347,44 @@ export namespace Prisma {
     branchId?: boolean
     businessDate?: boolean
     status?: boolean
+    terminalId?: boolean
+    openedById?: boolean
+    openedAt?: boolean
+    openingCash?: boolean
+    previousClosingCash?: boolean
+    additionalCashAdded?: boolean
+    cashRemovedBeforeOpening?: boolean
+    expectedOpeningCash?: boolean
+    actualOpeningCash?: boolean
+    openingDifference?: boolean
+    openingDiscrepancyReason?: boolean
+    openingApprovedById?: boolean
+    openingDenominations?: boolean
+    openingRemarks?: boolean
+    verificationChecks?: boolean
+    verificationExceptions?: boolean
+    exceptionApprovedById?: boolean
+    exceptionApprovalReason?: boolean
     salesSummary?: boolean
+    closingExpectedCash?: boolean
     physicalCash?: boolean
     cashDifference?: boolean
+    closingDenominations?: boolean
     notes?: boolean
     finalizedById?: boolean
     finalizedAt?: boolean
+    adjustments?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
   export type DayCloseInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     branch?: boolean | BranchDefaultArgs<ExtArgs>
+    terminal?: boolean | DayClose$terminalArgs<ExtArgs>
+    openedBy?: boolean | DayClose$openedByArgs<ExtArgs>
+    openingApprovedBy?: boolean | DayClose$openingApprovedByArgs<ExtArgs>
     finalizedBy?: boolean | DayClose$finalizedByArgs<ExtArgs>
+    exceptionApprovedBy?: boolean | DayClose$exceptionApprovedByArgs<ExtArgs>
     staffClosings?: boolean | DayClose$staffClosingsArgs<ExtArgs>
     _count?: boolean | DayCloseCountOutputTypeDefaultArgs<ExtArgs>
   }
@@ -77953,7 +78394,11 @@ export namespace Prisma {
     name: "DayClose"
     objects: {
       branch: Prisma.$BranchPayload<ExtArgs>
+      terminal: Prisma.$TerminalPayload<ExtArgs> | null
+      openedBy: Prisma.$UserPayload<ExtArgs> | null
+      openingApprovedBy: Prisma.$UserPayload<ExtArgs> | null
       finalizedBy: Prisma.$UserPayload<ExtArgs> | null
+      exceptionApprovedBy: Prisma.$UserPayload<ExtArgs> | null
       staffClosings: Prisma.$StaffDayClosePayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
@@ -77961,12 +78406,33 @@ export namespace Prisma {
       branchId: number
       businessDate: Date
       status: string
+      terminalId: number | null
+      openedById: number | null
+      openedAt: Date | null
+      openingCash: Prisma.Decimal | null
+      previousClosingCash: Prisma.Decimal | null
+      additionalCashAdded: Prisma.Decimal | null
+      cashRemovedBeforeOpening: Prisma.Decimal | null
+      expectedOpeningCash: Prisma.Decimal | null
+      actualOpeningCash: Prisma.Decimal | null
+      openingDifference: Prisma.Decimal | null
+      openingDiscrepancyReason: string | null
+      openingApprovedById: number | null
+      openingDenominations: Prisma.JsonValue | null
+      openingRemarks: string | null
+      verificationChecks: Prisma.JsonValue | null
+      verificationExceptions: Prisma.JsonValue | null
+      exceptionApprovedById: number | null
+      exceptionApprovalReason: string | null
       salesSummary: Prisma.JsonValue | null
+      closingExpectedCash: Prisma.Decimal | null
       physicalCash: Prisma.Decimal | null
       cashDifference: Prisma.Decimal | null
+      closingDenominations: Prisma.JsonValue | null
       notes: string | null
       finalizedById: number | null
       finalizedAt: Date | null
+      adjustments: Prisma.JsonValue | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["dayClose"]>
@@ -78336,7 +78802,15 @@ export namespace Prisma {
 
     branch<T extends BranchDefaultArgs<ExtArgs> = {}>(args?: Subset<T, BranchDefaultArgs<ExtArgs>>): Prisma__BranchClient<$Result.GetResult<Prisma.$BranchPayload<ExtArgs>, T, 'findUniqueOrThrow'> | Null, Null, ExtArgs>;
 
+    terminal<T extends DayClose$terminalArgs<ExtArgs> = {}>(args?: Subset<T, DayClose$terminalArgs<ExtArgs>>): Prisma__TerminalClient<$Result.GetResult<Prisma.$TerminalPayload<ExtArgs>, T, 'findUniqueOrThrow'> | null, null, ExtArgs>;
+
+    openedBy<T extends DayClose$openedByArgs<ExtArgs> = {}>(args?: Subset<T, DayClose$openedByArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, 'findUniqueOrThrow'> | null, null, ExtArgs>;
+
+    openingApprovedBy<T extends DayClose$openingApprovedByArgs<ExtArgs> = {}>(args?: Subset<T, DayClose$openingApprovedByArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, 'findUniqueOrThrow'> | null, null, ExtArgs>;
+
     finalizedBy<T extends DayClose$finalizedByArgs<ExtArgs> = {}>(args?: Subset<T, DayClose$finalizedByArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, 'findUniqueOrThrow'> | null, null, ExtArgs>;
+
+    exceptionApprovedBy<T extends DayClose$exceptionApprovedByArgs<ExtArgs> = {}>(args?: Subset<T, DayClose$exceptionApprovedByArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, 'findUniqueOrThrow'> | null, null, ExtArgs>;
 
     staffClosings<T extends DayClose$staffClosingsArgs<ExtArgs> = {}>(args?: Subset<T, DayClose$staffClosingsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$StaffDayClosePayload<ExtArgs>, T, 'findMany'> | Null>;
 
@@ -78372,12 +78846,33 @@ export namespace Prisma {
     readonly branchId: FieldRef<"DayClose", 'Int'>
     readonly businessDate: FieldRef<"DayClose", 'DateTime'>
     readonly status: FieldRef<"DayClose", 'String'>
+    readonly terminalId: FieldRef<"DayClose", 'Int'>
+    readonly openedById: FieldRef<"DayClose", 'Int'>
+    readonly openedAt: FieldRef<"DayClose", 'DateTime'>
+    readonly openingCash: FieldRef<"DayClose", 'Decimal'>
+    readonly previousClosingCash: FieldRef<"DayClose", 'Decimal'>
+    readonly additionalCashAdded: FieldRef<"DayClose", 'Decimal'>
+    readonly cashRemovedBeforeOpening: FieldRef<"DayClose", 'Decimal'>
+    readonly expectedOpeningCash: FieldRef<"DayClose", 'Decimal'>
+    readonly actualOpeningCash: FieldRef<"DayClose", 'Decimal'>
+    readonly openingDifference: FieldRef<"DayClose", 'Decimal'>
+    readonly openingDiscrepancyReason: FieldRef<"DayClose", 'String'>
+    readonly openingApprovedById: FieldRef<"DayClose", 'Int'>
+    readonly openingDenominations: FieldRef<"DayClose", 'Json'>
+    readonly openingRemarks: FieldRef<"DayClose", 'String'>
+    readonly verificationChecks: FieldRef<"DayClose", 'Json'>
+    readonly verificationExceptions: FieldRef<"DayClose", 'Json'>
+    readonly exceptionApprovedById: FieldRef<"DayClose", 'Int'>
+    readonly exceptionApprovalReason: FieldRef<"DayClose", 'String'>
     readonly salesSummary: FieldRef<"DayClose", 'Json'>
+    readonly closingExpectedCash: FieldRef<"DayClose", 'Decimal'>
     readonly physicalCash: FieldRef<"DayClose", 'Decimal'>
     readonly cashDifference: FieldRef<"DayClose", 'Decimal'>
+    readonly closingDenominations: FieldRef<"DayClose", 'Json'>
     readonly notes: FieldRef<"DayClose", 'String'>
     readonly finalizedById: FieldRef<"DayClose", 'Int'>
     readonly finalizedAt: FieldRef<"DayClose", 'DateTime'>
+    readonly adjustments: FieldRef<"DayClose", 'Json'>
     readonly createdAt: FieldRef<"DayClose", 'DateTime'>
     readonly updatedAt: FieldRef<"DayClose", 'DateTime'>
   }
@@ -78692,9 +79187,73 @@ export namespace Prisma {
 
 
   /**
+   * DayClose.terminal
+   */
+  export type DayClose$terminalArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Terminal
+     */
+    select?: TerminalSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well.
+     */
+    include?: TerminalInclude<ExtArgs> | null
+    where?: TerminalWhereInput
+  }
+
+
+  /**
+   * DayClose.openedBy
+   */
+  export type DayClose$openedByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the User
+     */
+    select?: UserSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well.
+     */
+    include?: UserInclude<ExtArgs> | null
+    where?: UserWhereInput
+  }
+
+
+  /**
+   * DayClose.openingApprovedBy
+   */
+  export type DayClose$openingApprovedByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the User
+     */
+    select?: UserSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well.
+     */
+    include?: UserInclude<ExtArgs> | null
+    where?: UserWhereInput
+  }
+
+
+  /**
    * DayClose.finalizedBy
    */
   export type DayClose$finalizedByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the User
+     */
+    select?: UserSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well.
+     */
+    include?: UserInclude<ExtArgs> | null
+    where?: UserWhereInput
+  }
+
+
+  /**
+   * DayClose.exceptionApprovedBy
+   */
+  export type DayClose$exceptionApprovedByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
      * Select specific fields to fetch from the User
      */
@@ -82857,6 +83416,7 @@ export namespace Prisma {
     status: 'status',
     reference: 'reference',
     createdBy: 'createdBy',
+    branchId: 'branchId',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -83169,12 +83729,33 @@ export namespace Prisma {
     branchId: 'branchId',
     businessDate: 'businessDate',
     status: 'status',
+    terminalId: 'terminalId',
+    openedById: 'openedById',
+    openedAt: 'openedAt',
+    openingCash: 'openingCash',
+    previousClosingCash: 'previousClosingCash',
+    additionalCashAdded: 'additionalCashAdded',
+    cashRemovedBeforeOpening: 'cashRemovedBeforeOpening',
+    expectedOpeningCash: 'expectedOpeningCash',
+    actualOpeningCash: 'actualOpeningCash',
+    openingDifference: 'openingDifference',
+    openingDiscrepancyReason: 'openingDiscrepancyReason',
+    openingApprovedById: 'openingApprovedById',
+    openingDenominations: 'openingDenominations',
+    openingRemarks: 'openingRemarks',
+    verificationChecks: 'verificationChecks',
+    verificationExceptions: 'verificationExceptions',
+    exceptionApprovedById: 'exceptionApprovedById',
+    exceptionApprovalReason: 'exceptionApprovalReason',
     salesSummary: 'salesSummary',
+    closingExpectedCash: 'closingExpectedCash',
     physicalCash: 'physicalCash',
     cashDifference: 'cashDifference',
+    closingDenominations: 'closingDenominations',
     notes: 'notes',
     finalizedById: 'finalizedById',
     finalizedAt: 'finalizedAt',
+    adjustments: 'adjustments',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -83428,7 +84009,10 @@ export namespace Prisma {
     managedStaff?: UserListRelationFilter
     branch?: XOR<BranchNullableRelationFilter, BranchWhereInput> | null
     terminals?: TerminalListRelationFilter
+    dayCloseOpenings?: DayCloseListRelationFilter
+    dayCloseOpeningApprovals?: DayCloseListRelationFilter
     dayCloseFinalizations?: DayCloseListRelationFilter
+    dayCloseExceptionApprovals?: DayCloseListRelationFilter
     staffDayClosings?: StaffDayCloseListRelationFilter
   }
 
@@ -83479,7 +84063,10 @@ export namespace Prisma {
     managedStaff?: UserOrderByRelationAggregateInput
     branch?: BranchOrderByWithRelationInput
     terminals?: TerminalOrderByRelationAggregateInput
+    dayCloseOpenings?: DayCloseOrderByRelationAggregateInput
+    dayCloseOpeningApprovals?: DayCloseOrderByRelationAggregateInput
     dayCloseFinalizations?: DayCloseOrderByRelationAggregateInput
+    dayCloseExceptionApprovals?: DayCloseOrderByRelationAggregateInput
     staffDayClosings?: StaffDayCloseOrderByRelationAggregateInput
   }
 
@@ -83533,7 +84120,10 @@ export namespace Prisma {
     managedStaff?: UserListRelationFilter
     branch?: XOR<BranchNullableRelationFilter, BranchWhereInput> | null
     terminals?: TerminalListRelationFilter
+    dayCloseOpenings?: DayCloseListRelationFilter
+    dayCloseOpeningApprovals?: DayCloseListRelationFilter
     dayCloseFinalizations?: DayCloseListRelationFilter
+    dayCloseExceptionApprovals?: DayCloseListRelationFilter
     staffDayClosings?: StaffDayCloseListRelationFilter
   }, "id" | "username">
 
@@ -83620,6 +84210,7 @@ export namespace Prisma {
     users?: UserListRelationFilter
     dayCloses?: DayCloseListRelationFilter
     customerVouchers?: CustomerVoucherListRelationFilter
+    vouchers?: VoucherListRelationFilter
   }
 
   export type BranchOrderByWithRelationInput = {
@@ -83660,6 +84251,7 @@ export namespace Prisma {
     users?: UserOrderByRelationAggregateInput
     dayCloses?: DayCloseOrderByRelationAggregateInput
     customerVouchers?: CustomerVoucherOrderByRelationAggregateInput
+    vouchers?: VoucherOrderByRelationAggregateInput
   }
 
   export type BranchWhereUniqueInput = Prisma.AtLeast<{
@@ -83703,6 +84295,7 @@ export namespace Prisma {
     users?: UserListRelationFilter
     dayCloses?: DayCloseListRelationFilter
     customerVouchers?: CustomerVoucherListRelationFilter
+    vouchers?: VoucherListRelationFilter
   }, "id">
 
   export type BranchOrderByWithAggregationInput = {
@@ -87890,12 +88483,14 @@ export namespace Prisma {
     status?: StringFilter<"Voucher"> | string
     reference?: StringNullableFilter<"Voucher"> | string | null
     createdBy?: IntFilter<"Voucher"> | number
+    branchId?: IntNullableFilter<"Voucher"> | number | null
     createdAt?: DateTimeFilter<"Voucher"> | Date | string
     updatedAt?: DateTimeFilter<"Voucher"> | Date | string
     entries?: JournalEntryListRelationFilter
     payrolls?: PayrollListRelationFilter
     salaryAdvances?: SalaryAdvanceListRelationFilter
     creator?: XOR<UserRelationFilter, UserWhereInput>
+    branch?: XOR<BranchNullableRelationFilter, BranchWhereInput> | null
   }
 
   export type VoucherOrderByWithRelationInput = {
@@ -87908,12 +88503,14 @@ export namespace Prisma {
     status?: SortOrder
     reference?: SortOrderInput | SortOrder
     createdBy?: SortOrder
+    branchId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     entries?: JournalEntryOrderByRelationAggregateInput
     payrolls?: PayrollOrderByRelationAggregateInput
     salaryAdvances?: SalaryAdvanceOrderByRelationAggregateInput
     creator?: UserOrderByWithRelationInput
+    branch?: BranchOrderByWithRelationInput
   }
 
   export type VoucherWhereUniqueInput = Prisma.AtLeast<{
@@ -87929,12 +88526,14 @@ export namespace Prisma {
     status?: StringFilter<"Voucher"> | string
     reference?: StringNullableFilter<"Voucher"> | string | null
     createdBy?: IntFilter<"Voucher"> | number
+    branchId?: IntNullableFilter<"Voucher"> | number | null
     createdAt?: DateTimeFilter<"Voucher"> | Date | string
     updatedAt?: DateTimeFilter<"Voucher"> | Date | string
     entries?: JournalEntryListRelationFilter
     payrolls?: PayrollListRelationFilter
     salaryAdvances?: SalaryAdvanceListRelationFilter
     creator?: XOR<UserRelationFilter, UserWhereInput>
+    branch?: XOR<BranchNullableRelationFilter, BranchWhereInput> | null
   }, "id" | "voucherNumber">
 
   export type VoucherOrderByWithAggregationInput = {
@@ -87947,6 +88546,7 @@ export namespace Prisma {
     status?: SortOrder
     reference?: SortOrderInput | SortOrder
     createdBy?: SortOrder
+    branchId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: VoucherCountOrderByAggregateInput
@@ -87969,6 +88569,7 @@ export namespace Prisma {
     status?: StringWithAggregatesFilter<"Voucher"> | string
     reference?: StringNullableWithAggregatesFilter<"Voucher"> | string | null
     createdBy?: IntWithAggregatesFilter<"Voucher"> | number
+    branchId?: IntNullableWithAggregatesFilter<"Voucher"> | number | null
     createdAt?: DateTimeWithAggregatesFilter<"Voucher"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Voucher"> | Date | string
   }
@@ -88753,6 +89354,7 @@ export namespace Prisma {
     sales?: SaleListRelationFilter
     branch?: XOR<BranchNullableRelationFilter, BranchWhereInput> | null
     users?: UserListRelationFilter
+    dayCloses?: DayCloseListRelationFilter
   }
 
   export type TerminalOrderByWithRelationInput = {
@@ -88768,6 +89370,7 @@ export namespace Prisma {
     sales?: SaleOrderByRelationAggregateInput
     branch?: BranchOrderByWithRelationInput
     users?: UserOrderByRelationAggregateInput
+    dayCloses?: DayCloseOrderByRelationAggregateInput
   }
 
   export type TerminalWhereUniqueInput = Prisma.AtLeast<{
@@ -88786,6 +89389,7 @@ export namespace Prisma {
     sales?: SaleListRelationFilter
     branch?: XOR<BranchNullableRelationFilter, BranchWhereInput> | null
     users?: UserListRelationFilter
+    dayCloses?: DayCloseListRelationFilter
   }, "id" | "terminalCode">
 
   export type TerminalOrderByWithAggregationInput = {
@@ -89587,16 +90191,41 @@ export namespace Prisma {
     branchId?: IntFilter<"DayClose"> | number
     businessDate?: DateTimeFilter<"DayClose"> | Date | string
     status?: StringFilter<"DayClose"> | string
+    terminalId?: IntNullableFilter<"DayClose"> | number | null
+    openedById?: IntNullableFilter<"DayClose"> | number | null
+    openedAt?: DateTimeNullableFilter<"DayClose"> | Date | string | null
+    openingCash?: DecimalNullableFilter<"DayClose"> | Decimal | DecimalJsLike | number | string | null
+    previousClosingCash?: DecimalNullableFilter<"DayClose"> | Decimal | DecimalJsLike | number | string | null
+    additionalCashAdded?: DecimalNullableFilter<"DayClose"> | Decimal | DecimalJsLike | number | string | null
+    cashRemovedBeforeOpening?: DecimalNullableFilter<"DayClose"> | Decimal | DecimalJsLike | number | string | null
+    expectedOpeningCash?: DecimalNullableFilter<"DayClose"> | Decimal | DecimalJsLike | number | string | null
+    actualOpeningCash?: DecimalNullableFilter<"DayClose"> | Decimal | DecimalJsLike | number | string | null
+    openingDifference?: DecimalNullableFilter<"DayClose"> | Decimal | DecimalJsLike | number | string | null
+    openingDiscrepancyReason?: StringNullableFilter<"DayClose"> | string | null
+    openingApprovedById?: IntNullableFilter<"DayClose"> | number | null
+    openingDenominations?: JsonNullableFilter<"DayClose">
+    openingRemarks?: StringNullableFilter<"DayClose"> | string | null
+    verificationChecks?: JsonNullableFilter<"DayClose">
+    verificationExceptions?: JsonNullableFilter<"DayClose">
+    exceptionApprovedById?: IntNullableFilter<"DayClose"> | number | null
+    exceptionApprovalReason?: StringNullableFilter<"DayClose"> | string | null
     salesSummary?: JsonNullableFilter<"DayClose">
+    closingExpectedCash?: DecimalNullableFilter<"DayClose"> | Decimal | DecimalJsLike | number | string | null
     physicalCash?: DecimalNullableFilter<"DayClose"> | Decimal | DecimalJsLike | number | string | null
     cashDifference?: DecimalNullableFilter<"DayClose"> | Decimal | DecimalJsLike | number | string | null
+    closingDenominations?: JsonNullableFilter<"DayClose">
     notes?: StringNullableFilter<"DayClose"> | string | null
     finalizedById?: IntNullableFilter<"DayClose"> | number | null
     finalizedAt?: DateTimeNullableFilter<"DayClose"> | Date | string | null
+    adjustments?: JsonNullableFilter<"DayClose">
     createdAt?: DateTimeFilter<"DayClose"> | Date | string
     updatedAt?: DateTimeFilter<"DayClose"> | Date | string
     branch?: XOR<BranchRelationFilter, BranchWhereInput>
+    terminal?: XOR<TerminalNullableRelationFilter, TerminalWhereInput> | null
+    openedBy?: XOR<UserNullableRelationFilter, UserWhereInput> | null
+    openingApprovedBy?: XOR<UserNullableRelationFilter, UserWhereInput> | null
     finalizedBy?: XOR<UserNullableRelationFilter, UserWhereInput> | null
+    exceptionApprovedBy?: XOR<UserNullableRelationFilter, UserWhereInput> | null
     staffClosings?: StaffDayCloseListRelationFilter
   }
 
@@ -89605,16 +90234,41 @@ export namespace Prisma {
     branchId?: SortOrder
     businessDate?: SortOrder
     status?: SortOrder
+    terminalId?: SortOrderInput | SortOrder
+    openedById?: SortOrderInput | SortOrder
+    openedAt?: SortOrderInput | SortOrder
+    openingCash?: SortOrderInput | SortOrder
+    previousClosingCash?: SortOrderInput | SortOrder
+    additionalCashAdded?: SortOrderInput | SortOrder
+    cashRemovedBeforeOpening?: SortOrderInput | SortOrder
+    expectedOpeningCash?: SortOrderInput | SortOrder
+    actualOpeningCash?: SortOrderInput | SortOrder
+    openingDifference?: SortOrderInput | SortOrder
+    openingDiscrepancyReason?: SortOrderInput | SortOrder
+    openingApprovedById?: SortOrderInput | SortOrder
+    openingDenominations?: SortOrderInput | SortOrder
+    openingRemarks?: SortOrderInput | SortOrder
+    verificationChecks?: SortOrderInput | SortOrder
+    verificationExceptions?: SortOrderInput | SortOrder
+    exceptionApprovedById?: SortOrderInput | SortOrder
+    exceptionApprovalReason?: SortOrderInput | SortOrder
     salesSummary?: SortOrderInput | SortOrder
+    closingExpectedCash?: SortOrderInput | SortOrder
     physicalCash?: SortOrderInput | SortOrder
     cashDifference?: SortOrderInput | SortOrder
+    closingDenominations?: SortOrderInput | SortOrder
     notes?: SortOrderInput | SortOrder
     finalizedById?: SortOrderInput | SortOrder
     finalizedAt?: SortOrderInput | SortOrder
+    adjustments?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     branch?: BranchOrderByWithRelationInput
+    terminal?: TerminalOrderByWithRelationInput
+    openedBy?: UserOrderByWithRelationInput
+    openingApprovedBy?: UserOrderByWithRelationInput
     finalizedBy?: UserOrderByWithRelationInput
+    exceptionApprovedBy?: UserOrderByWithRelationInput
     staffClosings?: StaffDayCloseOrderByRelationAggregateInput
   }
 
@@ -89627,16 +90281,41 @@ export namespace Prisma {
     branchId?: IntFilter<"DayClose"> | number
     businessDate?: DateTimeFilter<"DayClose"> | Date | string
     status?: StringFilter<"DayClose"> | string
+    terminalId?: IntNullableFilter<"DayClose"> | number | null
+    openedById?: IntNullableFilter<"DayClose"> | number | null
+    openedAt?: DateTimeNullableFilter<"DayClose"> | Date | string | null
+    openingCash?: DecimalNullableFilter<"DayClose"> | Decimal | DecimalJsLike | number | string | null
+    previousClosingCash?: DecimalNullableFilter<"DayClose"> | Decimal | DecimalJsLike | number | string | null
+    additionalCashAdded?: DecimalNullableFilter<"DayClose"> | Decimal | DecimalJsLike | number | string | null
+    cashRemovedBeforeOpening?: DecimalNullableFilter<"DayClose"> | Decimal | DecimalJsLike | number | string | null
+    expectedOpeningCash?: DecimalNullableFilter<"DayClose"> | Decimal | DecimalJsLike | number | string | null
+    actualOpeningCash?: DecimalNullableFilter<"DayClose"> | Decimal | DecimalJsLike | number | string | null
+    openingDifference?: DecimalNullableFilter<"DayClose"> | Decimal | DecimalJsLike | number | string | null
+    openingDiscrepancyReason?: StringNullableFilter<"DayClose"> | string | null
+    openingApprovedById?: IntNullableFilter<"DayClose"> | number | null
+    openingDenominations?: JsonNullableFilter<"DayClose">
+    openingRemarks?: StringNullableFilter<"DayClose"> | string | null
+    verificationChecks?: JsonNullableFilter<"DayClose">
+    verificationExceptions?: JsonNullableFilter<"DayClose">
+    exceptionApprovedById?: IntNullableFilter<"DayClose"> | number | null
+    exceptionApprovalReason?: StringNullableFilter<"DayClose"> | string | null
     salesSummary?: JsonNullableFilter<"DayClose">
+    closingExpectedCash?: DecimalNullableFilter<"DayClose"> | Decimal | DecimalJsLike | number | string | null
     physicalCash?: DecimalNullableFilter<"DayClose"> | Decimal | DecimalJsLike | number | string | null
     cashDifference?: DecimalNullableFilter<"DayClose"> | Decimal | DecimalJsLike | number | string | null
+    closingDenominations?: JsonNullableFilter<"DayClose">
     notes?: StringNullableFilter<"DayClose"> | string | null
     finalizedById?: IntNullableFilter<"DayClose"> | number | null
     finalizedAt?: DateTimeNullableFilter<"DayClose"> | Date | string | null
+    adjustments?: JsonNullableFilter<"DayClose">
     createdAt?: DateTimeFilter<"DayClose"> | Date | string
     updatedAt?: DateTimeFilter<"DayClose"> | Date | string
     branch?: XOR<BranchRelationFilter, BranchWhereInput>
+    terminal?: XOR<TerminalNullableRelationFilter, TerminalWhereInput> | null
+    openedBy?: XOR<UserNullableRelationFilter, UserWhereInput> | null
+    openingApprovedBy?: XOR<UserNullableRelationFilter, UserWhereInput> | null
     finalizedBy?: XOR<UserNullableRelationFilter, UserWhereInput> | null
+    exceptionApprovedBy?: XOR<UserNullableRelationFilter, UserWhereInput> | null
     staffClosings?: StaffDayCloseListRelationFilter
   }, "id" | "branchId_businessDate">
 
@@ -89645,12 +90324,33 @@ export namespace Prisma {
     branchId?: SortOrder
     businessDate?: SortOrder
     status?: SortOrder
+    terminalId?: SortOrderInput | SortOrder
+    openedById?: SortOrderInput | SortOrder
+    openedAt?: SortOrderInput | SortOrder
+    openingCash?: SortOrderInput | SortOrder
+    previousClosingCash?: SortOrderInput | SortOrder
+    additionalCashAdded?: SortOrderInput | SortOrder
+    cashRemovedBeforeOpening?: SortOrderInput | SortOrder
+    expectedOpeningCash?: SortOrderInput | SortOrder
+    actualOpeningCash?: SortOrderInput | SortOrder
+    openingDifference?: SortOrderInput | SortOrder
+    openingDiscrepancyReason?: SortOrderInput | SortOrder
+    openingApprovedById?: SortOrderInput | SortOrder
+    openingDenominations?: SortOrderInput | SortOrder
+    openingRemarks?: SortOrderInput | SortOrder
+    verificationChecks?: SortOrderInput | SortOrder
+    verificationExceptions?: SortOrderInput | SortOrder
+    exceptionApprovedById?: SortOrderInput | SortOrder
+    exceptionApprovalReason?: SortOrderInput | SortOrder
     salesSummary?: SortOrderInput | SortOrder
+    closingExpectedCash?: SortOrderInput | SortOrder
     physicalCash?: SortOrderInput | SortOrder
     cashDifference?: SortOrderInput | SortOrder
+    closingDenominations?: SortOrderInput | SortOrder
     notes?: SortOrderInput | SortOrder
     finalizedById?: SortOrderInput | SortOrder
     finalizedAt?: SortOrderInput | SortOrder
+    adjustments?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: DayCloseCountOrderByAggregateInput
@@ -89668,12 +90368,33 @@ export namespace Prisma {
     branchId?: IntWithAggregatesFilter<"DayClose"> | number
     businessDate?: DateTimeWithAggregatesFilter<"DayClose"> | Date | string
     status?: StringWithAggregatesFilter<"DayClose"> | string
+    terminalId?: IntNullableWithAggregatesFilter<"DayClose"> | number | null
+    openedById?: IntNullableWithAggregatesFilter<"DayClose"> | number | null
+    openedAt?: DateTimeNullableWithAggregatesFilter<"DayClose"> | Date | string | null
+    openingCash?: DecimalNullableWithAggregatesFilter<"DayClose"> | Decimal | DecimalJsLike | number | string | null
+    previousClosingCash?: DecimalNullableWithAggregatesFilter<"DayClose"> | Decimal | DecimalJsLike | number | string | null
+    additionalCashAdded?: DecimalNullableWithAggregatesFilter<"DayClose"> | Decimal | DecimalJsLike | number | string | null
+    cashRemovedBeforeOpening?: DecimalNullableWithAggregatesFilter<"DayClose"> | Decimal | DecimalJsLike | number | string | null
+    expectedOpeningCash?: DecimalNullableWithAggregatesFilter<"DayClose"> | Decimal | DecimalJsLike | number | string | null
+    actualOpeningCash?: DecimalNullableWithAggregatesFilter<"DayClose"> | Decimal | DecimalJsLike | number | string | null
+    openingDifference?: DecimalNullableWithAggregatesFilter<"DayClose"> | Decimal | DecimalJsLike | number | string | null
+    openingDiscrepancyReason?: StringNullableWithAggregatesFilter<"DayClose"> | string | null
+    openingApprovedById?: IntNullableWithAggregatesFilter<"DayClose"> | number | null
+    openingDenominations?: JsonNullableWithAggregatesFilter<"DayClose">
+    openingRemarks?: StringNullableWithAggregatesFilter<"DayClose"> | string | null
+    verificationChecks?: JsonNullableWithAggregatesFilter<"DayClose">
+    verificationExceptions?: JsonNullableWithAggregatesFilter<"DayClose">
+    exceptionApprovedById?: IntNullableWithAggregatesFilter<"DayClose"> | number | null
+    exceptionApprovalReason?: StringNullableWithAggregatesFilter<"DayClose"> | string | null
     salesSummary?: JsonNullableWithAggregatesFilter<"DayClose">
+    closingExpectedCash?: DecimalNullableWithAggregatesFilter<"DayClose"> | Decimal | DecimalJsLike | number | string | null
     physicalCash?: DecimalNullableWithAggregatesFilter<"DayClose"> | Decimal | DecimalJsLike | number | string | null
     cashDifference?: DecimalNullableWithAggregatesFilter<"DayClose"> | Decimal | DecimalJsLike | number | string | null
+    closingDenominations?: JsonNullableWithAggregatesFilter<"DayClose">
     notes?: StringNullableWithAggregatesFilter<"DayClose"> | string | null
     finalizedById?: IntNullableWithAggregatesFilter<"DayClose"> | number | null
     finalizedAt?: DateTimeNullableWithAggregatesFilter<"DayClose"> | Date | string | null
+    adjustments?: JsonNullableWithAggregatesFilter<"DayClose">
     createdAt?: DateTimeWithAggregatesFilter<"DayClose"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"DayClose"> | Date | string
   }
@@ -90027,7 +90748,10 @@ export namespace Prisma {
     managedStaff?: UserCreateNestedManyWithoutAdminInput
     branch?: BranchCreateNestedOneWithoutUsersInput
     terminals?: TerminalCreateNestedManyWithoutUsersInput
+    dayCloseOpenings?: DayCloseCreateNestedManyWithoutOpenedByInput
+    dayCloseOpeningApprovals?: DayCloseCreateNestedManyWithoutOpeningApprovedByInput
     dayCloseFinalizations?: DayCloseCreateNestedManyWithoutFinalizedByInput
+    dayCloseExceptionApprovals?: DayCloseCreateNestedManyWithoutExceptionApprovedByInput
     staffDayClosings?: StaffDayCloseCreateNestedManyWithoutUserInput
   }
 
@@ -90076,7 +90800,10 @@ export namespace Prisma {
     referredLeads?: LeadUncheckedCreateNestedManyWithoutReferredByInput
     managedStaff?: UserUncheckedCreateNestedManyWithoutAdminInput
     terminals?: TerminalUncheckedCreateNestedManyWithoutUsersInput
+    dayCloseOpenings?: DayCloseUncheckedCreateNestedManyWithoutOpenedByInput
+    dayCloseOpeningApprovals?: DayCloseUncheckedCreateNestedManyWithoutOpeningApprovedByInput
     dayCloseFinalizations?: DayCloseUncheckedCreateNestedManyWithoutFinalizedByInput
+    dayCloseExceptionApprovals?: DayCloseUncheckedCreateNestedManyWithoutExceptionApprovedByInput
     staffDayClosings?: StaffDayCloseUncheckedCreateNestedManyWithoutUserInput
   }
 
@@ -90124,7 +90851,10 @@ export namespace Prisma {
     managedStaff?: UserUpdateManyWithoutAdminNestedInput
     branch?: BranchUpdateOneWithoutUsersNestedInput
     terminals?: TerminalUpdateManyWithoutUsersNestedInput
+    dayCloseOpenings?: DayCloseUpdateManyWithoutOpenedByNestedInput
+    dayCloseOpeningApprovals?: DayCloseUpdateManyWithoutOpeningApprovedByNestedInput
     dayCloseFinalizations?: DayCloseUpdateManyWithoutFinalizedByNestedInput
+    dayCloseExceptionApprovals?: DayCloseUpdateManyWithoutExceptionApprovedByNestedInput
     staffDayClosings?: StaffDayCloseUpdateManyWithoutUserNestedInput
   }
 
@@ -90173,7 +90903,10 @@ export namespace Prisma {
     referredLeads?: LeadUncheckedUpdateManyWithoutReferredByNestedInput
     managedStaff?: UserUncheckedUpdateManyWithoutAdminNestedInput
     terminals?: TerminalUncheckedUpdateManyWithoutUsersNestedInput
+    dayCloseOpenings?: DayCloseUncheckedUpdateManyWithoutOpenedByNestedInput
+    dayCloseOpeningApprovals?: DayCloseUncheckedUpdateManyWithoutOpeningApprovedByNestedInput
     dayCloseFinalizations?: DayCloseUncheckedUpdateManyWithoutFinalizedByNestedInput
+    dayCloseExceptionApprovals?: DayCloseUncheckedUpdateManyWithoutExceptionApprovedByNestedInput
     staffDayClosings?: StaffDayCloseUncheckedUpdateManyWithoutUserNestedInput
   }
 
@@ -90262,6 +90995,7 @@ export namespace Prisma {
     users?: UserCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseCreateNestedManyWithoutBranchInput
     customerVouchers?: CustomerVoucherCreateNestedManyWithoutBranchInput
+    vouchers?: VoucherCreateNestedManyWithoutBranchInput
   }
 
   export type BranchUncheckedCreateInput = {
@@ -90302,6 +91036,7 @@ export namespace Prisma {
     users?: UserUncheckedCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseUncheckedCreateNestedManyWithoutBranchInput
     customerVouchers?: CustomerVoucherUncheckedCreateNestedManyWithoutBranchInput
+    vouchers?: VoucherUncheckedCreateNestedManyWithoutBranchInput
   }
 
   export type BranchUpdateInput = {
@@ -90341,6 +91076,7 @@ export namespace Prisma {
     users?: UserUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUpdateManyWithoutBranchNestedInput
     customerVouchers?: CustomerVoucherUpdateManyWithoutBranchNestedInput
+    vouchers?: VoucherUpdateManyWithoutBranchNestedInput
   }
 
   export type BranchUncheckedUpdateInput = {
@@ -90381,6 +91117,7 @@ export namespace Prisma {
     users?: UserUncheckedUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUncheckedUpdateManyWithoutBranchNestedInput
     customerVouchers?: CustomerVoucherUncheckedUpdateManyWithoutBranchNestedInput
+    vouchers?: VoucherUncheckedUpdateManyWithoutBranchNestedInput
   }
 
   export type BranchCreateManyInput = {
@@ -94879,6 +95616,7 @@ export namespace Prisma {
     payrolls?: PayrollCreateNestedManyWithoutVoucherInput
     salaryAdvances?: SalaryAdvanceCreateNestedManyWithoutVoucherInput
     creator: UserCreateNestedOneWithoutVouchersInput
+    branch?: BranchCreateNestedOneWithoutVouchersInput
   }
 
   export type VoucherUncheckedCreateInput = {
@@ -94891,6 +95629,7 @@ export namespace Prisma {
     status?: string
     reference?: string | null
     createdBy: number
+    branchId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     entries?: JournalEntryUncheckedCreateNestedManyWithoutVoucherInput
@@ -94912,6 +95651,7 @@ export namespace Prisma {
     payrolls?: PayrollUpdateManyWithoutVoucherNestedInput
     salaryAdvances?: SalaryAdvanceUpdateManyWithoutVoucherNestedInput
     creator?: UserUpdateOneRequiredWithoutVouchersNestedInput
+    branch?: BranchUpdateOneWithoutVouchersNestedInput
   }
 
   export type VoucherUncheckedUpdateInput = {
@@ -94924,6 +95664,7 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     reference?: NullableStringFieldUpdateOperationsInput | string | null
     createdBy?: IntFieldUpdateOperationsInput | number
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     entries?: JournalEntryUncheckedUpdateManyWithoutVoucherNestedInput
@@ -94941,6 +95682,7 @@ export namespace Prisma {
     status?: string
     reference?: string | null
     createdBy: number
+    branchId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -94967,6 +95709,7 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     reference?: NullableStringFieldUpdateOperationsInput | string | null
     createdBy?: IntFieldUpdateOperationsInput | number
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -95820,6 +96563,7 @@ export namespace Prisma {
     sales?: SaleCreateNestedManyWithoutTerminalInput
     branch?: BranchCreateNestedOneWithoutTerminalsInput
     users?: UserCreateNestedManyWithoutTerminalsInput
+    dayCloses?: DayCloseCreateNestedManyWithoutTerminalInput
   }
 
   export type TerminalUncheckedCreateInput = {
@@ -95834,6 +96578,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     sales?: SaleUncheckedCreateNestedManyWithoutTerminalInput
     users?: UserUncheckedCreateNestedManyWithoutTerminalsInput
+    dayCloses?: DayCloseUncheckedCreateNestedManyWithoutTerminalInput
   }
 
   export type TerminalUpdateInput = {
@@ -95847,6 +96592,7 @@ export namespace Prisma {
     sales?: SaleUpdateManyWithoutTerminalNestedInput
     branch?: BranchUpdateOneWithoutTerminalsNestedInput
     users?: UserUpdateManyWithoutTerminalsNestedInput
+    dayCloses?: DayCloseUpdateManyWithoutTerminalNestedInput
   }
 
   export type TerminalUncheckedUpdateInput = {
@@ -95861,6 +96607,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     sales?: SaleUncheckedUpdateManyWithoutTerminalNestedInput
     users?: UserUncheckedUpdateManyWithoutTerminalsNestedInput
+    dayCloses?: DayCloseUncheckedUpdateManyWithoutTerminalNestedInput
   }
 
   export type TerminalCreateManyInput = {
@@ -96652,15 +97399,36 @@ export namespace Prisma {
   export type DayCloseCreateInput = {
     businessDate: Date | string
     status?: string
+    openedAt?: Date | string | null
+    openingCash?: Decimal | DecimalJsLike | number | string | null
+    previousClosingCash?: Decimal | DecimalJsLike | number | string | null
+    additionalCashAdded?: Decimal | DecimalJsLike | number | string | null
+    cashRemovedBeforeOpening?: Decimal | DecimalJsLike | number | string | null
+    expectedOpeningCash?: Decimal | DecimalJsLike | number | string | null
+    actualOpeningCash?: Decimal | DecimalJsLike | number | string | null
+    openingDifference?: Decimal | DecimalJsLike | number | string | null
+    openingDiscrepancyReason?: string | null
+    openingDenominations?: NullableJsonNullValueInput | InputJsonValue
+    openingRemarks?: string | null
+    verificationChecks?: NullableJsonNullValueInput | InputJsonValue
+    verificationExceptions?: NullableJsonNullValueInput | InputJsonValue
+    exceptionApprovalReason?: string | null
     salesSummary?: NullableJsonNullValueInput | InputJsonValue
+    closingExpectedCash?: Decimal | DecimalJsLike | number | string | null
     physicalCash?: Decimal | DecimalJsLike | number | string | null
     cashDifference?: Decimal | DecimalJsLike | number | string | null
+    closingDenominations?: NullableJsonNullValueInput | InputJsonValue
     notes?: string | null
     finalizedAt?: Date | string | null
+    adjustments?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
     branch: BranchCreateNestedOneWithoutDayClosesInput
+    terminal?: TerminalCreateNestedOneWithoutDayClosesInput
+    openedBy?: UserCreateNestedOneWithoutDayCloseOpeningsInput
+    openingApprovedBy?: UserCreateNestedOneWithoutDayCloseOpeningApprovalsInput
     finalizedBy?: UserCreateNestedOneWithoutDayCloseFinalizationsInput
+    exceptionApprovedBy?: UserCreateNestedOneWithoutDayCloseExceptionApprovalsInput
     staffClosings?: StaffDayCloseCreateNestedManyWithoutDayCloseInput
   }
 
@@ -96669,12 +97437,33 @@ export namespace Prisma {
     branchId: number
     businessDate: Date | string
     status?: string
+    terminalId?: number | null
+    openedById?: number | null
+    openedAt?: Date | string | null
+    openingCash?: Decimal | DecimalJsLike | number | string | null
+    previousClosingCash?: Decimal | DecimalJsLike | number | string | null
+    additionalCashAdded?: Decimal | DecimalJsLike | number | string | null
+    cashRemovedBeforeOpening?: Decimal | DecimalJsLike | number | string | null
+    expectedOpeningCash?: Decimal | DecimalJsLike | number | string | null
+    actualOpeningCash?: Decimal | DecimalJsLike | number | string | null
+    openingDifference?: Decimal | DecimalJsLike | number | string | null
+    openingDiscrepancyReason?: string | null
+    openingApprovedById?: number | null
+    openingDenominations?: NullableJsonNullValueInput | InputJsonValue
+    openingRemarks?: string | null
+    verificationChecks?: NullableJsonNullValueInput | InputJsonValue
+    verificationExceptions?: NullableJsonNullValueInput | InputJsonValue
+    exceptionApprovedById?: number | null
+    exceptionApprovalReason?: string | null
     salesSummary?: NullableJsonNullValueInput | InputJsonValue
+    closingExpectedCash?: Decimal | DecimalJsLike | number | string | null
     physicalCash?: Decimal | DecimalJsLike | number | string | null
     cashDifference?: Decimal | DecimalJsLike | number | string | null
+    closingDenominations?: NullableJsonNullValueInput | InputJsonValue
     notes?: string | null
     finalizedById?: number | null
     finalizedAt?: Date | string | null
+    adjustments?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
     staffClosings?: StaffDayCloseUncheckedCreateNestedManyWithoutDayCloseInput
@@ -96683,15 +97472,36 @@ export namespace Prisma {
   export type DayCloseUpdateInput = {
     businessDate?: DateTimeFieldUpdateOperationsInput | Date | string
     status?: StringFieldUpdateOperationsInput | string
+    openedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    openingCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    previousClosingCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    additionalCashAdded?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cashRemovedBeforeOpening?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    expectedOpeningCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    actualOpeningCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    openingDifference?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    openingDiscrepancyReason?: NullableStringFieldUpdateOperationsInput | string | null
+    openingDenominations?: NullableJsonNullValueInput | InputJsonValue
+    openingRemarks?: NullableStringFieldUpdateOperationsInput | string | null
+    verificationChecks?: NullableJsonNullValueInput | InputJsonValue
+    verificationExceptions?: NullableJsonNullValueInput | InputJsonValue
+    exceptionApprovalReason?: NullableStringFieldUpdateOperationsInput | string | null
     salesSummary?: NullableJsonNullValueInput | InputJsonValue
+    closingExpectedCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     physicalCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     cashDifference?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    closingDenominations?: NullableJsonNullValueInput | InputJsonValue
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     finalizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    adjustments?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     branch?: BranchUpdateOneRequiredWithoutDayClosesNestedInput
+    terminal?: TerminalUpdateOneWithoutDayClosesNestedInput
+    openedBy?: UserUpdateOneWithoutDayCloseOpeningsNestedInput
+    openingApprovedBy?: UserUpdateOneWithoutDayCloseOpeningApprovalsNestedInput
     finalizedBy?: UserUpdateOneWithoutDayCloseFinalizationsNestedInput
+    exceptionApprovedBy?: UserUpdateOneWithoutDayCloseExceptionApprovalsNestedInput
     staffClosings?: StaffDayCloseUpdateManyWithoutDayCloseNestedInput
   }
 
@@ -96700,12 +97510,33 @@ export namespace Prisma {
     branchId?: IntFieldUpdateOperationsInput | number
     businessDate?: DateTimeFieldUpdateOperationsInput | Date | string
     status?: StringFieldUpdateOperationsInput | string
+    terminalId?: NullableIntFieldUpdateOperationsInput | number | null
+    openedById?: NullableIntFieldUpdateOperationsInput | number | null
+    openedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    openingCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    previousClosingCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    additionalCashAdded?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cashRemovedBeforeOpening?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    expectedOpeningCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    actualOpeningCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    openingDifference?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    openingDiscrepancyReason?: NullableStringFieldUpdateOperationsInput | string | null
+    openingApprovedById?: NullableIntFieldUpdateOperationsInput | number | null
+    openingDenominations?: NullableJsonNullValueInput | InputJsonValue
+    openingRemarks?: NullableStringFieldUpdateOperationsInput | string | null
+    verificationChecks?: NullableJsonNullValueInput | InputJsonValue
+    verificationExceptions?: NullableJsonNullValueInput | InputJsonValue
+    exceptionApprovedById?: NullableIntFieldUpdateOperationsInput | number | null
+    exceptionApprovalReason?: NullableStringFieldUpdateOperationsInput | string | null
     salesSummary?: NullableJsonNullValueInput | InputJsonValue
+    closingExpectedCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     physicalCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     cashDifference?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    closingDenominations?: NullableJsonNullValueInput | InputJsonValue
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     finalizedById?: NullableIntFieldUpdateOperationsInput | number | null
     finalizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    adjustments?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     staffClosings?: StaffDayCloseUncheckedUpdateManyWithoutDayCloseNestedInput
@@ -96716,12 +97547,33 @@ export namespace Prisma {
     branchId: number
     businessDate: Date | string
     status?: string
+    terminalId?: number | null
+    openedById?: number | null
+    openedAt?: Date | string | null
+    openingCash?: Decimal | DecimalJsLike | number | string | null
+    previousClosingCash?: Decimal | DecimalJsLike | number | string | null
+    additionalCashAdded?: Decimal | DecimalJsLike | number | string | null
+    cashRemovedBeforeOpening?: Decimal | DecimalJsLike | number | string | null
+    expectedOpeningCash?: Decimal | DecimalJsLike | number | string | null
+    actualOpeningCash?: Decimal | DecimalJsLike | number | string | null
+    openingDifference?: Decimal | DecimalJsLike | number | string | null
+    openingDiscrepancyReason?: string | null
+    openingApprovedById?: number | null
+    openingDenominations?: NullableJsonNullValueInput | InputJsonValue
+    openingRemarks?: string | null
+    verificationChecks?: NullableJsonNullValueInput | InputJsonValue
+    verificationExceptions?: NullableJsonNullValueInput | InputJsonValue
+    exceptionApprovedById?: number | null
+    exceptionApprovalReason?: string | null
     salesSummary?: NullableJsonNullValueInput | InputJsonValue
+    closingExpectedCash?: Decimal | DecimalJsLike | number | string | null
     physicalCash?: Decimal | DecimalJsLike | number | string | null
     cashDifference?: Decimal | DecimalJsLike | number | string | null
+    closingDenominations?: NullableJsonNullValueInput | InputJsonValue
     notes?: string | null
     finalizedById?: number | null
     finalizedAt?: Date | string | null
+    adjustments?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -96729,11 +97581,28 @@ export namespace Prisma {
   export type DayCloseUpdateManyMutationInput = {
     businessDate?: DateTimeFieldUpdateOperationsInput | Date | string
     status?: StringFieldUpdateOperationsInput | string
+    openedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    openingCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    previousClosingCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    additionalCashAdded?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cashRemovedBeforeOpening?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    expectedOpeningCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    actualOpeningCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    openingDifference?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    openingDiscrepancyReason?: NullableStringFieldUpdateOperationsInput | string | null
+    openingDenominations?: NullableJsonNullValueInput | InputJsonValue
+    openingRemarks?: NullableStringFieldUpdateOperationsInput | string | null
+    verificationChecks?: NullableJsonNullValueInput | InputJsonValue
+    verificationExceptions?: NullableJsonNullValueInput | InputJsonValue
+    exceptionApprovalReason?: NullableStringFieldUpdateOperationsInput | string | null
     salesSummary?: NullableJsonNullValueInput | InputJsonValue
+    closingExpectedCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     physicalCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     cashDifference?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    closingDenominations?: NullableJsonNullValueInput | InputJsonValue
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     finalizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    adjustments?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -96743,12 +97612,33 @@ export namespace Prisma {
     branchId?: IntFieldUpdateOperationsInput | number
     businessDate?: DateTimeFieldUpdateOperationsInput | Date | string
     status?: StringFieldUpdateOperationsInput | string
+    terminalId?: NullableIntFieldUpdateOperationsInput | number | null
+    openedById?: NullableIntFieldUpdateOperationsInput | number | null
+    openedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    openingCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    previousClosingCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    additionalCashAdded?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cashRemovedBeforeOpening?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    expectedOpeningCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    actualOpeningCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    openingDifference?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    openingDiscrepancyReason?: NullableStringFieldUpdateOperationsInput | string | null
+    openingApprovedById?: NullableIntFieldUpdateOperationsInput | number | null
+    openingDenominations?: NullableJsonNullValueInput | InputJsonValue
+    openingRemarks?: NullableStringFieldUpdateOperationsInput | string | null
+    verificationChecks?: NullableJsonNullValueInput | InputJsonValue
+    verificationExceptions?: NullableJsonNullValueInput | InputJsonValue
+    exceptionApprovedById?: NullableIntFieldUpdateOperationsInput | number | null
+    exceptionApprovalReason?: NullableStringFieldUpdateOperationsInput | string | null
     salesSummary?: NullableJsonNullValueInput | InputJsonValue
+    closingExpectedCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     physicalCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     cashDifference?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    closingDenominations?: NullableJsonNullValueInput | InputJsonValue
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     finalizedById?: NullableIntFieldUpdateOperationsInput | number | null
     finalizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    adjustments?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -100802,6 +101692,7 @@ export namespace Prisma {
     status?: SortOrder
     reference?: SortOrder
     createdBy?: SortOrder
+    branchId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -100810,6 +101701,7 @@ export namespace Prisma {
     id?: SortOrder
     totalAmount?: SortOrder
     createdBy?: SortOrder
+    branchId?: SortOrder
   }
 
   export type VoucherMaxOrderByAggregateInput = {
@@ -100822,6 +101714,7 @@ export namespace Prisma {
     status?: SortOrder
     reference?: SortOrder
     createdBy?: SortOrder
+    branchId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -100836,6 +101729,7 @@ export namespace Prisma {
     status?: SortOrder
     reference?: SortOrder
     createdBy?: SortOrder
+    branchId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -100844,6 +101738,7 @@ export namespace Prisma {
     id?: SortOrder
     totalAmount?: SortOrder
     createdBy?: SortOrder
+    branchId?: SortOrder
   }
 
   export type LedgerNullableRelationFilter = {
@@ -101876,12 +102771,33 @@ export namespace Prisma {
     branchId?: SortOrder
     businessDate?: SortOrder
     status?: SortOrder
+    terminalId?: SortOrder
+    openedById?: SortOrder
+    openedAt?: SortOrder
+    openingCash?: SortOrder
+    previousClosingCash?: SortOrder
+    additionalCashAdded?: SortOrder
+    cashRemovedBeforeOpening?: SortOrder
+    expectedOpeningCash?: SortOrder
+    actualOpeningCash?: SortOrder
+    openingDifference?: SortOrder
+    openingDiscrepancyReason?: SortOrder
+    openingApprovedById?: SortOrder
+    openingDenominations?: SortOrder
+    openingRemarks?: SortOrder
+    verificationChecks?: SortOrder
+    verificationExceptions?: SortOrder
+    exceptionApprovedById?: SortOrder
+    exceptionApprovalReason?: SortOrder
     salesSummary?: SortOrder
+    closingExpectedCash?: SortOrder
     physicalCash?: SortOrder
     cashDifference?: SortOrder
+    closingDenominations?: SortOrder
     notes?: SortOrder
     finalizedById?: SortOrder
     finalizedAt?: SortOrder
+    adjustments?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -101889,6 +102805,18 @@ export namespace Prisma {
   export type DayCloseAvgOrderByAggregateInput = {
     id?: SortOrder
     branchId?: SortOrder
+    terminalId?: SortOrder
+    openedById?: SortOrder
+    openingCash?: SortOrder
+    previousClosingCash?: SortOrder
+    additionalCashAdded?: SortOrder
+    cashRemovedBeforeOpening?: SortOrder
+    expectedOpeningCash?: SortOrder
+    actualOpeningCash?: SortOrder
+    openingDifference?: SortOrder
+    openingApprovedById?: SortOrder
+    exceptionApprovedById?: SortOrder
+    closingExpectedCash?: SortOrder
     physicalCash?: SortOrder
     cashDifference?: SortOrder
     finalizedById?: SortOrder
@@ -101899,6 +102827,22 @@ export namespace Prisma {
     branchId?: SortOrder
     businessDate?: SortOrder
     status?: SortOrder
+    terminalId?: SortOrder
+    openedById?: SortOrder
+    openedAt?: SortOrder
+    openingCash?: SortOrder
+    previousClosingCash?: SortOrder
+    additionalCashAdded?: SortOrder
+    cashRemovedBeforeOpening?: SortOrder
+    expectedOpeningCash?: SortOrder
+    actualOpeningCash?: SortOrder
+    openingDifference?: SortOrder
+    openingDiscrepancyReason?: SortOrder
+    openingApprovedById?: SortOrder
+    openingRemarks?: SortOrder
+    exceptionApprovedById?: SortOrder
+    exceptionApprovalReason?: SortOrder
+    closingExpectedCash?: SortOrder
     physicalCash?: SortOrder
     cashDifference?: SortOrder
     notes?: SortOrder
@@ -101913,6 +102857,22 @@ export namespace Prisma {
     branchId?: SortOrder
     businessDate?: SortOrder
     status?: SortOrder
+    terminalId?: SortOrder
+    openedById?: SortOrder
+    openedAt?: SortOrder
+    openingCash?: SortOrder
+    previousClosingCash?: SortOrder
+    additionalCashAdded?: SortOrder
+    cashRemovedBeforeOpening?: SortOrder
+    expectedOpeningCash?: SortOrder
+    actualOpeningCash?: SortOrder
+    openingDifference?: SortOrder
+    openingDiscrepancyReason?: SortOrder
+    openingApprovedById?: SortOrder
+    openingRemarks?: SortOrder
+    exceptionApprovedById?: SortOrder
+    exceptionApprovalReason?: SortOrder
+    closingExpectedCash?: SortOrder
     physicalCash?: SortOrder
     cashDifference?: SortOrder
     notes?: SortOrder
@@ -101925,6 +102885,18 @@ export namespace Prisma {
   export type DayCloseSumOrderByAggregateInput = {
     id?: SortOrder
     branchId?: SortOrder
+    terminalId?: SortOrder
+    openedById?: SortOrder
+    openingCash?: SortOrder
+    previousClosingCash?: SortOrder
+    additionalCashAdded?: SortOrder
+    cashRemovedBeforeOpening?: SortOrder
+    expectedOpeningCash?: SortOrder
+    actualOpeningCash?: SortOrder
+    openingDifference?: SortOrder
+    openingApprovedById?: SortOrder
+    exceptionApprovedById?: SortOrder
+    closingExpectedCash?: SortOrder
     physicalCash?: SortOrder
     cashDifference?: SortOrder
     finalizedById?: SortOrder
@@ -102364,10 +103336,31 @@ export namespace Prisma {
     connect?: TerminalWhereUniqueInput | TerminalWhereUniqueInput[]
   }
 
+  export type DayCloseCreateNestedManyWithoutOpenedByInput = {
+    create?: XOR<DayCloseCreateWithoutOpenedByInput, DayCloseUncheckedCreateWithoutOpenedByInput> | DayCloseCreateWithoutOpenedByInput[] | DayCloseUncheckedCreateWithoutOpenedByInput[]
+    connectOrCreate?: DayCloseCreateOrConnectWithoutOpenedByInput | DayCloseCreateOrConnectWithoutOpenedByInput[]
+    createMany?: DayCloseCreateManyOpenedByInputEnvelope
+    connect?: DayCloseWhereUniqueInput | DayCloseWhereUniqueInput[]
+  }
+
+  export type DayCloseCreateNestedManyWithoutOpeningApprovedByInput = {
+    create?: XOR<DayCloseCreateWithoutOpeningApprovedByInput, DayCloseUncheckedCreateWithoutOpeningApprovedByInput> | DayCloseCreateWithoutOpeningApprovedByInput[] | DayCloseUncheckedCreateWithoutOpeningApprovedByInput[]
+    connectOrCreate?: DayCloseCreateOrConnectWithoutOpeningApprovedByInput | DayCloseCreateOrConnectWithoutOpeningApprovedByInput[]
+    createMany?: DayCloseCreateManyOpeningApprovedByInputEnvelope
+    connect?: DayCloseWhereUniqueInput | DayCloseWhereUniqueInput[]
+  }
+
   export type DayCloseCreateNestedManyWithoutFinalizedByInput = {
     create?: XOR<DayCloseCreateWithoutFinalizedByInput, DayCloseUncheckedCreateWithoutFinalizedByInput> | DayCloseCreateWithoutFinalizedByInput[] | DayCloseUncheckedCreateWithoutFinalizedByInput[]
     connectOrCreate?: DayCloseCreateOrConnectWithoutFinalizedByInput | DayCloseCreateOrConnectWithoutFinalizedByInput[]
     createMany?: DayCloseCreateManyFinalizedByInputEnvelope
+    connect?: DayCloseWhereUniqueInput | DayCloseWhereUniqueInput[]
+  }
+
+  export type DayCloseCreateNestedManyWithoutExceptionApprovedByInput = {
+    create?: XOR<DayCloseCreateWithoutExceptionApprovedByInput, DayCloseUncheckedCreateWithoutExceptionApprovedByInput> | DayCloseCreateWithoutExceptionApprovedByInput[] | DayCloseUncheckedCreateWithoutExceptionApprovedByInput[]
+    connectOrCreate?: DayCloseCreateOrConnectWithoutExceptionApprovedByInput | DayCloseCreateOrConnectWithoutExceptionApprovedByInput[]
+    createMany?: DayCloseCreateManyExceptionApprovedByInputEnvelope
     connect?: DayCloseWhereUniqueInput | DayCloseWhereUniqueInput[]
   }
 
@@ -102586,10 +103579,31 @@ export namespace Prisma {
     connect?: TerminalWhereUniqueInput | TerminalWhereUniqueInput[]
   }
 
+  export type DayCloseUncheckedCreateNestedManyWithoutOpenedByInput = {
+    create?: XOR<DayCloseCreateWithoutOpenedByInput, DayCloseUncheckedCreateWithoutOpenedByInput> | DayCloseCreateWithoutOpenedByInput[] | DayCloseUncheckedCreateWithoutOpenedByInput[]
+    connectOrCreate?: DayCloseCreateOrConnectWithoutOpenedByInput | DayCloseCreateOrConnectWithoutOpenedByInput[]
+    createMany?: DayCloseCreateManyOpenedByInputEnvelope
+    connect?: DayCloseWhereUniqueInput | DayCloseWhereUniqueInput[]
+  }
+
+  export type DayCloseUncheckedCreateNestedManyWithoutOpeningApprovedByInput = {
+    create?: XOR<DayCloseCreateWithoutOpeningApprovedByInput, DayCloseUncheckedCreateWithoutOpeningApprovedByInput> | DayCloseCreateWithoutOpeningApprovedByInput[] | DayCloseUncheckedCreateWithoutOpeningApprovedByInput[]
+    connectOrCreate?: DayCloseCreateOrConnectWithoutOpeningApprovedByInput | DayCloseCreateOrConnectWithoutOpeningApprovedByInput[]
+    createMany?: DayCloseCreateManyOpeningApprovedByInputEnvelope
+    connect?: DayCloseWhereUniqueInput | DayCloseWhereUniqueInput[]
+  }
+
   export type DayCloseUncheckedCreateNestedManyWithoutFinalizedByInput = {
     create?: XOR<DayCloseCreateWithoutFinalizedByInput, DayCloseUncheckedCreateWithoutFinalizedByInput> | DayCloseCreateWithoutFinalizedByInput[] | DayCloseUncheckedCreateWithoutFinalizedByInput[]
     connectOrCreate?: DayCloseCreateOrConnectWithoutFinalizedByInput | DayCloseCreateOrConnectWithoutFinalizedByInput[]
     createMany?: DayCloseCreateManyFinalizedByInputEnvelope
+    connect?: DayCloseWhereUniqueInput | DayCloseWhereUniqueInput[]
+  }
+
+  export type DayCloseUncheckedCreateNestedManyWithoutExceptionApprovedByInput = {
+    create?: XOR<DayCloseCreateWithoutExceptionApprovedByInput, DayCloseUncheckedCreateWithoutExceptionApprovedByInput> | DayCloseCreateWithoutExceptionApprovedByInput[] | DayCloseUncheckedCreateWithoutExceptionApprovedByInput[]
+    connectOrCreate?: DayCloseCreateOrConnectWithoutExceptionApprovedByInput | DayCloseCreateOrConnectWithoutExceptionApprovedByInput[]
+    createMany?: DayCloseCreateManyExceptionApprovedByInputEnvelope
     connect?: DayCloseWhereUniqueInput | DayCloseWhereUniqueInput[]
   }
 
@@ -103059,6 +104073,34 @@ export namespace Prisma {
     deleteMany?: TerminalScalarWhereInput | TerminalScalarWhereInput[]
   }
 
+  export type DayCloseUpdateManyWithoutOpenedByNestedInput = {
+    create?: XOR<DayCloseCreateWithoutOpenedByInput, DayCloseUncheckedCreateWithoutOpenedByInput> | DayCloseCreateWithoutOpenedByInput[] | DayCloseUncheckedCreateWithoutOpenedByInput[]
+    connectOrCreate?: DayCloseCreateOrConnectWithoutOpenedByInput | DayCloseCreateOrConnectWithoutOpenedByInput[]
+    upsert?: DayCloseUpsertWithWhereUniqueWithoutOpenedByInput | DayCloseUpsertWithWhereUniqueWithoutOpenedByInput[]
+    createMany?: DayCloseCreateManyOpenedByInputEnvelope
+    set?: DayCloseWhereUniqueInput | DayCloseWhereUniqueInput[]
+    disconnect?: DayCloseWhereUniqueInput | DayCloseWhereUniqueInput[]
+    delete?: DayCloseWhereUniqueInput | DayCloseWhereUniqueInput[]
+    connect?: DayCloseWhereUniqueInput | DayCloseWhereUniqueInput[]
+    update?: DayCloseUpdateWithWhereUniqueWithoutOpenedByInput | DayCloseUpdateWithWhereUniqueWithoutOpenedByInput[]
+    updateMany?: DayCloseUpdateManyWithWhereWithoutOpenedByInput | DayCloseUpdateManyWithWhereWithoutOpenedByInput[]
+    deleteMany?: DayCloseScalarWhereInput | DayCloseScalarWhereInput[]
+  }
+
+  export type DayCloseUpdateManyWithoutOpeningApprovedByNestedInput = {
+    create?: XOR<DayCloseCreateWithoutOpeningApprovedByInput, DayCloseUncheckedCreateWithoutOpeningApprovedByInput> | DayCloseCreateWithoutOpeningApprovedByInput[] | DayCloseUncheckedCreateWithoutOpeningApprovedByInput[]
+    connectOrCreate?: DayCloseCreateOrConnectWithoutOpeningApprovedByInput | DayCloseCreateOrConnectWithoutOpeningApprovedByInput[]
+    upsert?: DayCloseUpsertWithWhereUniqueWithoutOpeningApprovedByInput | DayCloseUpsertWithWhereUniqueWithoutOpeningApprovedByInput[]
+    createMany?: DayCloseCreateManyOpeningApprovedByInputEnvelope
+    set?: DayCloseWhereUniqueInput | DayCloseWhereUniqueInput[]
+    disconnect?: DayCloseWhereUniqueInput | DayCloseWhereUniqueInput[]
+    delete?: DayCloseWhereUniqueInput | DayCloseWhereUniqueInput[]
+    connect?: DayCloseWhereUniqueInput | DayCloseWhereUniqueInput[]
+    update?: DayCloseUpdateWithWhereUniqueWithoutOpeningApprovedByInput | DayCloseUpdateWithWhereUniqueWithoutOpeningApprovedByInput[]
+    updateMany?: DayCloseUpdateManyWithWhereWithoutOpeningApprovedByInput | DayCloseUpdateManyWithWhereWithoutOpeningApprovedByInput[]
+    deleteMany?: DayCloseScalarWhereInput | DayCloseScalarWhereInput[]
+  }
+
   export type DayCloseUpdateManyWithoutFinalizedByNestedInput = {
     create?: XOR<DayCloseCreateWithoutFinalizedByInput, DayCloseUncheckedCreateWithoutFinalizedByInput> | DayCloseCreateWithoutFinalizedByInput[] | DayCloseUncheckedCreateWithoutFinalizedByInput[]
     connectOrCreate?: DayCloseCreateOrConnectWithoutFinalizedByInput | DayCloseCreateOrConnectWithoutFinalizedByInput[]
@@ -103070,6 +104112,20 @@ export namespace Prisma {
     connect?: DayCloseWhereUniqueInput | DayCloseWhereUniqueInput[]
     update?: DayCloseUpdateWithWhereUniqueWithoutFinalizedByInput | DayCloseUpdateWithWhereUniqueWithoutFinalizedByInput[]
     updateMany?: DayCloseUpdateManyWithWhereWithoutFinalizedByInput | DayCloseUpdateManyWithWhereWithoutFinalizedByInput[]
+    deleteMany?: DayCloseScalarWhereInput | DayCloseScalarWhereInput[]
+  }
+
+  export type DayCloseUpdateManyWithoutExceptionApprovedByNestedInput = {
+    create?: XOR<DayCloseCreateWithoutExceptionApprovedByInput, DayCloseUncheckedCreateWithoutExceptionApprovedByInput> | DayCloseCreateWithoutExceptionApprovedByInput[] | DayCloseUncheckedCreateWithoutExceptionApprovedByInput[]
+    connectOrCreate?: DayCloseCreateOrConnectWithoutExceptionApprovedByInput | DayCloseCreateOrConnectWithoutExceptionApprovedByInput[]
+    upsert?: DayCloseUpsertWithWhereUniqueWithoutExceptionApprovedByInput | DayCloseUpsertWithWhereUniqueWithoutExceptionApprovedByInput[]
+    createMany?: DayCloseCreateManyExceptionApprovedByInputEnvelope
+    set?: DayCloseWhereUniqueInput | DayCloseWhereUniqueInput[]
+    disconnect?: DayCloseWhereUniqueInput | DayCloseWhereUniqueInput[]
+    delete?: DayCloseWhereUniqueInput | DayCloseWhereUniqueInput[]
+    connect?: DayCloseWhereUniqueInput | DayCloseWhereUniqueInput[]
+    update?: DayCloseUpdateWithWhereUniqueWithoutExceptionApprovedByInput | DayCloseUpdateWithWhereUniqueWithoutExceptionApprovedByInput[]
+    updateMany?: DayCloseUpdateManyWithWhereWithoutExceptionApprovedByInput | DayCloseUpdateManyWithWhereWithoutExceptionApprovedByInput[]
     deleteMany?: DayCloseScalarWhereInput | DayCloseScalarWhereInput[]
   }
 
@@ -103518,6 +104574,34 @@ export namespace Prisma {
     deleteMany?: TerminalScalarWhereInput | TerminalScalarWhereInput[]
   }
 
+  export type DayCloseUncheckedUpdateManyWithoutOpenedByNestedInput = {
+    create?: XOR<DayCloseCreateWithoutOpenedByInput, DayCloseUncheckedCreateWithoutOpenedByInput> | DayCloseCreateWithoutOpenedByInput[] | DayCloseUncheckedCreateWithoutOpenedByInput[]
+    connectOrCreate?: DayCloseCreateOrConnectWithoutOpenedByInput | DayCloseCreateOrConnectWithoutOpenedByInput[]
+    upsert?: DayCloseUpsertWithWhereUniqueWithoutOpenedByInput | DayCloseUpsertWithWhereUniqueWithoutOpenedByInput[]
+    createMany?: DayCloseCreateManyOpenedByInputEnvelope
+    set?: DayCloseWhereUniqueInput | DayCloseWhereUniqueInput[]
+    disconnect?: DayCloseWhereUniqueInput | DayCloseWhereUniqueInput[]
+    delete?: DayCloseWhereUniqueInput | DayCloseWhereUniqueInput[]
+    connect?: DayCloseWhereUniqueInput | DayCloseWhereUniqueInput[]
+    update?: DayCloseUpdateWithWhereUniqueWithoutOpenedByInput | DayCloseUpdateWithWhereUniqueWithoutOpenedByInput[]
+    updateMany?: DayCloseUpdateManyWithWhereWithoutOpenedByInput | DayCloseUpdateManyWithWhereWithoutOpenedByInput[]
+    deleteMany?: DayCloseScalarWhereInput | DayCloseScalarWhereInput[]
+  }
+
+  export type DayCloseUncheckedUpdateManyWithoutOpeningApprovedByNestedInput = {
+    create?: XOR<DayCloseCreateWithoutOpeningApprovedByInput, DayCloseUncheckedCreateWithoutOpeningApprovedByInput> | DayCloseCreateWithoutOpeningApprovedByInput[] | DayCloseUncheckedCreateWithoutOpeningApprovedByInput[]
+    connectOrCreate?: DayCloseCreateOrConnectWithoutOpeningApprovedByInput | DayCloseCreateOrConnectWithoutOpeningApprovedByInput[]
+    upsert?: DayCloseUpsertWithWhereUniqueWithoutOpeningApprovedByInput | DayCloseUpsertWithWhereUniqueWithoutOpeningApprovedByInput[]
+    createMany?: DayCloseCreateManyOpeningApprovedByInputEnvelope
+    set?: DayCloseWhereUniqueInput | DayCloseWhereUniqueInput[]
+    disconnect?: DayCloseWhereUniqueInput | DayCloseWhereUniqueInput[]
+    delete?: DayCloseWhereUniqueInput | DayCloseWhereUniqueInput[]
+    connect?: DayCloseWhereUniqueInput | DayCloseWhereUniqueInput[]
+    update?: DayCloseUpdateWithWhereUniqueWithoutOpeningApprovedByInput | DayCloseUpdateWithWhereUniqueWithoutOpeningApprovedByInput[]
+    updateMany?: DayCloseUpdateManyWithWhereWithoutOpeningApprovedByInput | DayCloseUpdateManyWithWhereWithoutOpeningApprovedByInput[]
+    deleteMany?: DayCloseScalarWhereInput | DayCloseScalarWhereInput[]
+  }
+
   export type DayCloseUncheckedUpdateManyWithoutFinalizedByNestedInput = {
     create?: XOR<DayCloseCreateWithoutFinalizedByInput, DayCloseUncheckedCreateWithoutFinalizedByInput> | DayCloseCreateWithoutFinalizedByInput[] | DayCloseUncheckedCreateWithoutFinalizedByInput[]
     connectOrCreate?: DayCloseCreateOrConnectWithoutFinalizedByInput | DayCloseCreateOrConnectWithoutFinalizedByInput[]
@@ -103529,6 +104613,20 @@ export namespace Prisma {
     connect?: DayCloseWhereUniqueInput | DayCloseWhereUniqueInput[]
     update?: DayCloseUpdateWithWhereUniqueWithoutFinalizedByInput | DayCloseUpdateWithWhereUniqueWithoutFinalizedByInput[]
     updateMany?: DayCloseUpdateManyWithWhereWithoutFinalizedByInput | DayCloseUpdateManyWithWhereWithoutFinalizedByInput[]
+    deleteMany?: DayCloseScalarWhereInput | DayCloseScalarWhereInput[]
+  }
+
+  export type DayCloseUncheckedUpdateManyWithoutExceptionApprovedByNestedInput = {
+    create?: XOR<DayCloseCreateWithoutExceptionApprovedByInput, DayCloseUncheckedCreateWithoutExceptionApprovedByInput> | DayCloseCreateWithoutExceptionApprovedByInput[] | DayCloseUncheckedCreateWithoutExceptionApprovedByInput[]
+    connectOrCreate?: DayCloseCreateOrConnectWithoutExceptionApprovedByInput | DayCloseCreateOrConnectWithoutExceptionApprovedByInput[]
+    upsert?: DayCloseUpsertWithWhereUniqueWithoutExceptionApprovedByInput | DayCloseUpsertWithWhereUniqueWithoutExceptionApprovedByInput[]
+    createMany?: DayCloseCreateManyExceptionApprovedByInputEnvelope
+    set?: DayCloseWhereUniqueInput | DayCloseWhereUniqueInput[]
+    disconnect?: DayCloseWhereUniqueInput | DayCloseWhereUniqueInput[]
+    delete?: DayCloseWhereUniqueInput | DayCloseWhereUniqueInput[]
+    connect?: DayCloseWhereUniqueInput | DayCloseWhereUniqueInput[]
+    update?: DayCloseUpdateWithWhereUniqueWithoutExceptionApprovedByInput | DayCloseUpdateWithWhereUniqueWithoutExceptionApprovedByInput[]
+    updateMany?: DayCloseUpdateManyWithWhereWithoutExceptionApprovedByInput | DayCloseUpdateManyWithWhereWithoutExceptionApprovedByInput[]
     deleteMany?: DayCloseScalarWhereInput | DayCloseScalarWhereInput[]
   }
 
@@ -103713,6 +104811,13 @@ export namespace Prisma {
     connect?: CustomerVoucherWhereUniqueInput | CustomerVoucherWhereUniqueInput[]
   }
 
+  export type VoucherCreateNestedManyWithoutBranchInput = {
+    create?: XOR<VoucherCreateWithoutBranchInput, VoucherUncheckedCreateWithoutBranchInput> | VoucherCreateWithoutBranchInput[] | VoucherUncheckedCreateWithoutBranchInput[]
+    connectOrCreate?: VoucherCreateOrConnectWithoutBranchInput | VoucherCreateOrConnectWithoutBranchInput[]
+    createMany?: VoucherCreateManyBranchInputEnvelope
+    connect?: VoucherWhereUniqueInput | VoucherWhereUniqueInput[]
+  }
+
   export type AttendanceUncheckedCreateNestedManyWithoutBranchInput = {
     create?: XOR<AttendanceCreateWithoutBranchInput, AttendanceUncheckedCreateWithoutBranchInput> | AttendanceCreateWithoutBranchInput[] | AttendanceUncheckedCreateWithoutBranchInput[]
     connectOrCreate?: AttendanceCreateOrConnectWithoutBranchInput | AttendanceCreateOrConnectWithoutBranchInput[]
@@ -103878,6 +104983,13 @@ export namespace Prisma {
     connectOrCreate?: CustomerVoucherCreateOrConnectWithoutBranchInput | CustomerVoucherCreateOrConnectWithoutBranchInput[]
     createMany?: CustomerVoucherCreateManyBranchInputEnvelope
     connect?: CustomerVoucherWhereUniqueInput | CustomerVoucherWhereUniqueInput[]
+  }
+
+  export type VoucherUncheckedCreateNestedManyWithoutBranchInput = {
+    create?: XOR<VoucherCreateWithoutBranchInput, VoucherUncheckedCreateWithoutBranchInput> | VoucherCreateWithoutBranchInput[] | VoucherUncheckedCreateWithoutBranchInput[]
+    connectOrCreate?: VoucherCreateOrConnectWithoutBranchInput | VoucherCreateOrConnectWithoutBranchInput[]
+    createMany?: VoucherCreateManyBranchInputEnvelope
+    connect?: VoucherWhereUniqueInput | VoucherWhereUniqueInput[]
   }
 
   export type AttendanceUpdateManyWithoutBranchNestedInput = {
@@ -104212,6 +105324,20 @@ export namespace Prisma {
     deleteMany?: CustomerVoucherScalarWhereInput | CustomerVoucherScalarWhereInput[]
   }
 
+  export type VoucherUpdateManyWithoutBranchNestedInput = {
+    create?: XOR<VoucherCreateWithoutBranchInput, VoucherUncheckedCreateWithoutBranchInput> | VoucherCreateWithoutBranchInput[] | VoucherUncheckedCreateWithoutBranchInput[]
+    connectOrCreate?: VoucherCreateOrConnectWithoutBranchInput | VoucherCreateOrConnectWithoutBranchInput[]
+    upsert?: VoucherUpsertWithWhereUniqueWithoutBranchInput | VoucherUpsertWithWhereUniqueWithoutBranchInput[]
+    createMany?: VoucherCreateManyBranchInputEnvelope
+    set?: VoucherWhereUniqueInput | VoucherWhereUniqueInput[]
+    disconnect?: VoucherWhereUniqueInput | VoucherWhereUniqueInput[]
+    delete?: VoucherWhereUniqueInput | VoucherWhereUniqueInput[]
+    connect?: VoucherWhereUniqueInput | VoucherWhereUniqueInput[]
+    update?: VoucherUpdateWithWhereUniqueWithoutBranchInput | VoucherUpdateWithWhereUniqueWithoutBranchInput[]
+    updateMany?: VoucherUpdateManyWithWhereWithoutBranchInput | VoucherUpdateManyWithWhereWithoutBranchInput[]
+    deleteMany?: VoucherScalarWhereInput | VoucherScalarWhereInput[]
+  }
+
   export type AttendanceUncheckedUpdateManyWithoutBranchNestedInput = {
     create?: XOR<AttendanceCreateWithoutBranchInput, AttendanceUncheckedCreateWithoutBranchInput> | AttendanceCreateWithoutBranchInput[] | AttendanceUncheckedCreateWithoutBranchInput[]
     connectOrCreate?: AttendanceCreateOrConnectWithoutBranchInput | AttendanceCreateOrConnectWithoutBranchInput[]
@@ -104542,6 +105668,20 @@ export namespace Prisma {
     update?: CustomerVoucherUpdateWithWhereUniqueWithoutBranchInput | CustomerVoucherUpdateWithWhereUniqueWithoutBranchInput[]
     updateMany?: CustomerVoucherUpdateManyWithWhereWithoutBranchInput | CustomerVoucherUpdateManyWithWhereWithoutBranchInput[]
     deleteMany?: CustomerVoucherScalarWhereInput | CustomerVoucherScalarWhereInput[]
+  }
+
+  export type VoucherUncheckedUpdateManyWithoutBranchNestedInput = {
+    create?: XOR<VoucherCreateWithoutBranchInput, VoucherUncheckedCreateWithoutBranchInput> | VoucherCreateWithoutBranchInput[] | VoucherUncheckedCreateWithoutBranchInput[]
+    connectOrCreate?: VoucherCreateOrConnectWithoutBranchInput | VoucherCreateOrConnectWithoutBranchInput[]
+    upsert?: VoucherUpsertWithWhereUniqueWithoutBranchInput | VoucherUpsertWithWhereUniqueWithoutBranchInput[]
+    createMany?: VoucherCreateManyBranchInputEnvelope
+    set?: VoucherWhereUniqueInput | VoucherWhereUniqueInput[]
+    disconnect?: VoucherWhereUniqueInput | VoucherWhereUniqueInput[]
+    delete?: VoucherWhereUniqueInput | VoucherWhereUniqueInput[]
+    connect?: VoucherWhereUniqueInput | VoucherWhereUniqueInput[]
+    update?: VoucherUpdateWithWhereUniqueWithoutBranchInput | VoucherUpdateWithWhereUniqueWithoutBranchInput[]
+    updateMany?: VoucherUpdateManyWithWhereWithoutBranchInput | VoucherUpdateManyWithWhereWithoutBranchInput[]
+    deleteMany?: VoucherScalarWhereInput | VoucherScalarWhereInput[]
   }
 
   export type BankCreateNestedOneWithoutCompanyProfilesInput = {
@@ -107859,6 +108999,12 @@ export namespace Prisma {
     connect?: UserWhereUniqueInput
   }
 
+  export type BranchCreateNestedOneWithoutVouchersInput = {
+    create?: XOR<BranchCreateWithoutVouchersInput, BranchUncheckedCreateWithoutVouchersInput>
+    connectOrCreate?: BranchCreateOrConnectWithoutVouchersInput
+    connect?: BranchWhereUniqueInput
+  }
+
   export type JournalEntryUncheckedCreateNestedManyWithoutVoucherInput = {
     create?: XOR<JournalEntryCreateWithoutVoucherInput, JournalEntryUncheckedCreateWithoutVoucherInput> | JournalEntryCreateWithoutVoucherInput[] | JournalEntryUncheckedCreateWithoutVoucherInput[]
     connectOrCreate?: JournalEntryCreateOrConnectWithoutVoucherInput | JournalEntryCreateOrConnectWithoutVoucherInput[]
@@ -107928,6 +109074,16 @@ export namespace Prisma {
     upsert?: UserUpsertWithoutVouchersInput
     connect?: UserWhereUniqueInput
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutVouchersInput, UserUpdateWithoutVouchersInput>, UserUncheckedUpdateWithoutVouchersInput>
+  }
+
+  export type BranchUpdateOneWithoutVouchersNestedInput = {
+    create?: XOR<BranchCreateWithoutVouchersInput, BranchUncheckedCreateWithoutVouchersInput>
+    connectOrCreate?: BranchCreateOrConnectWithoutVouchersInput
+    upsert?: BranchUpsertWithoutVouchersInput
+    disconnect?: BranchWhereInput | boolean
+    delete?: BranchWhereInput | boolean
+    connect?: BranchWhereUniqueInput
+    update?: XOR<XOR<BranchUpdateToOneWithWhereWithoutVouchersInput, BranchUpdateWithoutVouchersInput>, BranchUncheckedUpdateWithoutVouchersInput>
   }
 
   export type JournalEntryUncheckedUpdateManyWithoutVoucherNestedInput = {
@@ -108379,6 +109535,13 @@ export namespace Prisma {
     connect?: UserWhereUniqueInput | UserWhereUniqueInput[]
   }
 
+  export type DayCloseCreateNestedManyWithoutTerminalInput = {
+    create?: XOR<DayCloseCreateWithoutTerminalInput, DayCloseUncheckedCreateWithoutTerminalInput> | DayCloseCreateWithoutTerminalInput[] | DayCloseUncheckedCreateWithoutTerminalInput[]
+    connectOrCreate?: DayCloseCreateOrConnectWithoutTerminalInput | DayCloseCreateOrConnectWithoutTerminalInput[]
+    createMany?: DayCloseCreateManyTerminalInputEnvelope
+    connect?: DayCloseWhereUniqueInput | DayCloseWhereUniqueInput[]
+  }
+
   export type SaleUncheckedCreateNestedManyWithoutTerminalInput = {
     create?: XOR<SaleCreateWithoutTerminalInput, SaleUncheckedCreateWithoutTerminalInput> | SaleCreateWithoutTerminalInput[] | SaleUncheckedCreateWithoutTerminalInput[]
     connectOrCreate?: SaleCreateOrConnectWithoutTerminalInput | SaleCreateOrConnectWithoutTerminalInput[]
@@ -108390,6 +109553,13 @@ export namespace Prisma {
     create?: XOR<UserCreateWithoutTerminalsInput, UserUncheckedCreateWithoutTerminalsInput> | UserCreateWithoutTerminalsInput[] | UserUncheckedCreateWithoutTerminalsInput[]
     connectOrCreate?: UserCreateOrConnectWithoutTerminalsInput | UserCreateOrConnectWithoutTerminalsInput[]
     connect?: UserWhereUniqueInput | UserWhereUniqueInput[]
+  }
+
+  export type DayCloseUncheckedCreateNestedManyWithoutTerminalInput = {
+    create?: XOR<DayCloseCreateWithoutTerminalInput, DayCloseUncheckedCreateWithoutTerminalInput> | DayCloseCreateWithoutTerminalInput[] | DayCloseUncheckedCreateWithoutTerminalInput[]
+    connectOrCreate?: DayCloseCreateOrConnectWithoutTerminalInput | DayCloseCreateOrConnectWithoutTerminalInput[]
+    createMany?: DayCloseCreateManyTerminalInputEnvelope
+    connect?: DayCloseWhereUniqueInput | DayCloseWhereUniqueInput[]
   }
 
   export type SaleUpdateManyWithoutTerminalNestedInput = {
@@ -108429,6 +109599,20 @@ export namespace Prisma {
     deleteMany?: UserScalarWhereInput | UserScalarWhereInput[]
   }
 
+  export type DayCloseUpdateManyWithoutTerminalNestedInput = {
+    create?: XOR<DayCloseCreateWithoutTerminalInput, DayCloseUncheckedCreateWithoutTerminalInput> | DayCloseCreateWithoutTerminalInput[] | DayCloseUncheckedCreateWithoutTerminalInput[]
+    connectOrCreate?: DayCloseCreateOrConnectWithoutTerminalInput | DayCloseCreateOrConnectWithoutTerminalInput[]
+    upsert?: DayCloseUpsertWithWhereUniqueWithoutTerminalInput | DayCloseUpsertWithWhereUniqueWithoutTerminalInput[]
+    createMany?: DayCloseCreateManyTerminalInputEnvelope
+    set?: DayCloseWhereUniqueInput | DayCloseWhereUniqueInput[]
+    disconnect?: DayCloseWhereUniqueInput | DayCloseWhereUniqueInput[]
+    delete?: DayCloseWhereUniqueInput | DayCloseWhereUniqueInput[]
+    connect?: DayCloseWhereUniqueInput | DayCloseWhereUniqueInput[]
+    update?: DayCloseUpdateWithWhereUniqueWithoutTerminalInput | DayCloseUpdateWithWhereUniqueWithoutTerminalInput[]
+    updateMany?: DayCloseUpdateManyWithWhereWithoutTerminalInput | DayCloseUpdateManyWithWhereWithoutTerminalInput[]
+    deleteMany?: DayCloseScalarWhereInput | DayCloseScalarWhereInput[]
+  }
+
   export type SaleUncheckedUpdateManyWithoutTerminalNestedInput = {
     create?: XOR<SaleCreateWithoutTerminalInput, SaleUncheckedCreateWithoutTerminalInput> | SaleCreateWithoutTerminalInput[] | SaleUncheckedCreateWithoutTerminalInput[]
     connectOrCreate?: SaleCreateOrConnectWithoutTerminalInput | SaleCreateOrConnectWithoutTerminalInput[]
@@ -108454,6 +109638,20 @@ export namespace Prisma {
     update?: UserUpdateWithWhereUniqueWithoutTerminalsInput | UserUpdateWithWhereUniqueWithoutTerminalsInput[]
     updateMany?: UserUpdateManyWithWhereWithoutTerminalsInput | UserUpdateManyWithWhereWithoutTerminalsInput[]
     deleteMany?: UserScalarWhereInput | UserScalarWhereInput[]
+  }
+
+  export type DayCloseUncheckedUpdateManyWithoutTerminalNestedInput = {
+    create?: XOR<DayCloseCreateWithoutTerminalInput, DayCloseUncheckedCreateWithoutTerminalInput> | DayCloseCreateWithoutTerminalInput[] | DayCloseUncheckedCreateWithoutTerminalInput[]
+    connectOrCreate?: DayCloseCreateOrConnectWithoutTerminalInput | DayCloseCreateOrConnectWithoutTerminalInput[]
+    upsert?: DayCloseUpsertWithWhereUniqueWithoutTerminalInput | DayCloseUpsertWithWhereUniqueWithoutTerminalInput[]
+    createMany?: DayCloseCreateManyTerminalInputEnvelope
+    set?: DayCloseWhereUniqueInput | DayCloseWhereUniqueInput[]
+    disconnect?: DayCloseWhereUniqueInput | DayCloseWhereUniqueInput[]
+    delete?: DayCloseWhereUniqueInput | DayCloseWhereUniqueInput[]
+    connect?: DayCloseWhereUniqueInput | DayCloseWhereUniqueInput[]
+    update?: DayCloseUpdateWithWhereUniqueWithoutTerminalInput | DayCloseUpdateWithWhereUniqueWithoutTerminalInput[]
+    updateMany?: DayCloseUpdateManyWithWhereWithoutTerminalInput | DayCloseUpdateManyWithWhereWithoutTerminalInput[]
+    deleteMany?: DayCloseScalarWhereInput | DayCloseScalarWhereInput[]
   }
 
   export type UserCreateNestedOneWithoutReceivedMessagesInput = {
@@ -108912,9 +110110,33 @@ export namespace Prisma {
     connect?: BranchWhereUniqueInput
   }
 
+  export type TerminalCreateNestedOneWithoutDayClosesInput = {
+    create?: XOR<TerminalCreateWithoutDayClosesInput, TerminalUncheckedCreateWithoutDayClosesInput>
+    connectOrCreate?: TerminalCreateOrConnectWithoutDayClosesInput
+    connect?: TerminalWhereUniqueInput
+  }
+
+  export type UserCreateNestedOneWithoutDayCloseOpeningsInput = {
+    create?: XOR<UserCreateWithoutDayCloseOpeningsInput, UserUncheckedCreateWithoutDayCloseOpeningsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutDayCloseOpeningsInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type UserCreateNestedOneWithoutDayCloseOpeningApprovalsInput = {
+    create?: XOR<UserCreateWithoutDayCloseOpeningApprovalsInput, UserUncheckedCreateWithoutDayCloseOpeningApprovalsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutDayCloseOpeningApprovalsInput
+    connect?: UserWhereUniqueInput
+  }
+
   export type UserCreateNestedOneWithoutDayCloseFinalizationsInput = {
     create?: XOR<UserCreateWithoutDayCloseFinalizationsInput, UserUncheckedCreateWithoutDayCloseFinalizationsInput>
     connectOrCreate?: UserCreateOrConnectWithoutDayCloseFinalizationsInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type UserCreateNestedOneWithoutDayCloseExceptionApprovalsInput = {
+    create?: XOR<UserCreateWithoutDayCloseExceptionApprovalsInput, UserUncheckedCreateWithoutDayCloseExceptionApprovalsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutDayCloseExceptionApprovalsInput
     connect?: UserWhereUniqueInput
   }
 
@@ -108940,6 +110162,36 @@ export namespace Prisma {
     update?: XOR<XOR<BranchUpdateToOneWithWhereWithoutDayClosesInput, BranchUpdateWithoutDayClosesInput>, BranchUncheckedUpdateWithoutDayClosesInput>
   }
 
+  export type TerminalUpdateOneWithoutDayClosesNestedInput = {
+    create?: XOR<TerminalCreateWithoutDayClosesInput, TerminalUncheckedCreateWithoutDayClosesInput>
+    connectOrCreate?: TerminalCreateOrConnectWithoutDayClosesInput
+    upsert?: TerminalUpsertWithoutDayClosesInput
+    disconnect?: TerminalWhereInput | boolean
+    delete?: TerminalWhereInput | boolean
+    connect?: TerminalWhereUniqueInput
+    update?: XOR<XOR<TerminalUpdateToOneWithWhereWithoutDayClosesInput, TerminalUpdateWithoutDayClosesInput>, TerminalUncheckedUpdateWithoutDayClosesInput>
+  }
+
+  export type UserUpdateOneWithoutDayCloseOpeningsNestedInput = {
+    create?: XOR<UserCreateWithoutDayCloseOpeningsInput, UserUncheckedCreateWithoutDayCloseOpeningsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutDayCloseOpeningsInput
+    upsert?: UserUpsertWithoutDayCloseOpeningsInput
+    disconnect?: UserWhereInput | boolean
+    delete?: UserWhereInput | boolean
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutDayCloseOpeningsInput, UserUpdateWithoutDayCloseOpeningsInput>, UserUncheckedUpdateWithoutDayCloseOpeningsInput>
+  }
+
+  export type UserUpdateOneWithoutDayCloseOpeningApprovalsNestedInput = {
+    create?: XOR<UserCreateWithoutDayCloseOpeningApprovalsInput, UserUncheckedCreateWithoutDayCloseOpeningApprovalsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutDayCloseOpeningApprovalsInput
+    upsert?: UserUpsertWithoutDayCloseOpeningApprovalsInput
+    disconnect?: UserWhereInput | boolean
+    delete?: UserWhereInput | boolean
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutDayCloseOpeningApprovalsInput, UserUpdateWithoutDayCloseOpeningApprovalsInput>, UserUncheckedUpdateWithoutDayCloseOpeningApprovalsInput>
+  }
+
   export type UserUpdateOneWithoutDayCloseFinalizationsNestedInput = {
     create?: XOR<UserCreateWithoutDayCloseFinalizationsInput, UserUncheckedCreateWithoutDayCloseFinalizationsInput>
     connectOrCreate?: UserCreateOrConnectWithoutDayCloseFinalizationsInput
@@ -108948,6 +110200,16 @@ export namespace Prisma {
     delete?: UserWhereInput | boolean
     connect?: UserWhereUniqueInput
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutDayCloseFinalizationsInput, UserUpdateWithoutDayCloseFinalizationsInput>, UserUncheckedUpdateWithoutDayCloseFinalizationsInput>
+  }
+
+  export type UserUpdateOneWithoutDayCloseExceptionApprovalsNestedInput = {
+    create?: XOR<UserCreateWithoutDayCloseExceptionApprovalsInput, UserUncheckedCreateWithoutDayCloseExceptionApprovalsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutDayCloseExceptionApprovalsInput
+    upsert?: UserUpsertWithoutDayCloseExceptionApprovalsInput
+    disconnect?: UserWhereInput | boolean
+    delete?: UserWhereInput | boolean
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutDayCloseExceptionApprovalsInput, UserUpdateWithoutDayCloseExceptionApprovalsInput>, UserUncheckedUpdateWithoutDayCloseExceptionApprovalsInput>
   }
 
   export type StaffDayCloseUpdateManyWithoutDayCloseNestedInput = {
@@ -110472,6 +111734,7 @@ export namespace Prisma {
     entries?: JournalEntryCreateNestedManyWithoutVoucherInput
     payrolls?: PayrollCreateNestedManyWithoutVoucherInput
     salaryAdvances?: SalaryAdvanceCreateNestedManyWithoutVoucherInput
+    branch?: BranchCreateNestedOneWithoutVouchersInput
   }
 
   export type VoucherUncheckedCreateWithoutCreatorInput = {
@@ -110483,6 +111746,7 @@ export namespace Prisma {
     totalAmount: Decimal | DecimalJsLike | number | string
     status?: string
     reference?: string | null
+    branchId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     entries?: JournalEntryUncheckedCreateNestedManyWithoutVoucherInput
@@ -110763,7 +112027,10 @@ export namespace Prisma {
     admin?: UserCreateNestedOneWithoutManagedStaffInput
     branch?: BranchCreateNestedOneWithoutUsersInput
     terminals?: TerminalCreateNestedManyWithoutUsersInput
+    dayCloseOpenings?: DayCloseCreateNestedManyWithoutOpenedByInput
+    dayCloseOpeningApprovals?: DayCloseCreateNestedManyWithoutOpeningApprovedByInput
     dayCloseFinalizations?: DayCloseCreateNestedManyWithoutFinalizedByInput
+    dayCloseExceptionApprovals?: DayCloseCreateNestedManyWithoutExceptionApprovedByInput
     staffDayClosings?: StaffDayCloseCreateNestedManyWithoutUserInput
   }
 
@@ -110811,7 +112078,10 @@ export namespace Prisma {
     leads?: LeadUncheckedCreateNestedManyWithoutAssignedUserInput
     referredLeads?: LeadUncheckedCreateNestedManyWithoutReferredByInput
     terminals?: TerminalUncheckedCreateNestedManyWithoutUsersInput
+    dayCloseOpenings?: DayCloseUncheckedCreateNestedManyWithoutOpenedByInput
+    dayCloseOpeningApprovals?: DayCloseUncheckedCreateNestedManyWithoutOpeningApprovedByInput
     dayCloseFinalizations?: DayCloseUncheckedCreateNestedManyWithoutFinalizedByInput
+    dayCloseExceptionApprovals?: DayCloseUncheckedCreateNestedManyWithoutExceptionApprovedByInput
     staffDayClosings?: StaffDayCloseUncheckedCreateNestedManyWithoutUserInput
   }
 
@@ -110863,7 +112133,10 @@ export namespace Prisma {
     managedStaff?: UserCreateNestedManyWithoutAdminInput
     branch?: BranchCreateNestedOneWithoutUsersInput
     terminals?: TerminalCreateNestedManyWithoutUsersInput
+    dayCloseOpenings?: DayCloseCreateNestedManyWithoutOpenedByInput
+    dayCloseOpeningApprovals?: DayCloseCreateNestedManyWithoutOpeningApprovedByInput
     dayCloseFinalizations?: DayCloseCreateNestedManyWithoutFinalizedByInput
+    dayCloseExceptionApprovals?: DayCloseCreateNestedManyWithoutExceptionApprovedByInput
     staffDayClosings?: StaffDayCloseCreateNestedManyWithoutUserInput
   }
 
@@ -110911,7 +112184,10 @@ export namespace Prisma {
     referredLeads?: LeadUncheckedCreateNestedManyWithoutReferredByInput
     managedStaff?: UserUncheckedCreateNestedManyWithoutAdminInput
     terminals?: TerminalUncheckedCreateNestedManyWithoutUsersInput
+    dayCloseOpenings?: DayCloseUncheckedCreateNestedManyWithoutOpenedByInput
+    dayCloseOpeningApprovals?: DayCloseUncheckedCreateNestedManyWithoutOpeningApprovedByInput
     dayCloseFinalizations?: DayCloseUncheckedCreateNestedManyWithoutFinalizedByInput
+    dayCloseExceptionApprovals?: DayCloseUncheckedCreateNestedManyWithoutExceptionApprovedByInput
     staffDayClosings?: StaffDayCloseUncheckedCreateNestedManyWithoutUserInput
   }
 
@@ -110961,6 +112237,7 @@ export namespace Prisma {
     leads?: LeadCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseCreateNestedManyWithoutBranchInput
     customerVouchers?: CustomerVoucherCreateNestedManyWithoutBranchInput
+    vouchers?: VoucherCreateNestedManyWithoutBranchInput
   }
 
   export type BranchUncheckedCreateWithoutUsersInput = {
@@ -111000,6 +112277,7 @@ export namespace Prisma {
     leads?: LeadUncheckedCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseUncheckedCreateNestedManyWithoutBranchInput
     customerVouchers?: CustomerVoucherUncheckedCreateNestedManyWithoutBranchInput
+    vouchers?: VoucherUncheckedCreateNestedManyWithoutBranchInput
   }
 
   export type BranchCreateOrConnectWithoutUsersInput = {
@@ -111017,6 +112295,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     sales?: SaleCreateNestedManyWithoutTerminalInput
     branch?: BranchCreateNestedOneWithoutTerminalsInput
+    dayCloses?: DayCloseCreateNestedManyWithoutTerminalInput
   }
 
   export type TerminalUncheckedCreateWithoutUsersInput = {
@@ -111030,6 +112309,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     sales?: SaleUncheckedCreateNestedManyWithoutTerminalInput
+    dayCloses?: DayCloseUncheckedCreateNestedManyWithoutTerminalInput
   }
 
   export type TerminalCreateOrConnectWithoutUsersInput = {
@@ -111037,17 +112317,200 @@ export namespace Prisma {
     create: XOR<TerminalCreateWithoutUsersInput, TerminalUncheckedCreateWithoutUsersInput>
   }
 
-  export type DayCloseCreateWithoutFinalizedByInput = {
+  export type DayCloseCreateWithoutOpenedByInput = {
     businessDate: Date | string
     status?: string
+    openedAt?: Date | string | null
+    openingCash?: Decimal | DecimalJsLike | number | string | null
+    previousClosingCash?: Decimal | DecimalJsLike | number | string | null
+    additionalCashAdded?: Decimal | DecimalJsLike | number | string | null
+    cashRemovedBeforeOpening?: Decimal | DecimalJsLike | number | string | null
+    expectedOpeningCash?: Decimal | DecimalJsLike | number | string | null
+    actualOpeningCash?: Decimal | DecimalJsLike | number | string | null
+    openingDifference?: Decimal | DecimalJsLike | number | string | null
+    openingDiscrepancyReason?: string | null
+    openingDenominations?: NullableJsonNullValueInput | InputJsonValue
+    openingRemarks?: string | null
+    verificationChecks?: NullableJsonNullValueInput | InputJsonValue
+    verificationExceptions?: NullableJsonNullValueInput | InputJsonValue
+    exceptionApprovalReason?: string | null
     salesSummary?: NullableJsonNullValueInput | InputJsonValue
+    closingExpectedCash?: Decimal | DecimalJsLike | number | string | null
     physicalCash?: Decimal | DecimalJsLike | number | string | null
     cashDifference?: Decimal | DecimalJsLike | number | string | null
+    closingDenominations?: NullableJsonNullValueInput | InputJsonValue
     notes?: string | null
     finalizedAt?: Date | string | null
+    adjustments?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
     branch: BranchCreateNestedOneWithoutDayClosesInput
+    terminal?: TerminalCreateNestedOneWithoutDayClosesInput
+    openingApprovedBy?: UserCreateNestedOneWithoutDayCloseOpeningApprovalsInput
+    finalizedBy?: UserCreateNestedOneWithoutDayCloseFinalizationsInput
+    exceptionApprovedBy?: UserCreateNestedOneWithoutDayCloseExceptionApprovalsInput
+    staffClosings?: StaffDayCloseCreateNestedManyWithoutDayCloseInput
+  }
+
+  export type DayCloseUncheckedCreateWithoutOpenedByInput = {
+    id?: number
+    branchId: number
+    businessDate: Date | string
+    status?: string
+    terminalId?: number | null
+    openedAt?: Date | string | null
+    openingCash?: Decimal | DecimalJsLike | number | string | null
+    previousClosingCash?: Decimal | DecimalJsLike | number | string | null
+    additionalCashAdded?: Decimal | DecimalJsLike | number | string | null
+    cashRemovedBeforeOpening?: Decimal | DecimalJsLike | number | string | null
+    expectedOpeningCash?: Decimal | DecimalJsLike | number | string | null
+    actualOpeningCash?: Decimal | DecimalJsLike | number | string | null
+    openingDifference?: Decimal | DecimalJsLike | number | string | null
+    openingDiscrepancyReason?: string | null
+    openingApprovedById?: number | null
+    openingDenominations?: NullableJsonNullValueInput | InputJsonValue
+    openingRemarks?: string | null
+    verificationChecks?: NullableJsonNullValueInput | InputJsonValue
+    verificationExceptions?: NullableJsonNullValueInput | InputJsonValue
+    exceptionApprovedById?: number | null
+    exceptionApprovalReason?: string | null
+    salesSummary?: NullableJsonNullValueInput | InputJsonValue
+    closingExpectedCash?: Decimal | DecimalJsLike | number | string | null
+    physicalCash?: Decimal | DecimalJsLike | number | string | null
+    cashDifference?: Decimal | DecimalJsLike | number | string | null
+    closingDenominations?: NullableJsonNullValueInput | InputJsonValue
+    notes?: string | null
+    finalizedById?: number | null
+    finalizedAt?: Date | string | null
+    adjustments?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    staffClosings?: StaffDayCloseUncheckedCreateNestedManyWithoutDayCloseInput
+  }
+
+  export type DayCloseCreateOrConnectWithoutOpenedByInput = {
+    where: DayCloseWhereUniqueInput
+    create: XOR<DayCloseCreateWithoutOpenedByInput, DayCloseUncheckedCreateWithoutOpenedByInput>
+  }
+
+  export type DayCloseCreateManyOpenedByInputEnvelope = {
+    data: DayCloseCreateManyOpenedByInput | DayCloseCreateManyOpenedByInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type DayCloseCreateWithoutOpeningApprovedByInput = {
+    businessDate: Date | string
+    status?: string
+    openedAt?: Date | string | null
+    openingCash?: Decimal | DecimalJsLike | number | string | null
+    previousClosingCash?: Decimal | DecimalJsLike | number | string | null
+    additionalCashAdded?: Decimal | DecimalJsLike | number | string | null
+    cashRemovedBeforeOpening?: Decimal | DecimalJsLike | number | string | null
+    expectedOpeningCash?: Decimal | DecimalJsLike | number | string | null
+    actualOpeningCash?: Decimal | DecimalJsLike | number | string | null
+    openingDifference?: Decimal | DecimalJsLike | number | string | null
+    openingDiscrepancyReason?: string | null
+    openingDenominations?: NullableJsonNullValueInput | InputJsonValue
+    openingRemarks?: string | null
+    verificationChecks?: NullableJsonNullValueInput | InputJsonValue
+    verificationExceptions?: NullableJsonNullValueInput | InputJsonValue
+    exceptionApprovalReason?: string | null
+    salesSummary?: NullableJsonNullValueInput | InputJsonValue
+    closingExpectedCash?: Decimal | DecimalJsLike | number | string | null
+    physicalCash?: Decimal | DecimalJsLike | number | string | null
+    cashDifference?: Decimal | DecimalJsLike | number | string | null
+    closingDenominations?: NullableJsonNullValueInput | InputJsonValue
+    notes?: string | null
+    finalizedAt?: Date | string | null
+    adjustments?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    branch: BranchCreateNestedOneWithoutDayClosesInput
+    terminal?: TerminalCreateNestedOneWithoutDayClosesInput
+    openedBy?: UserCreateNestedOneWithoutDayCloseOpeningsInput
+    finalizedBy?: UserCreateNestedOneWithoutDayCloseFinalizationsInput
+    exceptionApprovedBy?: UserCreateNestedOneWithoutDayCloseExceptionApprovalsInput
+    staffClosings?: StaffDayCloseCreateNestedManyWithoutDayCloseInput
+  }
+
+  export type DayCloseUncheckedCreateWithoutOpeningApprovedByInput = {
+    id?: number
+    branchId: number
+    businessDate: Date | string
+    status?: string
+    terminalId?: number | null
+    openedById?: number | null
+    openedAt?: Date | string | null
+    openingCash?: Decimal | DecimalJsLike | number | string | null
+    previousClosingCash?: Decimal | DecimalJsLike | number | string | null
+    additionalCashAdded?: Decimal | DecimalJsLike | number | string | null
+    cashRemovedBeforeOpening?: Decimal | DecimalJsLike | number | string | null
+    expectedOpeningCash?: Decimal | DecimalJsLike | number | string | null
+    actualOpeningCash?: Decimal | DecimalJsLike | number | string | null
+    openingDifference?: Decimal | DecimalJsLike | number | string | null
+    openingDiscrepancyReason?: string | null
+    openingDenominations?: NullableJsonNullValueInput | InputJsonValue
+    openingRemarks?: string | null
+    verificationChecks?: NullableJsonNullValueInput | InputJsonValue
+    verificationExceptions?: NullableJsonNullValueInput | InputJsonValue
+    exceptionApprovedById?: number | null
+    exceptionApprovalReason?: string | null
+    salesSummary?: NullableJsonNullValueInput | InputJsonValue
+    closingExpectedCash?: Decimal | DecimalJsLike | number | string | null
+    physicalCash?: Decimal | DecimalJsLike | number | string | null
+    cashDifference?: Decimal | DecimalJsLike | number | string | null
+    closingDenominations?: NullableJsonNullValueInput | InputJsonValue
+    notes?: string | null
+    finalizedById?: number | null
+    finalizedAt?: Date | string | null
+    adjustments?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    staffClosings?: StaffDayCloseUncheckedCreateNestedManyWithoutDayCloseInput
+  }
+
+  export type DayCloseCreateOrConnectWithoutOpeningApprovedByInput = {
+    where: DayCloseWhereUniqueInput
+    create: XOR<DayCloseCreateWithoutOpeningApprovedByInput, DayCloseUncheckedCreateWithoutOpeningApprovedByInput>
+  }
+
+  export type DayCloseCreateManyOpeningApprovedByInputEnvelope = {
+    data: DayCloseCreateManyOpeningApprovedByInput | DayCloseCreateManyOpeningApprovedByInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type DayCloseCreateWithoutFinalizedByInput = {
+    businessDate: Date | string
+    status?: string
+    openedAt?: Date | string | null
+    openingCash?: Decimal | DecimalJsLike | number | string | null
+    previousClosingCash?: Decimal | DecimalJsLike | number | string | null
+    additionalCashAdded?: Decimal | DecimalJsLike | number | string | null
+    cashRemovedBeforeOpening?: Decimal | DecimalJsLike | number | string | null
+    expectedOpeningCash?: Decimal | DecimalJsLike | number | string | null
+    actualOpeningCash?: Decimal | DecimalJsLike | number | string | null
+    openingDifference?: Decimal | DecimalJsLike | number | string | null
+    openingDiscrepancyReason?: string | null
+    openingDenominations?: NullableJsonNullValueInput | InputJsonValue
+    openingRemarks?: string | null
+    verificationChecks?: NullableJsonNullValueInput | InputJsonValue
+    verificationExceptions?: NullableJsonNullValueInput | InputJsonValue
+    exceptionApprovalReason?: string | null
+    salesSummary?: NullableJsonNullValueInput | InputJsonValue
+    closingExpectedCash?: Decimal | DecimalJsLike | number | string | null
+    physicalCash?: Decimal | DecimalJsLike | number | string | null
+    cashDifference?: Decimal | DecimalJsLike | number | string | null
+    closingDenominations?: NullableJsonNullValueInput | InputJsonValue
+    notes?: string | null
+    finalizedAt?: Date | string | null
+    adjustments?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    branch: BranchCreateNestedOneWithoutDayClosesInput
+    terminal?: TerminalCreateNestedOneWithoutDayClosesInput
+    openedBy?: UserCreateNestedOneWithoutDayCloseOpeningsInput
+    openingApprovedBy?: UserCreateNestedOneWithoutDayCloseOpeningApprovalsInput
+    exceptionApprovedBy?: UserCreateNestedOneWithoutDayCloseExceptionApprovalsInput
     staffClosings?: StaffDayCloseCreateNestedManyWithoutDayCloseInput
   }
 
@@ -111056,11 +112519,32 @@ export namespace Prisma {
     branchId: number
     businessDate: Date | string
     status?: string
+    terminalId?: number | null
+    openedById?: number | null
+    openedAt?: Date | string | null
+    openingCash?: Decimal | DecimalJsLike | number | string | null
+    previousClosingCash?: Decimal | DecimalJsLike | number | string | null
+    additionalCashAdded?: Decimal | DecimalJsLike | number | string | null
+    cashRemovedBeforeOpening?: Decimal | DecimalJsLike | number | string | null
+    expectedOpeningCash?: Decimal | DecimalJsLike | number | string | null
+    actualOpeningCash?: Decimal | DecimalJsLike | number | string | null
+    openingDifference?: Decimal | DecimalJsLike | number | string | null
+    openingDiscrepancyReason?: string | null
+    openingApprovedById?: number | null
+    openingDenominations?: NullableJsonNullValueInput | InputJsonValue
+    openingRemarks?: string | null
+    verificationChecks?: NullableJsonNullValueInput | InputJsonValue
+    verificationExceptions?: NullableJsonNullValueInput | InputJsonValue
+    exceptionApprovedById?: number | null
+    exceptionApprovalReason?: string | null
     salesSummary?: NullableJsonNullValueInput | InputJsonValue
+    closingExpectedCash?: Decimal | DecimalJsLike | number | string | null
     physicalCash?: Decimal | DecimalJsLike | number | string | null
     cashDifference?: Decimal | DecimalJsLike | number | string | null
+    closingDenominations?: NullableJsonNullValueInput | InputJsonValue
     notes?: string | null
     finalizedAt?: Date | string | null
+    adjustments?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
     staffClosings?: StaffDayCloseUncheckedCreateNestedManyWithoutDayCloseInput
@@ -111073,6 +112557,87 @@ export namespace Prisma {
 
   export type DayCloseCreateManyFinalizedByInputEnvelope = {
     data: DayCloseCreateManyFinalizedByInput | DayCloseCreateManyFinalizedByInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type DayCloseCreateWithoutExceptionApprovedByInput = {
+    businessDate: Date | string
+    status?: string
+    openedAt?: Date | string | null
+    openingCash?: Decimal | DecimalJsLike | number | string | null
+    previousClosingCash?: Decimal | DecimalJsLike | number | string | null
+    additionalCashAdded?: Decimal | DecimalJsLike | number | string | null
+    cashRemovedBeforeOpening?: Decimal | DecimalJsLike | number | string | null
+    expectedOpeningCash?: Decimal | DecimalJsLike | number | string | null
+    actualOpeningCash?: Decimal | DecimalJsLike | number | string | null
+    openingDifference?: Decimal | DecimalJsLike | number | string | null
+    openingDiscrepancyReason?: string | null
+    openingDenominations?: NullableJsonNullValueInput | InputJsonValue
+    openingRemarks?: string | null
+    verificationChecks?: NullableJsonNullValueInput | InputJsonValue
+    verificationExceptions?: NullableJsonNullValueInput | InputJsonValue
+    exceptionApprovalReason?: string | null
+    salesSummary?: NullableJsonNullValueInput | InputJsonValue
+    closingExpectedCash?: Decimal | DecimalJsLike | number | string | null
+    physicalCash?: Decimal | DecimalJsLike | number | string | null
+    cashDifference?: Decimal | DecimalJsLike | number | string | null
+    closingDenominations?: NullableJsonNullValueInput | InputJsonValue
+    notes?: string | null
+    finalizedAt?: Date | string | null
+    adjustments?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    branch: BranchCreateNestedOneWithoutDayClosesInput
+    terminal?: TerminalCreateNestedOneWithoutDayClosesInput
+    openedBy?: UserCreateNestedOneWithoutDayCloseOpeningsInput
+    openingApprovedBy?: UserCreateNestedOneWithoutDayCloseOpeningApprovalsInput
+    finalizedBy?: UserCreateNestedOneWithoutDayCloseFinalizationsInput
+    staffClosings?: StaffDayCloseCreateNestedManyWithoutDayCloseInput
+  }
+
+  export type DayCloseUncheckedCreateWithoutExceptionApprovedByInput = {
+    id?: number
+    branchId: number
+    businessDate: Date | string
+    status?: string
+    terminalId?: number | null
+    openedById?: number | null
+    openedAt?: Date | string | null
+    openingCash?: Decimal | DecimalJsLike | number | string | null
+    previousClosingCash?: Decimal | DecimalJsLike | number | string | null
+    additionalCashAdded?: Decimal | DecimalJsLike | number | string | null
+    cashRemovedBeforeOpening?: Decimal | DecimalJsLike | number | string | null
+    expectedOpeningCash?: Decimal | DecimalJsLike | number | string | null
+    actualOpeningCash?: Decimal | DecimalJsLike | number | string | null
+    openingDifference?: Decimal | DecimalJsLike | number | string | null
+    openingDiscrepancyReason?: string | null
+    openingApprovedById?: number | null
+    openingDenominations?: NullableJsonNullValueInput | InputJsonValue
+    openingRemarks?: string | null
+    verificationChecks?: NullableJsonNullValueInput | InputJsonValue
+    verificationExceptions?: NullableJsonNullValueInput | InputJsonValue
+    exceptionApprovalReason?: string | null
+    salesSummary?: NullableJsonNullValueInput | InputJsonValue
+    closingExpectedCash?: Decimal | DecimalJsLike | number | string | null
+    physicalCash?: Decimal | DecimalJsLike | number | string | null
+    cashDifference?: Decimal | DecimalJsLike | number | string | null
+    closingDenominations?: NullableJsonNullValueInput | InputJsonValue
+    notes?: string | null
+    finalizedById?: number | null
+    finalizedAt?: Date | string | null
+    adjustments?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    staffClosings?: StaffDayCloseUncheckedCreateNestedManyWithoutDayCloseInput
+  }
+
+  export type DayCloseCreateOrConnectWithoutExceptionApprovedByInput = {
+    where: DayCloseWhereUniqueInput
+    create: XOR<DayCloseCreateWithoutExceptionApprovedByInput, DayCloseUncheckedCreateWithoutExceptionApprovedByInput>
+  }
+
+  export type DayCloseCreateManyExceptionApprovedByInputEnvelope = {
+    data: DayCloseCreateManyExceptionApprovedByInput | DayCloseCreateManyExceptionApprovedByInput[]
     skipDuplicates?: boolean
   }
 
@@ -111821,6 +113386,7 @@ export namespace Prisma {
     status?: StringFilter<"Voucher"> | string
     reference?: StringNullableFilter<"Voucher"> | string | null
     createdBy?: IntFilter<"Voucher"> | number
+    branchId?: IntNullableFilter<"Voucher"> | number | null
     createdAt?: DateTimeFilter<"Voucher"> | Date | string
     updatedAt?: DateTimeFilter<"Voucher"> | Date | string
   }
@@ -111992,7 +113558,10 @@ export namespace Prisma {
     admin?: UserUpdateOneWithoutManagedStaffNestedInput
     branch?: BranchUpdateOneWithoutUsersNestedInput
     terminals?: TerminalUpdateManyWithoutUsersNestedInput
+    dayCloseOpenings?: DayCloseUpdateManyWithoutOpenedByNestedInput
+    dayCloseOpeningApprovals?: DayCloseUpdateManyWithoutOpeningApprovedByNestedInput
     dayCloseFinalizations?: DayCloseUpdateManyWithoutFinalizedByNestedInput
+    dayCloseExceptionApprovals?: DayCloseUpdateManyWithoutExceptionApprovedByNestedInput
     staffDayClosings?: StaffDayCloseUpdateManyWithoutUserNestedInput
   }
 
@@ -112040,7 +113609,10 @@ export namespace Prisma {
     leads?: LeadUncheckedUpdateManyWithoutAssignedUserNestedInput
     referredLeads?: LeadUncheckedUpdateManyWithoutReferredByNestedInput
     terminals?: TerminalUncheckedUpdateManyWithoutUsersNestedInput
+    dayCloseOpenings?: DayCloseUncheckedUpdateManyWithoutOpenedByNestedInput
+    dayCloseOpeningApprovals?: DayCloseUncheckedUpdateManyWithoutOpeningApprovedByNestedInput
     dayCloseFinalizations?: DayCloseUncheckedUpdateManyWithoutFinalizedByNestedInput
+    dayCloseExceptionApprovals?: DayCloseUncheckedUpdateManyWithoutExceptionApprovedByNestedInput
     staffDayClosings?: StaffDayCloseUncheckedUpdateManyWithoutUserNestedInput
   }
 
@@ -112127,6 +113699,7 @@ export namespace Prisma {
     leads?: LeadUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUpdateManyWithoutBranchNestedInput
     customerVouchers?: CustomerVoucherUpdateManyWithoutBranchNestedInput
+    vouchers?: VoucherUpdateManyWithoutBranchNestedInput
   }
 
   export type BranchUncheckedUpdateWithoutUsersInput = {
@@ -112166,6 +113739,7 @@ export namespace Prisma {
     leads?: LeadUncheckedUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUncheckedUpdateManyWithoutBranchNestedInput
     customerVouchers?: CustomerVoucherUncheckedUpdateManyWithoutBranchNestedInput
+    vouchers?: VoucherUncheckedUpdateManyWithoutBranchNestedInput
   }
 
   export type TerminalUpsertWithWhereUniqueWithoutUsersInput = {
@@ -112199,6 +113773,77 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"Terminal"> | Date | string
   }
 
+  export type DayCloseUpsertWithWhereUniqueWithoutOpenedByInput = {
+    where: DayCloseWhereUniqueInput
+    update: XOR<DayCloseUpdateWithoutOpenedByInput, DayCloseUncheckedUpdateWithoutOpenedByInput>
+    create: XOR<DayCloseCreateWithoutOpenedByInput, DayCloseUncheckedCreateWithoutOpenedByInput>
+  }
+
+  export type DayCloseUpdateWithWhereUniqueWithoutOpenedByInput = {
+    where: DayCloseWhereUniqueInput
+    data: XOR<DayCloseUpdateWithoutOpenedByInput, DayCloseUncheckedUpdateWithoutOpenedByInput>
+  }
+
+  export type DayCloseUpdateManyWithWhereWithoutOpenedByInput = {
+    where: DayCloseScalarWhereInput
+    data: XOR<DayCloseUpdateManyMutationInput, DayCloseUncheckedUpdateManyWithoutOpenedByInput>
+  }
+
+  export type DayCloseScalarWhereInput = {
+    AND?: DayCloseScalarWhereInput | DayCloseScalarWhereInput[]
+    OR?: DayCloseScalarWhereInput[]
+    NOT?: DayCloseScalarWhereInput | DayCloseScalarWhereInput[]
+    id?: IntFilter<"DayClose"> | number
+    branchId?: IntFilter<"DayClose"> | number
+    businessDate?: DateTimeFilter<"DayClose"> | Date | string
+    status?: StringFilter<"DayClose"> | string
+    terminalId?: IntNullableFilter<"DayClose"> | number | null
+    openedById?: IntNullableFilter<"DayClose"> | number | null
+    openedAt?: DateTimeNullableFilter<"DayClose"> | Date | string | null
+    openingCash?: DecimalNullableFilter<"DayClose"> | Decimal | DecimalJsLike | number | string | null
+    previousClosingCash?: DecimalNullableFilter<"DayClose"> | Decimal | DecimalJsLike | number | string | null
+    additionalCashAdded?: DecimalNullableFilter<"DayClose"> | Decimal | DecimalJsLike | number | string | null
+    cashRemovedBeforeOpening?: DecimalNullableFilter<"DayClose"> | Decimal | DecimalJsLike | number | string | null
+    expectedOpeningCash?: DecimalNullableFilter<"DayClose"> | Decimal | DecimalJsLike | number | string | null
+    actualOpeningCash?: DecimalNullableFilter<"DayClose"> | Decimal | DecimalJsLike | number | string | null
+    openingDifference?: DecimalNullableFilter<"DayClose"> | Decimal | DecimalJsLike | number | string | null
+    openingDiscrepancyReason?: StringNullableFilter<"DayClose"> | string | null
+    openingApprovedById?: IntNullableFilter<"DayClose"> | number | null
+    openingDenominations?: JsonNullableFilter<"DayClose">
+    openingRemarks?: StringNullableFilter<"DayClose"> | string | null
+    verificationChecks?: JsonNullableFilter<"DayClose">
+    verificationExceptions?: JsonNullableFilter<"DayClose">
+    exceptionApprovedById?: IntNullableFilter<"DayClose"> | number | null
+    exceptionApprovalReason?: StringNullableFilter<"DayClose"> | string | null
+    salesSummary?: JsonNullableFilter<"DayClose">
+    closingExpectedCash?: DecimalNullableFilter<"DayClose"> | Decimal | DecimalJsLike | number | string | null
+    physicalCash?: DecimalNullableFilter<"DayClose"> | Decimal | DecimalJsLike | number | string | null
+    cashDifference?: DecimalNullableFilter<"DayClose"> | Decimal | DecimalJsLike | number | string | null
+    closingDenominations?: JsonNullableFilter<"DayClose">
+    notes?: StringNullableFilter<"DayClose"> | string | null
+    finalizedById?: IntNullableFilter<"DayClose"> | number | null
+    finalizedAt?: DateTimeNullableFilter<"DayClose"> | Date | string | null
+    adjustments?: JsonNullableFilter<"DayClose">
+    createdAt?: DateTimeFilter<"DayClose"> | Date | string
+    updatedAt?: DateTimeFilter<"DayClose"> | Date | string
+  }
+
+  export type DayCloseUpsertWithWhereUniqueWithoutOpeningApprovedByInput = {
+    where: DayCloseWhereUniqueInput
+    update: XOR<DayCloseUpdateWithoutOpeningApprovedByInput, DayCloseUncheckedUpdateWithoutOpeningApprovedByInput>
+    create: XOR<DayCloseCreateWithoutOpeningApprovedByInput, DayCloseUncheckedCreateWithoutOpeningApprovedByInput>
+  }
+
+  export type DayCloseUpdateWithWhereUniqueWithoutOpeningApprovedByInput = {
+    where: DayCloseWhereUniqueInput
+    data: XOR<DayCloseUpdateWithoutOpeningApprovedByInput, DayCloseUncheckedUpdateWithoutOpeningApprovedByInput>
+  }
+
+  export type DayCloseUpdateManyWithWhereWithoutOpeningApprovedByInput = {
+    where: DayCloseScalarWhereInput
+    data: XOR<DayCloseUpdateManyMutationInput, DayCloseUncheckedUpdateManyWithoutOpeningApprovedByInput>
+  }
+
   export type DayCloseUpsertWithWhereUniqueWithoutFinalizedByInput = {
     where: DayCloseWhereUniqueInput
     update: XOR<DayCloseUpdateWithoutFinalizedByInput, DayCloseUncheckedUpdateWithoutFinalizedByInput>
@@ -112215,22 +113860,20 @@ export namespace Prisma {
     data: XOR<DayCloseUpdateManyMutationInput, DayCloseUncheckedUpdateManyWithoutFinalizedByInput>
   }
 
-  export type DayCloseScalarWhereInput = {
-    AND?: DayCloseScalarWhereInput | DayCloseScalarWhereInput[]
-    OR?: DayCloseScalarWhereInput[]
-    NOT?: DayCloseScalarWhereInput | DayCloseScalarWhereInput[]
-    id?: IntFilter<"DayClose"> | number
-    branchId?: IntFilter<"DayClose"> | number
-    businessDate?: DateTimeFilter<"DayClose"> | Date | string
-    status?: StringFilter<"DayClose"> | string
-    salesSummary?: JsonNullableFilter<"DayClose">
-    physicalCash?: DecimalNullableFilter<"DayClose"> | Decimal | DecimalJsLike | number | string | null
-    cashDifference?: DecimalNullableFilter<"DayClose"> | Decimal | DecimalJsLike | number | string | null
-    notes?: StringNullableFilter<"DayClose"> | string | null
-    finalizedById?: IntNullableFilter<"DayClose"> | number | null
-    finalizedAt?: DateTimeNullableFilter<"DayClose"> | Date | string | null
-    createdAt?: DateTimeFilter<"DayClose"> | Date | string
-    updatedAt?: DateTimeFilter<"DayClose"> | Date | string
+  export type DayCloseUpsertWithWhereUniqueWithoutExceptionApprovedByInput = {
+    where: DayCloseWhereUniqueInput
+    update: XOR<DayCloseUpdateWithoutExceptionApprovedByInput, DayCloseUncheckedUpdateWithoutExceptionApprovedByInput>
+    create: XOR<DayCloseCreateWithoutExceptionApprovedByInput, DayCloseUncheckedCreateWithoutExceptionApprovedByInput>
+  }
+
+  export type DayCloseUpdateWithWhereUniqueWithoutExceptionApprovedByInput = {
+    where: DayCloseWhereUniqueInput
+    data: XOR<DayCloseUpdateWithoutExceptionApprovedByInput, DayCloseUncheckedUpdateWithoutExceptionApprovedByInput>
+  }
+
+  export type DayCloseUpdateManyWithWhereWithoutExceptionApprovedByInput = {
+    where: DayCloseScalarWhereInput
+    data: XOR<DayCloseUpdateManyMutationInput, DayCloseUncheckedUpdateManyWithoutExceptionApprovedByInput>
   }
 
   export type StaffDayCloseUpsertWithWhereUniqueWithoutUserInput = {
@@ -113067,6 +114710,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     sales?: SaleCreateNestedManyWithoutTerminalInput
     users?: UserCreateNestedManyWithoutTerminalsInput
+    dayCloses?: DayCloseCreateNestedManyWithoutTerminalInput
   }
 
   export type TerminalUncheckedCreateWithoutBranchInput = {
@@ -113080,6 +114724,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     sales?: SaleUncheckedCreateNestedManyWithoutTerminalInput
     users?: UserUncheckedCreateNestedManyWithoutTerminalsInput
+    dayCloses?: DayCloseUncheckedCreateNestedManyWithoutTerminalInput
   }
 
   export type TerminalCreateOrConnectWithoutBranchInput = {
@@ -113307,7 +114952,10 @@ export namespace Prisma {
     admin?: UserCreateNestedOneWithoutManagedStaffInput
     managedStaff?: UserCreateNestedManyWithoutAdminInput
     terminals?: TerminalCreateNestedManyWithoutUsersInput
+    dayCloseOpenings?: DayCloseCreateNestedManyWithoutOpenedByInput
+    dayCloseOpeningApprovals?: DayCloseCreateNestedManyWithoutOpeningApprovedByInput
     dayCloseFinalizations?: DayCloseCreateNestedManyWithoutFinalizedByInput
+    dayCloseExceptionApprovals?: DayCloseCreateNestedManyWithoutExceptionApprovedByInput
     staffDayClosings?: StaffDayCloseCreateNestedManyWithoutUserInput
   }
 
@@ -113355,7 +115003,10 @@ export namespace Prisma {
     referredLeads?: LeadUncheckedCreateNestedManyWithoutReferredByInput
     managedStaff?: UserUncheckedCreateNestedManyWithoutAdminInput
     terminals?: TerminalUncheckedCreateNestedManyWithoutUsersInput
+    dayCloseOpenings?: DayCloseUncheckedCreateNestedManyWithoutOpenedByInput
+    dayCloseOpeningApprovals?: DayCloseUncheckedCreateNestedManyWithoutOpeningApprovedByInput
     dayCloseFinalizations?: DayCloseUncheckedCreateNestedManyWithoutFinalizedByInput
+    dayCloseExceptionApprovals?: DayCloseUncheckedCreateNestedManyWithoutExceptionApprovedByInput
     staffDayClosings?: StaffDayCloseUncheckedCreateNestedManyWithoutUserInput
   }
 
@@ -113372,14 +115023,35 @@ export namespace Prisma {
   export type DayCloseCreateWithoutBranchInput = {
     businessDate: Date | string
     status?: string
+    openedAt?: Date | string | null
+    openingCash?: Decimal | DecimalJsLike | number | string | null
+    previousClosingCash?: Decimal | DecimalJsLike | number | string | null
+    additionalCashAdded?: Decimal | DecimalJsLike | number | string | null
+    cashRemovedBeforeOpening?: Decimal | DecimalJsLike | number | string | null
+    expectedOpeningCash?: Decimal | DecimalJsLike | number | string | null
+    actualOpeningCash?: Decimal | DecimalJsLike | number | string | null
+    openingDifference?: Decimal | DecimalJsLike | number | string | null
+    openingDiscrepancyReason?: string | null
+    openingDenominations?: NullableJsonNullValueInput | InputJsonValue
+    openingRemarks?: string | null
+    verificationChecks?: NullableJsonNullValueInput | InputJsonValue
+    verificationExceptions?: NullableJsonNullValueInput | InputJsonValue
+    exceptionApprovalReason?: string | null
     salesSummary?: NullableJsonNullValueInput | InputJsonValue
+    closingExpectedCash?: Decimal | DecimalJsLike | number | string | null
     physicalCash?: Decimal | DecimalJsLike | number | string | null
     cashDifference?: Decimal | DecimalJsLike | number | string | null
+    closingDenominations?: NullableJsonNullValueInput | InputJsonValue
     notes?: string | null
     finalizedAt?: Date | string | null
+    adjustments?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
+    terminal?: TerminalCreateNestedOneWithoutDayClosesInput
+    openedBy?: UserCreateNestedOneWithoutDayCloseOpeningsInput
+    openingApprovedBy?: UserCreateNestedOneWithoutDayCloseOpeningApprovalsInput
     finalizedBy?: UserCreateNestedOneWithoutDayCloseFinalizationsInput
+    exceptionApprovedBy?: UserCreateNestedOneWithoutDayCloseExceptionApprovalsInput
     staffClosings?: StaffDayCloseCreateNestedManyWithoutDayCloseInput
   }
 
@@ -113387,12 +115059,33 @@ export namespace Prisma {
     id?: number
     businessDate: Date | string
     status?: string
+    terminalId?: number | null
+    openedById?: number | null
+    openedAt?: Date | string | null
+    openingCash?: Decimal | DecimalJsLike | number | string | null
+    previousClosingCash?: Decimal | DecimalJsLike | number | string | null
+    additionalCashAdded?: Decimal | DecimalJsLike | number | string | null
+    cashRemovedBeforeOpening?: Decimal | DecimalJsLike | number | string | null
+    expectedOpeningCash?: Decimal | DecimalJsLike | number | string | null
+    actualOpeningCash?: Decimal | DecimalJsLike | number | string | null
+    openingDifference?: Decimal | DecimalJsLike | number | string | null
+    openingDiscrepancyReason?: string | null
+    openingApprovedById?: number | null
+    openingDenominations?: NullableJsonNullValueInput | InputJsonValue
+    openingRemarks?: string | null
+    verificationChecks?: NullableJsonNullValueInput | InputJsonValue
+    verificationExceptions?: NullableJsonNullValueInput | InputJsonValue
+    exceptionApprovedById?: number | null
+    exceptionApprovalReason?: string | null
     salesSummary?: NullableJsonNullValueInput | InputJsonValue
+    closingExpectedCash?: Decimal | DecimalJsLike | number | string | null
     physicalCash?: Decimal | DecimalJsLike | number | string | null
     cashDifference?: Decimal | DecimalJsLike | number | string | null
+    closingDenominations?: NullableJsonNullValueInput | InputJsonValue
     notes?: string | null
     finalizedById?: number | null
     finalizedAt?: Date | string | null
+    adjustments?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
     staffClosings?: StaffDayCloseUncheckedCreateNestedManyWithoutDayCloseInput
@@ -113462,6 +115155,49 @@ export namespace Prisma {
 
   export type CustomerVoucherCreateManyBranchInputEnvelope = {
     data: CustomerVoucherCreateManyBranchInput | CustomerVoucherCreateManyBranchInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type VoucherCreateWithoutBranchInput = {
+    voucherNumber: string
+    voucherType: string
+    date: Date | string
+    narration?: string | null
+    totalAmount: Decimal | DecimalJsLike | number | string
+    status?: string
+    reference?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    entries?: JournalEntryCreateNestedManyWithoutVoucherInput
+    payrolls?: PayrollCreateNestedManyWithoutVoucherInput
+    salaryAdvances?: SalaryAdvanceCreateNestedManyWithoutVoucherInput
+    creator: UserCreateNestedOneWithoutVouchersInput
+  }
+
+  export type VoucherUncheckedCreateWithoutBranchInput = {
+    id?: number
+    voucherNumber: string
+    voucherType: string
+    date: Date | string
+    narration?: string | null
+    totalAmount: Decimal | DecimalJsLike | number | string
+    status?: string
+    reference?: string | null
+    createdBy: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    entries?: JournalEntryUncheckedCreateNestedManyWithoutVoucherInput
+    payrolls?: PayrollUncheckedCreateNestedManyWithoutVoucherInput
+    salaryAdvances?: SalaryAdvanceUncheckedCreateNestedManyWithoutVoucherInput
+  }
+
+  export type VoucherCreateOrConnectWithoutBranchInput = {
+    where: VoucherWhereUniqueInput
+    create: XOR<VoucherCreateWithoutBranchInput, VoucherUncheckedCreateWithoutBranchInput>
+  }
+
+  export type VoucherCreateManyBranchInputEnvelope = {
+    data: VoucherCreateManyBranchInput | VoucherCreateManyBranchInput[]
     skipDuplicates?: boolean
   }
 
@@ -114077,6 +115813,22 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"CustomerVoucher"> | Date | string
   }
 
+  export type VoucherUpsertWithWhereUniqueWithoutBranchInput = {
+    where: VoucherWhereUniqueInput
+    update: XOR<VoucherUpdateWithoutBranchInput, VoucherUncheckedUpdateWithoutBranchInput>
+    create: XOR<VoucherCreateWithoutBranchInput, VoucherUncheckedCreateWithoutBranchInput>
+  }
+
+  export type VoucherUpdateWithWhereUniqueWithoutBranchInput = {
+    where: VoucherWhereUniqueInput
+    data: XOR<VoucherUpdateWithoutBranchInput, VoucherUncheckedUpdateWithoutBranchInput>
+  }
+
+  export type VoucherUpdateManyWithWhereWithoutBranchInput = {
+    where: VoucherScalarWhereInput
+    data: XOR<VoucherUpdateManyMutationInput, VoucherUncheckedUpdateManyWithoutBranchInput>
+  }
+
   export type BankCreateWithoutCompanyProfilesInput = {
     name: string
     accountNumber?: string | null
@@ -114232,6 +115984,7 @@ export namespace Prisma {
     users?: UserCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseCreateNestedManyWithoutBranchInput
     customerVouchers?: CustomerVoucherCreateNestedManyWithoutBranchInput
+    vouchers?: VoucherCreateNestedManyWithoutBranchInput
   }
 
   export type BranchUncheckedCreateWithoutCustomersInput = {
@@ -114271,6 +116024,7 @@ export namespace Prisma {
     users?: UserUncheckedCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseUncheckedCreateNestedManyWithoutBranchInput
     customerVouchers?: CustomerVoucherUncheckedCreateNestedManyWithoutBranchInput
+    vouchers?: VoucherUncheckedCreateNestedManyWithoutBranchInput
   }
 
   export type BranchCreateOrConnectWithoutCustomersInput = {
@@ -114770,6 +116524,7 @@ export namespace Prisma {
     users?: UserUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUpdateManyWithoutBranchNestedInput
     customerVouchers?: CustomerVoucherUpdateManyWithoutBranchNestedInput
+    vouchers?: VoucherUpdateManyWithoutBranchNestedInput
   }
 
   export type BranchUncheckedUpdateWithoutCustomersInput = {
@@ -114809,6 +116564,7 @@ export namespace Prisma {
     users?: UserUncheckedUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUncheckedUpdateManyWithoutBranchNestedInput
     customerVouchers?: CustomerVoucherUncheckedUpdateManyWithoutBranchNestedInput
+    vouchers?: VoucherUncheckedUpdateManyWithoutBranchNestedInput
   }
 
   export type DeliveryChallanUpsertWithWhereUniqueWithoutCustomerInput = {
@@ -116581,6 +118337,7 @@ export namespace Prisma {
     users?: UserCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseCreateNestedManyWithoutBranchInput
     customerVouchers?: CustomerVoucherCreateNestedManyWithoutBranchInput
+    vouchers?: VoucherCreateNestedManyWithoutBranchInput
   }
 
   export type BranchUncheckedCreateWithoutProductStocksInput = {
@@ -116620,6 +118377,7 @@ export namespace Prisma {
     users?: UserUncheckedCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseUncheckedCreateNestedManyWithoutBranchInput
     customerVouchers?: CustomerVoucherUncheckedCreateNestedManyWithoutBranchInput
+    vouchers?: VoucherUncheckedCreateNestedManyWithoutBranchInput
   }
 
   export type BranchCreateOrConnectWithoutProductStocksInput = {
@@ -116758,6 +118516,7 @@ export namespace Prisma {
     users?: UserUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUpdateManyWithoutBranchNestedInput
     customerVouchers?: CustomerVoucherUpdateManyWithoutBranchNestedInput
+    vouchers?: VoucherUpdateManyWithoutBranchNestedInput
   }
 
   export type BranchUncheckedUpdateWithoutProductStocksInput = {
@@ -116797,6 +118556,7 @@ export namespace Prisma {
     users?: UserUncheckedUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUncheckedUpdateManyWithoutBranchNestedInput
     customerVouchers?: CustomerVoucherUncheckedUpdateManyWithoutBranchNestedInput
+    vouchers?: VoucherUncheckedUpdateManyWithoutBranchNestedInput
   }
 
   export type ProductUpsertWithoutStocksInput = {
@@ -116925,6 +118685,7 @@ export namespace Prisma {
     users?: UserCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseCreateNestedManyWithoutBranchInput
     customerVouchers?: CustomerVoucherCreateNestedManyWithoutBranchInput
+    vouchers?: VoucherCreateNestedManyWithoutBranchInput
   }
 
   export type BranchUncheckedCreateWithoutPurchasesInput = {
@@ -116964,6 +118725,7 @@ export namespace Prisma {
     users?: UserUncheckedCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseUncheckedCreateNestedManyWithoutBranchInput
     customerVouchers?: CustomerVoucherUncheckedCreateNestedManyWithoutBranchInput
+    vouchers?: VoucherUncheckedCreateNestedManyWithoutBranchInput
   }
 
   export type BranchCreateOrConnectWithoutPurchasesInput = {
@@ -117127,6 +118889,7 @@ export namespace Prisma {
     users?: UserUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUpdateManyWithoutBranchNestedInput
     customerVouchers?: CustomerVoucherUpdateManyWithoutBranchNestedInput
+    vouchers?: VoucherUpdateManyWithoutBranchNestedInput
   }
 
   export type BranchUncheckedUpdateWithoutPurchasesInput = {
@@ -117166,6 +118929,7 @@ export namespace Prisma {
     users?: UserUncheckedUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUncheckedUpdateManyWithoutBranchNestedInput
     customerVouchers?: CustomerVoucherUncheckedUpdateManyWithoutBranchNestedInput
+    vouchers?: VoucherUncheckedUpdateManyWithoutBranchNestedInput
   }
 
   export type FinancialYearUpsertWithoutPurchasesInput = {
@@ -117615,6 +119379,7 @@ export namespace Prisma {
     users?: UserCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseCreateNestedManyWithoutBranchInput
     customerVouchers?: CustomerVoucherCreateNestedManyWithoutBranchInput
+    vouchers?: VoucherCreateNestedManyWithoutBranchInput
   }
 
   export type BranchUncheckedCreateWithoutSalesInput = {
@@ -117654,6 +119419,7 @@ export namespace Prisma {
     users?: UserUncheckedCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseUncheckedCreateNestedManyWithoutBranchInput
     customerVouchers?: CustomerVoucherUncheckedCreateNestedManyWithoutBranchInput
+    vouchers?: VoucherUncheckedCreateNestedManyWithoutBranchInput
   }
 
   export type BranchCreateOrConnectWithoutSalesInput = {
@@ -117864,7 +119630,10 @@ export namespace Prisma {
     managedStaff?: UserCreateNestedManyWithoutAdminInput
     branch?: BranchCreateNestedOneWithoutUsersInput
     terminals?: TerminalCreateNestedManyWithoutUsersInput
+    dayCloseOpenings?: DayCloseCreateNestedManyWithoutOpenedByInput
+    dayCloseOpeningApprovals?: DayCloseCreateNestedManyWithoutOpeningApprovedByInput
     dayCloseFinalizations?: DayCloseCreateNestedManyWithoutFinalizedByInput
+    dayCloseExceptionApprovals?: DayCloseCreateNestedManyWithoutExceptionApprovedByInput
     staffDayClosings?: StaffDayCloseCreateNestedManyWithoutUserInput
   }
 
@@ -117912,7 +119681,10 @@ export namespace Prisma {
     referredLeads?: LeadUncheckedCreateNestedManyWithoutReferredByInput
     managedStaff?: UserUncheckedCreateNestedManyWithoutAdminInput
     terminals?: TerminalUncheckedCreateNestedManyWithoutUsersInput
+    dayCloseOpenings?: DayCloseUncheckedCreateNestedManyWithoutOpenedByInput
+    dayCloseOpeningApprovals?: DayCloseUncheckedCreateNestedManyWithoutOpeningApprovedByInput
     dayCloseFinalizations?: DayCloseUncheckedCreateNestedManyWithoutFinalizedByInput
+    dayCloseExceptionApprovals?: DayCloseUncheckedCreateNestedManyWithoutExceptionApprovedByInput
     staffDayClosings?: StaffDayCloseUncheckedCreateNestedManyWithoutUserInput
   }
 
@@ -117931,6 +119703,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     branch?: BranchCreateNestedOneWithoutTerminalsInput
     users?: UserCreateNestedManyWithoutTerminalsInput
+    dayCloses?: DayCloseCreateNestedManyWithoutTerminalInput
   }
 
   export type TerminalUncheckedCreateWithoutSalesInput = {
@@ -117944,6 +119717,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     users?: UserUncheckedCreateNestedManyWithoutTerminalsInput
+    dayCloses?: DayCloseUncheckedCreateNestedManyWithoutTerminalInput
   }
 
   export type TerminalCreateOrConnectWithoutSalesInput = {
@@ -118272,6 +120046,7 @@ export namespace Prisma {
     users?: UserUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUpdateManyWithoutBranchNestedInput
     customerVouchers?: CustomerVoucherUpdateManyWithoutBranchNestedInput
+    vouchers?: VoucherUpdateManyWithoutBranchNestedInput
   }
 
   export type BranchUncheckedUpdateWithoutSalesInput = {
@@ -118311,6 +120086,7 @@ export namespace Prisma {
     users?: UserUncheckedUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUncheckedUpdateManyWithoutBranchNestedInput
     customerVouchers?: CustomerVoucherUncheckedUpdateManyWithoutBranchNestedInput
+    vouchers?: VoucherUncheckedUpdateManyWithoutBranchNestedInput
   }
 
   export type CustomerUpsertWithoutSalesInput = {
@@ -118545,7 +120321,10 @@ export namespace Prisma {
     managedStaff?: UserUpdateManyWithoutAdminNestedInput
     branch?: BranchUpdateOneWithoutUsersNestedInput
     terminals?: TerminalUpdateManyWithoutUsersNestedInput
+    dayCloseOpenings?: DayCloseUpdateManyWithoutOpenedByNestedInput
+    dayCloseOpeningApprovals?: DayCloseUpdateManyWithoutOpeningApprovedByNestedInput
     dayCloseFinalizations?: DayCloseUpdateManyWithoutFinalizedByNestedInput
+    dayCloseExceptionApprovals?: DayCloseUpdateManyWithoutExceptionApprovedByNestedInput
     staffDayClosings?: StaffDayCloseUpdateManyWithoutUserNestedInput
   }
 
@@ -118593,7 +120372,10 @@ export namespace Prisma {
     referredLeads?: LeadUncheckedUpdateManyWithoutReferredByNestedInput
     managedStaff?: UserUncheckedUpdateManyWithoutAdminNestedInput
     terminals?: TerminalUncheckedUpdateManyWithoutUsersNestedInput
+    dayCloseOpenings?: DayCloseUncheckedUpdateManyWithoutOpenedByNestedInput
+    dayCloseOpeningApprovals?: DayCloseUncheckedUpdateManyWithoutOpeningApprovedByNestedInput
     dayCloseFinalizations?: DayCloseUncheckedUpdateManyWithoutFinalizedByNestedInput
+    dayCloseExceptionApprovals?: DayCloseUncheckedUpdateManyWithoutExceptionApprovedByNestedInput
     staffDayClosings?: StaffDayCloseUncheckedUpdateManyWithoutUserNestedInput
   }
 
@@ -118618,6 +120400,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     branch?: BranchUpdateOneWithoutTerminalsNestedInput
     users?: UserUpdateManyWithoutTerminalsNestedInput
+    dayCloses?: DayCloseUpdateManyWithoutTerminalNestedInput
   }
 
   export type TerminalUncheckedUpdateWithoutSalesInput = {
@@ -118631,6 +120414,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     users?: UserUncheckedUpdateManyWithoutTerminalsNestedInput
+    dayCloses?: DayCloseUncheckedUpdateManyWithoutTerminalNestedInput
   }
 
   export type SaleItemUpsertWithWhereUniqueWithoutSaleInput = {
@@ -119228,6 +121012,7 @@ export namespace Prisma {
     users?: UserCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseCreateNestedManyWithoutBranchInput
     customerVouchers?: CustomerVoucherCreateNestedManyWithoutBranchInput
+    vouchers?: VoucherCreateNestedManyWithoutBranchInput
   }
 
   export type BranchUncheckedCreateWithoutExpensesInput = {
@@ -119267,6 +121052,7 @@ export namespace Prisma {
     users?: UserUncheckedCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseUncheckedCreateNestedManyWithoutBranchInput
     customerVouchers?: CustomerVoucherUncheckedCreateNestedManyWithoutBranchInput
+    vouchers?: VoucherUncheckedCreateNestedManyWithoutBranchInput
   }
 
   export type BranchCreateOrConnectWithoutExpensesInput = {
@@ -119321,6 +121107,7 @@ export namespace Prisma {
     users?: UserUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUpdateManyWithoutBranchNestedInput
     customerVouchers?: CustomerVoucherUpdateManyWithoutBranchNestedInput
+    vouchers?: VoucherUpdateManyWithoutBranchNestedInput
   }
 
   export type BranchUncheckedUpdateWithoutExpensesInput = {
@@ -119360,6 +121147,7 @@ export namespace Prisma {
     users?: UserUncheckedUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUncheckedUpdateManyWithoutBranchNestedInput
     customerVouchers?: CustomerVoucherUncheckedUpdateManyWithoutBranchNestedInput
+    vouchers?: VoucherUncheckedUpdateManyWithoutBranchNestedInput
   }
 
   export type BranchCreateWithoutPaymentsInput = {
@@ -119398,6 +121186,7 @@ export namespace Prisma {
     users?: UserCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseCreateNestedManyWithoutBranchInput
     customerVouchers?: CustomerVoucherCreateNestedManyWithoutBranchInput
+    vouchers?: VoucherCreateNestedManyWithoutBranchInput
   }
 
   export type BranchUncheckedCreateWithoutPaymentsInput = {
@@ -119437,6 +121226,7 @@ export namespace Prisma {
     users?: UserUncheckedCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseUncheckedCreateNestedManyWithoutBranchInput
     customerVouchers?: CustomerVoucherUncheckedCreateNestedManyWithoutBranchInput
+    vouchers?: VoucherUncheckedCreateNestedManyWithoutBranchInput
   }
 
   export type BranchCreateOrConnectWithoutPaymentsInput = {
@@ -119743,6 +121533,7 @@ export namespace Prisma {
     users?: UserUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUpdateManyWithoutBranchNestedInput
     customerVouchers?: CustomerVoucherUpdateManyWithoutBranchNestedInput
+    vouchers?: VoucherUpdateManyWithoutBranchNestedInput
   }
 
   export type BranchUncheckedUpdateWithoutPaymentsInput = {
@@ -119782,6 +121573,7 @@ export namespace Prisma {
     users?: UserUncheckedUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUncheckedUpdateManyWithoutBranchNestedInput
     customerVouchers?: CustomerVoucherUncheckedUpdateManyWithoutBranchNestedInput
+    vouchers?: VoucherUncheckedUpdateManyWithoutBranchNestedInput
   }
 
   export type CustomerUpsertWithoutPaymentsInput = {
@@ -120137,6 +121929,7 @@ export namespace Prisma {
     users?: UserCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseCreateNestedManyWithoutBranchInput
     customerVouchers?: CustomerVoucherCreateNestedManyWithoutBranchInput
+    vouchers?: VoucherCreateNestedManyWithoutBranchInput
   }
 
   export type BranchUncheckedCreateWithoutQuotationsInput = {
@@ -120176,6 +121969,7 @@ export namespace Prisma {
     users?: UserUncheckedCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseUncheckedCreateNestedManyWithoutBranchInput
     customerVouchers?: CustomerVoucherUncheckedCreateNestedManyWithoutBranchInput
+    vouchers?: VoucherUncheckedCreateNestedManyWithoutBranchInput
   }
 
   export type BranchCreateOrConnectWithoutQuotationsInput = {
@@ -120575,6 +122369,7 @@ export namespace Prisma {
     users?: UserUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUpdateManyWithoutBranchNestedInput
     customerVouchers?: CustomerVoucherUpdateManyWithoutBranchNestedInput
+    vouchers?: VoucherUpdateManyWithoutBranchNestedInput
   }
 
   export type BranchUncheckedUpdateWithoutQuotationsInput = {
@@ -120614,6 +122409,7 @@ export namespace Prisma {
     users?: UserUncheckedUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUncheckedUpdateManyWithoutBranchNestedInput
     customerVouchers?: CustomerVoucherUncheckedUpdateManyWithoutBranchNestedInput
+    vouchers?: VoucherUncheckedUpdateManyWithoutBranchNestedInput
   }
 
   export type CustomerUpsertWithoutQuotationsInput = {
@@ -121268,6 +123064,7 @@ export namespace Prisma {
     users?: UserCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseCreateNestedManyWithoutBranchInput
     customerVouchers?: CustomerVoucherCreateNestedManyWithoutBranchInput
+    vouchers?: VoucherCreateNestedManyWithoutBranchInput
   }
 
   export type BranchUncheckedCreateWithoutOutgoingTransfersInput = {
@@ -121307,6 +123104,7 @@ export namespace Prisma {
     users?: UserUncheckedCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseUncheckedCreateNestedManyWithoutBranchInput
     customerVouchers?: CustomerVoucherUncheckedCreateNestedManyWithoutBranchInput
+    vouchers?: VoucherUncheckedCreateNestedManyWithoutBranchInput
   }
 
   export type BranchCreateOrConnectWithoutOutgoingTransfersInput = {
@@ -121357,7 +123155,10 @@ export namespace Prisma {
     managedStaff?: UserCreateNestedManyWithoutAdminInput
     branch?: BranchCreateNestedOneWithoutUsersInput
     terminals?: TerminalCreateNestedManyWithoutUsersInput
+    dayCloseOpenings?: DayCloseCreateNestedManyWithoutOpenedByInput
+    dayCloseOpeningApprovals?: DayCloseCreateNestedManyWithoutOpeningApprovedByInput
     dayCloseFinalizations?: DayCloseCreateNestedManyWithoutFinalizedByInput
+    dayCloseExceptionApprovals?: DayCloseCreateNestedManyWithoutExceptionApprovedByInput
     staffDayClosings?: StaffDayCloseCreateNestedManyWithoutUserInput
   }
 
@@ -121405,7 +123206,10 @@ export namespace Prisma {
     referredLeads?: LeadUncheckedCreateNestedManyWithoutReferredByInput
     managedStaff?: UserUncheckedCreateNestedManyWithoutAdminInput
     terminals?: TerminalUncheckedCreateNestedManyWithoutUsersInput
+    dayCloseOpenings?: DayCloseUncheckedCreateNestedManyWithoutOpenedByInput
+    dayCloseOpeningApprovals?: DayCloseUncheckedCreateNestedManyWithoutOpeningApprovedByInput
     dayCloseFinalizations?: DayCloseUncheckedCreateNestedManyWithoutFinalizedByInput
+    dayCloseExceptionApprovals?: DayCloseUncheckedCreateNestedManyWithoutExceptionApprovedByInput
     staffDayClosings?: StaffDayCloseUncheckedCreateNestedManyWithoutUserInput
   }
 
@@ -121450,6 +123254,7 @@ export namespace Prisma {
     users?: UserCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseCreateNestedManyWithoutBranchInput
     customerVouchers?: CustomerVoucherCreateNestedManyWithoutBranchInput
+    vouchers?: VoucherCreateNestedManyWithoutBranchInput
   }
 
   export type BranchUncheckedCreateWithoutIncomingTransfersInput = {
@@ -121489,6 +123294,7 @@ export namespace Prisma {
     users?: UserUncheckedCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseUncheckedCreateNestedManyWithoutBranchInput
     customerVouchers?: CustomerVoucherUncheckedCreateNestedManyWithoutBranchInput
+    vouchers?: VoucherUncheckedCreateNestedManyWithoutBranchInput
   }
 
   export type BranchCreateOrConnectWithoutIncomingTransfersInput = {
@@ -121572,6 +123378,7 @@ export namespace Prisma {
     users?: UserUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUpdateManyWithoutBranchNestedInput
     customerVouchers?: CustomerVoucherUpdateManyWithoutBranchNestedInput
+    vouchers?: VoucherUpdateManyWithoutBranchNestedInput
   }
 
   export type BranchUncheckedUpdateWithoutOutgoingTransfersInput = {
@@ -121611,6 +123418,7 @@ export namespace Prisma {
     users?: UserUncheckedUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUncheckedUpdateManyWithoutBranchNestedInput
     customerVouchers?: CustomerVoucherUncheckedUpdateManyWithoutBranchNestedInput
+    vouchers?: VoucherUncheckedUpdateManyWithoutBranchNestedInput
   }
 
   export type UserUpsertWithoutReceivedTransfersInput = {
@@ -121667,7 +123475,10 @@ export namespace Prisma {
     managedStaff?: UserUpdateManyWithoutAdminNestedInput
     branch?: BranchUpdateOneWithoutUsersNestedInput
     terminals?: TerminalUpdateManyWithoutUsersNestedInput
+    dayCloseOpenings?: DayCloseUpdateManyWithoutOpenedByNestedInput
+    dayCloseOpeningApprovals?: DayCloseUpdateManyWithoutOpeningApprovedByNestedInput
     dayCloseFinalizations?: DayCloseUpdateManyWithoutFinalizedByNestedInput
+    dayCloseExceptionApprovals?: DayCloseUpdateManyWithoutExceptionApprovedByNestedInput
     staffDayClosings?: StaffDayCloseUpdateManyWithoutUserNestedInput
   }
 
@@ -121715,7 +123526,10 @@ export namespace Prisma {
     referredLeads?: LeadUncheckedUpdateManyWithoutReferredByNestedInput
     managedStaff?: UserUncheckedUpdateManyWithoutAdminNestedInput
     terminals?: TerminalUncheckedUpdateManyWithoutUsersNestedInput
+    dayCloseOpenings?: DayCloseUncheckedUpdateManyWithoutOpenedByNestedInput
+    dayCloseOpeningApprovals?: DayCloseUncheckedUpdateManyWithoutOpeningApprovedByNestedInput
     dayCloseFinalizations?: DayCloseUncheckedUpdateManyWithoutFinalizedByNestedInput
+    dayCloseExceptionApprovals?: DayCloseUncheckedUpdateManyWithoutExceptionApprovedByNestedInput
     staffDayClosings?: StaffDayCloseUncheckedUpdateManyWithoutUserNestedInput
   }
 
@@ -121766,6 +123580,7 @@ export namespace Prisma {
     users?: UserUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUpdateManyWithoutBranchNestedInput
     customerVouchers?: CustomerVoucherUpdateManyWithoutBranchNestedInput
+    vouchers?: VoucherUpdateManyWithoutBranchNestedInput
   }
 
   export type BranchUncheckedUpdateWithoutIncomingTransfersInput = {
@@ -121805,6 +123620,7 @@ export namespace Prisma {
     users?: UserUncheckedUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUncheckedUpdateManyWithoutBranchNestedInput
     customerVouchers?: CustomerVoucherUncheckedUpdateManyWithoutBranchNestedInput
+    vouchers?: VoucherUncheckedUpdateManyWithoutBranchNestedInput
   }
 
   export type StockTransferItemUpsertWithWhereUniqueWithoutTransferInput = {
@@ -122099,6 +123915,7 @@ export namespace Prisma {
     users?: UserCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseCreateNestedManyWithoutBranchInput
     customerVouchers?: CustomerVoucherCreateNestedManyWithoutBranchInput
+    vouchers?: VoucherCreateNestedManyWithoutBranchInput
   }
 
   export type BranchUncheckedCreateWithoutBarcodeSettingInput = {
@@ -122138,6 +123955,7 @@ export namespace Prisma {
     users?: UserUncheckedCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseUncheckedCreateNestedManyWithoutBranchInput
     customerVouchers?: CustomerVoucherUncheckedCreateNestedManyWithoutBranchInput
+    vouchers?: VoucherUncheckedCreateNestedManyWithoutBranchInput
   }
 
   export type BranchCreateOrConnectWithoutBarcodeSettingInput = {
@@ -122192,6 +124010,7 @@ export namespace Prisma {
     users?: UserUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUpdateManyWithoutBranchNestedInput
     customerVouchers?: CustomerVoucherUpdateManyWithoutBranchNestedInput
+    vouchers?: VoucherUpdateManyWithoutBranchNestedInput
   }
 
   export type BranchUncheckedUpdateWithoutBarcodeSettingInput = {
@@ -122231,6 +124050,7 @@ export namespace Prisma {
     users?: UserUncheckedUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUncheckedUpdateManyWithoutBranchNestedInput
     customerVouchers?: CustomerVoucherUncheckedUpdateManyWithoutBranchNestedInput
+    vouchers?: VoucherUncheckedUpdateManyWithoutBranchNestedInput
   }
 
   export type CategoryCreateWithoutDefaultLabelDesignInput = {
@@ -122368,7 +124188,10 @@ export namespace Prisma {
     managedStaff?: UserCreateNestedManyWithoutAdminInput
     branch?: BranchCreateNestedOneWithoutUsersInput
     terminals?: TerminalCreateNestedManyWithoutUsersInput
+    dayCloseOpenings?: DayCloseCreateNestedManyWithoutOpenedByInput
+    dayCloseOpeningApprovals?: DayCloseCreateNestedManyWithoutOpeningApprovedByInput
     dayCloseFinalizations?: DayCloseCreateNestedManyWithoutFinalizedByInput
+    dayCloseExceptionApprovals?: DayCloseCreateNestedManyWithoutExceptionApprovedByInput
     staffDayClosings?: StaffDayCloseCreateNestedManyWithoutUserInput
   }
 
@@ -122416,7 +124239,10 @@ export namespace Prisma {
     referredLeads?: LeadUncheckedCreateNestedManyWithoutReferredByInput
     managedStaff?: UserUncheckedCreateNestedManyWithoutAdminInput
     terminals?: TerminalUncheckedCreateNestedManyWithoutUsersInput
+    dayCloseOpenings?: DayCloseUncheckedCreateNestedManyWithoutOpenedByInput
+    dayCloseOpeningApprovals?: DayCloseUncheckedCreateNestedManyWithoutOpeningApprovedByInput
     dayCloseFinalizations?: DayCloseUncheckedCreateNestedManyWithoutFinalizedByInput
+    dayCloseExceptionApprovals?: DayCloseUncheckedCreateNestedManyWithoutExceptionApprovedByInput
     staffDayClosings?: StaffDayCloseUncheckedCreateNestedManyWithoutUserInput
   }
 
@@ -122527,7 +124353,10 @@ export namespace Prisma {
     managedStaff?: UserUpdateManyWithoutAdminNestedInput
     branch?: BranchUpdateOneWithoutUsersNestedInput
     terminals?: TerminalUpdateManyWithoutUsersNestedInput
+    dayCloseOpenings?: DayCloseUpdateManyWithoutOpenedByNestedInput
+    dayCloseOpeningApprovals?: DayCloseUpdateManyWithoutOpeningApprovedByNestedInput
     dayCloseFinalizations?: DayCloseUpdateManyWithoutFinalizedByNestedInput
+    dayCloseExceptionApprovals?: DayCloseUpdateManyWithoutExceptionApprovedByNestedInput
     staffDayClosings?: StaffDayCloseUpdateManyWithoutUserNestedInput
   }
 
@@ -122575,7 +124404,10 @@ export namespace Prisma {
     referredLeads?: LeadUncheckedUpdateManyWithoutReferredByNestedInput
     managedStaff?: UserUncheckedUpdateManyWithoutAdminNestedInput
     terminals?: TerminalUncheckedUpdateManyWithoutUsersNestedInput
+    dayCloseOpenings?: DayCloseUncheckedUpdateManyWithoutOpenedByNestedInput
+    dayCloseOpeningApprovals?: DayCloseUncheckedUpdateManyWithoutOpeningApprovedByNestedInput
     dayCloseFinalizations?: DayCloseUncheckedUpdateManyWithoutFinalizedByNestedInput
+    dayCloseExceptionApprovals?: DayCloseUncheckedUpdateManyWithoutExceptionApprovedByNestedInput
     staffDayClosings?: StaffDayCloseUncheckedUpdateManyWithoutUserNestedInput
   }
 
@@ -122754,6 +124586,7 @@ export namespace Prisma {
     users?: UserCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseCreateNestedManyWithoutBranchInput
     customerVouchers?: CustomerVoucherCreateNestedManyWithoutBranchInput
+    vouchers?: VoucherCreateNestedManyWithoutBranchInput
   }
 
   export type BranchUncheckedCreateWithoutAttendanceInput = {
@@ -122793,6 +124626,7 @@ export namespace Prisma {
     users?: UserUncheckedCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseUncheckedCreateNestedManyWithoutBranchInput
     customerVouchers?: CustomerVoucherUncheckedCreateNestedManyWithoutBranchInput
+    vouchers?: VoucherUncheckedCreateNestedManyWithoutBranchInput
   }
 
   export type BranchCreateOrConnectWithoutAttendanceInput = {
@@ -122843,7 +124677,10 @@ export namespace Prisma {
     managedStaff?: UserCreateNestedManyWithoutAdminInput
     branch?: BranchCreateNestedOneWithoutUsersInput
     terminals?: TerminalCreateNestedManyWithoutUsersInput
+    dayCloseOpenings?: DayCloseCreateNestedManyWithoutOpenedByInput
+    dayCloseOpeningApprovals?: DayCloseCreateNestedManyWithoutOpeningApprovedByInput
     dayCloseFinalizations?: DayCloseCreateNestedManyWithoutFinalizedByInput
+    dayCloseExceptionApprovals?: DayCloseCreateNestedManyWithoutExceptionApprovedByInput
     staffDayClosings?: StaffDayCloseCreateNestedManyWithoutUserInput
   }
 
@@ -122891,7 +124728,10 @@ export namespace Prisma {
     referredLeads?: LeadUncheckedCreateNestedManyWithoutReferredByInput
     managedStaff?: UserUncheckedCreateNestedManyWithoutAdminInput
     terminals?: TerminalUncheckedCreateNestedManyWithoutUsersInput
+    dayCloseOpenings?: DayCloseUncheckedCreateNestedManyWithoutOpenedByInput
+    dayCloseOpeningApprovals?: DayCloseUncheckedCreateNestedManyWithoutOpeningApprovedByInput
     dayCloseFinalizations?: DayCloseUncheckedCreateNestedManyWithoutFinalizedByInput
+    dayCloseExceptionApprovals?: DayCloseUncheckedCreateNestedManyWithoutExceptionApprovedByInput
     staffDayClosings?: StaffDayCloseUncheckedCreateNestedManyWithoutUserInput
   }
 
@@ -122947,6 +124787,7 @@ export namespace Prisma {
     users?: UserUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUpdateManyWithoutBranchNestedInput
     customerVouchers?: CustomerVoucherUpdateManyWithoutBranchNestedInput
+    vouchers?: VoucherUpdateManyWithoutBranchNestedInput
   }
 
   export type BranchUncheckedUpdateWithoutAttendanceInput = {
@@ -122986,6 +124827,7 @@ export namespace Prisma {
     users?: UserUncheckedUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUncheckedUpdateManyWithoutBranchNestedInput
     customerVouchers?: CustomerVoucherUncheckedUpdateManyWithoutBranchNestedInput
+    vouchers?: VoucherUncheckedUpdateManyWithoutBranchNestedInput
   }
 
   export type UserUpsertWithoutAttendanceInput = {
@@ -123042,7 +124884,10 @@ export namespace Prisma {
     managedStaff?: UserUpdateManyWithoutAdminNestedInput
     branch?: BranchUpdateOneWithoutUsersNestedInput
     terminals?: TerminalUpdateManyWithoutUsersNestedInput
+    dayCloseOpenings?: DayCloseUpdateManyWithoutOpenedByNestedInput
+    dayCloseOpeningApprovals?: DayCloseUpdateManyWithoutOpeningApprovedByNestedInput
     dayCloseFinalizations?: DayCloseUpdateManyWithoutFinalizedByNestedInput
+    dayCloseExceptionApprovals?: DayCloseUpdateManyWithoutExceptionApprovedByNestedInput
     staffDayClosings?: StaffDayCloseUpdateManyWithoutUserNestedInput
   }
 
@@ -123090,7 +124935,10 @@ export namespace Prisma {
     referredLeads?: LeadUncheckedUpdateManyWithoutReferredByNestedInput
     managedStaff?: UserUncheckedUpdateManyWithoutAdminNestedInput
     terminals?: TerminalUncheckedUpdateManyWithoutUsersNestedInput
+    dayCloseOpenings?: DayCloseUncheckedUpdateManyWithoutOpenedByNestedInput
+    dayCloseOpeningApprovals?: DayCloseUncheckedUpdateManyWithoutOpeningApprovedByNestedInput
     dayCloseFinalizations?: DayCloseUncheckedUpdateManyWithoutFinalizedByNestedInput
+    dayCloseExceptionApprovals?: DayCloseUncheckedUpdateManyWithoutExceptionApprovedByNestedInput
     staffDayClosings?: StaffDayCloseUncheckedUpdateManyWithoutUserNestedInput
   }
 
@@ -123137,7 +124985,10 @@ export namespace Prisma {
     managedStaff?: UserCreateNestedManyWithoutAdminInput
     branch?: BranchCreateNestedOneWithoutUsersInput
     terminals?: TerminalCreateNestedManyWithoutUsersInput
+    dayCloseOpenings?: DayCloseCreateNestedManyWithoutOpenedByInput
+    dayCloseOpeningApprovals?: DayCloseCreateNestedManyWithoutOpeningApprovedByInput
     dayCloseFinalizations?: DayCloseCreateNestedManyWithoutFinalizedByInput
+    dayCloseExceptionApprovals?: DayCloseCreateNestedManyWithoutExceptionApprovedByInput
     staffDayClosings?: StaffDayCloseCreateNestedManyWithoutUserInput
   }
 
@@ -123185,7 +125036,10 @@ export namespace Prisma {
     referredLeads?: LeadUncheckedCreateNestedManyWithoutReferredByInput
     managedStaff?: UserUncheckedCreateNestedManyWithoutAdminInput
     terminals?: TerminalUncheckedCreateNestedManyWithoutUsersInput
+    dayCloseOpenings?: DayCloseUncheckedCreateNestedManyWithoutOpenedByInput
+    dayCloseOpeningApprovals?: DayCloseUncheckedCreateNestedManyWithoutOpeningApprovedByInput
     dayCloseFinalizations?: DayCloseUncheckedCreateNestedManyWithoutFinalizedByInput
+    dayCloseExceptionApprovals?: DayCloseUncheckedCreateNestedManyWithoutExceptionApprovedByInput
     staffDayClosings?: StaffDayCloseUncheckedCreateNestedManyWithoutUserInput
   }
 
@@ -123230,6 +125084,7 @@ export namespace Prisma {
     users?: UserCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseCreateNestedManyWithoutBranchInput
     customerVouchers?: CustomerVoucherCreateNestedManyWithoutBranchInput
+    vouchers?: VoucherCreateNestedManyWithoutBranchInput
   }
 
   export type BranchUncheckedCreateWithoutLeaveRequestsInput = {
@@ -123269,6 +125124,7 @@ export namespace Prisma {
     users?: UserUncheckedCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseUncheckedCreateNestedManyWithoutBranchInput
     customerVouchers?: CustomerVoucherUncheckedCreateNestedManyWithoutBranchInput
+    vouchers?: VoucherUncheckedCreateNestedManyWithoutBranchInput
   }
 
   export type BranchCreateOrConnectWithoutLeaveRequestsInput = {
@@ -123345,7 +125201,10 @@ export namespace Prisma {
     managedStaff?: UserCreateNestedManyWithoutAdminInput
     branch?: BranchCreateNestedOneWithoutUsersInput
     terminals?: TerminalCreateNestedManyWithoutUsersInput
+    dayCloseOpenings?: DayCloseCreateNestedManyWithoutOpenedByInput
+    dayCloseOpeningApprovals?: DayCloseCreateNestedManyWithoutOpeningApprovedByInput
     dayCloseFinalizations?: DayCloseCreateNestedManyWithoutFinalizedByInput
+    dayCloseExceptionApprovals?: DayCloseCreateNestedManyWithoutExceptionApprovedByInput
     staffDayClosings?: StaffDayCloseCreateNestedManyWithoutUserInput
   }
 
@@ -123393,7 +125252,10 @@ export namespace Prisma {
     referredLeads?: LeadUncheckedCreateNestedManyWithoutReferredByInput
     managedStaff?: UserUncheckedCreateNestedManyWithoutAdminInput
     terminals?: TerminalUncheckedCreateNestedManyWithoutUsersInput
+    dayCloseOpenings?: DayCloseUncheckedCreateNestedManyWithoutOpenedByInput
+    dayCloseOpeningApprovals?: DayCloseUncheckedCreateNestedManyWithoutOpeningApprovedByInput
     dayCloseFinalizations?: DayCloseUncheckedCreateNestedManyWithoutFinalizedByInput
+    dayCloseExceptionApprovals?: DayCloseUncheckedCreateNestedManyWithoutExceptionApprovedByInput
     staffDayClosings?: StaffDayCloseUncheckedCreateNestedManyWithoutUserInput
   }
 
@@ -123456,7 +125318,10 @@ export namespace Prisma {
     managedStaff?: UserUpdateManyWithoutAdminNestedInput
     branch?: BranchUpdateOneWithoutUsersNestedInput
     terminals?: TerminalUpdateManyWithoutUsersNestedInput
+    dayCloseOpenings?: DayCloseUpdateManyWithoutOpenedByNestedInput
+    dayCloseOpeningApprovals?: DayCloseUpdateManyWithoutOpeningApprovedByNestedInput
     dayCloseFinalizations?: DayCloseUpdateManyWithoutFinalizedByNestedInput
+    dayCloseExceptionApprovals?: DayCloseUpdateManyWithoutExceptionApprovedByNestedInput
     staffDayClosings?: StaffDayCloseUpdateManyWithoutUserNestedInput
   }
 
@@ -123504,7 +125369,10 @@ export namespace Prisma {
     referredLeads?: LeadUncheckedUpdateManyWithoutReferredByNestedInput
     managedStaff?: UserUncheckedUpdateManyWithoutAdminNestedInput
     terminals?: TerminalUncheckedUpdateManyWithoutUsersNestedInput
+    dayCloseOpenings?: DayCloseUncheckedUpdateManyWithoutOpenedByNestedInput
+    dayCloseOpeningApprovals?: DayCloseUncheckedUpdateManyWithoutOpeningApprovedByNestedInput
     dayCloseFinalizations?: DayCloseUncheckedUpdateManyWithoutFinalizedByNestedInput
+    dayCloseExceptionApprovals?: DayCloseUncheckedUpdateManyWithoutExceptionApprovedByNestedInput
     staffDayClosings?: StaffDayCloseUncheckedUpdateManyWithoutUserNestedInput
   }
 
@@ -123555,6 +125423,7 @@ export namespace Prisma {
     users?: UserUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUpdateManyWithoutBranchNestedInput
     customerVouchers?: CustomerVoucherUpdateManyWithoutBranchNestedInput
+    vouchers?: VoucherUpdateManyWithoutBranchNestedInput
   }
 
   export type BranchUncheckedUpdateWithoutLeaveRequestsInput = {
@@ -123594,6 +125463,7 @@ export namespace Prisma {
     users?: UserUncheckedUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUncheckedUpdateManyWithoutBranchNestedInput
     customerVouchers?: CustomerVoucherUncheckedUpdateManyWithoutBranchNestedInput
+    vouchers?: VoucherUncheckedUpdateManyWithoutBranchNestedInput
   }
 
   export type LeaveTypeUpsertWithoutRequestsInput = {
@@ -123682,7 +125552,10 @@ export namespace Prisma {
     managedStaff?: UserUpdateManyWithoutAdminNestedInput
     branch?: BranchUpdateOneWithoutUsersNestedInput
     terminals?: TerminalUpdateManyWithoutUsersNestedInput
+    dayCloseOpenings?: DayCloseUpdateManyWithoutOpenedByNestedInput
+    dayCloseOpeningApprovals?: DayCloseUpdateManyWithoutOpeningApprovedByNestedInput
     dayCloseFinalizations?: DayCloseUpdateManyWithoutFinalizedByNestedInput
+    dayCloseExceptionApprovals?: DayCloseUpdateManyWithoutExceptionApprovedByNestedInput
     staffDayClosings?: StaffDayCloseUpdateManyWithoutUserNestedInput
   }
 
@@ -123730,7 +125603,10 @@ export namespace Prisma {
     referredLeads?: LeadUncheckedUpdateManyWithoutReferredByNestedInput
     managedStaff?: UserUncheckedUpdateManyWithoutAdminNestedInput
     terminals?: TerminalUncheckedUpdateManyWithoutUsersNestedInput
+    dayCloseOpenings?: DayCloseUncheckedUpdateManyWithoutOpenedByNestedInput
+    dayCloseOpeningApprovals?: DayCloseUncheckedUpdateManyWithoutOpeningApprovedByNestedInput
     dayCloseFinalizations?: DayCloseUncheckedUpdateManyWithoutFinalizedByNestedInput
+    dayCloseExceptionApprovals?: DayCloseUncheckedUpdateManyWithoutExceptionApprovedByNestedInput
     staffDayClosings?: StaffDayCloseUncheckedUpdateManyWithoutUserNestedInput
   }
 
@@ -123823,6 +125699,7 @@ export namespace Prisma {
     users?: UserCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseCreateNestedManyWithoutBranchInput
     customerVouchers?: CustomerVoucherCreateNestedManyWithoutBranchInput
+    vouchers?: VoucherCreateNestedManyWithoutBranchInput
   }
 
   export type BranchUncheckedCreateWithoutPayrollsInput = {
@@ -123862,6 +125739,7 @@ export namespace Prisma {
     users?: UserUncheckedCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseUncheckedCreateNestedManyWithoutBranchInput
     customerVouchers?: CustomerVoucherUncheckedCreateNestedManyWithoutBranchInput
+    vouchers?: VoucherUncheckedCreateNestedManyWithoutBranchInput
   }
 
   export type BranchCreateOrConnectWithoutPayrollsInput = {
@@ -123912,7 +125790,10 @@ export namespace Prisma {
     managedStaff?: UserCreateNestedManyWithoutAdminInput
     branch?: BranchCreateNestedOneWithoutUsersInput
     terminals?: TerminalCreateNestedManyWithoutUsersInput
+    dayCloseOpenings?: DayCloseCreateNestedManyWithoutOpenedByInput
+    dayCloseOpeningApprovals?: DayCloseCreateNestedManyWithoutOpeningApprovedByInput
     dayCloseFinalizations?: DayCloseCreateNestedManyWithoutFinalizedByInput
+    dayCloseExceptionApprovals?: DayCloseCreateNestedManyWithoutExceptionApprovedByInput
     staffDayClosings?: StaffDayCloseCreateNestedManyWithoutUserInput
   }
 
@@ -123960,7 +125841,10 @@ export namespace Prisma {
     referredLeads?: LeadUncheckedCreateNestedManyWithoutReferredByInput
     managedStaff?: UserUncheckedCreateNestedManyWithoutAdminInput
     terminals?: TerminalUncheckedCreateNestedManyWithoutUsersInput
+    dayCloseOpenings?: DayCloseUncheckedCreateNestedManyWithoutOpenedByInput
+    dayCloseOpeningApprovals?: DayCloseUncheckedCreateNestedManyWithoutOpeningApprovedByInput
     dayCloseFinalizations?: DayCloseUncheckedCreateNestedManyWithoutFinalizedByInput
+    dayCloseExceptionApprovals?: DayCloseUncheckedCreateNestedManyWithoutExceptionApprovedByInput
     staffDayClosings?: StaffDayCloseUncheckedCreateNestedManyWithoutUserInput
   }
 
@@ -123982,6 +125866,7 @@ export namespace Prisma {
     entries?: JournalEntryCreateNestedManyWithoutVoucherInput
     salaryAdvances?: SalaryAdvanceCreateNestedManyWithoutVoucherInput
     creator: UserCreateNestedOneWithoutVouchersInput
+    branch?: BranchCreateNestedOneWithoutVouchersInput
   }
 
   export type VoucherUncheckedCreateWithoutPayrollsInput = {
@@ -123994,6 +125879,7 @@ export namespace Prisma {
     status?: string
     reference?: string | null
     createdBy: number
+    branchId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     entries?: JournalEntryUncheckedCreateNestedManyWithoutVoucherInput
@@ -124093,6 +125979,7 @@ export namespace Prisma {
     users?: UserUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUpdateManyWithoutBranchNestedInput
     customerVouchers?: CustomerVoucherUpdateManyWithoutBranchNestedInput
+    vouchers?: VoucherUpdateManyWithoutBranchNestedInput
   }
 
   export type BranchUncheckedUpdateWithoutPayrollsInput = {
@@ -124132,6 +126019,7 @@ export namespace Prisma {
     users?: UserUncheckedUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUncheckedUpdateManyWithoutBranchNestedInput
     customerVouchers?: CustomerVoucherUncheckedUpdateManyWithoutBranchNestedInput
+    vouchers?: VoucherUncheckedUpdateManyWithoutBranchNestedInput
   }
 
   export type UserUpsertWithoutPayrollsInput = {
@@ -124188,7 +126076,10 @@ export namespace Prisma {
     managedStaff?: UserUpdateManyWithoutAdminNestedInput
     branch?: BranchUpdateOneWithoutUsersNestedInput
     terminals?: TerminalUpdateManyWithoutUsersNestedInput
+    dayCloseOpenings?: DayCloseUpdateManyWithoutOpenedByNestedInput
+    dayCloseOpeningApprovals?: DayCloseUpdateManyWithoutOpeningApprovedByNestedInput
     dayCloseFinalizations?: DayCloseUpdateManyWithoutFinalizedByNestedInput
+    dayCloseExceptionApprovals?: DayCloseUpdateManyWithoutExceptionApprovedByNestedInput
     staffDayClosings?: StaffDayCloseUpdateManyWithoutUserNestedInput
   }
 
@@ -124236,7 +126127,10 @@ export namespace Prisma {
     referredLeads?: LeadUncheckedUpdateManyWithoutReferredByNestedInput
     managedStaff?: UserUncheckedUpdateManyWithoutAdminNestedInput
     terminals?: TerminalUncheckedUpdateManyWithoutUsersNestedInput
+    dayCloseOpenings?: DayCloseUncheckedUpdateManyWithoutOpenedByNestedInput
+    dayCloseOpeningApprovals?: DayCloseUncheckedUpdateManyWithoutOpeningApprovedByNestedInput
     dayCloseFinalizations?: DayCloseUncheckedUpdateManyWithoutFinalizedByNestedInput
+    dayCloseExceptionApprovals?: DayCloseUncheckedUpdateManyWithoutExceptionApprovedByNestedInput
     staffDayClosings?: StaffDayCloseUncheckedUpdateManyWithoutUserNestedInput
   }
 
@@ -124264,6 +126158,7 @@ export namespace Prisma {
     entries?: JournalEntryUpdateManyWithoutVoucherNestedInput
     salaryAdvances?: SalaryAdvanceUpdateManyWithoutVoucherNestedInput
     creator?: UserUpdateOneRequiredWithoutVouchersNestedInput
+    branch?: BranchUpdateOneWithoutVouchersNestedInput
   }
 
   export type VoucherUncheckedUpdateWithoutPayrollsInput = {
@@ -124276,6 +126171,7 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     reference?: NullableStringFieldUpdateOperationsInput | string | null
     createdBy?: IntFieldUpdateOperationsInput | number
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     entries?: JournalEntryUncheckedUpdateManyWithoutVoucherNestedInput
@@ -124467,7 +126363,10 @@ export namespace Prisma {
     managedStaff?: UserCreateNestedManyWithoutAdminInput
     branch?: BranchCreateNestedOneWithoutUsersInput
     terminals?: TerminalCreateNestedManyWithoutUsersInput
+    dayCloseOpenings?: DayCloseCreateNestedManyWithoutOpenedByInput
+    dayCloseOpeningApprovals?: DayCloseCreateNestedManyWithoutOpeningApprovedByInput
     dayCloseFinalizations?: DayCloseCreateNestedManyWithoutFinalizedByInput
+    dayCloseExceptionApprovals?: DayCloseCreateNestedManyWithoutExceptionApprovedByInput
     staffDayClosings?: StaffDayCloseCreateNestedManyWithoutUserInput
   }
 
@@ -124515,7 +126414,10 @@ export namespace Prisma {
     referredLeads?: LeadUncheckedCreateNestedManyWithoutReferredByInput
     managedStaff?: UserUncheckedCreateNestedManyWithoutAdminInput
     terminals?: TerminalUncheckedCreateNestedManyWithoutUsersInput
+    dayCloseOpenings?: DayCloseUncheckedCreateNestedManyWithoutOpenedByInput
+    dayCloseOpeningApprovals?: DayCloseUncheckedCreateNestedManyWithoutOpeningApprovedByInput
     dayCloseFinalizations?: DayCloseUncheckedCreateNestedManyWithoutFinalizedByInput
+    dayCloseExceptionApprovals?: DayCloseUncheckedCreateNestedManyWithoutExceptionApprovedByInput
     staffDayClosings?: StaffDayCloseUncheckedCreateNestedManyWithoutUserInput
   }
 
@@ -124560,6 +126462,7 @@ export namespace Prisma {
     users?: UserCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseCreateNestedManyWithoutBranchInput
     customerVouchers?: CustomerVoucherCreateNestedManyWithoutBranchInput
+    vouchers?: VoucherCreateNestedManyWithoutBranchInput
   }
 
   export type BranchUncheckedCreateWithoutLeadsInput = {
@@ -124599,6 +126502,7 @@ export namespace Prisma {
     users?: UserUncheckedCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseUncheckedCreateNestedManyWithoutBranchInput
     customerVouchers?: CustomerVoucherUncheckedCreateNestedManyWithoutBranchInput
+    vouchers?: VoucherUncheckedCreateNestedManyWithoutBranchInput
   }
 
   export type BranchCreateOrConnectWithoutLeadsInput = {
@@ -124783,7 +126687,10 @@ export namespace Prisma {
     managedStaff?: UserCreateNestedManyWithoutAdminInput
     branch?: BranchCreateNestedOneWithoutUsersInput
     terminals?: TerminalCreateNestedManyWithoutUsersInput
+    dayCloseOpenings?: DayCloseCreateNestedManyWithoutOpenedByInput
+    dayCloseOpeningApprovals?: DayCloseCreateNestedManyWithoutOpeningApprovedByInput
     dayCloseFinalizations?: DayCloseCreateNestedManyWithoutFinalizedByInput
+    dayCloseExceptionApprovals?: DayCloseCreateNestedManyWithoutExceptionApprovedByInput
     staffDayClosings?: StaffDayCloseCreateNestedManyWithoutUserInput
   }
 
@@ -124831,7 +126738,10 @@ export namespace Prisma {
     leads?: LeadUncheckedCreateNestedManyWithoutAssignedUserInput
     managedStaff?: UserUncheckedCreateNestedManyWithoutAdminInput
     terminals?: TerminalUncheckedCreateNestedManyWithoutUsersInput
+    dayCloseOpenings?: DayCloseUncheckedCreateNestedManyWithoutOpenedByInput
+    dayCloseOpeningApprovals?: DayCloseUncheckedCreateNestedManyWithoutOpeningApprovedByInput
     dayCloseFinalizations?: DayCloseUncheckedCreateNestedManyWithoutFinalizedByInput
+    dayCloseExceptionApprovals?: DayCloseUncheckedCreateNestedManyWithoutExceptionApprovedByInput
     staffDayClosings?: StaffDayCloseUncheckedCreateNestedManyWithoutUserInput
   }
 
@@ -125128,7 +127038,10 @@ export namespace Prisma {
     managedStaff?: UserUpdateManyWithoutAdminNestedInput
     branch?: BranchUpdateOneWithoutUsersNestedInput
     terminals?: TerminalUpdateManyWithoutUsersNestedInput
+    dayCloseOpenings?: DayCloseUpdateManyWithoutOpenedByNestedInput
+    dayCloseOpeningApprovals?: DayCloseUpdateManyWithoutOpeningApprovedByNestedInput
     dayCloseFinalizations?: DayCloseUpdateManyWithoutFinalizedByNestedInput
+    dayCloseExceptionApprovals?: DayCloseUpdateManyWithoutExceptionApprovedByNestedInput
     staffDayClosings?: StaffDayCloseUpdateManyWithoutUserNestedInput
   }
 
@@ -125176,7 +127089,10 @@ export namespace Prisma {
     referredLeads?: LeadUncheckedUpdateManyWithoutReferredByNestedInput
     managedStaff?: UserUncheckedUpdateManyWithoutAdminNestedInput
     terminals?: TerminalUncheckedUpdateManyWithoutUsersNestedInput
+    dayCloseOpenings?: DayCloseUncheckedUpdateManyWithoutOpenedByNestedInput
+    dayCloseOpeningApprovals?: DayCloseUncheckedUpdateManyWithoutOpeningApprovedByNestedInput
     dayCloseFinalizations?: DayCloseUncheckedUpdateManyWithoutFinalizedByNestedInput
+    dayCloseExceptionApprovals?: DayCloseUncheckedUpdateManyWithoutExceptionApprovedByNestedInput
     staffDayClosings?: StaffDayCloseUncheckedUpdateManyWithoutUserNestedInput
   }
 
@@ -125227,6 +127143,7 @@ export namespace Prisma {
     users?: UserUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUpdateManyWithoutBranchNestedInput
     customerVouchers?: CustomerVoucherUpdateManyWithoutBranchNestedInput
+    vouchers?: VoucherUpdateManyWithoutBranchNestedInput
   }
 
   export type BranchUncheckedUpdateWithoutLeadsInput = {
@@ -125266,6 +127183,7 @@ export namespace Prisma {
     users?: UserUncheckedUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUncheckedUpdateManyWithoutBranchNestedInput
     customerVouchers?: CustomerVoucherUncheckedUpdateManyWithoutBranchNestedInput
+    vouchers?: VoucherUncheckedUpdateManyWithoutBranchNestedInput
   }
 
   export type ProductUpsertWithoutLeadsInput = {
@@ -125468,7 +127386,10 @@ export namespace Prisma {
     managedStaff?: UserUpdateManyWithoutAdminNestedInput
     branch?: BranchUpdateOneWithoutUsersNestedInput
     terminals?: TerminalUpdateManyWithoutUsersNestedInput
+    dayCloseOpenings?: DayCloseUpdateManyWithoutOpenedByNestedInput
+    dayCloseOpeningApprovals?: DayCloseUpdateManyWithoutOpeningApprovedByNestedInput
     dayCloseFinalizations?: DayCloseUpdateManyWithoutFinalizedByNestedInput
+    dayCloseExceptionApprovals?: DayCloseUpdateManyWithoutExceptionApprovedByNestedInput
     staffDayClosings?: StaffDayCloseUpdateManyWithoutUserNestedInput
   }
 
@@ -125516,7 +127437,10 @@ export namespace Prisma {
     leads?: LeadUncheckedUpdateManyWithoutAssignedUserNestedInput
     managedStaff?: UserUncheckedUpdateManyWithoutAdminNestedInput
     terminals?: TerminalUncheckedUpdateManyWithoutUsersNestedInput
+    dayCloseOpenings?: DayCloseUncheckedUpdateManyWithoutOpenedByNestedInput
+    dayCloseOpeningApprovals?: DayCloseUncheckedUpdateManyWithoutOpeningApprovedByNestedInput
     dayCloseFinalizations?: DayCloseUncheckedUpdateManyWithoutFinalizedByNestedInput
+    dayCloseExceptionApprovals?: DayCloseUncheckedUpdateManyWithoutExceptionApprovedByNestedInput
     staffDayClosings?: StaffDayCloseUncheckedUpdateManyWithoutUserNestedInput
   }
 
@@ -126220,7 +128144,10 @@ export namespace Prisma {
     managedStaff?: UserCreateNestedManyWithoutAdminInput
     branch?: BranchCreateNestedOneWithoutUsersInput
     terminals?: TerminalCreateNestedManyWithoutUsersInput
+    dayCloseOpenings?: DayCloseCreateNestedManyWithoutOpenedByInput
+    dayCloseOpeningApprovals?: DayCloseCreateNestedManyWithoutOpeningApprovedByInput
     dayCloseFinalizations?: DayCloseCreateNestedManyWithoutFinalizedByInput
+    dayCloseExceptionApprovals?: DayCloseCreateNestedManyWithoutExceptionApprovedByInput
     staffDayClosings?: StaffDayCloseCreateNestedManyWithoutUserInput
   }
 
@@ -126268,7 +128195,10 @@ export namespace Prisma {
     referredLeads?: LeadUncheckedCreateNestedManyWithoutReferredByInput
     managedStaff?: UserUncheckedCreateNestedManyWithoutAdminInput
     terminals?: TerminalUncheckedCreateNestedManyWithoutUsersInput
+    dayCloseOpenings?: DayCloseUncheckedCreateNestedManyWithoutOpenedByInput
+    dayCloseOpeningApprovals?: DayCloseUncheckedCreateNestedManyWithoutOpeningApprovedByInput
     dayCloseFinalizations?: DayCloseUncheckedCreateNestedManyWithoutFinalizedByInput
+    dayCloseExceptionApprovals?: DayCloseUncheckedCreateNestedManyWithoutExceptionApprovedByInput
     staffDayClosings?: StaffDayCloseUncheckedCreateNestedManyWithoutUserInput
   }
 
@@ -126423,7 +128353,10 @@ export namespace Prisma {
     managedStaff?: UserUpdateManyWithoutAdminNestedInput
     branch?: BranchUpdateOneWithoutUsersNestedInput
     terminals?: TerminalUpdateManyWithoutUsersNestedInput
+    dayCloseOpenings?: DayCloseUpdateManyWithoutOpenedByNestedInput
+    dayCloseOpeningApprovals?: DayCloseUpdateManyWithoutOpeningApprovedByNestedInput
     dayCloseFinalizations?: DayCloseUpdateManyWithoutFinalizedByNestedInput
+    dayCloseExceptionApprovals?: DayCloseUpdateManyWithoutExceptionApprovedByNestedInput
     staffDayClosings?: StaffDayCloseUpdateManyWithoutUserNestedInput
   }
 
@@ -126471,7 +128404,10 @@ export namespace Prisma {
     referredLeads?: LeadUncheckedUpdateManyWithoutReferredByNestedInput
     managedStaff?: UserUncheckedUpdateManyWithoutAdminNestedInput
     terminals?: TerminalUncheckedUpdateManyWithoutUsersNestedInput
+    dayCloseOpenings?: DayCloseUncheckedUpdateManyWithoutOpenedByNestedInput
+    dayCloseOpeningApprovals?: DayCloseUncheckedUpdateManyWithoutOpeningApprovedByNestedInput
     dayCloseFinalizations?: DayCloseUncheckedUpdateManyWithoutFinalizedByNestedInput
+    dayCloseExceptionApprovals?: DayCloseUncheckedUpdateManyWithoutExceptionApprovedByNestedInput
     staffDayClosings?: StaffDayCloseUncheckedUpdateManyWithoutUserNestedInput
   }
 
@@ -126600,7 +128536,10 @@ export namespace Prisma {
     managedStaff?: UserCreateNestedManyWithoutAdminInput
     branch?: BranchCreateNestedOneWithoutUsersInput
     terminals?: TerminalCreateNestedManyWithoutUsersInput
+    dayCloseOpenings?: DayCloseCreateNestedManyWithoutOpenedByInput
+    dayCloseOpeningApprovals?: DayCloseCreateNestedManyWithoutOpeningApprovedByInput
     dayCloseFinalizations?: DayCloseCreateNestedManyWithoutFinalizedByInput
+    dayCloseExceptionApprovals?: DayCloseCreateNestedManyWithoutExceptionApprovedByInput
     staffDayClosings?: StaffDayCloseCreateNestedManyWithoutUserInput
   }
 
@@ -126648,7 +128587,10 @@ export namespace Prisma {
     referredLeads?: LeadUncheckedCreateNestedManyWithoutReferredByInput
     managedStaff?: UserUncheckedCreateNestedManyWithoutAdminInput
     terminals?: TerminalUncheckedCreateNestedManyWithoutUsersInput
+    dayCloseOpenings?: DayCloseUncheckedCreateNestedManyWithoutOpenedByInput
+    dayCloseOpeningApprovals?: DayCloseUncheckedCreateNestedManyWithoutOpeningApprovedByInput
     dayCloseFinalizations?: DayCloseUncheckedCreateNestedManyWithoutFinalizedByInput
+    dayCloseExceptionApprovals?: DayCloseUncheckedCreateNestedManyWithoutExceptionApprovedByInput
     staffDayClosings?: StaffDayCloseUncheckedCreateNestedManyWithoutUserInput
   }
 
@@ -126817,7 +128759,10 @@ export namespace Prisma {
     managedStaff?: UserUpdateManyWithoutAdminNestedInput
     branch?: BranchUpdateOneWithoutUsersNestedInput
     terminals?: TerminalUpdateManyWithoutUsersNestedInput
+    dayCloseOpenings?: DayCloseUpdateManyWithoutOpenedByNestedInput
+    dayCloseOpeningApprovals?: DayCloseUpdateManyWithoutOpeningApprovedByNestedInput
     dayCloseFinalizations?: DayCloseUpdateManyWithoutFinalizedByNestedInput
+    dayCloseExceptionApprovals?: DayCloseUpdateManyWithoutExceptionApprovedByNestedInput
     staffDayClosings?: StaffDayCloseUpdateManyWithoutUserNestedInput
   }
 
@@ -126865,7 +128810,10 @@ export namespace Prisma {
     referredLeads?: LeadUncheckedUpdateManyWithoutReferredByNestedInput
     managedStaff?: UserUncheckedUpdateManyWithoutAdminNestedInput
     terminals?: TerminalUncheckedUpdateManyWithoutUsersNestedInput
+    dayCloseOpenings?: DayCloseUncheckedUpdateManyWithoutOpenedByNestedInput
+    dayCloseOpeningApprovals?: DayCloseUncheckedUpdateManyWithoutOpeningApprovedByNestedInput
     dayCloseFinalizations?: DayCloseUncheckedUpdateManyWithoutFinalizedByNestedInput
+    dayCloseExceptionApprovals?: DayCloseUncheckedUpdateManyWithoutExceptionApprovedByNestedInput
     staffDayClosings?: StaffDayCloseUncheckedUpdateManyWithoutUserNestedInput
   }
 
@@ -127023,6 +128971,7 @@ export namespace Prisma {
     users?: UserCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseCreateNestedManyWithoutBranchInput
     customerVouchers?: CustomerVoucherCreateNestedManyWithoutBranchInput
+    vouchers?: VoucherCreateNestedManyWithoutBranchInput
   }
 
   export type BranchUncheckedCreateWithoutMissPunchRequestsInput = {
@@ -127062,6 +129011,7 @@ export namespace Prisma {
     users?: UserUncheckedCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseUncheckedCreateNestedManyWithoutBranchInput
     customerVouchers?: CustomerVoucherUncheckedCreateNestedManyWithoutBranchInput
+    vouchers?: VoucherUncheckedCreateNestedManyWithoutBranchInput
   }
 
   export type BranchCreateOrConnectWithoutMissPunchRequestsInput = {
@@ -127112,7 +129062,10 @@ export namespace Prisma {
     managedStaff?: UserCreateNestedManyWithoutAdminInput
     branch?: BranchCreateNestedOneWithoutUsersInput
     terminals?: TerminalCreateNestedManyWithoutUsersInput
+    dayCloseOpenings?: DayCloseCreateNestedManyWithoutOpenedByInput
+    dayCloseOpeningApprovals?: DayCloseCreateNestedManyWithoutOpeningApprovedByInput
     dayCloseFinalizations?: DayCloseCreateNestedManyWithoutFinalizedByInput
+    dayCloseExceptionApprovals?: DayCloseCreateNestedManyWithoutExceptionApprovedByInput
     staffDayClosings?: StaffDayCloseCreateNestedManyWithoutUserInput
   }
 
@@ -127160,7 +129113,10 @@ export namespace Prisma {
     referredLeads?: LeadUncheckedCreateNestedManyWithoutReferredByInput
     managedStaff?: UserUncheckedCreateNestedManyWithoutAdminInput
     terminals?: TerminalUncheckedCreateNestedManyWithoutUsersInput
+    dayCloseOpenings?: DayCloseUncheckedCreateNestedManyWithoutOpenedByInput
+    dayCloseOpeningApprovals?: DayCloseUncheckedCreateNestedManyWithoutOpeningApprovedByInput
     dayCloseFinalizations?: DayCloseUncheckedCreateNestedManyWithoutFinalizedByInput
+    dayCloseExceptionApprovals?: DayCloseUncheckedCreateNestedManyWithoutExceptionApprovedByInput
     staffDayClosings?: StaffDayCloseUncheckedCreateNestedManyWithoutUserInput
   }
 
@@ -127212,7 +129168,10 @@ export namespace Prisma {
     managedStaff?: UserCreateNestedManyWithoutAdminInput
     branch?: BranchCreateNestedOneWithoutUsersInput
     terminals?: TerminalCreateNestedManyWithoutUsersInput
+    dayCloseOpenings?: DayCloseCreateNestedManyWithoutOpenedByInput
+    dayCloseOpeningApprovals?: DayCloseCreateNestedManyWithoutOpeningApprovedByInput
     dayCloseFinalizations?: DayCloseCreateNestedManyWithoutFinalizedByInput
+    dayCloseExceptionApprovals?: DayCloseCreateNestedManyWithoutExceptionApprovedByInput
     staffDayClosings?: StaffDayCloseCreateNestedManyWithoutUserInput
   }
 
@@ -127260,7 +129219,10 @@ export namespace Prisma {
     referredLeads?: LeadUncheckedCreateNestedManyWithoutReferredByInput
     managedStaff?: UserUncheckedCreateNestedManyWithoutAdminInput
     terminals?: TerminalUncheckedCreateNestedManyWithoutUsersInput
+    dayCloseOpenings?: DayCloseUncheckedCreateNestedManyWithoutOpenedByInput
+    dayCloseOpeningApprovals?: DayCloseUncheckedCreateNestedManyWithoutOpeningApprovedByInput
     dayCloseFinalizations?: DayCloseUncheckedCreateNestedManyWithoutFinalizedByInput
+    dayCloseExceptionApprovals?: DayCloseUncheckedCreateNestedManyWithoutExceptionApprovedByInput
     staffDayClosings?: StaffDayCloseUncheckedCreateNestedManyWithoutUserInput
   }
 
@@ -127316,6 +129278,7 @@ export namespace Prisma {
     users?: UserUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUpdateManyWithoutBranchNestedInput
     customerVouchers?: CustomerVoucherUpdateManyWithoutBranchNestedInput
+    vouchers?: VoucherUpdateManyWithoutBranchNestedInput
   }
 
   export type BranchUncheckedUpdateWithoutMissPunchRequestsInput = {
@@ -127355,6 +129318,7 @@ export namespace Prisma {
     users?: UserUncheckedUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUncheckedUpdateManyWithoutBranchNestedInput
     customerVouchers?: CustomerVoucherUncheckedUpdateManyWithoutBranchNestedInput
+    vouchers?: VoucherUncheckedUpdateManyWithoutBranchNestedInput
   }
 
   export type UserUpsertWithoutReviewedMissPunchesInput = {
@@ -127411,7 +129375,10 @@ export namespace Prisma {
     managedStaff?: UserUpdateManyWithoutAdminNestedInput
     branch?: BranchUpdateOneWithoutUsersNestedInput
     terminals?: TerminalUpdateManyWithoutUsersNestedInput
+    dayCloseOpenings?: DayCloseUpdateManyWithoutOpenedByNestedInput
+    dayCloseOpeningApprovals?: DayCloseUpdateManyWithoutOpeningApprovedByNestedInput
     dayCloseFinalizations?: DayCloseUpdateManyWithoutFinalizedByNestedInput
+    dayCloseExceptionApprovals?: DayCloseUpdateManyWithoutExceptionApprovedByNestedInput
     staffDayClosings?: StaffDayCloseUpdateManyWithoutUserNestedInput
   }
 
@@ -127459,7 +129426,10 @@ export namespace Prisma {
     referredLeads?: LeadUncheckedUpdateManyWithoutReferredByNestedInput
     managedStaff?: UserUncheckedUpdateManyWithoutAdminNestedInput
     terminals?: TerminalUncheckedUpdateManyWithoutUsersNestedInput
+    dayCloseOpenings?: DayCloseUncheckedUpdateManyWithoutOpenedByNestedInput
+    dayCloseOpeningApprovals?: DayCloseUncheckedUpdateManyWithoutOpeningApprovedByNestedInput
     dayCloseFinalizations?: DayCloseUncheckedUpdateManyWithoutFinalizedByNestedInput
+    dayCloseExceptionApprovals?: DayCloseUncheckedUpdateManyWithoutExceptionApprovedByNestedInput
     staffDayClosings?: StaffDayCloseUncheckedUpdateManyWithoutUserNestedInput
   }
 
@@ -127517,7 +129487,10 @@ export namespace Prisma {
     managedStaff?: UserUpdateManyWithoutAdminNestedInput
     branch?: BranchUpdateOneWithoutUsersNestedInput
     terminals?: TerminalUpdateManyWithoutUsersNestedInput
+    dayCloseOpenings?: DayCloseUpdateManyWithoutOpenedByNestedInput
+    dayCloseOpeningApprovals?: DayCloseUpdateManyWithoutOpeningApprovedByNestedInput
     dayCloseFinalizations?: DayCloseUpdateManyWithoutFinalizedByNestedInput
+    dayCloseExceptionApprovals?: DayCloseUpdateManyWithoutExceptionApprovedByNestedInput
     staffDayClosings?: StaffDayCloseUpdateManyWithoutUserNestedInput
   }
 
@@ -127565,7 +129538,10 @@ export namespace Prisma {
     referredLeads?: LeadUncheckedUpdateManyWithoutReferredByNestedInput
     managedStaff?: UserUncheckedUpdateManyWithoutAdminNestedInput
     terminals?: TerminalUncheckedUpdateManyWithoutUsersNestedInput
+    dayCloseOpenings?: DayCloseUncheckedUpdateManyWithoutOpenedByNestedInput
+    dayCloseOpeningApprovals?: DayCloseUncheckedUpdateManyWithoutOpeningApprovedByNestedInput
     dayCloseFinalizations?: DayCloseUncheckedUpdateManyWithoutFinalizedByNestedInput
+    dayCloseExceptionApprovals?: DayCloseUncheckedUpdateManyWithoutExceptionApprovedByNestedInput
     staffDayClosings?: StaffDayCloseUncheckedUpdateManyWithoutUserNestedInput
   }
 
@@ -127612,7 +129588,10 @@ export namespace Prisma {
     managedStaff?: UserCreateNestedManyWithoutAdminInput
     branch?: BranchCreateNestedOneWithoutUsersInput
     terminals?: TerminalCreateNestedManyWithoutUsersInput
+    dayCloseOpenings?: DayCloseCreateNestedManyWithoutOpenedByInput
+    dayCloseOpeningApprovals?: DayCloseCreateNestedManyWithoutOpeningApprovedByInput
     dayCloseFinalizations?: DayCloseCreateNestedManyWithoutFinalizedByInput
+    dayCloseExceptionApprovals?: DayCloseCreateNestedManyWithoutExceptionApprovedByInput
     staffDayClosings?: StaffDayCloseCreateNestedManyWithoutUserInput
   }
 
@@ -127660,7 +129639,10 @@ export namespace Prisma {
     referredLeads?: LeadUncheckedCreateNestedManyWithoutReferredByInput
     managedStaff?: UserUncheckedCreateNestedManyWithoutAdminInput
     terminals?: TerminalUncheckedCreateNestedManyWithoutUsersInput
+    dayCloseOpenings?: DayCloseUncheckedCreateNestedManyWithoutOpenedByInput
+    dayCloseOpeningApprovals?: DayCloseUncheckedCreateNestedManyWithoutOpeningApprovedByInput
     dayCloseFinalizations?: DayCloseUncheckedCreateNestedManyWithoutFinalizedByInput
+    dayCloseExceptionApprovals?: DayCloseUncheckedCreateNestedManyWithoutExceptionApprovedByInput
     staffDayClosings?: StaffDayCloseUncheckedCreateNestedManyWithoutUserInput
   }
 
@@ -127705,6 +129687,7 @@ export namespace Prisma {
     users?: UserCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseCreateNestedManyWithoutBranchInput
     customerVouchers?: CustomerVoucherCreateNestedManyWithoutBranchInput
+    vouchers?: VoucherCreateNestedManyWithoutBranchInput
   }
 
   export type BranchUncheckedCreateWithoutSalaryAdvancesInput = {
@@ -127744,6 +129727,7 @@ export namespace Prisma {
     users?: UserUncheckedCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseUncheckedCreateNestedManyWithoutBranchInput
     customerVouchers?: CustomerVoucherUncheckedCreateNestedManyWithoutBranchInput
+    vouchers?: VoucherUncheckedCreateNestedManyWithoutBranchInput
   }
 
   export type BranchCreateOrConnectWithoutSalaryAdvancesInput = {
@@ -127834,7 +129818,10 @@ export namespace Prisma {
     managedStaff?: UserCreateNestedManyWithoutAdminInput
     branch?: BranchCreateNestedOneWithoutUsersInput
     terminals?: TerminalCreateNestedManyWithoutUsersInput
+    dayCloseOpenings?: DayCloseCreateNestedManyWithoutOpenedByInput
+    dayCloseOpeningApprovals?: DayCloseCreateNestedManyWithoutOpeningApprovedByInput
     dayCloseFinalizations?: DayCloseCreateNestedManyWithoutFinalizedByInput
+    dayCloseExceptionApprovals?: DayCloseCreateNestedManyWithoutExceptionApprovedByInput
     staffDayClosings?: StaffDayCloseCreateNestedManyWithoutUserInput
   }
 
@@ -127882,7 +129869,10 @@ export namespace Prisma {
     referredLeads?: LeadUncheckedCreateNestedManyWithoutReferredByInput
     managedStaff?: UserUncheckedCreateNestedManyWithoutAdminInput
     terminals?: TerminalUncheckedCreateNestedManyWithoutUsersInput
+    dayCloseOpenings?: DayCloseUncheckedCreateNestedManyWithoutOpenedByInput
+    dayCloseOpeningApprovals?: DayCloseUncheckedCreateNestedManyWithoutOpeningApprovedByInput
     dayCloseFinalizations?: DayCloseUncheckedCreateNestedManyWithoutFinalizedByInput
+    dayCloseExceptionApprovals?: DayCloseUncheckedCreateNestedManyWithoutExceptionApprovedByInput
     staffDayClosings?: StaffDayCloseUncheckedCreateNestedManyWithoutUserInput
   }
 
@@ -127904,6 +129894,7 @@ export namespace Prisma {
     entries?: JournalEntryCreateNestedManyWithoutVoucherInput
     payrolls?: PayrollCreateNestedManyWithoutVoucherInput
     creator: UserCreateNestedOneWithoutVouchersInput
+    branch?: BranchCreateNestedOneWithoutVouchersInput
   }
 
   export type VoucherUncheckedCreateWithoutSalaryAdvancesInput = {
@@ -127916,6 +129907,7 @@ export namespace Prisma {
     status?: string
     reference?: string | null
     createdBy: number
+    branchId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     entries?: JournalEntryUncheckedCreateNestedManyWithoutVoucherInput
@@ -127981,7 +129973,10 @@ export namespace Prisma {
     managedStaff?: UserUpdateManyWithoutAdminNestedInput
     branch?: BranchUpdateOneWithoutUsersNestedInput
     terminals?: TerminalUpdateManyWithoutUsersNestedInput
+    dayCloseOpenings?: DayCloseUpdateManyWithoutOpenedByNestedInput
+    dayCloseOpeningApprovals?: DayCloseUpdateManyWithoutOpeningApprovedByNestedInput
     dayCloseFinalizations?: DayCloseUpdateManyWithoutFinalizedByNestedInput
+    dayCloseExceptionApprovals?: DayCloseUpdateManyWithoutExceptionApprovedByNestedInput
     staffDayClosings?: StaffDayCloseUpdateManyWithoutUserNestedInput
   }
 
@@ -128029,7 +130024,10 @@ export namespace Prisma {
     referredLeads?: LeadUncheckedUpdateManyWithoutReferredByNestedInput
     managedStaff?: UserUncheckedUpdateManyWithoutAdminNestedInput
     terminals?: TerminalUncheckedUpdateManyWithoutUsersNestedInput
+    dayCloseOpenings?: DayCloseUncheckedUpdateManyWithoutOpenedByNestedInput
+    dayCloseOpeningApprovals?: DayCloseUncheckedUpdateManyWithoutOpeningApprovedByNestedInput
     dayCloseFinalizations?: DayCloseUncheckedUpdateManyWithoutFinalizedByNestedInput
+    dayCloseExceptionApprovals?: DayCloseUncheckedUpdateManyWithoutExceptionApprovedByNestedInput
     staffDayClosings?: StaffDayCloseUncheckedUpdateManyWithoutUserNestedInput
   }
 
@@ -128080,6 +130078,7 @@ export namespace Prisma {
     users?: UserUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUpdateManyWithoutBranchNestedInput
     customerVouchers?: CustomerVoucherUpdateManyWithoutBranchNestedInput
+    vouchers?: VoucherUpdateManyWithoutBranchNestedInput
   }
 
   export type BranchUncheckedUpdateWithoutSalaryAdvancesInput = {
@@ -128119,6 +130118,7 @@ export namespace Prisma {
     users?: UserUncheckedUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUncheckedUpdateManyWithoutBranchNestedInput
     customerVouchers?: CustomerVoucherUncheckedUpdateManyWithoutBranchNestedInput
+    vouchers?: VoucherUncheckedUpdateManyWithoutBranchNestedInput
   }
 
   export type PayrollUpsertWithoutSalaryAdvancesInput = {
@@ -128221,7 +130221,10 @@ export namespace Prisma {
     managedStaff?: UserUpdateManyWithoutAdminNestedInput
     branch?: BranchUpdateOneWithoutUsersNestedInput
     terminals?: TerminalUpdateManyWithoutUsersNestedInput
+    dayCloseOpenings?: DayCloseUpdateManyWithoutOpenedByNestedInput
+    dayCloseOpeningApprovals?: DayCloseUpdateManyWithoutOpeningApprovedByNestedInput
     dayCloseFinalizations?: DayCloseUpdateManyWithoutFinalizedByNestedInput
+    dayCloseExceptionApprovals?: DayCloseUpdateManyWithoutExceptionApprovedByNestedInput
     staffDayClosings?: StaffDayCloseUpdateManyWithoutUserNestedInput
   }
 
@@ -128269,7 +130272,10 @@ export namespace Prisma {
     referredLeads?: LeadUncheckedUpdateManyWithoutReferredByNestedInput
     managedStaff?: UserUncheckedUpdateManyWithoutAdminNestedInput
     terminals?: TerminalUncheckedUpdateManyWithoutUsersNestedInput
+    dayCloseOpenings?: DayCloseUncheckedUpdateManyWithoutOpenedByNestedInput
+    dayCloseOpeningApprovals?: DayCloseUncheckedUpdateManyWithoutOpeningApprovedByNestedInput
     dayCloseFinalizations?: DayCloseUncheckedUpdateManyWithoutFinalizedByNestedInput
+    dayCloseExceptionApprovals?: DayCloseUncheckedUpdateManyWithoutExceptionApprovedByNestedInput
     staffDayClosings?: StaffDayCloseUncheckedUpdateManyWithoutUserNestedInput
   }
 
@@ -128297,6 +130303,7 @@ export namespace Prisma {
     entries?: JournalEntryUpdateManyWithoutVoucherNestedInput
     payrolls?: PayrollUpdateManyWithoutVoucherNestedInput
     creator?: UserUpdateOneRequiredWithoutVouchersNestedInput
+    branch?: BranchUpdateOneWithoutVouchersNestedInput
   }
 
   export type VoucherUncheckedUpdateWithoutSalaryAdvancesInput = {
@@ -128309,6 +130316,7 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     reference?: NullableStringFieldUpdateOperationsInput | string | null
     createdBy?: IntFieldUpdateOperationsInput | number
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     entries?: JournalEntryUncheckedUpdateManyWithoutVoucherNestedInput
@@ -128989,7 +130997,10 @@ export namespace Prisma {
     managedStaff?: UserCreateNestedManyWithoutAdminInput
     branch?: BranchCreateNestedOneWithoutUsersInput
     terminals?: TerminalCreateNestedManyWithoutUsersInput
+    dayCloseOpenings?: DayCloseCreateNestedManyWithoutOpenedByInput
+    dayCloseOpeningApprovals?: DayCloseCreateNestedManyWithoutOpeningApprovedByInput
     dayCloseFinalizations?: DayCloseCreateNestedManyWithoutFinalizedByInput
+    dayCloseExceptionApprovals?: DayCloseCreateNestedManyWithoutExceptionApprovedByInput
     staffDayClosings?: StaffDayCloseCreateNestedManyWithoutUserInput
   }
 
@@ -129037,13 +131048,100 @@ export namespace Prisma {
     referredLeads?: LeadUncheckedCreateNestedManyWithoutReferredByInput
     managedStaff?: UserUncheckedCreateNestedManyWithoutAdminInput
     terminals?: TerminalUncheckedCreateNestedManyWithoutUsersInput
+    dayCloseOpenings?: DayCloseUncheckedCreateNestedManyWithoutOpenedByInput
+    dayCloseOpeningApprovals?: DayCloseUncheckedCreateNestedManyWithoutOpeningApprovedByInput
     dayCloseFinalizations?: DayCloseUncheckedCreateNestedManyWithoutFinalizedByInput
+    dayCloseExceptionApprovals?: DayCloseUncheckedCreateNestedManyWithoutExceptionApprovedByInput
     staffDayClosings?: StaffDayCloseUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutVouchersInput = {
     where: UserWhereUniqueInput
     create: XOR<UserCreateWithoutVouchersInput, UserUncheckedCreateWithoutVouchersInput>
+  }
+
+  export type BranchCreateWithoutVouchersInput = {
+    name: string
+    address?: string | null
+    phone?: string | null
+    email?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    invoiceSettings?: NullableJsonNullValueInput | InputJsonValue
+    stockIncluded?: boolean
+    invoiceTemplate?: string | null
+    currencyCode?: string | null
+    currencySymbol?: string | null
+    attendance?: AttendanceCreateNestedManyWithoutBranchInput
+    barcodeSetting?: BarcodeSettingCreateNestedOneWithoutBranchInput
+    customers?: CustomerCreateNestedManyWithoutBranchInput
+    challans?: DeliveryChallanCreateNestedManyWithoutBranchInput
+    expenses?: ExpenseCreateNestedManyWithoutBranchInput
+    financialYears?: FinancialYearCreateNestedManyWithoutBranchInput
+    leaveRequests?: LeaveRequestCreateNestedManyWithoutBranchInput
+    missPunchRequests?: MissPunchRequestCreateNestedManyWithoutBranchInput
+    payments?: PaymentCreateNestedManyWithoutBranchInput
+    payrolls?: PayrollCreateNestedManyWithoutBranchInput
+    productStocks?: ProductStockCreateNestedManyWithoutBranchInput
+    purchases?: PurchaseCreateNestedManyWithoutBranchInput
+    quotations?: QuotationCreateNestedManyWithoutBranchInput
+    salaryAdvances?: SalaryAdvanceCreateNestedManyWithoutBranchInput
+    sales?: SaleCreateNestedManyWithoutBranchInput
+    outgoingTransfers?: StockTransferCreateNestedManyWithoutFromBranchInput
+    incomingTransfers?: StockTransferCreateNestedManyWithoutToBranchInput
+    terminals?: TerminalCreateNestedManyWithoutBranchInput
+    tickets?: TicketCreateNestedManyWithoutBranchInput
+    workLogs?: WorkLogCreateNestedManyWithoutBranchInput
+    leads?: LeadCreateNestedManyWithoutBranchInput
+    users?: UserCreateNestedManyWithoutBranchInput
+    dayCloses?: DayCloseCreateNestedManyWithoutBranchInput
+    customerVouchers?: CustomerVoucherCreateNestedManyWithoutBranchInput
+  }
+
+  export type BranchUncheckedCreateWithoutVouchersInput = {
+    id?: number
+    name: string
+    address?: string | null
+    phone?: string | null
+    email?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    invoiceSettings?: NullableJsonNullValueInput | InputJsonValue
+    stockIncluded?: boolean
+    invoiceTemplate?: string | null
+    currencyCode?: string | null
+    currencySymbol?: string | null
+    attendance?: AttendanceUncheckedCreateNestedManyWithoutBranchInput
+    barcodeSetting?: BarcodeSettingUncheckedCreateNestedOneWithoutBranchInput
+    customers?: CustomerUncheckedCreateNestedManyWithoutBranchInput
+    challans?: DeliveryChallanUncheckedCreateNestedManyWithoutBranchInput
+    expenses?: ExpenseUncheckedCreateNestedManyWithoutBranchInput
+    financialYears?: FinancialYearUncheckedCreateNestedManyWithoutBranchInput
+    leaveRequests?: LeaveRequestUncheckedCreateNestedManyWithoutBranchInput
+    missPunchRequests?: MissPunchRequestUncheckedCreateNestedManyWithoutBranchInput
+    payments?: PaymentUncheckedCreateNestedManyWithoutBranchInput
+    payrolls?: PayrollUncheckedCreateNestedManyWithoutBranchInput
+    productStocks?: ProductStockUncheckedCreateNestedManyWithoutBranchInput
+    purchases?: PurchaseUncheckedCreateNestedManyWithoutBranchInput
+    quotations?: QuotationUncheckedCreateNestedManyWithoutBranchInput
+    salaryAdvances?: SalaryAdvanceUncheckedCreateNestedManyWithoutBranchInput
+    sales?: SaleUncheckedCreateNestedManyWithoutBranchInput
+    outgoingTransfers?: StockTransferUncheckedCreateNestedManyWithoutFromBranchInput
+    incomingTransfers?: StockTransferUncheckedCreateNestedManyWithoutToBranchInput
+    terminals?: TerminalUncheckedCreateNestedManyWithoutBranchInput
+    tickets?: TicketUncheckedCreateNestedManyWithoutBranchInput
+    workLogs?: WorkLogUncheckedCreateNestedManyWithoutBranchInput
+    leads?: LeadUncheckedCreateNestedManyWithoutBranchInput
+    users?: UserUncheckedCreateNestedManyWithoutBranchInput
+    dayCloses?: DayCloseUncheckedCreateNestedManyWithoutBranchInput
+    customerVouchers?: CustomerVoucherUncheckedCreateNestedManyWithoutBranchInput
+  }
+
+  export type BranchCreateOrConnectWithoutVouchersInput = {
+    where: BranchWhereUniqueInput
+    create: XOR<BranchCreateWithoutVouchersInput, BranchUncheckedCreateWithoutVouchersInput>
   }
 
   export type JournalEntryUpsertWithWhereUniqueWithoutVoucherInput = {
@@ -129148,7 +131246,10 @@ export namespace Prisma {
     managedStaff?: UserUpdateManyWithoutAdminNestedInput
     branch?: BranchUpdateOneWithoutUsersNestedInput
     terminals?: TerminalUpdateManyWithoutUsersNestedInput
+    dayCloseOpenings?: DayCloseUpdateManyWithoutOpenedByNestedInput
+    dayCloseOpeningApprovals?: DayCloseUpdateManyWithoutOpeningApprovedByNestedInput
     dayCloseFinalizations?: DayCloseUpdateManyWithoutFinalizedByNestedInput
+    dayCloseExceptionApprovals?: DayCloseUpdateManyWithoutExceptionApprovedByNestedInput
     staffDayClosings?: StaffDayCloseUpdateManyWithoutUserNestedInput
   }
 
@@ -129196,8 +131297,101 @@ export namespace Prisma {
     referredLeads?: LeadUncheckedUpdateManyWithoutReferredByNestedInput
     managedStaff?: UserUncheckedUpdateManyWithoutAdminNestedInput
     terminals?: TerminalUncheckedUpdateManyWithoutUsersNestedInput
+    dayCloseOpenings?: DayCloseUncheckedUpdateManyWithoutOpenedByNestedInput
+    dayCloseOpeningApprovals?: DayCloseUncheckedUpdateManyWithoutOpeningApprovedByNestedInput
     dayCloseFinalizations?: DayCloseUncheckedUpdateManyWithoutFinalizedByNestedInput
+    dayCloseExceptionApprovals?: DayCloseUncheckedUpdateManyWithoutExceptionApprovedByNestedInput
     staffDayClosings?: StaffDayCloseUncheckedUpdateManyWithoutUserNestedInput
+  }
+
+  export type BranchUpsertWithoutVouchersInput = {
+    update: XOR<BranchUpdateWithoutVouchersInput, BranchUncheckedUpdateWithoutVouchersInput>
+    create: XOR<BranchCreateWithoutVouchersInput, BranchUncheckedCreateWithoutVouchersInput>
+    where?: BranchWhereInput
+  }
+
+  export type BranchUpdateToOneWithWhereWithoutVouchersInput = {
+    where?: BranchWhereInput
+    data: XOR<BranchUpdateWithoutVouchersInput, BranchUncheckedUpdateWithoutVouchersInput>
+  }
+
+  export type BranchUpdateWithoutVouchersInput = {
+    name?: StringFieldUpdateOperationsInput | string
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    invoiceSettings?: NullableJsonNullValueInput | InputJsonValue
+    stockIncluded?: BoolFieldUpdateOperationsInput | boolean
+    invoiceTemplate?: NullableStringFieldUpdateOperationsInput | string | null
+    currencyCode?: NullableStringFieldUpdateOperationsInput | string | null
+    currencySymbol?: NullableStringFieldUpdateOperationsInput | string | null
+    attendance?: AttendanceUpdateManyWithoutBranchNestedInput
+    barcodeSetting?: BarcodeSettingUpdateOneWithoutBranchNestedInput
+    customers?: CustomerUpdateManyWithoutBranchNestedInput
+    challans?: DeliveryChallanUpdateManyWithoutBranchNestedInput
+    expenses?: ExpenseUpdateManyWithoutBranchNestedInput
+    financialYears?: FinancialYearUpdateManyWithoutBranchNestedInput
+    leaveRequests?: LeaveRequestUpdateManyWithoutBranchNestedInput
+    missPunchRequests?: MissPunchRequestUpdateManyWithoutBranchNestedInput
+    payments?: PaymentUpdateManyWithoutBranchNestedInput
+    payrolls?: PayrollUpdateManyWithoutBranchNestedInput
+    productStocks?: ProductStockUpdateManyWithoutBranchNestedInput
+    purchases?: PurchaseUpdateManyWithoutBranchNestedInput
+    quotations?: QuotationUpdateManyWithoutBranchNestedInput
+    salaryAdvances?: SalaryAdvanceUpdateManyWithoutBranchNestedInput
+    sales?: SaleUpdateManyWithoutBranchNestedInput
+    outgoingTransfers?: StockTransferUpdateManyWithoutFromBranchNestedInput
+    incomingTransfers?: StockTransferUpdateManyWithoutToBranchNestedInput
+    terminals?: TerminalUpdateManyWithoutBranchNestedInput
+    tickets?: TicketUpdateManyWithoutBranchNestedInput
+    workLogs?: WorkLogUpdateManyWithoutBranchNestedInput
+    leads?: LeadUpdateManyWithoutBranchNestedInput
+    users?: UserUpdateManyWithoutBranchNestedInput
+    dayCloses?: DayCloseUpdateManyWithoutBranchNestedInput
+    customerVouchers?: CustomerVoucherUpdateManyWithoutBranchNestedInput
+  }
+
+  export type BranchUncheckedUpdateWithoutVouchersInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    name?: StringFieldUpdateOperationsInput | string
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    invoiceSettings?: NullableJsonNullValueInput | InputJsonValue
+    stockIncluded?: BoolFieldUpdateOperationsInput | boolean
+    invoiceTemplate?: NullableStringFieldUpdateOperationsInput | string | null
+    currencyCode?: NullableStringFieldUpdateOperationsInput | string | null
+    currencySymbol?: NullableStringFieldUpdateOperationsInput | string | null
+    attendance?: AttendanceUncheckedUpdateManyWithoutBranchNestedInput
+    barcodeSetting?: BarcodeSettingUncheckedUpdateOneWithoutBranchNestedInput
+    customers?: CustomerUncheckedUpdateManyWithoutBranchNestedInput
+    challans?: DeliveryChallanUncheckedUpdateManyWithoutBranchNestedInput
+    expenses?: ExpenseUncheckedUpdateManyWithoutBranchNestedInput
+    financialYears?: FinancialYearUncheckedUpdateManyWithoutBranchNestedInput
+    leaveRequests?: LeaveRequestUncheckedUpdateManyWithoutBranchNestedInput
+    missPunchRequests?: MissPunchRequestUncheckedUpdateManyWithoutBranchNestedInput
+    payments?: PaymentUncheckedUpdateManyWithoutBranchNestedInput
+    payrolls?: PayrollUncheckedUpdateManyWithoutBranchNestedInput
+    productStocks?: ProductStockUncheckedUpdateManyWithoutBranchNestedInput
+    purchases?: PurchaseUncheckedUpdateManyWithoutBranchNestedInput
+    quotations?: QuotationUncheckedUpdateManyWithoutBranchNestedInput
+    salaryAdvances?: SalaryAdvanceUncheckedUpdateManyWithoutBranchNestedInput
+    sales?: SaleUncheckedUpdateManyWithoutBranchNestedInput
+    outgoingTransfers?: StockTransferUncheckedUpdateManyWithoutFromBranchNestedInput
+    incomingTransfers?: StockTransferUncheckedUpdateManyWithoutToBranchNestedInput
+    terminals?: TerminalUncheckedUpdateManyWithoutBranchNestedInput
+    tickets?: TicketUncheckedUpdateManyWithoutBranchNestedInput
+    workLogs?: WorkLogUncheckedUpdateManyWithoutBranchNestedInput
+    leads?: LeadUncheckedUpdateManyWithoutBranchNestedInput
+    users?: UserUncheckedUpdateManyWithoutBranchNestedInput
+    dayCloses?: DayCloseUncheckedUpdateManyWithoutBranchNestedInput
+    customerVouchers?: CustomerVoucherUncheckedUpdateManyWithoutBranchNestedInput
   }
 
   export type LedgerCreateWithoutCreditEntriesInput = {
@@ -129281,6 +131475,7 @@ export namespace Prisma {
     payrolls?: PayrollCreateNestedManyWithoutVoucherInput
     salaryAdvances?: SalaryAdvanceCreateNestedManyWithoutVoucherInput
     creator: UserCreateNestedOneWithoutVouchersInput
+    branch?: BranchCreateNestedOneWithoutVouchersInput
   }
 
   export type VoucherUncheckedCreateWithoutEntriesInput = {
@@ -129293,6 +131488,7 @@ export namespace Prisma {
     status?: string
     reference?: string | null
     createdBy: number
+    branchId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
     payrolls?: PayrollUncheckedCreateNestedManyWithoutVoucherInput
@@ -129408,6 +131604,7 @@ export namespace Prisma {
     payrolls?: PayrollUpdateManyWithoutVoucherNestedInput
     salaryAdvances?: SalaryAdvanceUpdateManyWithoutVoucherNestedInput
     creator?: UserUpdateOneRequiredWithoutVouchersNestedInput
+    branch?: BranchUpdateOneWithoutVouchersNestedInput
   }
 
   export type VoucherUncheckedUpdateWithoutEntriesInput = {
@@ -129420,6 +131617,7 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     reference?: NullableStringFieldUpdateOperationsInput | string | null
     createdBy?: IntFieldUpdateOperationsInput | number
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     payrolls?: PayrollUncheckedUpdateManyWithoutVoucherNestedInput
@@ -129515,6 +131713,7 @@ export namespace Prisma {
     users?: UserCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseCreateNestedManyWithoutBranchInput
     customerVouchers?: CustomerVoucherCreateNestedManyWithoutBranchInput
+    vouchers?: VoucherCreateNestedManyWithoutBranchInput
   }
 
   export type BranchUncheckedCreateWithoutFinancialYearsInput = {
@@ -129554,6 +131753,7 @@ export namespace Prisma {
     users?: UserUncheckedCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseUncheckedCreateNestedManyWithoutBranchInput
     customerVouchers?: CustomerVoucherUncheckedCreateNestedManyWithoutBranchInput
+    vouchers?: VoucherUncheckedCreateNestedManyWithoutBranchInput
   }
 
   export type BranchCreateOrConnectWithoutFinancialYearsInput = {
@@ -129839,6 +132039,7 @@ export namespace Prisma {
     users?: UserUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUpdateManyWithoutBranchNestedInput
     customerVouchers?: CustomerVoucherUpdateManyWithoutBranchNestedInput
+    vouchers?: VoucherUpdateManyWithoutBranchNestedInput
   }
 
   export type BranchUncheckedUpdateWithoutFinancialYearsInput = {
@@ -129878,6 +132079,7 @@ export namespace Prisma {
     users?: UserUncheckedUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUncheckedUpdateManyWithoutBranchNestedInput
     customerVouchers?: CustomerVoucherUncheckedUpdateManyWithoutBranchNestedInput
+    vouchers?: VoucherUncheckedUpdateManyWithoutBranchNestedInput
   }
 
   export type PurchaseUpsertWithWhereUniqueWithoutFinancialYearInput = {
@@ -129964,6 +132166,7 @@ export namespace Prisma {
     users?: UserCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseCreateNestedManyWithoutBranchInput
     customerVouchers?: CustomerVoucherCreateNestedManyWithoutBranchInput
+    vouchers?: VoucherCreateNestedManyWithoutBranchInput
   }
 
   export type BranchUncheckedCreateWithoutChallansInput = {
@@ -130003,6 +132206,7 @@ export namespace Prisma {
     users?: UserUncheckedCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseUncheckedCreateNestedManyWithoutBranchInput
     customerVouchers?: CustomerVoucherUncheckedCreateNestedManyWithoutBranchInput
+    vouchers?: VoucherUncheckedCreateNestedManyWithoutBranchInput
   }
 
   export type BranchCreateOrConnectWithoutChallansInput = {
@@ -130192,6 +132396,7 @@ export namespace Prisma {
     users?: UserUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUpdateManyWithoutBranchNestedInput
     customerVouchers?: CustomerVoucherUpdateManyWithoutBranchNestedInput
+    vouchers?: VoucherUpdateManyWithoutBranchNestedInput
   }
 
   export type BranchUncheckedUpdateWithoutChallansInput = {
@@ -130231,6 +132436,7 @@ export namespace Prisma {
     users?: UserUncheckedUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUncheckedUpdateManyWithoutBranchNestedInput
     customerVouchers?: CustomerVoucherUncheckedUpdateManyWithoutBranchNestedInput
+    vouchers?: VoucherUncheckedUpdateManyWithoutBranchNestedInput
   }
 
   export type CustomerUpsertWithoutChallansInput = {
@@ -130905,6 +133111,7 @@ export namespace Prisma {
     users?: UserCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseCreateNestedManyWithoutBranchInput
     customerVouchers?: CustomerVoucherCreateNestedManyWithoutBranchInput
+    vouchers?: VoucherCreateNestedManyWithoutBranchInput
   }
 
   export type BranchUncheckedCreateWithoutTerminalsInput = {
@@ -130944,6 +133151,7 @@ export namespace Prisma {
     users?: UserUncheckedCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseUncheckedCreateNestedManyWithoutBranchInput
     customerVouchers?: CustomerVoucherUncheckedCreateNestedManyWithoutBranchInput
+    vouchers?: VoucherUncheckedCreateNestedManyWithoutBranchInput
   }
 
   export type BranchCreateOrConnectWithoutTerminalsInput = {
@@ -130994,7 +133202,10 @@ export namespace Prisma {
     admin?: UserCreateNestedOneWithoutManagedStaffInput
     managedStaff?: UserCreateNestedManyWithoutAdminInput
     branch?: BranchCreateNestedOneWithoutUsersInput
+    dayCloseOpenings?: DayCloseCreateNestedManyWithoutOpenedByInput
+    dayCloseOpeningApprovals?: DayCloseCreateNestedManyWithoutOpeningApprovedByInput
     dayCloseFinalizations?: DayCloseCreateNestedManyWithoutFinalizedByInput
+    dayCloseExceptionApprovals?: DayCloseCreateNestedManyWithoutExceptionApprovedByInput
     staffDayClosings?: StaffDayCloseCreateNestedManyWithoutUserInput
   }
 
@@ -131042,13 +133253,97 @@ export namespace Prisma {
     leads?: LeadUncheckedCreateNestedManyWithoutAssignedUserInput
     referredLeads?: LeadUncheckedCreateNestedManyWithoutReferredByInput
     managedStaff?: UserUncheckedCreateNestedManyWithoutAdminInput
+    dayCloseOpenings?: DayCloseUncheckedCreateNestedManyWithoutOpenedByInput
+    dayCloseOpeningApprovals?: DayCloseUncheckedCreateNestedManyWithoutOpeningApprovedByInput
     dayCloseFinalizations?: DayCloseUncheckedCreateNestedManyWithoutFinalizedByInput
+    dayCloseExceptionApprovals?: DayCloseUncheckedCreateNestedManyWithoutExceptionApprovedByInput
     staffDayClosings?: StaffDayCloseUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutTerminalsInput = {
     where: UserWhereUniqueInput
     create: XOR<UserCreateWithoutTerminalsInput, UserUncheckedCreateWithoutTerminalsInput>
+  }
+
+  export type DayCloseCreateWithoutTerminalInput = {
+    businessDate: Date | string
+    status?: string
+    openedAt?: Date | string | null
+    openingCash?: Decimal | DecimalJsLike | number | string | null
+    previousClosingCash?: Decimal | DecimalJsLike | number | string | null
+    additionalCashAdded?: Decimal | DecimalJsLike | number | string | null
+    cashRemovedBeforeOpening?: Decimal | DecimalJsLike | number | string | null
+    expectedOpeningCash?: Decimal | DecimalJsLike | number | string | null
+    actualOpeningCash?: Decimal | DecimalJsLike | number | string | null
+    openingDifference?: Decimal | DecimalJsLike | number | string | null
+    openingDiscrepancyReason?: string | null
+    openingDenominations?: NullableJsonNullValueInput | InputJsonValue
+    openingRemarks?: string | null
+    verificationChecks?: NullableJsonNullValueInput | InputJsonValue
+    verificationExceptions?: NullableJsonNullValueInput | InputJsonValue
+    exceptionApprovalReason?: string | null
+    salesSummary?: NullableJsonNullValueInput | InputJsonValue
+    closingExpectedCash?: Decimal | DecimalJsLike | number | string | null
+    physicalCash?: Decimal | DecimalJsLike | number | string | null
+    cashDifference?: Decimal | DecimalJsLike | number | string | null
+    closingDenominations?: NullableJsonNullValueInput | InputJsonValue
+    notes?: string | null
+    finalizedAt?: Date | string | null
+    adjustments?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    branch: BranchCreateNestedOneWithoutDayClosesInput
+    openedBy?: UserCreateNestedOneWithoutDayCloseOpeningsInput
+    openingApprovedBy?: UserCreateNestedOneWithoutDayCloseOpeningApprovalsInput
+    finalizedBy?: UserCreateNestedOneWithoutDayCloseFinalizationsInput
+    exceptionApprovedBy?: UserCreateNestedOneWithoutDayCloseExceptionApprovalsInput
+    staffClosings?: StaffDayCloseCreateNestedManyWithoutDayCloseInput
+  }
+
+  export type DayCloseUncheckedCreateWithoutTerminalInput = {
+    id?: number
+    branchId: number
+    businessDate: Date | string
+    status?: string
+    openedById?: number | null
+    openedAt?: Date | string | null
+    openingCash?: Decimal | DecimalJsLike | number | string | null
+    previousClosingCash?: Decimal | DecimalJsLike | number | string | null
+    additionalCashAdded?: Decimal | DecimalJsLike | number | string | null
+    cashRemovedBeforeOpening?: Decimal | DecimalJsLike | number | string | null
+    expectedOpeningCash?: Decimal | DecimalJsLike | number | string | null
+    actualOpeningCash?: Decimal | DecimalJsLike | number | string | null
+    openingDifference?: Decimal | DecimalJsLike | number | string | null
+    openingDiscrepancyReason?: string | null
+    openingApprovedById?: number | null
+    openingDenominations?: NullableJsonNullValueInput | InputJsonValue
+    openingRemarks?: string | null
+    verificationChecks?: NullableJsonNullValueInput | InputJsonValue
+    verificationExceptions?: NullableJsonNullValueInput | InputJsonValue
+    exceptionApprovedById?: number | null
+    exceptionApprovalReason?: string | null
+    salesSummary?: NullableJsonNullValueInput | InputJsonValue
+    closingExpectedCash?: Decimal | DecimalJsLike | number | string | null
+    physicalCash?: Decimal | DecimalJsLike | number | string | null
+    cashDifference?: Decimal | DecimalJsLike | number | string | null
+    closingDenominations?: NullableJsonNullValueInput | InputJsonValue
+    notes?: string | null
+    finalizedById?: number | null
+    finalizedAt?: Date | string | null
+    adjustments?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    staffClosings?: StaffDayCloseUncheckedCreateNestedManyWithoutDayCloseInput
+  }
+
+  export type DayCloseCreateOrConnectWithoutTerminalInput = {
+    where: DayCloseWhereUniqueInput
+    create: XOR<DayCloseCreateWithoutTerminalInput, DayCloseUncheckedCreateWithoutTerminalInput>
+  }
+
+  export type DayCloseCreateManyTerminalInputEnvelope = {
+    data: DayCloseCreateManyTerminalInput | DayCloseCreateManyTerminalInput[]
+    skipDuplicates?: boolean
   }
 
   export type SaleUpsertWithWhereUniqueWithoutTerminalInput = {
@@ -131114,6 +133409,7 @@ export namespace Prisma {
     users?: UserUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUpdateManyWithoutBranchNestedInput
     customerVouchers?: CustomerVoucherUpdateManyWithoutBranchNestedInput
+    vouchers?: VoucherUpdateManyWithoutBranchNestedInput
   }
 
   export type BranchUncheckedUpdateWithoutTerminalsInput = {
@@ -131153,6 +133449,7 @@ export namespace Prisma {
     users?: UserUncheckedUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUncheckedUpdateManyWithoutBranchNestedInput
     customerVouchers?: CustomerVoucherUncheckedUpdateManyWithoutBranchNestedInput
+    vouchers?: VoucherUncheckedUpdateManyWithoutBranchNestedInput
   }
 
   export type UserUpsertWithWhereUniqueWithoutTerminalsInput = {
@@ -131169,6 +133466,22 @@ export namespace Prisma {
   export type UserUpdateManyWithWhereWithoutTerminalsInput = {
     where: UserScalarWhereInput
     data: XOR<UserUpdateManyMutationInput, UserUncheckedUpdateManyWithoutTerminalsInput>
+  }
+
+  export type DayCloseUpsertWithWhereUniqueWithoutTerminalInput = {
+    where: DayCloseWhereUniqueInput
+    update: XOR<DayCloseUpdateWithoutTerminalInput, DayCloseUncheckedUpdateWithoutTerminalInput>
+    create: XOR<DayCloseCreateWithoutTerminalInput, DayCloseUncheckedCreateWithoutTerminalInput>
+  }
+
+  export type DayCloseUpdateWithWhereUniqueWithoutTerminalInput = {
+    where: DayCloseWhereUniqueInput
+    data: XOR<DayCloseUpdateWithoutTerminalInput, DayCloseUncheckedUpdateWithoutTerminalInput>
+  }
+
+  export type DayCloseUpdateManyWithWhereWithoutTerminalInput = {
+    where: DayCloseScalarWhereInput
+    data: XOR<DayCloseUpdateManyMutationInput, DayCloseUncheckedUpdateManyWithoutTerminalInput>
   }
 
   export type UserCreateWithoutReceivedMessagesInput = {
@@ -131214,7 +133527,10 @@ export namespace Prisma {
     managedStaff?: UserCreateNestedManyWithoutAdminInput
     branch?: BranchCreateNestedOneWithoutUsersInput
     terminals?: TerminalCreateNestedManyWithoutUsersInput
+    dayCloseOpenings?: DayCloseCreateNestedManyWithoutOpenedByInput
+    dayCloseOpeningApprovals?: DayCloseCreateNestedManyWithoutOpeningApprovedByInput
     dayCloseFinalizations?: DayCloseCreateNestedManyWithoutFinalizedByInput
+    dayCloseExceptionApprovals?: DayCloseCreateNestedManyWithoutExceptionApprovedByInput
     staffDayClosings?: StaffDayCloseCreateNestedManyWithoutUserInput
   }
 
@@ -131262,7 +133578,10 @@ export namespace Prisma {
     referredLeads?: LeadUncheckedCreateNestedManyWithoutReferredByInput
     managedStaff?: UserUncheckedCreateNestedManyWithoutAdminInput
     terminals?: TerminalUncheckedCreateNestedManyWithoutUsersInput
+    dayCloseOpenings?: DayCloseUncheckedCreateNestedManyWithoutOpenedByInput
+    dayCloseOpeningApprovals?: DayCloseUncheckedCreateNestedManyWithoutOpeningApprovedByInput
     dayCloseFinalizations?: DayCloseUncheckedCreateNestedManyWithoutFinalizedByInput
+    dayCloseExceptionApprovals?: DayCloseUncheckedCreateNestedManyWithoutExceptionApprovedByInput
     staffDayClosings?: StaffDayCloseUncheckedCreateNestedManyWithoutUserInput
   }
 
@@ -131314,7 +133633,10 @@ export namespace Prisma {
     managedStaff?: UserCreateNestedManyWithoutAdminInput
     branch?: BranchCreateNestedOneWithoutUsersInput
     terminals?: TerminalCreateNestedManyWithoutUsersInput
+    dayCloseOpenings?: DayCloseCreateNestedManyWithoutOpenedByInput
+    dayCloseOpeningApprovals?: DayCloseCreateNestedManyWithoutOpeningApprovedByInput
     dayCloseFinalizations?: DayCloseCreateNestedManyWithoutFinalizedByInput
+    dayCloseExceptionApprovals?: DayCloseCreateNestedManyWithoutExceptionApprovedByInput
     staffDayClosings?: StaffDayCloseCreateNestedManyWithoutUserInput
   }
 
@@ -131362,7 +133684,10 @@ export namespace Prisma {
     referredLeads?: LeadUncheckedCreateNestedManyWithoutReferredByInput
     managedStaff?: UserUncheckedCreateNestedManyWithoutAdminInput
     terminals?: TerminalUncheckedCreateNestedManyWithoutUsersInput
+    dayCloseOpenings?: DayCloseUncheckedCreateNestedManyWithoutOpenedByInput
+    dayCloseOpeningApprovals?: DayCloseUncheckedCreateNestedManyWithoutOpeningApprovedByInput
     dayCloseFinalizations?: DayCloseUncheckedCreateNestedManyWithoutFinalizedByInput
+    dayCloseExceptionApprovals?: DayCloseUncheckedCreateNestedManyWithoutExceptionApprovedByInput
     staffDayClosings?: StaffDayCloseUncheckedCreateNestedManyWithoutUserInput
   }
 
@@ -131425,7 +133750,10 @@ export namespace Prisma {
     managedStaff?: UserUpdateManyWithoutAdminNestedInput
     branch?: BranchUpdateOneWithoutUsersNestedInput
     terminals?: TerminalUpdateManyWithoutUsersNestedInput
+    dayCloseOpenings?: DayCloseUpdateManyWithoutOpenedByNestedInput
+    dayCloseOpeningApprovals?: DayCloseUpdateManyWithoutOpeningApprovedByNestedInput
     dayCloseFinalizations?: DayCloseUpdateManyWithoutFinalizedByNestedInput
+    dayCloseExceptionApprovals?: DayCloseUpdateManyWithoutExceptionApprovedByNestedInput
     staffDayClosings?: StaffDayCloseUpdateManyWithoutUserNestedInput
   }
 
@@ -131473,7 +133801,10 @@ export namespace Prisma {
     referredLeads?: LeadUncheckedUpdateManyWithoutReferredByNestedInput
     managedStaff?: UserUncheckedUpdateManyWithoutAdminNestedInput
     terminals?: TerminalUncheckedUpdateManyWithoutUsersNestedInput
+    dayCloseOpenings?: DayCloseUncheckedUpdateManyWithoutOpenedByNestedInput
+    dayCloseOpeningApprovals?: DayCloseUncheckedUpdateManyWithoutOpeningApprovedByNestedInput
     dayCloseFinalizations?: DayCloseUncheckedUpdateManyWithoutFinalizedByNestedInput
+    dayCloseExceptionApprovals?: DayCloseUncheckedUpdateManyWithoutExceptionApprovedByNestedInput
     staffDayClosings?: StaffDayCloseUncheckedUpdateManyWithoutUserNestedInput
   }
 
@@ -131531,7 +133862,10 @@ export namespace Prisma {
     managedStaff?: UserUpdateManyWithoutAdminNestedInput
     branch?: BranchUpdateOneWithoutUsersNestedInput
     terminals?: TerminalUpdateManyWithoutUsersNestedInput
+    dayCloseOpenings?: DayCloseUpdateManyWithoutOpenedByNestedInput
+    dayCloseOpeningApprovals?: DayCloseUpdateManyWithoutOpeningApprovedByNestedInput
     dayCloseFinalizations?: DayCloseUpdateManyWithoutFinalizedByNestedInput
+    dayCloseExceptionApprovals?: DayCloseUpdateManyWithoutExceptionApprovedByNestedInput
     staffDayClosings?: StaffDayCloseUpdateManyWithoutUserNestedInput
   }
 
@@ -131579,7 +133913,10 @@ export namespace Prisma {
     referredLeads?: LeadUncheckedUpdateManyWithoutReferredByNestedInput
     managedStaff?: UserUncheckedUpdateManyWithoutAdminNestedInput
     terminals?: TerminalUncheckedUpdateManyWithoutUsersNestedInput
+    dayCloseOpenings?: DayCloseUncheckedUpdateManyWithoutOpenedByNestedInput
+    dayCloseOpeningApprovals?: DayCloseUncheckedUpdateManyWithoutOpeningApprovedByNestedInput
     dayCloseFinalizations?: DayCloseUncheckedUpdateManyWithoutFinalizedByNestedInput
+    dayCloseExceptionApprovals?: DayCloseUncheckedUpdateManyWithoutExceptionApprovedByNestedInput
     staffDayClosings?: StaffDayCloseUncheckedUpdateManyWithoutUserNestedInput
   }
 
@@ -131626,7 +133963,10 @@ export namespace Prisma {
     managedStaff?: UserCreateNestedManyWithoutAdminInput
     branch?: BranchCreateNestedOneWithoutUsersInput
     terminals?: TerminalCreateNestedManyWithoutUsersInput
+    dayCloseOpenings?: DayCloseCreateNestedManyWithoutOpenedByInput
+    dayCloseOpeningApprovals?: DayCloseCreateNestedManyWithoutOpeningApprovedByInput
     dayCloseFinalizations?: DayCloseCreateNestedManyWithoutFinalizedByInput
+    dayCloseExceptionApprovals?: DayCloseCreateNestedManyWithoutExceptionApprovedByInput
     staffDayClosings?: StaffDayCloseCreateNestedManyWithoutUserInput
   }
 
@@ -131674,7 +134014,10 @@ export namespace Prisma {
     referredLeads?: LeadUncheckedCreateNestedManyWithoutReferredByInput
     managedStaff?: UserUncheckedCreateNestedManyWithoutAdminInput
     terminals?: TerminalUncheckedCreateNestedManyWithoutUsersInput
+    dayCloseOpenings?: DayCloseUncheckedCreateNestedManyWithoutOpenedByInput
+    dayCloseOpeningApprovals?: DayCloseUncheckedCreateNestedManyWithoutOpeningApprovedByInput
     dayCloseFinalizations?: DayCloseUncheckedCreateNestedManyWithoutFinalizedByInput
+    dayCloseExceptionApprovals?: DayCloseUncheckedCreateNestedManyWithoutExceptionApprovedByInput
     staffDayClosings?: StaffDayCloseUncheckedCreateNestedManyWithoutUserInput
   }
 
@@ -131737,7 +134080,10 @@ export namespace Prisma {
     managedStaff?: UserUpdateManyWithoutAdminNestedInput
     branch?: BranchUpdateOneWithoutUsersNestedInput
     terminals?: TerminalUpdateManyWithoutUsersNestedInput
+    dayCloseOpenings?: DayCloseUpdateManyWithoutOpenedByNestedInput
+    dayCloseOpeningApprovals?: DayCloseUpdateManyWithoutOpeningApprovedByNestedInput
     dayCloseFinalizations?: DayCloseUpdateManyWithoutFinalizedByNestedInput
+    dayCloseExceptionApprovals?: DayCloseUpdateManyWithoutExceptionApprovedByNestedInput
     staffDayClosings?: StaffDayCloseUpdateManyWithoutUserNestedInput
   }
 
@@ -131785,7 +134131,10 @@ export namespace Prisma {
     referredLeads?: LeadUncheckedUpdateManyWithoutReferredByNestedInput
     managedStaff?: UserUncheckedUpdateManyWithoutAdminNestedInput
     terminals?: TerminalUncheckedUpdateManyWithoutUsersNestedInput
+    dayCloseOpenings?: DayCloseUncheckedUpdateManyWithoutOpenedByNestedInput
+    dayCloseOpeningApprovals?: DayCloseUncheckedUpdateManyWithoutOpeningApprovedByNestedInput
     dayCloseFinalizations?: DayCloseUncheckedUpdateManyWithoutFinalizedByNestedInput
+    dayCloseExceptionApprovals?: DayCloseUncheckedUpdateManyWithoutExceptionApprovedByNestedInput
     staffDayClosings?: StaffDayCloseUncheckedUpdateManyWithoutUserNestedInput
   }
 
@@ -131832,7 +134181,10 @@ export namespace Prisma {
     managedStaff?: UserCreateNestedManyWithoutAdminInput
     branch?: BranchCreateNestedOneWithoutUsersInput
     terminals?: TerminalCreateNestedManyWithoutUsersInput
+    dayCloseOpenings?: DayCloseCreateNestedManyWithoutOpenedByInput
+    dayCloseOpeningApprovals?: DayCloseCreateNestedManyWithoutOpeningApprovedByInput
     dayCloseFinalizations?: DayCloseCreateNestedManyWithoutFinalizedByInput
+    dayCloseExceptionApprovals?: DayCloseCreateNestedManyWithoutExceptionApprovedByInput
     staffDayClosings?: StaffDayCloseCreateNestedManyWithoutUserInput
   }
 
@@ -131880,7 +134232,10 @@ export namespace Prisma {
     referredLeads?: LeadUncheckedCreateNestedManyWithoutReferredByInput
     managedStaff?: UserUncheckedCreateNestedManyWithoutAdminInput
     terminals?: TerminalUncheckedCreateNestedManyWithoutUsersInput
+    dayCloseOpenings?: DayCloseUncheckedCreateNestedManyWithoutOpenedByInput
+    dayCloseOpeningApprovals?: DayCloseUncheckedCreateNestedManyWithoutOpeningApprovedByInput
     dayCloseFinalizations?: DayCloseUncheckedCreateNestedManyWithoutFinalizedByInput
+    dayCloseExceptionApprovals?: DayCloseUncheckedCreateNestedManyWithoutExceptionApprovedByInput
     staffDayClosings?: StaffDayCloseUncheckedCreateNestedManyWithoutUserInput
   }
 
@@ -131925,6 +134280,7 @@ export namespace Prisma {
     users?: UserCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseCreateNestedManyWithoutBranchInput
     customerVouchers?: CustomerVoucherCreateNestedManyWithoutBranchInput
+    vouchers?: VoucherCreateNestedManyWithoutBranchInput
   }
 
   export type BranchUncheckedCreateWithoutWorkLogsInput = {
@@ -131964,6 +134320,7 @@ export namespace Prisma {
     users?: UserUncheckedCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseUncheckedCreateNestedManyWithoutBranchInput
     customerVouchers?: CustomerVoucherUncheckedCreateNestedManyWithoutBranchInput
+    vouchers?: VoucherUncheckedCreateNestedManyWithoutBranchInput
   }
 
   export type BranchCreateOrConnectWithoutWorkLogsInput = {
@@ -132014,7 +134371,10 @@ export namespace Prisma {
     managedStaff?: UserCreateNestedManyWithoutAdminInput
     branch?: BranchCreateNestedOneWithoutUsersInput
     terminals?: TerminalCreateNestedManyWithoutUsersInput
+    dayCloseOpenings?: DayCloseCreateNestedManyWithoutOpenedByInput
+    dayCloseOpeningApprovals?: DayCloseCreateNestedManyWithoutOpeningApprovedByInput
     dayCloseFinalizations?: DayCloseCreateNestedManyWithoutFinalizedByInput
+    dayCloseExceptionApprovals?: DayCloseCreateNestedManyWithoutExceptionApprovedByInput
     staffDayClosings?: StaffDayCloseCreateNestedManyWithoutUserInput
   }
 
@@ -132062,7 +134422,10 @@ export namespace Prisma {
     referredLeads?: LeadUncheckedCreateNestedManyWithoutReferredByInput
     managedStaff?: UserUncheckedCreateNestedManyWithoutAdminInput
     terminals?: TerminalUncheckedCreateNestedManyWithoutUsersInput
+    dayCloseOpenings?: DayCloseUncheckedCreateNestedManyWithoutOpenedByInput
+    dayCloseOpeningApprovals?: DayCloseUncheckedCreateNestedManyWithoutOpeningApprovedByInput
     dayCloseFinalizations?: DayCloseUncheckedCreateNestedManyWithoutFinalizedByInput
+    dayCloseExceptionApprovals?: DayCloseUncheckedCreateNestedManyWithoutExceptionApprovedByInput
     staffDayClosings?: StaffDayCloseUncheckedCreateNestedManyWithoutUserInput
   }
 
@@ -132125,7 +134488,10 @@ export namespace Prisma {
     managedStaff?: UserUpdateManyWithoutAdminNestedInput
     branch?: BranchUpdateOneWithoutUsersNestedInput
     terminals?: TerminalUpdateManyWithoutUsersNestedInput
+    dayCloseOpenings?: DayCloseUpdateManyWithoutOpenedByNestedInput
+    dayCloseOpeningApprovals?: DayCloseUpdateManyWithoutOpeningApprovedByNestedInput
     dayCloseFinalizations?: DayCloseUpdateManyWithoutFinalizedByNestedInput
+    dayCloseExceptionApprovals?: DayCloseUpdateManyWithoutExceptionApprovedByNestedInput
     staffDayClosings?: StaffDayCloseUpdateManyWithoutUserNestedInput
   }
 
@@ -132173,7 +134539,10 @@ export namespace Prisma {
     referredLeads?: LeadUncheckedUpdateManyWithoutReferredByNestedInput
     managedStaff?: UserUncheckedUpdateManyWithoutAdminNestedInput
     terminals?: TerminalUncheckedUpdateManyWithoutUsersNestedInput
+    dayCloseOpenings?: DayCloseUncheckedUpdateManyWithoutOpenedByNestedInput
+    dayCloseOpeningApprovals?: DayCloseUncheckedUpdateManyWithoutOpeningApprovedByNestedInput
     dayCloseFinalizations?: DayCloseUncheckedUpdateManyWithoutFinalizedByNestedInput
+    dayCloseExceptionApprovals?: DayCloseUncheckedUpdateManyWithoutExceptionApprovedByNestedInput
     staffDayClosings?: StaffDayCloseUncheckedUpdateManyWithoutUserNestedInput
   }
 
@@ -132224,6 +134593,7 @@ export namespace Prisma {
     users?: UserUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUpdateManyWithoutBranchNestedInput
     customerVouchers?: CustomerVoucherUpdateManyWithoutBranchNestedInput
+    vouchers?: VoucherUpdateManyWithoutBranchNestedInput
   }
 
   export type BranchUncheckedUpdateWithoutWorkLogsInput = {
@@ -132263,6 +134633,7 @@ export namespace Prisma {
     users?: UserUncheckedUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUncheckedUpdateManyWithoutBranchNestedInput
     customerVouchers?: CustomerVoucherUncheckedUpdateManyWithoutBranchNestedInput
+    vouchers?: VoucherUncheckedUpdateManyWithoutBranchNestedInput
   }
 
   export type UserUpsertWithoutWorkLogsInput = {
@@ -132319,7 +134690,10 @@ export namespace Prisma {
     managedStaff?: UserUpdateManyWithoutAdminNestedInput
     branch?: BranchUpdateOneWithoutUsersNestedInput
     terminals?: TerminalUpdateManyWithoutUsersNestedInput
+    dayCloseOpenings?: DayCloseUpdateManyWithoutOpenedByNestedInput
+    dayCloseOpeningApprovals?: DayCloseUpdateManyWithoutOpeningApprovedByNestedInput
     dayCloseFinalizations?: DayCloseUpdateManyWithoutFinalizedByNestedInput
+    dayCloseExceptionApprovals?: DayCloseUpdateManyWithoutExceptionApprovedByNestedInput
     staffDayClosings?: StaffDayCloseUpdateManyWithoutUserNestedInput
   }
 
@@ -132367,7 +134741,10 @@ export namespace Prisma {
     referredLeads?: LeadUncheckedUpdateManyWithoutReferredByNestedInput
     managedStaff?: UserUncheckedUpdateManyWithoutAdminNestedInput
     terminals?: TerminalUncheckedUpdateManyWithoutUsersNestedInput
+    dayCloseOpenings?: DayCloseUncheckedUpdateManyWithoutOpenedByNestedInput
+    dayCloseOpeningApprovals?: DayCloseUncheckedUpdateManyWithoutOpeningApprovedByNestedInput
     dayCloseFinalizations?: DayCloseUncheckedUpdateManyWithoutFinalizedByNestedInput
+    dayCloseExceptionApprovals?: DayCloseUncheckedUpdateManyWithoutExceptionApprovedByNestedInput
     staffDayClosings?: StaffDayCloseUncheckedUpdateManyWithoutUserNestedInput
   }
 
@@ -132414,7 +134791,10 @@ export namespace Prisma {
     managedStaff?: UserCreateNestedManyWithoutAdminInput
     branch?: BranchCreateNestedOneWithoutUsersInput
     terminals?: TerminalCreateNestedManyWithoutUsersInput
+    dayCloseOpenings?: DayCloseCreateNestedManyWithoutOpenedByInput
+    dayCloseOpeningApprovals?: DayCloseCreateNestedManyWithoutOpeningApprovedByInput
     dayCloseFinalizations?: DayCloseCreateNestedManyWithoutFinalizedByInput
+    dayCloseExceptionApprovals?: DayCloseCreateNestedManyWithoutExceptionApprovedByInput
     staffDayClosings?: StaffDayCloseCreateNestedManyWithoutUserInput
   }
 
@@ -132462,7 +134842,10 @@ export namespace Prisma {
     referredLeads?: LeadUncheckedCreateNestedManyWithoutReferredByInput
     managedStaff?: UserUncheckedCreateNestedManyWithoutAdminInput
     terminals?: TerminalUncheckedCreateNestedManyWithoutUsersInput
+    dayCloseOpenings?: DayCloseUncheckedCreateNestedManyWithoutOpenedByInput
+    dayCloseOpeningApprovals?: DayCloseUncheckedCreateNestedManyWithoutOpeningApprovedByInput
     dayCloseFinalizations?: DayCloseUncheckedCreateNestedManyWithoutFinalizedByInput
+    dayCloseExceptionApprovals?: DayCloseUncheckedCreateNestedManyWithoutExceptionApprovedByInput
     staffDayClosings?: StaffDayCloseUncheckedCreateNestedManyWithoutUserInput
   }
 
@@ -132514,7 +134897,10 @@ export namespace Prisma {
     managedStaff?: UserCreateNestedManyWithoutAdminInput
     branch?: BranchCreateNestedOneWithoutUsersInput
     terminals?: TerminalCreateNestedManyWithoutUsersInput
+    dayCloseOpenings?: DayCloseCreateNestedManyWithoutOpenedByInput
+    dayCloseOpeningApprovals?: DayCloseCreateNestedManyWithoutOpeningApprovedByInput
     dayCloseFinalizations?: DayCloseCreateNestedManyWithoutFinalizedByInput
+    dayCloseExceptionApprovals?: DayCloseCreateNestedManyWithoutExceptionApprovedByInput
     staffDayClosings?: StaffDayCloseCreateNestedManyWithoutUserInput
   }
 
@@ -132562,7 +134948,10 @@ export namespace Prisma {
     referredLeads?: LeadUncheckedCreateNestedManyWithoutReferredByInput
     managedStaff?: UserUncheckedCreateNestedManyWithoutAdminInput
     terminals?: TerminalUncheckedCreateNestedManyWithoutUsersInput
+    dayCloseOpenings?: DayCloseUncheckedCreateNestedManyWithoutOpenedByInput
+    dayCloseOpeningApprovals?: DayCloseUncheckedCreateNestedManyWithoutOpeningApprovedByInput
     dayCloseFinalizations?: DayCloseUncheckedCreateNestedManyWithoutFinalizedByInput
+    dayCloseExceptionApprovals?: DayCloseUncheckedCreateNestedManyWithoutExceptionApprovedByInput
     staffDayClosings?: StaffDayCloseUncheckedCreateNestedManyWithoutUserInput
   }
 
@@ -132607,6 +134996,7 @@ export namespace Prisma {
     users?: UserCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseCreateNestedManyWithoutBranchInput
     customerVouchers?: CustomerVoucherCreateNestedManyWithoutBranchInput
+    vouchers?: VoucherCreateNestedManyWithoutBranchInput
   }
 
   export type BranchUncheckedCreateWithoutTicketsInput = {
@@ -132646,6 +135036,7 @@ export namespace Prisma {
     users?: UserUncheckedCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseUncheckedCreateNestedManyWithoutBranchInput
     customerVouchers?: CustomerVoucherUncheckedCreateNestedManyWithoutBranchInput
+    vouchers?: VoucherUncheckedCreateNestedManyWithoutBranchInput
   }
 
   export type BranchCreateOrConnectWithoutTicketsInput = {
@@ -132710,7 +135101,10 @@ export namespace Prisma {
     managedStaff?: UserCreateNestedManyWithoutAdminInput
     branch?: BranchCreateNestedOneWithoutUsersInput
     terminals?: TerminalCreateNestedManyWithoutUsersInput
+    dayCloseOpenings?: DayCloseCreateNestedManyWithoutOpenedByInput
+    dayCloseOpeningApprovals?: DayCloseCreateNestedManyWithoutOpeningApprovedByInput
     dayCloseFinalizations?: DayCloseCreateNestedManyWithoutFinalizedByInput
+    dayCloseExceptionApprovals?: DayCloseCreateNestedManyWithoutExceptionApprovedByInput
     staffDayClosings?: StaffDayCloseCreateNestedManyWithoutUserInput
   }
 
@@ -132758,7 +135152,10 @@ export namespace Prisma {
     referredLeads?: LeadUncheckedCreateNestedManyWithoutReferredByInput
     managedStaff?: UserUncheckedCreateNestedManyWithoutAdminInput
     terminals?: TerminalUncheckedCreateNestedManyWithoutUsersInput
+    dayCloseOpenings?: DayCloseUncheckedCreateNestedManyWithoutOpenedByInput
+    dayCloseOpeningApprovals?: DayCloseUncheckedCreateNestedManyWithoutOpeningApprovedByInput
     dayCloseFinalizations?: DayCloseUncheckedCreateNestedManyWithoutFinalizedByInput
+    dayCloseExceptionApprovals?: DayCloseUncheckedCreateNestedManyWithoutExceptionApprovedByInput
     staffDayClosings?: StaffDayCloseUncheckedCreateNestedManyWithoutUserInput
   }
 
@@ -132870,7 +135267,10 @@ export namespace Prisma {
     managedStaff?: UserCreateNestedManyWithoutAdminInput
     branch?: BranchCreateNestedOneWithoutUsersInput
     terminals?: TerminalCreateNestedManyWithoutUsersInput
+    dayCloseOpenings?: DayCloseCreateNestedManyWithoutOpenedByInput
+    dayCloseOpeningApprovals?: DayCloseCreateNestedManyWithoutOpeningApprovedByInput
     dayCloseFinalizations?: DayCloseCreateNestedManyWithoutFinalizedByInput
+    dayCloseExceptionApprovals?: DayCloseCreateNestedManyWithoutExceptionApprovedByInput
     staffDayClosings?: StaffDayCloseCreateNestedManyWithoutUserInput
   }
 
@@ -132918,7 +135318,10 @@ export namespace Prisma {
     referredLeads?: LeadUncheckedCreateNestedManyWithoutReferredByInput
     managedStaff?: UserUncheckedCreateNestedManyWithoutAdminInput
     terminals?: TerminalUncheckedCreateNestedManyWithoutUsersInput
+    dayCloseOpenings?: DayCloseUncheckedCreateNestedManyWithoutOpenedByInput
+    dayCloseOpeningApprovals?: DayCloseUncheckedCreateNestedManyWithoutOpeningApprovedByInput
     dayCloseFinalizations?: DayCloseUncheckedCreateNestedManyWithoutFinalizedByInput
+    dayCloseExceptionApprovals?: DayCloseUncheckedCreateNestedManyWithoutExceptionApprovedByInput
     staffDayClosings?: StaffDayCloseUncheckedCreateNestedManyWithoutUserInput
   }
 
@@ -133063,7 +135466,10 @@ export namespace Prisma {
     managedStaff?: UserUpdateManyWithoutAdminNestedInput
     branch?: BranchUpdateOneWithoutUsersNestedInput
     terminals?: TerminalUpdateManyWithoutUsersNestedInput
+    dayCloseOpenings?: DayCloseUpdateManyWithoutOpenedByNestedInput
+    dayCloseOpeningApprovals?: DayCloseUpdateManyWithoutOpeningApprovedByNestedInput
     dayCloseFinalizations?: DayCloseUpdateManyWithoutFinalizedByNestedInput
+    dayCloseExceptionApprovals?: DayCloseUpdateManyWithoutExceptionApprovedByNestedInput
     staffDayClosings?: StaffDayCloseUpdateManyWithoutUserNestedInput
   }
 
@@ -133111,7 +135517,10 @@ export namespace Prisma {
     referredLeads?: LeadUncheckedUpdateManyWithoutReferredByNestedInput
     managedStaff?: UserUncheckedUpdateManyWithoutAdminNestedInput
     terminals?: TerminalUncheckedUpdateManyWithoutUsersNestedInput
+    dayCloseOpenings?: DayCloseUncheckedUpdateManyWithoutOpenedByNestedInput
+    dayCloseOpeningApprovals?: DayCloseUncheckedUpdateManyWithoutOpeningApprovedByNestedInput
     dayCloseFinalizations?: DayCloseUncheckedUpdateManyWithoutFinalizedByNestedInput
+    dayCloseExceptionApprovals?: DayCloseUncheckedUpdateManyWithoutExceptionApprovedByNestedInput
     staffDayClosings?: StaffDayCloseUncheckedUpdateManyWithoutUserNestedInput
   }
 
@@ -133169,7 +135578,10 @@ export namespace Prisma {
     managedStaff?: UserUpdateManyWithoutAdminNestedInput
     branch?: BranchUpdateOneWithoutUsersNestedInput
     terminals?: TerminalUpdateManyWithoutUsersNestedInput
+    dayCloseOpenings?: DayCloseUpdateManyWithoutOpenedByNestedInput
+    dayCloseOpeningApprovals?: DayCloseUpdateManyWithoutOpeningApprovedByNestedInput
     dayCloseFinalizations?: DayCloseUpdateManyWithoutFinalizedByNestedInput
+    dayCloseExceptionApprovals?: DayCloseUpdateManyWithoutExceptionApprovedByNestedInput
     staffDayClosings?: StaffDayCloseUpdateManyWithoutUserNestedInput
   }
 
@@ -133217,7 +135629,10 @@ export namespace Prisma {
     referredLeads?: LeadUncheckedUpdateManyWithoutReferredByNestedInput
     managedStaff?: UserUncheckedUpdateManyWithoutAdminNestedInput
     terminals?: TerminalUncheckedUpdateManyWithoutUsersNestedInput
+    dayCloseOpenings?: DayCloseUncheckedUpdateManyWithoutOpenedByNestedInput
+    dayCloseOpeningApprovals?: DayCloseUncheckedUpdateManyWithoutOpeningApprovedByNestedInput
     dayCloseFinalizations?: DayCloseUncheckedUpdateManyWithoutFinalizedByNestedInput
+    dayCloseExceptionApprovals?: DayCloseUncheckedUpdateManyWithoutExceptionApprovedByNestedInput
     staffDayClosings?: StaffDayCloseUncheckedUpdateManyWithoutUserNestedInput
   }
 
@@ -133268,6 +135683,7 @@ export namespace Prisma {
     users?: UserUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUpdateManyWithoutBranchNestedInput
     customerVouchers?: CustomerVoucherUpdateManyWithoutBranchNestedInput
+    vouchers?: VoucherUpdateManyWithoutBranchNestedInput
   }
 
   export type BranchUncheckedUpdateWithoutTicketsInput = {
@@ -133307,6 +135723,7 @@ export namespace Prisma {
     users?: UserUncheckedUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUncheckedUpdateManyWithoutBranchNestedInput
     customerVouchers?: CustomerVoucherUncheckedUpdateManyWithoutBranchNestedInput
+    vouchers?: VoucherUncheckedUpdateManyWithoutBranchNestedInput
   }
 
   export type TicketCategoryUpsertWithoutTicketsInput = {
@@ -133383,7 +135800,10 @@ export namespace Prisma {
     managedStaff?: UserUpdateManyWithoutAdminNestedInput
     branch?: BranchUpdateOneWithoutUsersNestedInput
     terminals?: TerminalUpdateManyWithoutUsersNestedInput
+    dayCloseOpenings?: DayCloseUpdateManyWithoutOpenedByNestedInput
+    dayCloseOpeningApprovals?: DayCloseUpdateManyWithoutOpeningApprovedByNestedInput
     dayCloseFinalizations?: DayCloseUpdateManyWithoutFinalizedByNestedInput
+    dayCloseExceptionApprovals?: DayCloseUpdateManyWithoutExceptionApprovedByNestedInput
     staffDayClosings?: StaffDayCloseUpdateManyWithoutUserNestedInput
   }
 
@@ -133431,7 +135851,10 @@ export namespace Prisma {
     referredLeads?: LeadUncheckedUpdateManyWithoutReferredByNestedInput
     managedStaff?: UserUncheckedUpdateManyWithoutAdminNestedInput
     terminals?: TerminalUncheckedUpdateManyWithoutUsersNestedInput
+    dayCloseOpenings?: DayCloseUncheckedUpdateManyWithoutOpenedByNestedInput
+    dayCloseOpeningApprovals?: DayCloseUncheckedUpdateManyWithoutOpeningApprovedByNestedInput
     dayCloseFinalizations?: DayCloseUncheckedUpdateManyWithoutFinalizedByNestedInput
+    dayCloseExceptionApprovals?: DayCloseUncheckedUpdateManyWithoutExceptionApprovedByNestedInput
     staffDayClosings?: StaffDayCloseUncheckedUpdateManyWithoutUserNestedInput
   }
 
@@ -133555,7 +135978,10 @@ export namespace Prisma {
     managedStaff?: UserUpdateManyWithoutAdminNestedInput
     branch?: BranchUpdateOneWithoutUsersNestedInput
     terminals?: TerminalUpdateManyWithoutUsersNestedInput
+    dayCloseOpenings?: DayCloseUpdateManyWithoutOpenedByNestedInput
+    dayCloseOpeningApprovals?: DayCloseUpdateManyWithoutOpeningApprovedByNestedInput
     dayCloseFinalizations?: DayCloseUpdateManyWithoutFinalizedByNestedInput
+    dayCloseExceptionApprovals?: DayCloseUpdateManyWithoutExceptionApprovedByNestedInput
     staffDayClosings?: StaffDayCloseUpdateManyWithoutUserNestedInput
   }
 
@@ -133603,7 +136029,10 @@ export namespace Prisma {
     referredLeads?: LeadUncheckedUpdateManyWithoutReferredByNestedInput
     managedStaff?: UserUncheckedUpdateManyWithoutAdminNestedInput
     terminals?: TerminalUncheckedUpdateManyWithoutUsersNestedInput
+    dayCloseOpenings?: DayCloseUncheckedUpdateManyWithoutOpenedByNestedInput
+    dayCloseOpeningApprovals?: DayCloseUncheckedUpdateManyWithoutOpeningApprovedByNestedInput
     dayCloseFinalizations?: DayCloseUncheckedUpdateManyWithoutFinalizedByNestedInput
+    dayCloseExceptionApprovals?: DayCloseUncheckedUpdateManyWithoutExceptionApprovedByNestedInput
     staffDayClosings?: StaffDayCloseUncheckedUpdateManyWithoutUserNestedInput
   }
 
@@ -133776,7 +136205,10 @@ export namespace Prisma {
     managedStaff?: UserCreateNestedManyWithoutAdminInput
     branch?: BranchCreateNestedOneWithoutUsersInput
     terminals?: TerminalCreateNestedManyWithoutUsersInput
+    dayCloseOpenings?: DayCloseCreateNestedManyWithoutOpenedByInput
+    dayCloseOpeningApprovals?: DayCloseCreateNestedManyWithoutOpeningApprovedByInput
     dayCloseFinalizations?: DayCloseCreateNestedManyWithoutFinalizedByInput
+    dayCloseExceptionApprovals?: DayCloseCreateNestedManyWithoutExceptionApprovedByInput
     staffDayClosings?: StaffDayCloseCreateNestedManyWithoutUserInput
   }
 
@@ -133824,7 +136256,10 @@ export namespace Prisma {
     referredLeads?: LeadUncheckedCreateNestedManyWithoutReferredByInput
     managedStaff?: UserUncheckedCreateNestedManyWithoutAdminInput
     terminals?: TerminalUncheckedCreateNestedManyWithoutUsersInput
+    dayCloseOpenings?: DayCloseUncheckedCreateNestedManyWithoutOpenedByInput
+    dayCloseOpeningApprovals?: DayCloseUncheckedCreateNestedManyWithoutOpeningApprovedByInput
     dayCloseFinalizations?: DayCloseUncheckedCreateNestedManyWithoutFinalizedByInput
+    dayCloseExceptionApprovals?: DayCloseUncheckedCreateNestedManyWithoutExceptionApprovedByInput
     staffDayClosings?: StaffDayCloseUncheckedCreateNestedManyWithoutUserInput
   }
 
@@ -133944,7 +136379,10 @@ export namespace Prisma {
     managedStaff?: UserUpdateManyWithoutAdminNestedInput
     branch?: BranchUpdateOneWithoutUsersNestedInput
     terminals?: TerminalUpdateManyWithoutUsersNestedInput
+    dayCloseOpenings?: DayCloseUpdateManyWithoutOpenedByNestedInput
+    dayCloseOpeningApprovals?: DayCloseUpdateManyWithoutOpeningApprovedByNestedInput
     dayCloseFinalizations?: DayCloseUpdateManyWithoutFinalizedByNestedInput
+    dayCloseExceptionApprovals?: DayCloseUpdateManyWithoutExceptionApprovedByNestedInput
     staffDayClosings?: StaffDayCloseUpdateManyWithoutUserNestedInput
   }
 
@@ -133992,7 +136430,10 @@ export namespace Prisma {
     referredLeads?: LeadUncheckedUpdateManyWithoutReferredByNestedInput
     managedStaff?: UserUncheckedUpdateManyWithoutAdminNestedInput
     terminals?: TerminalUncheckedUpdateManyWithoutUsersNestedInput
+    dayCloseOpenings?: DayCloseUncheckedUpdateManyWithoutOpenedByNestedInput
+    dayCloseOpeningApprovals?: DayCloseUncheckedUpdateManyWithoutOpeningApprovedByNestedInput
     dayCloseFinalizations?: DayCloseUncheckedUpdateManyWithoutFinalizedByNestedInput
+    dayCloseExceptionApprovals?: DayCloseUncheckedUpdateManyWithoutExceptionApprovedByNestedInput
     staffDayClosings?: StaffDayCloseUncheckedUpdateManyWithoutUserNestedInput
   }
 
@@ -134102,7 +136543,10 @@ export namespace Prisma {
     managedStaff?: UserCreateNestedManyWithoutAdminInput
     branch?: BranchCreateNestedOneWithoutUsersInput
     terminals?: TerminalCreateNestedManyWithoutUsersInput
+    dayCloseOpenings?: DayCloseCreateNestedManyWithoutOpenedByInput
+    dayCloseOpeningApprovals?: DayCloseCreateNestedManyWithoutOpeningApprovedByInput
     dayCloseFinalizations?: DayCloseCreateNestedManyWithoutFinalizedByInput
+    dayCloseExceptionApprovals?: DayCloseCreateNestedManyWithoutExceptionApprovedByInput
     staffDayClosings?: StaffDayCloseCreateNestedManyWithoutUserInput
   }
 
@@ -134150,7 +136594,10 @@ export namespace Prisma {
     referredLeads?: LeadUncheckedCreateNestedManyWithoutReferredByInput
     managedStaff?: UserUncheckedCreateNestedManyWithoutAdminInput
     terminals?: TerminalUncheckedCreateNestedManyWithoutUsersInput
+    dayCloseOpenings?: DayCloseUncheckedCreateNestedManyWithoutOpenedByInput
+    dayCloseOpeningApprovals?: DayCloseUncheckedCreateNestedManyWithoutOpeningApprovedByInput
     dayCloseFinalizations?: DayCloseUncheckedCreateNestedManyWithoutFinalizedByInput
+    dayCloseExceptionApprovals?: DayCloseUncheckedCreateNestedManyWithoutExceptionApprovedByInput
     staffDayClosings?: StaffDayCloseUncheckedCreateNestedManyWithoutUserInput
   }
 
@@ -134270,7 +136717,10 @@ export namespace Prisma {
     managedStaff?: UserUpdateManyWithoutAdminNestedInput
     branch?: BranchUpdateOneWithoutUsersNestedInput
     terminals?: TerminalUpdateManyWithoutUsersNestedInput
+    dayCloseOpenings?: DayCloseUpdateManyWithoutOpenedByNestedInput
+    dayCloseOpeningApprovals?: DayCloseUpdateManyWithoutOpeningApprovedByNestedInput
     dayCloseFinalizations?: DayCloseUpdateManyWithoutFinalizedByNestedInput
+    dayCloseExceptionApprovals?: DayCloseUpdateManyWithoutExceptionApprovedByNestedInput
     staffDayClosings?: StaffDayCloseUpdateManyWithoutUserNestedInput
   }
 
@@ -134318,7 +136768,10 @@ export namespace Prisma {
     referredLeads?: LeadUncheckedUpdateManyWithoutReferredByNestedInput
     managedStaff?: UserUncheckedUpdateManyWithoutAdminNestedInput
     terminals?: TerminalUncheckedUpdateManyWithoutUsersNestedInput
+    dayCloseOpenings?: DayCloseUncheckedUpdateManyWithoutOpenedByNestedInput
+    dayCloseOpeningApprovals?: DayCloseUncheckedUpdateManyWithoutOpeningApprovedByNestedInput
     dayCloseFinalizations?: DayCloseUncheckedUpdateManyWithoutFinalizedByNestedInput
+    dayCloseExceptionApprovals?: DayCloseUncheckedUpdateManyWithoutExceptionApprovedByNestedInput
     staffDayClosings?: StaffDayCloseUncheckedUpdateManyWithoutUserNestedInput
   }
 
@@ -134428,7 +136881,10 @@ export namespace Prisma {
     managedStaff?: UserCreateNestedManyWithoutAdminInput
     branch?: BranchCreateNestedOneWithoutUsersInput
     terminals?: TerminalCreateNestedManyWithoutUsersInput
+    dayCloseOpenings?: DayCloseCreateNestedManyWithoutOpenedByInput
+    dayCloseOpeningApprovals?: DayCloseCreateNestedManyWithoutOpeningApprovedByInput
     dayCloseFinalizations?: DayCloseCreateNestedManyWithoutFinalizedByInput
+    dayCloseExceptionApprovals?: DayCloseCreateNestedManyWithoutExceptionApprovedByInput
     staffDayClosings?: StaffDayCloseCreateNestedManyWithoutUserInput
   }
 
@@ -134476,7 +136932,10 @@ export namespace Prisma {
     referredLeads?: LeadUncheckedCreateNestedManyWithoutReferredByInput
     managedStaff?: UserUncheckedCreateNestedManyWithoutAdminInput
     terminals?: TerminalUncheckedCreateNestedManyWithoutUsersInput
+    dayCloseOpenings?: DayCloseUncheckedCreateNestedManyWithoutOpenedByInput
+    dayCloseOpeningApprovals?: DayCloseUncheckedCreateNestedManyWithoutOpeningApprovedByInput
     dayCloseFinalizations?: DayCloseUncheckedCreateNestedManyWithoutFinalizedByInput
+    dayCloseExceptionApprovals?: DayCloseUncheckedCreateNestedManyWithoutExceptionApprovedByInput
     staffDayClosings?: StaffDayCloseUncheckedCreateNestedManyWithoutUserInput
   }
 
@@ -134596,7 +137055,10 @@ export namespace Prisma {
     managedStaff?: UserUpdateManyWithoutAdminNestedInput
     branch?: BranchUpdateOneWithoutUsersNestedInput
     terminals?: TerminalUpdateManyWithoutUsersNestedInput
+    dayCloseOpenings?: DayCloseUpdateManyWithoutOpenedByNestedInput
+    dayCloseOpeningApprovals?: DayCloseUpdateManyWithoutOpeningApprovedByNestedInput
     dayCloseFinalizations?: DayCloseUpdateManyWithoutFinalizedByNestedInput
+    dayCloseExceptionApprovals?: DayCloseUpdateManyWithoutExceptionApprovedByNestedInput
     staffDayClosings?: StaffDayCloseUpdateManyWithoutUserNestedInput
   }
 
@@ -134644,7 +137106,10 @@ export namespace Prisma {
     referredLeads?: LeadUncheckedUpdateManyWithoutReferredByNestedInput
     managedStaff?: UserUncheckedUpdateManyWithoutAdminNestedInput
     terminals?: TerminalUncheckedUpdateManyWithoutUsersNestedInput
+    dayCloseOpenings?: DayCloseUncheckedUpdateManyWithoutOpenedByNestedInput
+    dayCloseOpeningApprovals?: DayCloseUncheckedUpdateManyWithoutOpeningApprovedByNestedInput
     dayCloseFinalizations?: DayCloseUncheckedUpdateManyWithoutFinalizedByNestedInput
+    dayCloseExceptionApprovals?: DayCloseUncheckedUpdateManyWithoutExceptionApprovedByNestedInput
     staffDayClosings?: StaffDayCloseUncheckedUpdateManyWithoutUserNestedInput
   }
 
@@ -134747,6 +137212,7 @@ export namespace Prisma {
     leads?: LeadCreateNestedManyWithoutBranchInput
     users?: UserCreateNestedManyWithoutBranchInput
     customerVouchers?: CustomerVoucherCreateNestedManyWithoutBranchInput
+    vouchers?: VoucherCreateNestedManyWithoutBranchInput
   }
 
   export type BranchUncheckedCreateWithoutDayClosesInput = {
@@ -134786,11 +137252,256 @@ export namespace Prisma {
     leads?: LeadUncheckedCreateNestedManyWithoutBranchInput
     users?: UserUncheckedCreateNestedManyWithoutBranchInput
     customerVouchers?: CustomerVoucherUncheckedCreateNestedManyWithoutBranchInput
+    vouchers?: VoucherUncheckedCreateNestedManyWithoutBranchInput
   }
 
   export type BranchCreateOrConnectWithoutDayClosesInput = {
     where: BranchWhereUniqueInput
     create: XOR<BranchCreateWithoutDayClosesInput, BranchUncheckedCreateWithoutDayClosesInput>
+  }
+
+  export type TerminalCreateWithoutDayClosesInput = {
+    terminalCode: string
+    name: string
+    isActive?: boolean
+    lastUsed?: Date | string
+    ipAddress?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    sales?: SaleCreateNestedManyWithoutTerminalInput
+    branch?: BranchCreateNestedOneWithoutTerminalsInput
+    users?: UserCreateNestedManyWithoutTerminalsInput
+  }
+
+  export type TerminalUncheckedCreateWithoutDayClosesInput = {
+    id?: number
+    terminalCode: string
+    name: string
+    branchId?: number | null
+    isActive?: boolean
+    lastUsed?: Date | string
+    ipAddress?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    sales?: SaleUncheckedCreateNestedManyWithoutTerminalInput
+    users?: UserUncheckedCreateNestedManyWithoutTerminalsInput
+  }
+
+  export type TerminalCreateOrConnectWithoutDayClosesInput = {
+    where: TerminalWhereUniqueInput
+    create: XOR<TerminalCreateWithoutDayClosesInput, TerminalUncheckedCreateWithoutDayClosesInput>
+  }
+
+  export type UserCreateWithoutDayCloseOpeningsInput = {
+    username: string
+    password: string
+    role?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    allowedModules?: NullableJsonNullValueInput | InputJsonValue
+    name?: string | null
+    incentivePercentage?: Decimal | DecimalJsLike | number | string
+    imageUrl?: string | null
+    weeklyOff?: string | null
+    isActive?: boolean
+    attendance?: AttendanceCreateNestedManyWithoutUserInput
+    crmTasks?: CRMTaskCreateNestedManyWithoutAssignedUserInput
+    receivedMessages?: ChatMessageCreateNestedManyWithoutReceiverInput
+    sentMessages?: ChatMessageCreateNestedManyWithoutSenderInput
+    deals?: DealCreateNestedManyWithoutAssignedUserInput
+    employeeProfile?: EmployeeProfileCreateNestedOneWithoutUserInput
+    approvedLeaves?: LeaveRequestCreateNestedManyWithoutApprovedByInput
+    leaveRequests?: LeaveRequestCreateNestedManyWithoutUserInput
+    reviewedMissPunches?: MissPunchRequestCreateNestedManyWithoutReviewerInput
+    missPunchRequests?: MissPunchRequestCreateNestedManyWithoutUserInput
+    notifications?: NotificationCreateNestedManyWithoutUserInput
+    payrolls?: PayrollCreateNestedManyWithoutUserInput
+    approvedAdvances?: SalaryAdvanceCreateNestedManyWithoutApproverInput
+    salaryAdvances?: SalaryAdvanceCreateNestedManyWithoutUserInput
+    sales?: SaleCreateNestedManyWithoutSalesmanInput
+    receivedTransfers?: StockTransferCreateNestedManyWithoutReceivedByInput
+    ownedTickets?: TicketCreateNestedManyWithoutAdminInput
+    assignedTickets?: TicketCreateNestedManyWithoutAssignedToInput
+    createdTickets?: TicketCreateNestedManyWithoutCreatedByInput
+    previousAssignedTickets?: TicketCreateNestedManyWithoutPreviousAssigneeInput
+    closureRequests?: TicketClosureRequestCreateNestedManyWithoutRequestedByInput
+    ticketHistoryActions?: TicketHistoryCreateNestedManyWithoutDoneByInput
+    ticketMessages?: TicketMessageCreateNestedManyWithoutSenderInput
+    vouchers?: VoucherCreateNestedManyWithoutCreatorInput
+    managedWorkLogs?: WorkLogCreateNestedManyWithoutAdminInput
+    workLogs?: WorkLogCreateNestedManyWithoutUserInput
+    leads?: LeadCreateNestedManyWithoutAssignedUserInput
+    referredLeads?: LeadCreateNestedManyWithoutReferredByInput
+    admin?: UserCreateNestedOneWithoutManagedStaffInput
+    managedStaff?: UserCreateNestedManyWithoutAdminInput
+    branch?: BranchCreateNestedOneWithoutUsersInput
+    terminals?: TerminalCreateNestedManyWithoutUsersInput
+    dayCloseOpeningApprovals?: DayCloseCreateNestedManyWithoutOpeningApprovedByInput
+    dayCloseFinalizations?: DayCloseCreateNestedManyWithoutFinalizedByInput
+    dayCloseExceptionApprovals?: DayCloseCreateNestedManyWithoutExceptionApprovedByInput
+    staffDayClosings?: StaffDayCloseCreateNestedManyWithoutUserInput
+  }
+
+  export type UserUncheckedCreateWithoutDayCloseOpeningsInput = {
+    id?: number
+    username: string
+    password: string
+    role?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    allowedModules?: NullableJsonNullValueInput | InputJsonValue
+    name?: string | null
+    branchId?: number | null
+    incentivePercentage?: Decimal | DecimalJsLike | number | string
+    imageUrl?: string | null
+    weeklyOff?: string | null
+    isActive?: boolean
+    adminId?: number | null
+    attendance?: AttendanceUncheckedCreateNestedManyWithoutUserInput
+    crmTasks?: CRMTaskUncheckedCreateNestedManyWithoutAssignedUserInput
+    receivedMessages?: ChatMessageUncheckedCreateNestedManyWithoutReceiverInput
+    sentMessages?: ChatMessageUncheckedCreateNestedManyWithoutSenderInput
+    deals?: DealUncheckedCreateNestedManyWithoutAssignedUserInput
+    employeeProfile?: EmployeeProfileUncheckedCreateNestedOneWithoutUserInput
+    approvedLeaves?: LeaveRequestUncheckedCreateNestedManyWithoutApprovedByInput
+    leaveRequests?: LeaveRequestUncheckedCreateNestedManyWithoutUserInput
+    reviewedMissPunches?: MissPunchRequestUncheckedCreateNestedManyWithoutReviewerInput
+    missPunchRequests?: MissPunchRequestUncheckedCreateNestedManyWithoutUserInput
+    notifications?: NotificationUncheckedCreateNestedManyWithoutUserInput
+    payrolls?: PayrollUncheckedCreateNestedManyWithoutUserInput
+    approvedAdvances?: SalaryAdvanceUncheckedCreateNestedManyWithoutApproverInput
+    salaryAdvances?: SalaryAdvanceUncheckedCreateNestedManyWithoutUserInput
+    sales?: SaleUncheckedCreateNestedManyWithoutSalesmanInput
+    receivedTransfers?: StockTransferUncheckedCreateNestedManyWithoutReceivedByInput
+    ownedTickets?: TicketUncheckedCreateNestedManyWithoutAdminInput
+    assignedTickets?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
+    createdTickets?: TicketUncheckedCreateNestedManyWithoutCreatedByInput
+    previousAssignedTickets?: TicketUncheckedCreateNestedManyWithoutPreviousAssigneeInput
+    closureRequests?: TicketClosureRequestUncheckedCreateNestedManyWithoutRequestedByInput
+    ticketHistoryActions?: TicketHistoryUncheckedCreateNestedManyWithoutDoneByInput
+    ticketMessages?: TicketMessageUncheckedCreateNestedManyWithoutSenderInput
+    vouchers?: VoucherUncheckedCreateNestedManyWithoutCreatorInput
+    managedWorkLogs?: WorkLogUncheckedCreateNestedManyWithoutAdminInput
+    workLogs?: WorkLogUncheckedCreateNestedManyWithoutUserInput
+    leads?: LeadUncheckedCreateNestedManyWithoutAssignedUserInput
+    referredLeads?: LeadUncheckedCreateNestedManyWithoutReferredByInput
+    managedStaff?: UserUncheckedCreateNestedManyWithoutAdminInput
+    terminals?: TerminalUncheckedCreateNestedManyWithoutUsersInput
+    dayCloseOpeningApprovals?: DayCloseUncheckedCreateNestedManyWithoutOpeningApprovedByInput
+    dayCloseFinalizations?: DayCloseUncheckedCreateNestedManyWithoutFinalizedByInput
+    dayCloseExceptionApprovals?: DayCloseUncheckedCreateNestedManyWithoutExceptionApprovedByInput
+    staffDayClosings?: StaffDayCloseUncheckedCreateNestedManyWithoutUserInput
+  }
+
+  export type UserCreateOrConnectWithoutDayCloseOpeningsInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutDayCloseOpeningsInput, UserUncheckedCreateWithoutDayCloseOpeningsInput>
+  }
+
+  export type UserCreateWithoutDayCloseOpeningApprovalsInput = {
+    username: string
+    password: string
+    role?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    allowedModules?: NullableJsonNullValueInput | InputJsonValue
+    name?: string | null
+    incentivePercentage?: Decimal | DecimalJsLike | number | string
+    imageUrl?: string | null
+    weeklyOff?: string | null
+    isActive?: boolean
+    attendance?: AttendanceCreateNestedManyWithoutUserInput
+    crmTasks?: CRMTaskCreateNestedManyWithoutAssignedUserInput
+    receivedMessages?: ChatMessageCreateNestedManyWithoutReceiverInput
+    sentMessages?: ChatMessageCreateNestedManyWithoutSenderInput
+    deals?: DealCreateNestedManyWithoutAssignedUserInput
+    employeeProfile?: EmployeeProfileCreateNestedOneWithoutUserInput
+    approvedLeaves?: LeaveRequestCreateNestedManyWithoutApprovedByInput
+    leaveRequests?: LeaveRequestCreateNestedManyWithoutUserInput
+    reviewedMissPunches?: MissPunchRequestCreateNestedManyWithoutReviewerInput
+    missPunchRequests?: MissPunchRequestCreateNestedManyWithoutUserInput
+    notifications?: NotificationCreateNestedManyWithoutUserInput
+    payrolls?: PayrollCreateNestedManyWithoutUserInput
+    approvedAdvances?: SalaryAdvanceCreateNestedManyWithoutApproverInput
+    salaryAdvances?: SalaryAdvanceCreateNestedManyWithoutUserInput
+    sales?: SaleCreateNestedManyWithoutSalesmanInput
+    receivedTransfers?: StockTransferCreateNestedManyWithoutReceivedByInput
+    ownedTickets?: TicketCreateNestedManyWithoutAdminInput
+    assignedTickets?: TicketCreateNestedManyWithoutAssignedToInput
+    createdTickets?: TicketCreateNestedManyWithoutCreatedByInput
+    previousAssignedTickets?: TicketCreateNestedManyWithoutPreviousAssigneeInput
+    closureRequests?: TicketClosureRequestCreateNestedManyWithoutRequestedByInput
+    ticketHistoryActions?: TicketHistoryCreateNestedManyWithoutDoneByInput
+    ticketMessages?: TicketMessageCreateNestedManyWithoutSenderInput
+    vouchers?: VoucherCreateNestedManyWithoutCreatorInput
+    managedWorkLogs?: WorkLogCreateNestedManyWithoutAdminInput
+    workLogs?: WorkLogCreateNestedManyWithoutUserInput
+    leads?: LeadCreateNestedManyWithoutAssignedUserInput
+    referredLeads?: LeadCreateNestedManyWithoutReferredByInput
+    admin?: UserCreateNestedOneWithoutManagedStaffInput
+    managedStaff?: UserCreateNestedManyWithoutAdminInput
+    branch?: BranchCreateNestedOneWithoutUsersInput
+    terminals?: TerminalCreateNestedManyWithoutUsersInput
+    dayCloseOpenings?: DayCloseCreateNestedManyWithoutOpenedByInput
+    dayCloseFinalizations?: DayCloseCreateNestedManyWithoutFinalizedByInput
+    dayCloseExceptionApprovals?: DayCloseCreateNestedManyWithoutExceptionApprovedByInput
+    staffDayClosings?: StaffDayCloseCreateNestedManyWithoutUserInput
+  }
+
+  export type UserUncheckedCreateWithoutDayCloseOpeningApprovalsInput = {
+    id?: number
+    username: string
+    password: string
+    role?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    allowedModules?: NullableJsonNullValueInput | InputJsonValue
+    name?: string | null
+    branchId?: number | null
+    incentivePercentage?: Decimal | DecimalJsLike | number | string
+    imageUrl?: string | null
+    weeklyOff?: string | null
+    isActive?: boolean
+    adminId?: number | null
+    attendance?: AttendanceUncheckedCreateNestedManyWithoutUserInput
+    crmTasks?: CRMTaskUncheckedCreateNestedManyWithoutAssignedUserInput
+    receivedMessages?: ChatMessageUncheckedCreateNestedManyWithoutReceiverInput
+    sentMessages?: ChatMessageUncheckedCreateNestedManyWithoutSenderInput
+    deals?: DealUncheckedCreateNestedManyWithoutAssignedUserInput
+    employeeProfile?: EmployeeProfileUncheckedCreateNestedOneWithoutUserInput
+    approvedLeaves?: LeaveRequestUncheckedCreateNestedManyWithoutApprovedByInput
+    leaveRequests?: LeaveRequestUncheckedCreateNestedManyWithoutUserInput
+    reviewedMissPunches?: MissPunchRequestUncheckedCreateNestedManyWithoutReviewerInput
+    missPunchRequests?: MissPunchRequestUncheckedCreateNestedManyWithoutUserInput
+    notifications?: NotificationUncheckedCreateNestedManyWithoutUserInput
+    payrolls?: PayrollUncheckedCreateNestedManyWithoutUserInput
+    approvedAdvances?: SalaryAdvanceUncheckedCreateNestedManyWithoutApproverInput
+    salaryAdvances?: SalaryAdvanceUncheckedCreateNestedManyWithoutUserInput
+    sales?: SaleUncheckedCreateNestedManyWithoutSalesmanInput
+    receivedTransfers?: StockTransferUncheckedCreateNestedManyWithoutReceivedByInput
+    ownedTickets?: TicketUncheckedCreateNestedManyWithoutAdminInput
+    assignedTickets?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
+    createdTickets?: TicketUncheckedCreateNestedManyWithoutCreatedByInput
+    previousAssignedTickets?: TicketUncheckedCreateNestedManyWithoutPreviousAssigneeInput
+    closureRequests?: TicketClosureRequestUncheckedCreateNestedManyWithoutRequestedByInput
+    ticketHistoryActions?: TicketHistoryUncheckedCreateNestedManyWithoutDoneByInput
+    ticketMessages?: TicketMessageUncheckedCreateNestedManyWithoutSenderInput
+    vouchers?: VoucherUncheckedCreateNestedManyWithoutCreatorInput
+    managedWorkLogs?: WorkLogUncheckedCreateNestedManyWithoutAdminInput
+    workLogs?: WorkLogUncheckedCreateNestedManyWithoutUserInput
+    leads?: LeadUncheckedCreateNestedManyWithoutAssignedUserInput
+    referredLeads?: LeadUncheckedCreateNestedManyWithoutReferredByInput
+    managedStaff?: UserUncheckedCreateNestedManyWithoutAdminInput
+    terminals?: TerminalUncheckedCreateNestedManyWithoutUsersInput
+    dayCloseOpenings?: DayCloseUncheckedCreateNestedManyWithoutOpenedByInput
+    dayCloseFinalizations?: DayCloseUncheckedCreateNestedManyWithoutFinalizedByInput
+    dayCloseExceptionApprovals?: DayCloseUncheckedCreateNestedManyWithoutExceptionApprovedByInput
+    staffDayClosings?: StaffDayCloseUncheckedCreateNestedManyWithoutUserInput
+  }
+
+  export type UserCreateOrConnectWithoutDayCloseOpeningApprovalsInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutDayCloseOpeningApprovalsInput, UserUncheckedCreateWithoutDayCloseOpeningApprovalsInput>
   }
 
   export type UserCreateWithoutDayCloseFinalizationsInput = {
@@ -134837,6 +137548,9 @@ export namespace Prisma {
     managedStaff?: UserCreateNestedManyWithoutAdminInput
     branch?: BranchCreateNestedOneWithoutUsersInput
     terminals?: TerminalCreateNestedManyWithoutUsersInput
+    dayCloseOpenings?: DayCloseCreateNestedManyWithoutOpenedByInput
+    dayCloseOpeningApprovals?: DayCloseCreateNestedManyWithoutOpeningApprovedByInput
+    dayCloseExceptionApprovals?: DayCloseCreateNestedManyWithoutExceptionApprovedByInput
     staffDayClosings?: StaffDayCloseCreateNestedManyWithoutUserInput
   }
 
@@ -134885,12 +137599,121 @@ export namespace Prisma {
     referredLeads?: LeadUncheckedCreateNestedManyWithoutReferredByInput
     managedStaff?: UserUncheckedCreateNestedManyWithoutAdminInput
     terminals?: TerminalUncheckedCreateNestedManyWithoutUsersInput
+    dayCloseOpenings?: DayCloseUncheckedCreateNestedManyWithoutOpenedByInput
+    dayCloseOpeningApprovals?: DayCloseUncheckedCreateNestedManyWithoutOpeningApprovedByInput
+    dayCloseExceptionApprovals?: DayCloseUncheckedCreateNestedManyWithoutExceptionApprovedByInput
     staffDayClosings?: StaffDayCloseUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutDayCloseFinalizationsInput = {
     where: UserWhereUniqueInput
     create: XOR<UserCreateWithoutDayCloseFinalizationsInput, UserUncheckedCreateWithoutDayCloseFinalizationsInput>
+  }
+
+  export type UserCreateWithoutDayCloseExceptionApprovalsInput = {
+    username: string
+    password: string
+    role?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    allowedModules?: NullableJsonNullValueInput | InputJsonValue
+    name?: string | null
+    incentivePercentage?: Decimal | DecimalJsLike | number | string
+    imageUrl?: string | null
+    weeklyOff?: string | null
+    isActive?: boolean
+    attendance?: AttendanceCreateNestedManyWithoutUserInput
+    crmTasks?: CRMTaskCreateNestedManyWithoutAssignedUserInput
+    receivedMessages?: ChatMessageCreateNestedManyWithoutReceiverInput
+    sentMessages?: ChatMessageCreateNestedManyWithoutSenderInput
+    deals?: DealCreateNestedManyWithoutAssignedUserInput
+    employeeProfile?: EmployeeProfileCreateNestedOneWithoutUserInput
+    approvedLeaves?: LeaveRequestCreateNestedManyWithoutApprovedByInput
+    leaveRequests?: LeaveRequestCreateNestedManyWithoutUserInput
+    reviewedMissPunches?: MissPunchRequestCreateNestedManyWithoutReviewerInput
+    missPunchRequests?: MissPunchRequestCreateNestedManyWithoutUserInput
+    notifications?: NotificationCreateNestedManyWithoutUserInput
+    payrolls?: PayrollCreateNestedManyWithoutUserInput
+    approvedAdvances?: SalaryAdvanceCreateNestedManyWithoutApproverInput
+    salaryAdvances?: SalaryAdvanceCreateNestedManyWithoutUserInput
+    sales?: SaleCreateNestedManyWithoutSalesmanInput
+    receivedTransfers?: StockTransferCreateNestedManyWithoutReceivedByInput
+    ownedTickets?: TicketCreateNestedManyWithoutAdminInput
+    assignedTickets?: TicketCreateNestedManyWithoutAssignedToInput
+    createdTickets?: TicketCreateNestedManyWithoutCreatedByInput
+    previousAssignedTickets?: TicketCreateNestedManyWithoutPreviousAssigneeInput
+    closureRequests?: TicketClosureRequestCreateNestedManyWithoutRequestedByInput
+    ticketHistoryActions?: TicketHistoryCreateNestedManyWithoutDoneByInput
+    ticketMessages?: TicketMessageCreateNestedManyWithoutSenderInput
+    vouchers?: VoucherCreateNestedManyWithoutCreatorInput
+    managedWorkLogs?: WorkLogCreateNestedManyWithoutAdminInput
+    workLogs?: WorkLogCreateNestedManyWithoutUserInput
+    leads?: LeadCreateNestedManyWithoutAssignedUserInput
+    referredLeads?: LeadCreateNestedManyWithoutReferredByInput
+    admin?: UserCreateNestedOneWithoutManagedStaffInput
+    managedStaff?: UserCreateNestedManyWithoutAdminInput
+    branch?: BranchCreateNestedOneWithoutUsersInput
+    terminals?: TerminalCreateNestedManyWithoutUsersInput
+    dayCloseOpenings?: DayCloseCreateNestedManyWithoutOpenedByInput
+    dayCloseOpeningApprovals?: DayCloseCreateNestedManyWithoutOpeningApprovedByInput
+    dayCloseFinalizations?: DayCloseCreateNestedManyWithoutFinalizedByInput
+    staffDayClosings?: StaffDayCloseCreateNestedManyWithoutUserInput
+  }
+
+  export type UserUncheckedCreateWithoutDayCloseExceptionApprovalsInput = {
+    id?: number
+    username: string
+    password: string
+    role?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    allowedModules?: NullableJsonNullValueInput | InputJsonValue
+    name?: string | null
+    branchId?: number | null
+    incentivePercentage?: Decimal | DecimalJsLike | number | string
+    imageUrl?: string | null
+    weeklyOff?: string | null
+    isActive?: boolean
+    adminId?: number | null
+    attendance?: AttendanceUncheckedCreateNestedManyWithoutUserInput
+    crmTasks?: CRMTaskUncheckedCreateNestedManyWithoutAssignedUserInput
+    receivedMessages?: ChatMessageUncheckedCreateNestedManyWithoutReceiverInput
+    sentMessages?: ChatMessageUncheckedCreateNestedManyWithoutSenderInput
+    deals?: DealUncheckedCreateNestedManyWithoutAssignedUserInput
+    employeeProfile?: EmployeeProfileUncheckedCreateNestedOneWithoutUserInput
+    approvedLeaves?: LeaveRequestUncheckedCreateNestedManyWithoutApprovedByInput
+    leaveRequests?: LeaveRequestUncheckedCreateNestedManyWithoutUserInput
+    reviewedMissPunches?: MissPunchRequestUncheckedCreateNestedManyWithoutReviewerInput
+    missPunchRequests?: MissPunchRequestUncheckedCreateNestedManyWithoutUserInput
+    notifications?: NotificationUncheckedCreateNestedManyWithoutUserInput
+    payrolls?: PayrollUncheckedCreateNestedManyWithoutUserInput
+    approvedAdvances?: SalaryAdvanceUncheckedCreateNestedManyWithoutApproverInput
+    salaryAdvances?: SalaryAdvanceUncheckedCreateNestedManyWithoutUserInput
+    sales?: SaleUncheckedCreateNestedManyWithoutSalesmanInput
+    receivedTransfers?: StockTransferUncheckedCreateNestedManyWithoutReceivedByInput
+    ownedTickets?: TicketUncheckedCreateNestedManyWithoutAdminInput
+    assignedTickets?: TicketUncheckedCreateNestedManyWithoutAssignedToInput
+    createdTickets?: TicketUncheckedCreateNestedManyWithoutCreatedByInput
+    previousAssignedTickets?: TicketUncheckedCreateNestedManyWithoutPreviousAssigneeInput
+    closureRequests?: TicketClosureRequestUncheckedCreateNestedManyWithoutRequestedByInput
+    ticketHistoryActions?: TicketHistoryUncheckedCreateNestedManyWithoutDoneByInput
+    ticketMessages?: TicketMessageUncheckedCreateNestedManyWithoutSenderInput
+    vouchers?: VoucherUncheckedCreateNestedManyWithoutCreatorInput
+    managedWorkLogs?: WorkLogUncheckedCreateNestedManyWithoutAdminInput
+    workLogs?: WorkLogUncheckedCreateNestedManyWithoutUserInput
+    leads?: LeadUncheckedCreateNestedManyWithoutAssignedUserInput
+    referredLeads?: LeadUncheckedCreateNestedManyWithoutReferredByInput
+    managedStaff?: UserUncheckedCreateNestedManyWithoutAdminInput
+    terminals?: TerminalUncheckedCreateNestedManyWithoutUsersInput
+    dayCloseOpenings?: DayCloseUncheckedCreateNestedManyWithoutOpenedByInput
+    dayCloseOpeningApprovals?: DayCloseUncheckedCreateNestedManyWithoutOpeningApprovedByInput
+    dayCloseFinalizations?: DayCloseUncheckedCreateNestedManyWithoutFinalizedByInput
+    staffDayClosings?: StaffDayCloseUncheckedCreateNestedManyWithoutUserInput
+  }
+
+  export type UserCreateOrConnectWithoutDayCloseExceptionApprovalsInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutDayCloseExceptionApprovalsInput, UserUncheckedCreateWithoutDayCloseExceptionApprovalsInput>
   }
 
   export type StaffDayCloseCreateWithoutDayCloseInput = {
@@ -134973,6 +137796,7 @@ export namespace Prisma {
     leads?: LeadUpdateManyWithoutBranchNestedInput
     users?: UserUpdateManyWithoutBranchNestedInput
     customerVouchers?: CustomerVoucherUpdateManyWithoutBranchNestedInput
+    vouchers?: VoucherUpdateManyWithoutBranchNestedInput
   }
 
   export type BranchUncheckedUpdateWithoutDayClosesInput = {
@@ -135012,6 +137836,269 @@ export namespace Prisma {
     leads?: LeadUncheckedUpdateManyWithoutBranchNestedInput
     users?: UserUncheckedUpdateManyWithoutBranchNestedInput
     customerVouchers?: CustomerVoucherUncheckedUpdateManyWithoutBranchNestedInput
+    vouchers?: VoucherUncheckedUpdateManyWithoutBranchNestedInput
+  }
+
+  export type TerminalUpsertWithoutDayClosesInput = {
+    update: XOR<TerminalUpdateWithoutDayClosesInput, TerminalUncheckedUpdateWithoutDayClosesInput>
+    create: XOR<TerminalCreateWithoutDayClosesInput, TerminalUncheckedCreateWithoutDayClosesInput>
+    where?: TerminalWhereInput
+  }
+
+  export type TerminalUpdateToOneWithWhereWithoutDayClosesInput = {
+    where?: TerminalWhereInput
+    data: XOR<TerminalUpdateWithoutDayClosesInput, TerminalUncheckedUpdateWithoutDayClosesInput>
+  }
+
+  export type TerminalUpdateWithoutDayClosesInput = {
+    terminalCode?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    lastUsed?: DateTimeFieldUpdateOperationsInput | Date | string
+    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    sales?: SaleUpdateManyWithoutTerminalNestedInput
+    branch?: BranchUpdateOneWithoutTerminalsNestedInput
+    users?: UserUpdateManyWithoutTerminalsNestedInput
+  }
+
+  export type TerminalUncheckedUpdateWithoutDayClosesInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    terminalCode?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    lastUsed?: DateTimeFieldUpdateOperationsInput | Date | string
+    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    sales?: SaleUncheckedUpdateManyWithoutTerminalNestedInput
+    users?: UserUncheckedUpdateManyWithoutTerminalsNestedInput
+  }
+
+  export type UserUpsertWithoutDayCloseOpeningsInput = {
+    update: XOR<UserUpdateWithoutDayCloseOpeningsInput, UserUncheckedUpdateWithoutDayCloseOpeningsInput>
+    create: XOR<UserCreateWithoutDayCloseOpeningsInput, UserUncheckedCreateWithoutDayCloseOpeningsInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutDayCloseOpeningsInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutDayCloseOpeningsInput, UserUncheckedUpdateWithoutDayCloseOpeningsInput>
+  }
+
+  export type UserUpdateWithoutDayCloseOpeningsInput = {
+    username?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    role?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    allowedModules?: NullableJsonNullValueInput | InputJsonValue
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    incentivePercentage?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    weeklyOff?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    attendance?: AttendanceUpdateManyWithoutUserNestedInput
+    crmTasks?: CRMTaskUpdateManyWithoutAssignedUserNestedInput
+    receivedMessages?: ChatMessageUpdateManyWithoutReceiverNestedInput
+    sentMessages?: ChatMessageUpdateManyWithoutSenderNestedInput
+    deals?: DealUpdateManyWithoutAssignedUserNestedInput
+    employeeProfile?: EmployeeProfileUpdateOneWithoutUserNestedInput
+    approvedLeaves?: LeaveRequestUpdateManyWithoutApprovedByNestedInput
+    leaveRequests?: LeaveRequestUpdateManyWithoutUserNestedInput
+    reviewedMissPunches?: MissPunchRequestUpdateManyWithoutReviewerNestedInput
+    missPunchRequests?: MissPunchRequestUpdateManyWithoutUserNestedInput
+    notifications?: NotificationUpdateManyWithoutUserNestedInput
+    payrolls?: PayrollUpdateManyWithoutUserNestedInput
+    approvedAdvances?: SalaryAdvanceUpdateManyWithoutApproverNestedInput
+    salaryAdvances?: SalaryAdvanceUpdateManyWithoutUserNestedInput
+    sales?: SaleUpdateManyWithoutSalesmanNestedInput
+    receivedTransfers?: StockTransferUpdateManyWithoutReceivedByNestedInput
+    ownedTickets?: TicketUpdateManyWithoutAdminNestedInput
+    assignedTickets?: TicketUpdateManyWithoutAssignedToNestedInput
+    createdTickets?: TicketUpdateManyWithoutCreatedByNestedInput
+    previousAssignedTickets?: TicketUpdateManyWithoutPreviousAssigneeNestedInput
+    closureRequests?: TicketClosureRequestUpdateManyWithoutRequestedByNestedInput
+    ticketHistoryActions?: TicketHistoryUpdateManyWithoutDoneByNestedInput
+    ticketMessages?: TicketMessageUpdateManyWithoutSenderNestedInput
+    vouchers?: VoucherUpdateManyWithoutCreatorNestedInput
+    managedWorkLogs?: WorkLogUpdateManyWithoutAdminNestedInput
+    workLogs?: WorkLogUpdateManyWithoutUserNestedInput
+    leads?: LeadUpdateManyWithoutAssignedUserNestedInput
+    referredLeads?: LeadUpdateManyWithoutReferredByNestedInput
+    admin?: UserUpdateOneWithoutManagedStaffNestedInput
+    managedStaff?: UserUpdateManyWithoutAdminNestedInput
+    branch?: BranchUpdateOneWithoutUsersNestedInput
+    terminals?: TerminalUpdateManyWithoutUsersNestedInput
+    dayCloseOpeningApprovals?: DayCloseUpdateManyWithoutOpeningApprovedByNestedInput
+    dayCloseFinalizations?: DayCloseUpdateManyWithoutFinalizedByNestedInput
+    dayCloseExceptionApprovals?: DayCloseUpdateManyWithoutExceptionApprovedByNestedInput
+    staffDayClosings?: StaffDayCloseUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutDayCloseOpeningsInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    username?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    role?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    allowedModules?: NullableJsonNullValueInput | InputJsonValue
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
+    incentivePercentage?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    weeklyOff?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    adminId?: NullableIntFieldUpdateOperationsInput | number | null
+    attendance?: AttendanceUncheckedUpdateManyWithoutUserNestedInput
+    crmTasks?: CRMTaskUncheckedUpdateManyWithoutAssignedUserNestedInput
+    receivedMessages?: ChatMessageUncheckedUpdateManyWithoutReceiverNestedInput
+    sentMessages?: ChatMessageUncheckedUpdateManyWithoutSenderNestedInput
+    deals?: DealUncheckedUpdateManyWithoutAssignedUserNestedInput
+    employeeProfile?: EmployeeProfileUncheckedUpdateOneWithoutUserNestedInput
+    approvedLeaves?: LeaveRequestUncheckedUpdateManyWithoutApprovedByNestedInput
+    leaveRequests?: LeaveRequestUncheckedUpdateManyWithoutUserNestedInput
+    reviewedMissPunches?: MissPunchRequestUncheckedUpdateManyWithoutReviewerNestedInput
+    missPunchRequests?: MissPunchRequestUncheckedUpdateManyWithoutUserNestedInput
+    notifications?: NotificationUncheckedUpdateManyWithoutUserNestedInput
+    payrolls?: PayrollUncheckedUpdateManyWithoutUserNestedInput
+    approvedAdvances?: SalaryAdvanceUncheckedUpdateManyWithoutApproverNestedInput
+    salaryAdvances?: SalaryAdvanceUncheckedUpdateManyWithoutUserNestedInput
+    sales?: SaleUncheckedUpdateManyWithoutSalesmanNestedInput
+    receivedTransfers?: StockTransferUncheckedUpdateManyWithoutReceivedByNestedInput
+    ownedTickets?: TicketUncheckedUpdateManyWithoutAdminNestedInput
+    assignedTickets?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
+    createdTickets?: TicketUncheckedUpdateManyWithoutCreatedByNestedInput
+    previousAssignedTickets?: TicketUncheckedUpdateManyWithoutPreviousAssigneeNestedInput
+    closureRequests?: TicketClosureRequestUncheckedUpdateManyWithoutRequestedByNestedInput
+    ticketHistoryActions?: TicketHistoryUncheckedUpdateManyWithoutDoneByNestedInput
+    ticketMessages?: TicketMessageUncheckedUpdateManyWithoutSenderNestedInput
+    vouchers?: VoucherUncheckedUpdateManyWithoutCreatorNestedInput
+    managedWorkLogs?: WorkLogUncheckedUpdateManyWithoutAdminNestedInput
+    workLogs?: WorkLogUncheckedUpdateManyWithoutUserNestedInput
+    leads?: LeadUncheckedUpdateManyWithoutAssignedUserNestedInput
+    referredLeads?: LeadUncheckedUpdateManyWithoutReferredByNestedInput
+    managedStaff?: UserUncheckedUpdateManyWithoutAdminNestedInput
+    terminals?: TerminalUncheckedUpdateManyWithoutUsersNestedInput
+    dayCloseOpeningApprovals?: DayCloseUncheckedUpdateManyWithoutOpeningApprovedByNestedInput
+    dayCloseFinalizations?: DayCloseUncheckedUpdateManyWithoutFinalizedByNestedInput
+    dayCloseExceptionApprovals?: DayCloseUncheckedUpdateManyWithoutExceptionApprovedByNestedInput
+    staffDayClosings?: StaffDayCloseUncheckedUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUpsertWithoutDayCloseOpeningApprovalsInput = {
+    update: XOR<UserUpdateWithoutDayCloseOpeningApprovalsInput, UserUncheckedUpdateWithoutDayCloseOpeningApprovalsInput>
+    create: XOR<UserCreateWithoutDayCloseOpeningApprovalsInput, UserUncheckedCreateWithoutDayCloseOpeningApprovalsInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutDayCloseOpeningApprovalsInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutDayCloseOpeningApprovalsInput, UserUncheckedUpdateWithoutDayCloseOpeningApprovalsInput>
+  }
+
+  export type UserUpdateWithoutDayCloseOpeningApprovalsInput = {
+    username?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    role?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    allowedModules?: NullableJsonNullValueInput | InputJsonValue
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    incentivePercentage?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    weeklyOff?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    attendance?: AttendanceUpdateManyWithoutUserNestedInput
+    crmTasks?: CRMTaskUpdateManyWithoutAssignedUserNestedInput
+    receivedMessages?: ChatMessageUpdateManyWithoutReceiverNestedInput
+    sentMessages?: ChatMessageUpdateManyWithoutSenderNestedInput
+    deals?: DealUpdateManyWithoutAssignedUserNestedInput
+    employeeProfile?: EmployeeProfileUpdateOneWithoutUserNestedInput
+    approvedLeaves?: LeaveRequestUpdateManyWithoutApprovedByNestedInput
+    leaveRequests?: LeaveRequestUpdateManyWithoutUserNestedInput
+    reviewedMissPunches?: MissPunchRequestUpdateManyWithoutReviewerNestedInput
+    missPunchRequests?: MissPunchRequestUpdateManyWithoutUserNestedInput
+    notifications?: NotificationUpdateManyWithoutUserNestedInput
+    payrolls?: PayrollUpdateManyWithoutUserNestedInput
+    approvedAdvances?: SalaryAdvanceUpdateManyWithoutApproverNestedInput
+    salaryAdvances?: SalaryAdvanceUpdateManyWithoutUserNestedInput
+    sales?: SaleUpdateManyWithoutSalesmanNestedInput
+    receivedTransfers?: StockTransferUpdateManyWithoutReceivedByNestedInput
+    ownedTickets?: TicketUpdateManyWithoutAdminNestedInput
+    assignedTickets?: TicketUpdateManyWithoutAssignedToNestedInput
+    createdTickets?: TicketUpdateManyWithoutCreatedByNestedInput
+    previousAssignedTickets?: TicketUpdateManyWithoutPreviousAssigneeNestedInput
+    closureRequests?: TicketClosureRequestUpdateManyWithoutRequestedByNestedInput
+    ticketHistoryActions?: TicketHistoryUpdateManyWithoutDoneByNestedInput
+    ticketMessages?: TicketMessageUpdateManyWithoutSenderNestedInput
+    vouchers?: VoucherUpdateManyWithoutCreatorNestedInput
+    managedWorkLogs?: WorkLogUpdateManyWithoutAdminNestedInput
+    workLogs?: WorkLogUpdateManyWithoutUserNestedInput
+    leads?: LeadUpdateManyWithoutAssignedUserNestedInput
+    referredLeads?: LeadUpdateManyWithoutReferredByNestedInput
+    admin?: UserUpdateOneWithoutManagedStaffNestedInput
+    managedStaff?: UserUpdateManyWithoutAdminNestedInput
+    branch?: BranchUpdateOneWithoutUsersNestedInput
+    terminals?: TerminalUpdateManyWithoutUsersNestedInput
+    dayCloseOpenings?: DayCloseUpdateManyWithoutOpenedByNestedInput
+    dayCloseFinalizations?: DayCloseUpdateManyWithoutFinalizedByNestedInput
+    dayCloseExceptionApprovals?: DayCloseUpdateManyWithoutExceptionApprovedByNestedInput
+    staffDayClosings?: StaffDayCloseUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutDayCloseOpeningApprovalsInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    username?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    role?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    allowedModules?: NullableJsonNullValueInput | InputJsonValue
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
+    incentivePercentage?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    weeklyOff?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    adminId?: NullableIntFieldUpdateOperationsInput | number | null
+    attendance?: AttendanceUncheckedUpdateManyWithoutUserNestedInput
+    crmTasks?: CRMTaskUncheckedUpdateManyWithoutAssignedUserNestedInput
+    receivedMessages?: ChatMessageUncheckedUpdateManyWithoutReceiverNestedInput
+    sentMessages?: ChatMessageUncheckedUpdateManyWithoutSenderNestedInput
+    deals?: DealUncheckedUpdateManyWithoutAssignedUserNestedInput
+    employeeProfile?: EmployeeProfileUncheckedUpdateOneWithoutUserNestedInput
+    approvedLeaves?: LeaveRequestUncheckedUpdateManyWithoutApprovedByNestedInput
+    leaveRequests?: LeaveRequestUncheckedUpdateManyWithoutUserNestedInput
+    reviewedMissPunches?: MissPunchRequestUncheckedUpdateManyWithoutReviewerNestedInput
+    missPunchRequests?: MissPunchRequestUncheckedUpdateManyWithoutUserNestedInput
+    notifications?: NotificationUncheckedUpdateManyWithoutUserNestedInput
+    payrolls?: PayrollUncheckedUpdateManyWithoutUserNestedInput
+    approvedAdvances?: SalaryAdvanceUncheckedUpdateManyWithoutApproverNestedInput
+    salaryAdvances?: SalaryAdvanceUncheckedUpdateManyWithoutUserNestedInput
+    sales?: SaleUncheckedUpdateManyWithoutSalesmanNestedInput
+    receivedTransfers?: StockTransferUncheckedUpdateManyWithoutReceivedByNestedInput
+    ownedTickets?: TicketUncheckedUpdateManyWithoutAdminNestedInput
+    assignedTickets?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
+    createdTickets?: TicketUncheckedUpdateManyWithoutCreatedByNestedInput
+    previousAssignedTickets?: TicketUncheckedUpdateManyWithoutPreviousAssigneeNestedInput
+    closureRequests?: TicketClosureRequestUncheckedUpdateManyWithoutRequestedByNestedInput
+    ticketHistoryActions?: TicketHistoryUncheckedUpdateManyWithoutDoneByNestedInput
+    ticketMessages?: TicketMessageUncheckedUpdateManyWithoutSenderNestedInput
+    vouchers?: VoucherUncheckedUpdateManyWithoutCreatorNestedInput
+    managedWorkLogs?: WorkLogUncheckedUpdateManyWithoutAdminNestedInput
+    workLogs?: WorkLogUncheckedUpdateManyWithoutUserNestedInput
+    leads?: LeadUncheckedUpdateManyWithoutAssignedUserNestedInput
+    referredLeads?: LeadUncheckedUpdateManyWithoutReferredByNestedInput
+    managedStaff?: UserUncheckedUpdateManyWithoutAdminNestedInput
+    terminals?: TerminalUncheckedUpdateManyWithoutUsersNestedInput
+    dayCloseOpenings?: DayCloseUncheckedUpdateManyWithoutOpenedByNestedInput
+    dayCloseFinalizations?: DayCloseUncheckedUpdateManyWithoutFinalizedByNestedInput
+    dayCloseExceptionApprovals?: DayCloseUncheckedUpdateManyWithoutExceptionApprovedByNestedInput
+    staffDayClosings?: StaffDayCloseUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserUpsertWithoutDayCloseFinalizationsInput = {
@@ -135069,6 +138156,9 @@ export namespace Prisma {
     managedStaff?: UserUpdateManyWithoutAdminNestedInput
     branch?: BranchUpdateOneWithoutUsersNestedInput
     terminals?: TerminalUpdateManyWithoutUsersNestedInput
+    dayCloseOpenings?: DayCloseUpdateManyWithoutOpenedByNestedInput
+    dayCloseOpeningApprovals?: DayCloseUpdateManyWithoutOpeningApprovedByNestedInput
+    dayCloseExceptionApprovals?: DayCloseUpdateManyWithoutExceptionApprovedByNestedInput
     staffDayClosings?: StaffDayCloseUpdateManyWithoutUserNestedInput
   }
 
@@ -135117,6 +138207,121 @@ export namespace Prisma {
     referredLeads?: LeadUncheckedUpdateManyWithoutReferredByNestedInput
     managedStaff?: UserUncheckedUpdateManyWithoutAdminNestedInput
     terminals?: TerminalUncheckedUpdateManyWithoutUsersNestedInput
+    dayCloseOpenings?: DayCloseUncheckedUpdateManyWithoutOpenedByNestedInput
+    dayCloseOpeningApprovals?: DayCloseUncheckedUpdateManyWithoutOpeningApprovedByNestedInput
+    dayCloseExceptionApprovals?: DayCloseUncheckedUpdateManyWithoutExceptionApprovedByNestedInput
+    staffDayClosings?: StaffDayCloseUncheckedUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUpsertWithoutDayCloseExceptionApprovalsInput = {
+    update: XOR<UserUpdateWithoutDayCloseExceptionApprovalsInput, UserUncheckedUpdateWithoutDayCloseExceptionApprovalsInput>
+    create: XOR<UserCreateWithoutDayCloseExceptionApprovalsInput, UserUncheckedCreateWithoutDayCloseExceptionApprovalsInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutDayCloseExceptionApprovalsInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutDayCloseExceptionApprovalsInput, UserUncheckedUpdateWithoutDayCloseExceptionApprovalsInput>
+  }
+
+  export type UserUpdateWithoutDayCloseExceptionApprovalsInput = {
+    username?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    role?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    allowedModules?: NullableJsonNullValueInput | InputJsonValue
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    incentivePercentage?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    weeklyOff?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    attendance?: AttendanceUpdateManyWithoutUserNestedInput
+    crmTasks?: CRMTaskUpdateManyWithoutAssignedUserNestedInput
+    receivedMessages?: ChatMessageUpdateManyWithoutReceiverNestedInput
+    sentMessages?: ChatMessageUpdateManyWithoutSenderNestedInput
+    deals?: DealUpdateManyWithoutAssignedUserNestedInput
+    employeeProfile?: EmployeeProfileUpdateOneWithoutUserNestedInput
+    approvedLeaves?: LeaveRequestUpdateManyWithoutApprovedByNestedInput
+    leaveRequests?: LeaveRequestUpdateManyWithoutUserNestedInput
+    reviewedMissPunches?: MissPunchRequestUpdateManyWithoutReviewerNestedInput
+    missPunchRequests?: MissPunchRequestUpdateManyWithoutUserNestedInput
+    notifications?: NotificationUpdateManyWithoutUserNestedInput
+    payrolls?: PayrollUpdateManyWithoutUserNestedInput
+    approvedAdvances?: SalaryAdvanceUpdateManyWithoutApproverNestedInput
+    salaryAdvances?: SalaryAdvanceUpdateManyWithoutUserNestedInput
+    sales?: SaleUpdateManyWithoutSalesmanNestedInput
+    receivedTransfers?: StockTransferUpdateManyWithoutReceivedByNestedInput
+    ownedTickets?: TicketUpdateManyWithoutAdminNestedInput
+    assignedTickets?: TicketUpdateManyWithoutAssignedToNestedInput
+    createdTickets?: TicketUpdateManyWithoutCreatedByNestedInput
+    previousAssignedTickets?: TicketUpdateManyWithoutPreviousAssigneeNestedInput
+    closureRequests?: TicketClosureRequestUpdateManyWithoutRequestedByNestedInput
+    ticketHistoryActions?: TicketHistoryUpdateManyWithoutDoneByNestedInput
+    ticketMessages?: TicketMessageUpdateManyWithoutSenderNestedInput
+    vouchers?: VoucherUpdateManyWithoutCreatorNestedInput
+    managedWorkLogs?: WorkLogUpdateManyWithoutAdminNestedInput
+    workLogs?: WorkLogUpdateManyWithoutUserNestedInput
+    leads?: LeadUpdateManyWithoutAssignedUserNestedInput
+    referredLeads?: LeadUpdateManyWithoutReferredByNestedInput
+    admin?: UserUpdateOneWithoutManagedStaffNestedInput
+    managedStaff?: UserUpdateManyWithoutAdminNestedInput
+    branch?: BranchUpdateOneWithoutUsersNestedInput
+    terminals?: TerminalUpdateManyWithoutUsersNestedInput
+    dayCloseOpenings?: DayCloseUpdateManyWithoutOpenedByNestedInput
+    dayCloseOpeningApprovals?: DayCloseUpdateManyWithoutOpeningApprovedByNestedInput
+    dayCloseFinalizations?: DayCloseUpdateManyWithoutFinalizedByNestedInput
+    staffDayClosings?: StaffDayCloseUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutDayCloseExceptionApprovalsInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    username?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    role?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    allowedModules?: NullableJsonNullValueInput | InputJsonValue
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
+    incentivePercentage?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    weeklyOff?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    adminId?: NullableIntFieldUpdateOperationsInput | number | null
+    attendance?: AttendanceUncheckedUpdateManyWithoutUserNestedInput
+    crmTasks?: CRMTaskUncheckedUpdateManyWithoutAssignedUserNestedInput
+    receivedMessages?: ChatMessageUncheckedUpdateManyWithoutReceiverNestedInput
+    sentMessages?: ChatMessageUncheckedUpdateManyWithoutSenderNestedInput
+    deals?: DealUncheckedUpdateManyWithoutAssignedUserNestedInput
+    employeeProfile?: EmployeeProfileUncheckedUpdateOneWithoutUserNestedInput
+    approvedLeaves?: LeaveRequestUncheckedUpdateManyWithoutApprovedByNestedInput
+    leaveRequests?: LeaveRequestUncheckedUpdateManyWithoutUserNestedInput
+    reviewedMissPunches?: MissPunchRequestUncheckedUpdateManyWithoutReviewerNestedInput
+    missPunchRequests?: MissPunchRequestUncheckedUpdateManyWithoutUserNestedInput
+    notifications?: NotificationUncheckedUpdateManyWithoutUserNestedInput
+    payrolls?: PayrollUncheckedUpdateManyWithoutUserNestedInput
+    approvedAdvances?: SalaryAdvanceUncheckedUpdateManyWithoutApproverNestedInput
+    salaryAdvances?: SalaryAdvanceUncheckedUpdateManyWithoutUserNestedInput
+    sales?: SaleUncheckedUpdateManyWithoutSalesmanNestedInput
+    receivedTransfers?: StockTransferUncheckedUpdateManyWithoutReceivedByNestedInput
+    ownedTickets?: TicketUncheckedUpdateManyWithoutAdminNestedInput
+    assignedTickets?: TicketUncheckedUpdateManyWithoutAssignedToNestedInput
+    createdTickets?: TicketUncheckedUpdateManyWithoutCreatedByNestedInput
+    previousAssignedTickets?: TicketUncheckedUpdateManyWithoutPreviousAssigneeNestedInput
+    closureRequests?: TicketClosureRequestUncheckedUpdateManyWithoutRequestedByNestedInput
+    ticketHistoryActions?: TicketHistoryUncheckedUpdateManyWithoutDoneByNestedInput
+    ticketMessages?: TicketMessageUncheckedUpdateManyWithoutSenderNestedInput
+    vouchers?: VoucherUncheckedUpdateManyWithoutCreatorNestedInput
+    managedWorkLogs?: WorkLogUncheckedUpdateManyWithoutAdminNestedInput
+    workLogs?: WorkLogUncheckedUpdateManyWithoutUserNestedInput
+    leads?: LeadUncheckedUpdateManyWithoutAssignedUserNestedInput
+    referredLeads?: LeadUncheckedUpdateManyWithoutReferredByNestedInput
+    managedStaff?: UserUncheckedUpdateManyWithoutAdminNestedInput
+    terminals?: TerminalUncheckedUpdateManyWithoutUsersNestedInput
+    dayCloseOpenings?: DayCloseUncheckedUpdateManyWithoutOpenedByNestedInput
+    dayCloseOpeningApprovals?: DayCloseUncheckedUpdateManyWithoutOpeningApprovedByNestedInput
+    dayCloseFinalizations?: DayCloseUncheckedUpdateManyWithoutFinalizedByNestedInput
     staffDayClosings?: StaffDayCloseUncheckedUpdateManyWithoutUserNestedInput
   }
 
@@ -135139,15 +138344,36 @@ export namespace Prisma {
   export type DayCloseCreateWithoutStaffClosingsInput = {
     businessDate: Date | string
     status?: string
+    openedAt?: Date | string | null
+    openingCash?: Decimal | DecimalJsLike | number | string | null
+    previousClosingCash?: Decimal | DecimalJsLike | number | string | null
+    additionalCashAdded?: Decimal | DecimalJsLike | number | string | null
+    cashRemovedBeforeOpening?: Decimal | DecimalJsLike | number | string | null
+    expectedOpeningCash?: Decimal | DecimalJsLike | number | string | null
+    actualOpeningCash?: Decimal | DecimalJsLike | number | string | null
+    openingDifference?: Decimal | DecimalJsLike | number | string | null
+    openingDiscrepancyReason?: string | null
+    openingDenominations?: NullableJsonNullValueInput | InputJsonValue
+    openingRemarks?: string | null
+    verificationChecks?: NullableJsonNullValueInput | InputJsonValue
+    verificationExceptions?: NullableJsonNullValueInput | InputJsonValue
+    exceptionApprovalReason?: string | null
     salesSummary?: NullableJsonNullValueInput | InputJsonValue
+    closingExpectedCash?: Decimal | DecimalJsLike | number | string | null
     physicalCash?: Decimal | DecimalJsLike | number | string | null
     cashDifference?: Decimal | DecimalJsLike | number | string | null
+    closingDenominations?: NullableJsonNullValueInput | InputJsonValue
     notes?: string | null
     finalizedAt?: Date | string | null
+    adjustments?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
     branch: BranchCreateNestedOneWithoutDayClosesInput
+    terminal?: TerminalCreateNestedOneWithoutDayClosesInput
+    openedBy?: UserCreateNestedOneWithoutDayCloseOpeningsInput
+    openingApprovedBy?: UserCreateNestedOneWithoutDayCloseOpeningApprovalsInput
     finalizedBy?: UserCreateNestedOneWithoutDayCloseFinalizationsInput
+    exceptionApprovedBy?: UserCreateNestedOneWithoutDayCloseExceptionApprovalsInput
   }
 
   export type DayCloseUncheckedCreateWithoutStaffClosingsInput = {
@@ -135155,12 +138381,33 @@ export namespace Prisma {
     branchId: number
     businessDate: Date | string
     status?: string
+    terminalId?: number | null
+    openedById?: number | null
+    openedAt?: Date | string | null
+    openingCash?: Decimal | DecimalJsLike | number | string | null
+    previousClosingCash?: Decimal | DecimalJsLike | number | string | null
+    additionalCashAdded?: Decimal | DecimalJsLike | number | string | null
+    cashRemovedBeforeOpening?: Decimal | DecimalJsLike | number | string | null
+    expectedOpeningCash?: Decimal | DecimalJsLike | number | string | null
+    actualOpeningCash?: Decimal | DecimalJsLike | number | string | null
+    openingDifference?: Decimal | DecimalJsLike | number | string | null
+    openingDiscrepancyReason?: string | null
+    openingApprovedById?: number | null
+    openingDenominations?: NullableJsonNullValueInput | InputJsonValue
+    openingRemarks?: string | null
+    verificationChecks?: NullableJsonNullValueInput | InputJsonValue
+    verificationExceptions?: NullableJsonNullValueInput | InputJsonValue
+    exceptionApprovedById?: number | null
+    exceptionApprovalReason?: string | null
     salesSummary?: NullableJsonNullValueInput | InputJsonValue
+    closingExpectedCash?: Decimal | DecimalJsLike | number | string | null
     physicalCash?: Decimal | DecimalJsLike | number | string | null
     cashDifference?: Decimal | DecimalJsLike | number | string | null
+    closingDenominations?: NullableJsonNullValueInput | InputJsonValue
     notes?: string | null
     finalizedById?: number | null
     finalizedAt?: Date | string | null
+    adjustments?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -135214,7 +138461,10 @@ export namespace Prisma {
     managedStaff?: UserCreateNestedManyWithoutAdminInput
     branch?: BranchCreateNestedOneWithoutUsersInput
     terminals?: TerminalCreateNestedManyWithoutUsersInput
+    dayCloseOpenings?: DayCloseCreateNestedManyWithoutOpenedByInput
+    dayCloseOpeningApprovals?: DayCloseCreateNestedManyWithoutOpeningApprovedByInput
     dayCloseFinalizations?: DayCloseCreateNestedManyWithoutFinalizedByInput
+    dayCloseExceptionApprovals?: DayCloseCreateNestedManyWithoutExceptionApprovedByInput
   }
 
   export type UserUncheckedCreateWithoutStaffDayClosingsInput = {
@@ -135262,7 +138512,10 @@ export namespace Prisma {
     referredLeads?: LeadUncheckedCreateNestedManyWithoutReferredByInput
     managedStaff?: UserUncheckedCreateNestedManyWithoutAdminInput
     terminals?: TerminalUncheckedCreateNestedManyWithoutUsersInput
+    dayCloseOpenings?: DayCloseUncheckedCreateNestedManyWithoutOpenedByInput
+    dayCloseOpeningApprovals?: DayCloseUncheckedCreateNestedManyWithoutOpeningApprovedByInput
     dayCloseFinalizations?: DayCloseUncheckedCreateNestedManyWithoutFinalizedByInput
+    dayCloseExceptionApprovals?: DayCloseUncheckedCreateNestedManyWithoutExceptionApprovedByInput
   }
 
   export type UserCreateOrConnectWithoutStaffDayClosingsInput = {
@@ -135284,15 +138537,36 @@ export namespace Prisma {
   export type DayCloseUpdateWithoutStaffClosingsInput = {
     businessDate?: DateTimeFieldUpdateOperationsInput | Date | string
     status?: StringFieldUpdateOperationsInput | string
+    openedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    openingCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    previousClosingCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    additionalCashAdded?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cashRemovedBeforeOpening?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    expectedOpeningCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    actualOpeningCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    openingDifference?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    openingDiscrepancyReason?: NullableStringFieldUpdateOperationsInput | string | null
+    openingDenominations?: NullableJsonNullValueInput | InputJsonValue
+    openingRemarks?: NullableStringFieldUpdateOperationsInput | string | null
+    verificationChecks?: NullableJsonNullValueInput | InputJsonValue
+    verificationExceptions?: NullableJsonNullValueInput | InputJsonValue
+    exceptionApprovalReason?: NullableStringFieldUpdateOperationsInput | string | null
     salesSummary?: NullableJsonNullValueInput | InputJsonValue
+    closingExpectedCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     physicalCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     cashDifference?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    closingDenominations?: NullableJsonNullValueInput | InputJsonValue
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     finalizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    adjustments?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     branch?: BranchUpdateOneRequiredWithoutDayClosesNestedInput
+    terminal?: TerminalUpdateOneWithoutDayClosesNestedInput
+    openedBy?: UserUpdateOneWithoutDayCloseOpeningsNestedInput
+    openingApprovedBy?: UserUpdateOneWithoutDayCloseOpeningApprovalsNestedInput
     finalizedBy?: UserUpdateOneWithoutDayCloseFinalizationsNestedInput
+    exceptionApprovedBy?: UserUpdateOneWithoutDayCloseExceptionApprovalsNestedInput
   }
 
   export type DayCloseUncheckedUpdateWithoutStaffClosingsInput = {
@@ -135300,12 +138574,33 @@ export namespace Prisma {
     branchId?: IntFieldUpdateOperationsInput | number
     businessDate?: DateTimeFieldUpdateOperationsInput | Date | string
     status?: StringFieldUpdateOperationsInput | string
+    terminalId?: NullableIntFieldUpdateOperationsInput | number | null
+    openedById?: NullableIntFieldUpdateOperationsInput | number | null
+    openedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    openingCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    previousClosingCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    additionalCashAdded?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cashRemovedBeforeOpening?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    expectedOpeningCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    actualOpeningCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    openingDifference?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    openingDiscrepancyReason?: NullableStringFieldUpdateOperationsInput | string | null
+    openingApprovedById?: NullableIntFieldUpdateOperationsInput | number | null
+    openingDenominations?: NullableJsonNullValueInput | InputJsonValue
+    openingRemarks?: NullableStringFieldUpdateOperationsInput | string | null
+    verificationChecks?: NullableJsonNullValueInput | InputJsonValue
+    verificationExceptions?: NullableJsonNullValueInput | InputJsonValue
+    exceptionApprovedById?: NullableIntFieldUpdateOperationsInput | number | null
+    exceptionApprovalReason?: NullableStringFieldUpdateOperationsInput | string | null
     salesSummary?: NullableJsonNullValueInput | InputJsonValue
+    closingExpectedCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     physicalCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     cashDifference?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    closingDenominations?: NullableJsonNullValueInput | InputJsonValue
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     finalizedById?: NullableIntFieldUpdateOperationsInput | number | null
     finalizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    adjustments?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -135365,7 +138660,10 @@ export namespace Prisma {
     managedStaff?: UserUpdateManyWithoutAdminNestedInput
     branch?: BranchUpdateOneWithoutUsersNestedInput
     terminals?: TerminalUpdateManyWithoutUsersNestedInput
+    dayCloseOpenings?: DayCloseUpdateManyWithoutOpenedByNestedInput
+    dayCloseOpeningApprovals?: DayCloseUpdateManyWithoutOpeningApprovedByNestedInput
     dayCloseFinalizations?: DayCloseUpdateManyWithoutFinalizedByNestedInput
+    dayCloseExceptionApprovals?: DayCloseUpdateManyWithoutExceptionApprovedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutStaffDayClosingsInput = {
@@ -135413,7 +138711,10 @@ export namespace Prisma {
     referredLeads?: LeadUncheckedUpdateManyWithoutReferredByNestedInput
     managedStaff?: UserUncheckedUpdateManyWithoutAdminNestedInput
     terminals?: TerminalUncheckedUpdateManyWithoutUsersNestedInput
+    dayCloseOpenings?: DayCloseUncheckedUpdateManyWithoutOpenedByNestedInput
+    dayCloseOpeningApprovals?: DayCloseUncheckedUpdateManyWithoutOpeningApprovedByNestedInput
     dayCloseFinalizations?: DayCloseUncheckedUpdateManyWithoutFinalizedByNestedInput
+    dayCloseExceptionApprovals?: DayCloseUncheckedUpdateManyWithoutExceptionApprovedByNestedInput
   }
 
   export type CustomerCreateWithoutCustomerVouchersInput = {
@@ -135512,6 +138813,7 @@ export namespace Prisma {
     leads?: LeadCreateNestedManyWithoutBranchInput
     users?: UserCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseCreateNestedManyWithoutBranchInput
+    vouchers?: VoucherCreateNestedManyWithoutBranchInput
   }
 
   export type BranchUncheckedCreateWithoutCustomerVouchersInput = {
@@ -135551,6 +138853,7 @@ export namespace Prisma {
     leads?: LeadUncheckedCreateNestedManyWithoutBranchInput
     users?: UserUncheckedCreateNestedManyWithoutBranchInput
     dayCloses?: DayCloseUncheckedCreateNestedManyWithoutBranchInput
+    vouchers?: VoucherUncheckedCreateNestedManyWithoutBranchInput
   }
 
   export type BranchCreateOrConnectWithoutCustomerVouchersInput = {
@@ -135918,6 +139221,7 @@ export namespace Prisma {
     leads?: LeadUpdateManyWithoutBranchNestedInput
     users?: UserUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUpdateManyWithoutBranchNestedInput
+    vouchers?: VoucherUpdateManyWithoutBranchNestedInput
   }
 
   export type BranchUncheckedUpdateWithoutCustomerVouchersInput = {
@@ -135957,6 +139261,7 @@ export namespace Prisma {
     leads?: LeadUncheckedUpdateManyWithoutBranchNestedInput
     users?: UserUncheckedUpdateManyWithoutBranchNestedInput
     dayCloses?: DayCloseUncheckedUpdateManyWithoutBranchNestedInput
+    vouchers?: VoucherUncheckedUpdateManyWithoutBranchNestedInput
   }
 
   export type SaleUpsertWithoutCustomerVouchersIssuedInput = {
@@ -136903,6 +140208,7 @@ export namespace Prisma {
     totalAmount: Decimal | DecimalJsLike | number | string
     status?: string
     reference?: string | null
+    branchId?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -137005,16 +140311,142 @@ export namespace Prisma {
     isActive?: boolean
   }
 
+  export type DayCloseCreateManyOpenedByInput = {
+    id?: number
+    branchId: number
+    businessDate: Date | string
+    status?: string
+    terminalId?: number | null
+    openedAt?: Date | string | null
+    openingCash?: Decimal | DecimalJsLike | number | string | null
+    previousClosingCash?: Decimal | DecimalJsLike | number | string | null
+    additionalCashAdded?: Decimal | DecimalJsLike | number | string | null
+    cashRemovedBeforeOpening?: Decimal | DecimalJsLike | number | string | null
+    expectedOpeningCash?: Decimal | DecimalJsLike | number | string | null
+    actualOpeningCash?: Decimal | DecimalJsLike | number | string | null
+    openingDifference?: Decimal | DecimalJsLike | number | string | null
+    openingDiscrepancyReason?: string | null
+    openingApprovedById?: number | null
+    openingDenominations?: NullableJsonNullValueInput | InputJsonValue
+    openingRemarks?: string | null
+    verificationChecks?: NullableJsonNullValueInput | InputJsonValue
+    verificationExceptions?: NullableJsonNullValueInput | InputJsonValue
+    exceptionApprovedById?: number | null
+    exceptionApprovalReason?: string | null
+    salesSummary?: NullableJsonNullValueInput | InputJsonValue
+    closingExpectedCash?: Decimal | DecimalJsLike | number | string | null
+    physicalCash?: Decimal | DecimalJsLike | number | string | null
+    cashDifference?: Decimal | DecimalJsLike | number | string | null
+    closingDenominations?: NullableJsonNullValueInput | InputJsonValue
+    notes?: string | null
+    finalizedById?: number | null
+    finalizedAt?: Date | string | null
+    adjustments?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type DayCloseCreateManyOpeningApprovedByInput = {
+    id?: number
+    branchId: number
+    businessDate: Date | string
+    status?: string
+    terminalId?: number | null
+    openedById?: number | null
+    openedAt?: Date | string | null
+    openingCash?: Decimal | DecimalJsLike | number | string | null
+    previousClosingCash?: Decimal | DecimalJsLike | number | string | null
+    additionalCashAdded?: Decimal | DecimalJsLike | number | string | null
+    cashRemovedBeforeOpening?: Decimal | DecimalJsLike | number | string | null
+    expectedOpeningCash?: Decimal | DecimalJsLike | number | string | null
+    actualOpeningCash?: Decimal | DecimalJsLike | number | string | null
+    openingDifference?: Decimal | DecimalJsLike | number | string | null
+    openingDiscrepancyReason?: string | null
+    openingDenominations?: NullableJsonNullValueInput | InputJsonValue
+    openingRemarks?: string | null
+    verificationChecks?: NullableJsonNullValueInput | InputJsonValue
+    verificationExceptions?: NullableJsonNullValueInput | InputJsonValue
+    exceptionApprovedById?: number | null
+    exceptionApprovalReason?: string | null
+    salesSummary?: NullableJsonNullValueInput | InputJsonValue
+    closingExpectedCash?: Decimal | DecimalJsLike | number | string | null
+    physicalCash?: Decimal | DecimalJsLike | number | string | null
+    cashDifference?: Decimal | DecimalJsLike | number | string | null
+    closingDenominations?: NullableJsonNullValueInput | InputJsonValue
+    notes?: string | null
+    finalizedById?: number | null
+    finalizedAt?: Date | string | null
+    adjustments?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
   export type DayCloseCreateManyFinalizedByInput = {
     id?: number
     branchId: number
     businessDate: Date | string
     status?: string
+    terminalId?: number | null
+    openedById?: number | null
+    openedAt?: Date | string | null
+    openingCash?: Decimal | DecimalJsLike | number | string | null
+    previousClosingCash?: Decimal | DecimalJsLike | number | string | null
+    additionalCashAdded?: Decimal | DecimalJsLike | number | string | null
+    cashRemovedBeforeOpening?: Decimal | DecimalJsLike | number | string | null
+    expectedOpeningCash?: Decimal | DecimalJsLike | number | string | null
+    actualOpeningCash?: Decimal | DecimalJsLike | number | string | null
+    openingDifference?: Decimal | DecimalJsLike | number | string | null
+    openingDiscrepancyReason?: string | null
+    openingApprovedById?: number | null
+    openingDenominations?: NullableJsonNullValueInput | InputJsonValue
+    openingRemarks?: string | null
+    verificationChecks?: NullableJsonNullValueInput | InputJsonValue
+    verificationExceptions?: NullableJsonNullValueInput | InputJsonValue
+    exceptionApprovedById?: number | null
+    exceptionApprovalReason?: string | null
     salesSummary?: NullableJsonNullValueInput | InputJsonValue
+    closingExpectedCash?: Decimal | DecimalJsLike | number | string | null
     physicalCash?: Decimal | DecimalJsLike | number | string | null
     cashDifference?: Decimal | DecimalJsLike | number | string | null
+    closingDenominations?: NullableJsonNullValueInput | InputJsonValue
     notes?: string | null
     finalizedAt?: Date | string | null
+    adjustments?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type DayCloseCreateManyExceptionApprovedByInput = {
+    id?: number
+    branchId: number
+    businessDate: Date | string
+    status?: string
+    terminalId?: number | null
+    openedById?: number | null
+    openedAt?: Date | string | null
+    openingCash?: Decimal | DecimalJsLike | number | string | null
+    previousClosingCash?: Decimal | DecimalJsLike | number | string | null
+    additionalCashAdded?: Decimal | DecimalJsLike | number | string | null
+    cashRemovedBeforeOpening?: Decimal | DecimalJsLike | number | string | null
+    expectedOpeningCash?: Decimal | DecimalJsLike | number | string | null
+    actualOpeningCash?: Decimal | DecimalJsLike | number | string | null
+    openingDifference?: Decimal | DecimalJsLike | number | string | null
+    openingDiscrepancyReason?: string | null
+    openingApprovedById?: number | null
+    openingDenominations?: NullableJsonNullValueInput | InputJsonValue
+    openingRemarks?: string | null
+    verificationChecks?: NullableJsonNullValueInput | InputJsonValue
+    verificationExceptions?: NullableJsonNullValueInput | InputJsonValue
+    exceptionApprovalReason?: string | null
+    salesSummary?: NullableJsonNullValueInput | InputJsonValue
+    closingExpectedCash?: Decimal | DecimalJsLike | number | string | null
+    physicalCash?: Decimal | DecimalJsLike | number | string | null
+    cashDifference?: Decimal | DecimalJsLike | number | string | null
+    closingDenominations?: NullableJsonNullValueInput | InputJsonValue
+    notes?: string | null
+    finalizedById?: number | null
+    finalizedAt?: Date | string | null
+    adjustments?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -138125,6 +141557,7 @@ export namespace Prisma {
     entries?: JournalEntryUpdateManyWithoutVoucherNestedInput
     payrolls?: PayrollUpdateManyWithoutVoucherNestedInput
     salaryAdvances?: SalaryAdvanceUpdateManyWithoutVoucherNestedInput
+    branch?: BranchUpdateOneWithoutVouchersNestedInput
   }
 
   export type VoucherUncheckedUpdateWithoutCreatorInput = {
@@ -138136,6 +141569,7 @@ export namespace Prisma {
     totalAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     status?: StringFieldUpdateOperationsInput | string
     reference?: NullableStringFieldUpdateOperationsInput | string | null
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     entries?: JournalEntryUncheckedUpdateManyWithoutVoucherNestedInput
@@ -138152,6 +141586,7 @@ export namespace Prisma {
     totalAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     status?: StringFieldUpdateOperationsInput | string
     reference?: NullableStringFieldUpdateOperationsInput | string | null
+    branchId?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -138461,7 +141896,10 @@ export namespace Prisma {
     managedStaff?: UserUpdateManyWithoutAdminNestedInput
     branch?: BranchUpdateOneWithoutUsersNestedInput
     terminals?: TerminalUpdateManyWithoutUsersNestedInput
+    dayCloseOpenings?: DayCloseUpdateManyWithoutOpenedByNestedInput
+    dayCloseOpeningApprovals?: DayCloseUpdateManyWithoutOpeningApprovedByNestedInput
     dayCloseFinalizations?: DayCloseUpdateManyWithoutFinalizedByNestedInput
+    dayCloseExceptionApprovals?: DayCloseUpdateManyWithoutExceptionApprovedByNestedInput
     staffDayClosings?: StaffDayCloseUpdateManyWithoutUserNestedInput
   }
 
@@ -138509,7 +141947,10 @@ export namespace Prisma {
     referredLeads?: LeadUncheckedUpdateManyWithoutReferredByNestedInput
     managedStaff?: UserUncheckedUpdateManyWithoutAdminNestedInput
     terminals?: TerminalUncheckedUpdateManyWithoutUsersNestedInput
+    dayCloseOpenings?: DayCloseUncheckedUpdateManyWithoutOpenedByNestedInput
+    dayCloseOpeningApprovals?: DayCloseUncheckedUpdateManyWithoutOpeningApprovedByNestedInput
     dayCloseFinalizations?: DayCloseUncheckedUpdateManyWithoutFinalizedByNestedInput
+    dayCloseExceptionApprovals?: DayCloseUncheckedUpdateManyWithoutExceptionApprovedByNestedInput
     staffDayClosings?: StaffDayCloseUncheckedUpdateManyWithoutUserNestedInput
   }
 
@@ -138539,6 +141980,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     sales?: SaleUpdateManyWithoutTerminalNestedInput
     branch?: BranchUpdateOneWithoutTerminalsNestedInput
+    dayCloses?: DayCloseUpdateManyWithoutTerminalNestedInput
   }
 
   export type TerminalUncheckedUpdateWithoutUsersInput = {
@@ -138552,6 +141994,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     sales?: SaleUncheckedUpdateManyWithoutTerminalNestedInput
+    dayCloses?: DayCloseUncheckedUpdateManyWithoutTerminalNestedInput
   }
 
   export type TerminalUncheckedUpdateManyWithoutUsersInput = {
@@ -138566,17 +142009,250 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
-  export type DayCloseUpdateWithoutFinalizedByInput = {
+  export type DayCloseUpdateWithoutOpenedByInput = {
     businessDate?: DateTimeFieldUpdateOperationsInput | Date | string
     status?: StringFieldUpdateOperationsInput | string
+    openedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    openingCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    previousClosingCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    additionalCashAdded?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cashRemovedBeforeOpening?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    expectedOpeningCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    actualOpeningCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    openingDifference?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    openingDiscrepancyReason?: NullableStringFieldUpdateOperationsInput | string | null
+    openingDenominations?: NullableJsonNullValueInput | InputJsonValue
+    openingRemarks?: NullableStringFieldUpdateOperationsInput | string | null
+    verificationChecks?: NullableJsonNullValueInput | InputJsonValue
+    verificationExceptions?: NullableJsonNullValueInput | InputJsonValue
+    exceptionApprovalReason?: NullableStringFieldUpdateOperationsInput | string | null
     salesSummary?: NullableJsonNullValueInput | InputJsonValue
+    closingExpectedCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     physicalCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     cashDifference?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    closingDenominations?: NullableJsonNullValueInput | InputJsonValue
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     finalizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    adjustments?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     branch?: BranchUpdateOneRequiredWithoutDayClosesNestedInput
+    terminal?: TerminalUpdateOneWithoutDayClosesNestedInput
+    openingApprovedBy?: UserUpdateOneWithoutDayCloseOpeningApprovalsNestedInput
+    finalizedBy?: UserUpdateOneWithoutDayCloseFinalizationsNestedInput
+    exceptionApprovedBy?: UserUpdateOneWithoutDayCloseExceptionApprovalsNestedInput
+    staffClosings?: StaffDayCloseUpdateManyWithoutDayCloseNestedInput
+  }
+
+  export type DayCloseUncheckedUpdateWithoutOpenedByInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    branchId?: IntFieldUpdateOperationsInput | number
+    businessDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: StringFieldUpdateOperationsInput | string
+    terminalId?: NullableIntFieldUpdateOperationsInput | number | null
+    openedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    openingCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    previousClosingCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    additionalCashAdded?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cashRemovedBeforeOpening?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    expectedOpeningCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    actualOpeningCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    openingDifference?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    openingDiscrepancyReason?: NullableStringFieldUpdateOperationsInput | string | null
+    openingApprovedById?: NullableIntFieldUpdateOperationsInput | number | null
+    openingDenominations?: NullableJsonNullValueInput | InputJsonValue
+    openingRemarks?: NullableStringFieldUpdateOperationsInput | string | null
+    verificationChecks?: NullableJsonNullValueInput | InputJsonValue
+    verificationExceptions?: NullableJsonNullValueInput | InputJsonValue
+    exceptionApprovedById?: NullableIntFieldUpdateOperationsInput | number | null
+    exceptionApprovalReason?: NullableStringFieldUpdateOperationsInput | string | null
+    salesSummary?: NullableJsonNullValueInput | InputJsonValue
+    closingExpectedCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    physicalCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cashDifference?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    closingDenominations?: NullableJsonNullValueInput | InputJsonValue
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    finalizedById?: NullableIntFieldUpdateOperationsInput | number | null
+    finalizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    adjustments?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    staffClosings?: StaffDayCloseUncheckedUpdateManyWithoutDayCloseNestedInput
+  }
+
+  export type DayCloseUncheckedUpdateManyWithoutOpenedByInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    branchId?: IntFieldUpdateOperationsInput | number
+    businessDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: StringFieldUpdateOperationsInput | string
+    terminalId?: NullableIntFieldUpdateOperationsInput | number | null
+    openedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    openingCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    previousClosingCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    additionalCashAdded?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cashRemovedBeforeOpening?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    expectedOpeningCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    actualOpeningCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    openingDifference?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    openingDiscrepancyReason?: NullableStringFieldUpdateOperationsInput | string | null
+    openingApprovedById?: NullableIntFieldUpdateOperationsInput | number | null
+    openingDenominations?: NullableJsonNullValueInput | InputJsonValue
+    openingRemarks?: NullableStringFieldUpdateOperationsInput | string | null
+    verificationChecks?: NullableJsonNullValueInput | InputJsonValue
+    verificationExceptions?: NullableJsonNullValueInput | InputJsonValue
+    exceptionApprovedById?: NullableIntFieldUpdateOperationsInput | number | null
+    exceptionApprovalReason?: NullableStringFieldUpdateOperationsInput | string | null
+    salesSummary?: NullableJsonNullValueInput | InputJsonValue
+    closingExpectedCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    physicalCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cashDifference?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    closingDenominations?: NullableJsonNullValueInput | InputJsonValue
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    finalizedById?: NullableIntFieldUpdateOperationsInput | number | null
+    finalizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    adjustments?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type DayCloseUpdateWithoutOpeningApprovedByInput = {
+    businessDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: StringFieldUpdateOperationsInput | string
+    openedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    openingCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    previousClosingCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    additionalCashAdded?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cashRemovedBeforeOpening?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    expectedOpeningCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    actualOpeningCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    openingDifference?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    openingDiscrepancyReason?: NullableStringFieldUpdateOperationsInput | string | null
+    openingDenominations?: NullableJsonNullValueInput | InputJsonValue
+    openingRemarks?: NullableStringFieldUpdateOperationsInput | string | null
+    verificationChecks?: NullableJsonNullValueInput | InputJsonValue
+    verificationExceptions?: NullableJsonNullValueInput | InputJsonValue
+    exceptionApprovalReason?: NullableStringFieldUpdateOperationsInput | string | null
+    salesSummary?: NullableJsonNullValueInput | InputJsonValue
+    closingExpectedCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    physicalCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cashDifference?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    closingDenominations?: NullableJsonNullValueInput | InputJsonValue
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    finalizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    adjustments?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    branch?: BranchUpdateOneRequiredWithoutDayClosesNestedInput
+    terminal?: TerminalUpdateOneWithoutDayClosesNestedInput
+    openedBy?: UserUpdateOneWithoutDayCloseOpeningsNestedInput
+    finalizedBy?: UserUpdateOneWithoutDayCloseFinalizationsNestedInput
+    exceptionApprovedBy?: UserUpdateOneWithoutDayCloseExceptionApprovalsNestedInput
+    staffClosings?: StaffDayCloseUpdateManyWithoutDayCloseNestedInput
+  }
+
+  export type DayCloseUncheckedUpdateWithoutOpeningApprovedByInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    branchId?: IntFieldUpdateOperationsInput | number
+    businessDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: StringFieldUpdateOperationsInput | string
+    terminalId?: NullableIntFieldUpdateOperationsInput | number | null
+    openedById?: NullableIntFieldUpdateOperationsInput | number | null
+    openedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    openingCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    previousClosingCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    additionalCashAdded?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cashRemovedBeforeOpening?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    expectedOpeningCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    actualOpeningCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    openingDifference?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    openingDiscrepancyReason?: NullableStringFieldUpdateOperationsInput | string | null
+    openingDenominations?: NullableJsonNullValueInput | InputJsonValue
+    openingRemarks?: NullableStringFieldUpdateOperationsInput | string | null
+    verificationChecks?: NullableJsonNullValueInput | InputJsonValue
+    verificationExceptions?: NullableJsonNullValueInput | InputJsonValue
+    exceptionApprovedById?: NullableIntFieldUpdateOperationsInput | number | null
+    exceptionApprovalReason?: NullableStringFieldUpdateOperationsInput | string | null
+    salesSummary?: NullableJsonNullValueInput | InputJsonValue
+    closingExpectedCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    physicalCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cashDifference?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    closingDenominations?: NullableJsonNullValueInput | InputJsonValue
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    finalizedById?: NullableIntFieldUpdateOperationsInput | number | null
+    finalizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    adjustments?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    staffClosings?: StaffDayCloseUncheckedUpdateManyWithoutDayCloseNestedInput
+  }
+
+  export type DayCloseUncheckedUpdateManyWithoutOpeningApprovedByInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    branchId?: IntFieldUpdateOperationsInput | number
+    businessDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: StringFieldUpdateOperationsInput | string
+    terminalId?: NullableIntFieldUpdateOperationsInput | number | null
+    openedById?: NullableIntFieldUpdateOperationsInput | number | null
+    openedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    openingCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    previousClosingCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    additionalCashAdded?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cashRemovedBeforeOpening?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    expectedOpeningCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    actualOpeningCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    openingDifference?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    openingDiscrepancyReason?: NullableStringFieldUpdateOperationsInput | string | null
+    openingDenominations?: NullableJsonNullValueInput | InputJsonValue
+    openingRemarks?: NullableStringFieldUpdateOperationsInput | string | null
+    verificationChecks?: NullableJsonNullValueInput | InputJsonValue
+    verificationExceptions?: NullableJsonNullValueInput | InputJsonValue
+    exceptionApprovedById?: NullableIntFieldUpdateOperationsInput | number | null
+    exceptionApprovalReason?: NullableStringFieldUpdateOperationsInput | string | null
+    salesSummary?: NullableJsonNullValueInput | InputJsonValue
+    closingExpectedCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    physicalCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cashDifference?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    closingDenominations?: NullableJsonNullValueInput | InputJsonValue
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    finalizedById?: NullableIntFieldUpdateOperationsInput | number | null
+    finalizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    adjustments?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type DayCloseUpdateWithoutFinalizedByInput = {
+    businessDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: StringFieldUpdateOperationsInput | string
+    openedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    openingCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    previousClosingCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    additionalCashAdded?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cashRemovedBeforeOpening?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    expectedOpeningCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    actualOpeningCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    openingDifference?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    openingDiscrepancyReason?: NullableStringFieldUpdateOperationsInput | string | null
+    openingDenominations?: NullableJsonNullValueInput | InputJsonValue
+    openingRemarks?: NullableStringFieldUpdateOperationsInput | string | null
+    verificationChecks?: NullableJsonNullValueInput | InputJsonValue
+    verificationExceptions?: NullableJsonNullValueInput | InputJsonValue
+    exceptionApprovalReason?: NullableStringFieldUpdateOperationsInput | string | null
+    salesSummary?: NullableJsonNullValueInput | InputJsonValue
+    closingExpectedCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    physicalCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cashDifference?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    closingDenominations?: NullableJsonNullValueInput | InputJsonValue
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    finalizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    adjustments?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    branch?: BranchUpdateOneRequiredWithoutDayClosesNestedInput
+    terminal?: TerminalUpdateOneWithoutDayClosesNestedInput
+    openedBy?: UserUpdateOneWithoutDayCloseOpeningsNestedInput
+    openingApprovedBy?: UserUpdateOneWithoutDayCloseOpeningApprovalsNestedInput
+    exceptionApprovedBy?: UserUpdateOneWithoutDayCloseExceptionApprovalsNestedInput
     staffClosings?: StaffDayCloseUpdateManyWithoutDayCloseNestedInput
   }
 
@@ -138585,11 +142261,32 @@ export namespace Prisma {
     branchId?: IntFieldUpdateOperationsInput | number
     businessDate?: DateTimeFieldUpdateOperationsInput | Date | string
     status?: StringFieldUpdateOperationsInput | string
+    terminalId?: NullableIntFieldUpdateOperationsInput | number | null
+    openedById?: NullableIntFieldUpdateOperationsInput | number | null
+    openedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    openingCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    previousClosingCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    additionalCashAdded?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cashRemovedBeforeOpening?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    expectedOpeningCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    actualOpeningCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    openingDifference?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    openingDiscrepancyReason?: NullableStringFieldUpdateOperationsInput | string | null
+    openingApprovedById?: NullableIntFieldUpdateOperationsInput | number | null
+    openingDenominations?: NullableJsonNullValueInput | InputJsonValue
+    openingRemarks?: NullableStringFieldUpdateOperationsInput | string | null
+    verificationChecks?: NullableJsonNullValueInput | InputJsonValue
+    verificationExceptions?: NullableJsonNullValueInput | InputJsonValue
+    exceptionApprovedById?: NullableIntFieldUpdateOperationsInput | number | null
+    exceptionApprovalReason?: NullableStringFieldUpdateOperationsInput | string | null
     salesSummary?: NullableJsonNullValueInput | InputJsonValue
+    closingExpectedCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     physicalCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     cashDifference?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    closingDenominations?: NullableJsonNullValueInput | InputJsonValue
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     finalizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    adjustments?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     staffClosings?: StaffDayCloseUncheckedUpdateManyWithoutDayCloseNestedInput
@@ -138600,11 +142297,138 @@ export namespace Prisma {
     branchId?: IntFieldUpdateOperationsInput | number
     businessDate?: DateTimeFieldUpdateOperationsInput | Date | string
     status?: StringFieldUpdateOperationsInput | string
+    terminalId?: NullableIntFieldUpdateOperationsInput | number | null
+    openedById?: NullableIntFieldUpdateOperationsInput | number | null
+    openedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    openingCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    previousClosingCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    additionalCashAdded?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cashRemovedBeforeOpening?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    expectedOpeningCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    actualOpeningCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    openingDifference?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    openingDiscrepancyReason?: NullableStringFieldUpdateOperationsInput | string | null
+    openingApprovedById?: NullableIntFieldUpdateOperationsInput | number | null
+    openingDenominations?: NullableJsonNullValueInput | InputJsonValue
+    openingRemarks?: NullableStringFieldUpdateOperationsInput | string | null
+    verificationChecks?: NullableJsonNullValueInput | InputJsonValue
+    verificationExceptions?: NullableJsonNullValueInput | InputJsonValue
+    exceptionApprovedById?: NullableIntFieldUpdateOperationsInput | number | null
+    exceptionApprovalReason?: NullableStringFieldUpdateOperationsInput | string | null
     salesSummary?: NullableJsonNullValueInput | InputJsonValue
+    closingExpectedCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     physicalCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     cashDifference?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    closingDenominations?: NullableJsonNullValueInput | InputJsonValue
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     finalizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    adjustments?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type DayCloseUpdateWithoutExceptionApprovedByInput = {
+    businessDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: StringFieldUpdateOperationsInput | string
+    openedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    openingCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    previousClosingCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    additionalCashAdded?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cashRemovedBeforeOpening?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    expectedOpeningCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    actualOpeningCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    openingDifference?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    openingDiscrepancyReason?: NullableStringFieldUpdateOperationsInput | string | null
+    openingDenominations?: NullableJsonNullValueInput | InputJsonValue
+    openingRemarks?: NullableStringFieldUpdateOperationsInput | string | null
+    verificationChecks?: NullableJsonNullValueInput | InputJsonValue
+    verificationExceptions?: NullableJsonNullValueInput | InputJsonValue
+    exceptionApprovalReason?: NullableStringFieldUpdateOperationsInput | string | null
+    salesSummary?: NullableJsonNullValueInput | InputJsonValue
+    closingExpectedCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    physicalCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cashDifference?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    closingDenominations?: NullableJsonNullValueInput | InputJsonValue
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    finalizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    adjustments?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    branch?: BranchUpdateOneRequiredWithoutDayClosesNestedInput
+    terminal?: TerminalUpdateOneWithoutDayClosesNestedInput
+    openedBy?: UserUpdateOneWithoutDayCloseOpeningsNestedInput
+    openingApprovedBy?: UserUpdateOneWithoutDayCloseOpeningApprovalsNestedInput
+    finalizedBy?: UserUpdateOneWithoutDayCloseFinalizationsNestedInput
+    staffClosings?: StaffDayCloseUpdateManyWithoutDayCloseNestedInput
+  }
+
+  export type DayCloseUncheckedUpdateWithoutExceptionApprovedByInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    branchId?: IntFieldUpdateOperationsInput | number
+    businessDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: StringFieldUpdateOperationsInput | string
+    terminalId?: NullableIntFieldUpdateOperationsInput | number | null
+    openedById?: NullableIntFieldUpdateOperationsInput | number | null
+    openedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    openingCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    previousClosingCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    additionalCashAdded?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cashRemovedBeforeOpening?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    expectedOpeningCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    actualOpeningCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    openingDifference?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    openingDiscrepancyReason?: NullableStringFieldUpdateOperationsInput | string | null
+    openingApprovedById?: NullableIntFieldUpdateOperationsInput | number | null
+    openingDenominations?: NullableJsonNullValueInput | InputJsonValue
+    openingRemarks?: NullableStringFieldUpdateOperationsInput | string | null
+    verificationChecks?: NullableJsonNullValueInput | InputJsonValue
+    verificationExceptions?: NullableJsonNullValueInput | InputJsonValue
+    exceptionApprovalReason?: NullableStringFieldUpdateOperationsInput | string | null
+    salesSummary?: NullableJsonNullValueInput | InputJsonValue
+    closingExpectedCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    physicalCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cashDifference?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    closingDenominations?: NullableJsonNullValueInput | InputJsonValue
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    finalizedById?: NullableIntFieldUpdateOperationsInput | number | null
+    finalizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    adjustments?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    staffClosings?: StaffDayCloseUncheckedUpdateManyWithoutDayCloseNestedInput
+  }
+
+  export type DayCloseUncheckedUpdateManyWithoutExceptionApprovedByInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    branchId?: IntFieldUpdateOperationsInput | number
+    businessDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: StringFieldUpdateOperationsInput | string
+    terminalId?: NullableIntFieldUpdateOperationsInput | number | null
+    openedById?: NullableIntFieldUpdateOperationsInput | number | null
+    openedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    openingCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    previousClosingCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    additionalCashAdded?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cashRemovedBeforeOpening?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    expectedOpeningCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    actualOpeningCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    openingDifference?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    openingDiscrepancyReason?: NullableStringFieldUpdateOperationsInput | string | null
+    openingApprovedById?: NullableIntFieldUpdateOperationsInput | number | null
+    openingDenominations?: NullableJsonNullValueInput | InputJsonValue
+    openingRemarks?: NullableStringFieldUpdateOperationsInput | string | null
+    verificationChecks?: NullableJsonNullValueInput | InputJsonValue
+    verificationExceptions?: NullableJsonNullValueInput | InputJsonValue
+    exceptionApprovalReason?: NullableStringFieldUpdateOperationsInput | string | null
+    salesSummary?: NullableJsonNullValueInput | InputJsonValue
+    closingExpectedCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    physicalCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cashDifference?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    closingDenominations?: NullableJsonNullValueInput | InputJsonValue
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    finalizedById?: NullableIntFieldUpdateOperationsInput | number | null
+    finalizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    adjustments?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -139011,12 +142835,33 @@ export namespace Prisma {
     id?: number
     businessDate: Date | string
     status?: string
+    terminalId?: number | null
+    openedById?: number | null
+    openedAt?: Date | string | null
+    openingCash?: Decimal | DecimalJsLike | number | string | null
+    previousClosingCash?: Decimal | DecimalJsLike | number | string | null
+    additionalCashAdded?: Decimal | DecimalJsLike | number | string | null
+    cashRemovedBeforeOpening?: Decimal | DecimalJsLike | number | string | null
+    expectedOpeningCash?: Decimal | DecimalJsLike | number | string | null
+    actualOpeningCash?: Decimal | DecimalJsLike | number | string | null
+    openingDifference?: Decimal | DecimalJsLike | number | string | null
+    openingDiscrepancyReason?: string | null
+    openingApprovedById?: number | null
+    openingDenominations?: NullableJsonNullValueInput | InputJsonValue
+    openingRemarks?: string | null
+    verificationChecks?: NullableJsonNullValueInput | InputJsonValue
+    verificationExceptions?: NullableJsonNullValueInput | InputJsonValue
+    exceptionApprovedById?: number | null
+    exceptionApprovalReason?: string | null
     salesSummary?: NullableJsonNullValueInput | InputJsonValue
+    closingExpectedCash?: Decimal | DecimalJsLike | number | string | null
     physicalCash?: Decimal | DecimalJsLike | number | string | null
     cashDifference?: Decimal | DecimalJsLike | number | string | null
+    closingDenominations?: NullableJsonNullValueInput | InputJsonValue
     notes?: string | null
     finalizedById?: number | null
     finalizedAt?: Date | string | null
+    adjustments?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -139040,6 +142885,20 @@ export namespace Prisma {
     usageCount?: number
     description?: string | null
     createdBy?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type VoucherCreateManyBranchInput = {
+    id?: number
+    voucherNumber: string
+    voucherType: string
+    date: Date | string
+    narration?: string | null
+    totalAmount: Decimal | DecimalJsLike | number | string
+    status?: string
+    reference?: string | null
+    createdBy: number
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -139908,6 +143767,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     sales?: SaleUpdateManyWithoutTerminalNestedInput
     users?: UserUpdateManyWithoutTerminalsNestedInput
+    dayCloses?: DayCloseUpdateManyWithoutTerminalNestedInput
   }
 
   export type TerminalUncheckedUpdateWithoutBranchInput = {
@@ -139921,6 +143781,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     sales?: SaleUncheckedUpdateManyWithoutTerminalNestedInput
     users?: UserUncheckedUpdateManyWithoutTerminalsNestedInput
+    dayCloses?: DayCloseUncheckedUpdateManyWithoutTerminalNestedInput
   }
 
   export type TerminalUncheckedUpdateManyWithoutBranchInput = {
@@ -140183,7 +144044,10 @@ export namespace Prisma {
     admin?: UserUpdateOneWithoutManagedStaffNestedInput
     managedStaff?: UserUpdateManyWithoutAdminNestedInput
     terminals?: TerminalUpdateManyWithoutUsersNestedInput
+    dayCloseOpenings?: DayCloseUpdateManyWithoutOpenedByNestedInput
+    dayCloseOpeningApprovals?: DayCloseUpdateManyWithoutOpeningApprovedByNestedInput
     dayCloseFinalizations?: DayCloseUpdateManyWithoutFinalizedByNestedInput
+    dayCloseExceptionApprovals?: DayCloseUpdateManyWithoutExceptionApprovedByNestedInput
     staffDayClosings?: StaffDayCloseUpdateManyWithoutUserNestedInput
   }
 
@@ -140231,7 +144095,10 @@ export namespace Prisma {
     referredLeads?: LeadUncheckedUpdateManyWithoutReferredByNestedInput
     managedStaff?: UserUncheckedUpdateManyWithoutAdminNestedInput
     terminals?: TerminalUncheckedUpdateManyWithoutUsersNestedInput
+    dayCloseOpenings?: DayCloseUncheckedUpdateManyWithoutOpenedByNestedInput
+    dayCloseOpeningApprovals?: DayCloseUncheckedUpdateManyWithoutOpeningApprovedByNestedInput
     dayCloseFinalizations?: DayCloseUncheckedUpdateManyWithoutFinalizedByNestedInput
+    dayCloseExceptionApprovals?: DayCloseUncheckedUpdateManyWithoutExceptionApprovedByNestedInput
     staffDayClosings?: StaffDayCloseUncheckedUpdateManyWithoutUserNestedInput
   }
 
@@ -140254,14 +144121,35 @@ export namespace Prisma {
   export type DayCloseUpdateWithoutBranchInput = {
     businessDate?: DateTimeFieldUpdateOperationsInput | Date | string
     status?: StringFieldUpdateOperationsInput | string
+    openedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    openingCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    previousClosingCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    additionalCashAdded?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cashRemovedBeforeOpening?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    expectedOpeningCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    actualOpeningCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    openingDifference?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    openingDiscrepancyReason?: NullableStringFieldUpdateOperationsInput | string | null
+    openingDenominations?: NullableJsonNullValueInput | InputJsonValue
+    openingRemarks?: NullableStringFieldUpdateOperationsInput | string | null
+    verificationChecks?: NullableJsonNullValueInput | InputJsonValue
+    verificationExceptions?: NullableJsonNullValueInput | InputJsonValue
+    exceptionApprovalReason?: NullableStringFieldUpdateOperationsInput | string | null
     salesSummary?: NullableJsonNullValueInput | InputJsonValue
+    closingExpectedCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     physicalCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     cashDifference?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    closingDenominations?: NullableJsonNullValueInput | InputJsonValue
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     finalizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    adjustments?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    terminal?: TerminalUpdateOneWithoutDayClosesNestedInput
+    openedBy?: UserUpdateOneWithoutDayCloseOpeningsNestedInput
+    openingApprovedBy?: UserUpdateOneWithoutDayCloseOpeningApprovalsNestedInput
     finalizedBy?: UserUpdateOneWithoutDayCloseFinalizationsNestedInput
+    exceptionApprovedBy?: UserUpdateOneWithoutDayCloseExceptionApprovalsNestedInput
     staffClosings?: StaffDayCloseUpdateManyWithoutDayCloseNestedInput
   }
 
@@ -140269,12 +144157,33 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     businessDate?: DateTimeFieldUpdateOperationsInput | Date | string
     status?: StringFieldUpdateOperationsInput | string
+    terminalId?: NullableIntFieldUpdateOperationsInput | number | null
+    openedById?: NullableIntFieldUpdateOperationsInput | number | null
+    openedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    openingCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    previousClosingCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    additionalCashAdded?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cashRemovedBeforeOpening?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    expectedOpeningCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    actualOpeningCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    openingDifference?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    openingDiscrepancyReason?: NullableStringFieldUpdateOperationsInput | string | null
+    openingApprovedById?: NullableIntFieldUpdateOperationsInput | number | null
+    openingDenominations?: NullableJsonNullValueInput | InputJsonValue
+    openingRemarks?: NullableStringFieldUpdateOperationsInput | string | null
+    verificationChecks?: NullableJsonNullValueInput | InputJsonValue
+    verificationExceptions?: NullableJsonNullValueInput | InputJsonValue
+    exceptionApprovedById?: NullableIntFieldUpdateOperationsInput | number | null
+    exceptionApprovalReason?: NullableStringFieldUpdateOperationsInput | string | null
     salesSummary?: NullableJsonNullValueInput | InputJsonValue
+    closingExpectedCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     physicalCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     cashDifference?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    closingDenominations?: NullableJsonNullValueInput | InputJsonValue
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     finalizedById?: NullableIntFieldUpdateOperationsInput | number | null
     finalizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    adjustments?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     staffClosings?: StaffDayCloseUncheckedUpdateManyWithoutDayCloseNestedInput
@@ -140284,12 +144193,33 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     businessDate?: DateTimeFieldUpdateOperationsInput | Date | string
     status?: StringFieldUpdateOperationsInput | string
+    terminalId?: NullableIntFieldUpdateOperationsInput | number | null
+    openedById?: NullableIntFieldUpdateOperationsInput | number | null
+    openedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    openingCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    previousClosingCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    additionalCashAdded?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cashRemovedBeforeOpening?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    expectedOpeningCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    actualOpeningCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    openingDifference?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    openingDiscrepancyReason?: NullableStringFieldUpdateOperationsInput | string | null
+    openingApprovedById?: NullableIntFieldUpdateOperationsInput | number | null
+    openingDenominations?: NullableJsonNullValueInput | InputJsonValue
+    openingRemarks?: NullableStringFieldUpdateOperationsInput | string | null
+    verificationChecks?: NullableJsonNullValueInput | InputJsonValue
+    verificationExceptions?: NullableJsonNullValueInput | InputJsonValue
+    exceptionApprovedById?: NullableIntFieldUpdateOperationsInput | number | null
+    exceptionApprovalReason?: NullableStringFieldUpdateOperationsInput | string | null
     salesSummary?: NullableJsonNullValueInput | InputJsonValue
+    closingExpectedCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     physicalCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     cashDifference?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    closingDenominations?: NullableJsonNullValueInput | InputJsonValue
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     finalizedById?: NullableIntFieldUpdateOperationsInput | number | null
     finalizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    adjustments?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -140360,6 +144290,53 @@ export namespace Prisma {
     usageCount?: IntFieldUpdateOperationsInput | number
     description?: NullableStringFieldUpdateOperationsInput | string | null
     createdBy?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type VoucherUpdateWithoutBranchInput = {
+    voucherNumber?: StringFieldUpdateOperationsInput | string
+    voucherType?: StringFieldUpdateOperationsInput | string
+    date?: DateTimeFieldUpdateOperationsInput | Date | string
+    narration?: NullableStringFieldUpdateOperationsInput | string | null
+    totalAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    status?: StringFieldUpdateOperationsInput | string
+    reference?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    entries?: JournalEntryUpdateManyWithoutVoucherNestedInput
+    payrolls?: PayrollUpdateManyWithoutVoucherNestedInput
+    salaryAdvances?: SalaryAdvanceUpdateManyWithoutVoucherNestedInput
+    creator?: UserUpdateOneRequiredWithoutVouchersNestedInput
+  }
+
+  export type VoucherUncheckedUpdateWithoutBranchInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    voucherNumber?: StringFieldUpdateOperationsInput | string
+    voucherType?: StringFieldUpdateOperationsInput | string
+    date?: DateTimeFieldUpdateOperationsInput | Date | string
+    narration?: NullableStringFieldUpdateOperationsInput | string | null
+    totalAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    status?: StringFieldUpdateOperationsInput | string
+    reference?: NullableStringFieldUpdateOperationsInput | string | null
+    createdBy?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    entries?: JournalEntryUncheckedUpdateManyWithoutVoucherNestedInput
+    payrolls?: PayrollUncheckedUpdateManyWithoutVoucherNestedInput
+    salaryAdvances?: SalaryAdvanceUncheckedUpdateManyWithoutVoucherNestedInput
+  }
+
+  export type VoucherUncheckedUpdateManyWithoutBranchInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    voucherNumber?: StringFieldUpdateOperationsInput | string
+    voucherType?: StringFieldUpdateOperationsInput | string
+    date?: DateTimeFieldUpdateOperationsInput | Date | string
+    narration?: NullableStringFieldUpdateOperationsInput | string | null
+    totalAmount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    status?: StringFieldUpdateOperationsInput | string
+    reference?: NullableStringFieldUpdateOperationsInput | string | null
+    createdBy?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -144190,6 +148167,41 @@ export namespace Prisma {
     voucherDiscount?: Decimal | DecimalJsLike | number | string
   }
 
+  export type DayCloseCreateManyTerminalInput = {
+    id?: number
+    branchId: number
+    businessDate: Date | string
+    status?: string
+    openedById?: number | null
+    openedAt?: Date | string | null
+    openingCash?: Decimal | DecimalJsLike | number | string | null
+    previousClosingCash?: Decimal | DecimalJsLike | number | string | null
+    additionalCashAdded?: Decimal | DecimalJsLike | number | string | null
+    cashRemovedBeforeOpening?: Decimal | DecimalJsLike | number | string | null
+    expectedOpeningCash?: Decimal | DecimalJsLike | number | string | null
+    actualOpeningCash?: Decimal | DecimalJsLike | number | string | null
+    openingDifference?: Decimal | DecimalJsLike | number | string | null
+    openingDiscrepancyReason?: string | null
+    openingApprovedById?: number | null
+    openingDenominations?: NullableJsonNullValueInput | InputJsonValue
+    openingRemarks?: string | null
+    verificationChecks?: NullableJsonNullValueInput | InputJsonValue
+    verificationExceptions?: NullableJsonNullValueInput | InputJsonValue
+    exceptionApprovedById?: number | null
+    exceptionApprovalReason?: string | null
+    salesSummary?: NullableJsonNullValueInput | InputJsonValue
+    closingExpectedCash?: Decimal | DecimalJsLike | number | string | null
+    physicalCash?: Decimal | DecimalJsLike | number | string | null
+    cashDifference?: Decimal | DecimalJsLike | number | string | null
+    closingDenominations?: NullableJsonNullValueInput | InputJsonValue
+    notes?: string | null
+    finalizedById?: number | null
+    finalizedAt?: Date | string | null
+    adjustments?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
   export type SaleUpdateWithoutTerminalInput = {
     invoiceNumber?: StringFieldUpdateOperationsInput | string
     saleDate?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -144385,7 +148397,10 @@ export namespace Prisma {
     admin?: UserUpdateOneWithoutManagedStaffNestedInput
     managedStaff?: UserUpdateManyWithoutAdminNestedInput
     branch?: BranchUpdateOneWithoutUsersNestedInput
+    dayCloseOpenings?: DayCloseUpdateManyWithoutOpenedByNestedInput
+    dayCloseOpeningApprovals?: DayCloseUpdateManyWithoutOpeningApprovedByNestedInput
     dayCloseFinalizations?: DayCloseUpdateManyWithoutFinalizedByNestedInput
+    dayCloseExceptionApprovals?: DayCloseUpdateManyWithoutExceptionApprovedByNestedInput
     staffDayClosings?: StaffDayCloseUpdateManyWithoutUserNestedInput
   }
 
@@ -144433,7 +148448,10 @@ export namespace Prisma {
     leads?: LeadUncheckedUpdateManyWithoutAssignedUserNestedInput
     referredLeads?: LeadUncheckedUpdateManyWithoutReferredByNestedInput
     managedStaff?: UserUncheckedUpdateManyWithoutAdminNestedInput
+    dayCloseOpenings?: DayCloseUncheckedUpdateManyWithoutOpenedByNestedInput
+    dayCloseOpeningApprovals?: DayCloseUncheckedUpdateManyWithoutOpeningApprovedByNestedInput
     dayCloseFinalizations?: DayCloseUncheckedUpdateManyWithoutFinalizedByNestedInput
+    dayCloseExceptionApprovals?: DayCloseUncheckedUpdateManyWithoutExceptionApprovedByNestedInput
     staffDayClosings?: StaffDayCloseUncheckedUpdateManyWithoutUserNestedInput
   }
 
@@ -144452,6 +148470,112 @@ export namespace Prisma {
     weeklyOff?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     adminId?: NullableIntFieldUpdateOperationsInput | number | null
+  }
+
+  export type DayCloseUpdateWithoutTerminalInput = {
+    businessDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: StringFieldUpdateOperationsInput | string
+    openedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    openingCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    previousClosingCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    additionalCashAdded?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cashRemovedBeforeOpening?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    expectedOpeningCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    actualOpeningCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    openingDifference?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    openingDiscrepancyReason?: NullableStringFieldUpdateOperationsInput | string | null
+    openingDenominations?: NullableJsonNullValueInput | InputJsonValue
+    openingRemarks?: NullableStringFieldUpdateOperationsInput | string | null
+    verificationChecks?: NullableJsonNullValueInput | InputJsonValue
+    verificationExceptions?: NullableJsonNullValueInput | InputJsonValue
+    exceptionApprovalReason?: NullableStringFieldUpdateOperationsInput | string | null
+    salesSummary?: NullableJsonNullValueInput | InputJsonValue
+    closingExpectedCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    physicalCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cashDifference?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    closingDenominations?: NullableJsonNullValueInput | InputJsonValue
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    finalizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    adjustments?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    branch?: BranchUpdateOneRequiredWithoutDayClosesNestedInput
+    openedBy?: UserUpdateOneWithoutDayCloseOpeningsNestedInput
+    openingApprovedBy?: UserUpdateOneWithoutDayCloseOpeningApprovalsNestedInput
+    finalizedBy?: UserUpdateOneWithoutDayCloseFinalizationsNestedInput
+    exceptionApprovedBy?: UserUpdateOneWithoutDayCloseExceptionApprovalsNestedInput
+    staffClosings?: StaffDayCloseUpdateManyWithoutDayCloseNestedInput
+  }
+
+  export type DayCloseUncheckedUpdateWithoutTerminalInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    branchId?: IntFieldUpdateOperationsInput | number
+    businessDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: StringFieldUpdateOperationsInput | string
+    openedById?: NullableIntFieldUpdateOperationsInput | number | null
+    openedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    openingCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    previousClosingCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    additionalCashAdded?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cashRemovedBeforeOpening?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    expectedOpeningCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    actualOpeningCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    openingDifference?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    openingDiscrepancyReason?: NullableStringFieldUpdateOperationsInput | string | null
+    openingApprovedById?: NullableIntFieldUpdateOperationsInput | number | null
+    openingDenominations?: NullableJsonNullValueInput | InputJsonValue
+    openingRemarks?: NullableStringFieldUpdateOperationsInput | string | null
+    verificationChecks?: NullableJsonNullValueInput | InputJsonValue
+    verificationExceptions?: NullableJsonNullValueInput | InputJsonValue
+    exceptionApprovedById?: NullableIntFieldUpdateOperationsInput | number | null
+    exceptionApprovalReason?: NullableStringFieldUpdateOperationsInput | string | null
+    salesSummary?: NullableJsonNullValueInput | InputJsonValue
+    closingExpectedCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    physicalCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cashDifference?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    closingDenominations?: NullableJsonNullValueInput | InputJsonValue
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    finalizedById?: NullableIntFieldUpdateOperationsInput | number | null
+    finalizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    adjustments?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    staffClosings?: StaffDayCloseUncheckedUpdateManyWithoutDayCloseNestedInput
+  }
+
+  export type DayCloseUncheckedUpdateManyWithoutTerminalInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    branchId?: IntFieldUpdateOperationsInput | number
+    businessDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: StringFieldUpdateOperationsInput | string
+    openedById?: NullableIntFieldUpdateOperationsInput | number | null
+    openedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    openingCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    previousClosingCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    additionalCashAdded?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cashRemovedBeforeOpening?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    expectedOpeningCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    actualOpeningCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    openingDifference?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    openingDiscrepancyReason?: NullableStringFieldUpdateOperationsInput | string | null
+    openingApprovedById?: NullableIntFieldUpdateOperationsInput | number | null
+    openingDenominations?: NullableJsonNullValueInput | InputJsonValue
+    openingRemarks?: NullableStringFieldUpdateOperationsInput | string | null
+    verificationChecks?: NullableJsonNullValueInput | InputJsonValue
+    verificationExceptions?: NullableJsonNullValueInput | InputJsonValue
+    exceptionApprovedById?: NullableIntFieldUpdateOperationsInput | number | null
+    exceptionApprovalReason?: NullableStringFieldUpdateOperationsInput | string | null
+    salesSummary?: NullableJsonNullValueInput | InputJsonValue
+    closingExpectedCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    physicalCash?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    cashDifference?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    closingDenominations?: NullableJsonNullValueInput | InputJsonValue
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    finalizedById?: NullableIntFieldUpdateOperationsInput | number | null
+    finalizedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    adjustments?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type TicketClosureRequestCreateManyTicketInput = {

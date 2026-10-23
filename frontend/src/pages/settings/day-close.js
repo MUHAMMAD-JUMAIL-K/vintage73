@@ -106,7 +106,10 @@ export default function DayClosePage() {
       const res = await api.get('/day-close/status', { params });
       if (res.data && res.data.success) {
         setStatusData(res.data);
-        // Pre-fill physical cash with expected closing cash if not closed
+        // Restore saved physical cash count if previously saved; do NOT pre-fill with expectedClosingCash
+        if (res.data.physicalCash !== null && res.data.physicalCash !== undefined) {
+          setPhysicalCash(res.data.physicalCash.toString());
+        }
         if (res.data.status !== 'CLOSED') {
           fetchVerificationDetails(res.data.businessDate);
         }
@@ -128,8 +131,9 @@ export default function DayClosePage() {
       });
       if (res.data && res.data.success) {
         setVerificationData(res.data);
-        if (!physicalCash && res.data.expectedClosingCash !== undefined) {
-          setPhysicalCash(res.data.expectedClosingCash.toString());
+        // Only restore actual saved physical count if not already set, never default to expectedClosingCash
+        if (res.data.drawer?.physicalCash !== null && res.data.drawer?.physicalCash !== undefined) {
+          setPhysicalCash(res.data.drawer.physicalCash.toString());
         }
       }
     } catch (err) {
@@ -249,11 +253,19 @@ export default function DayClosePage() {
 
   // Handle Confirm Day Close
   const handleConfirmClose = async () => {
+    if (physicalCash === '' || isNaN(parseFloat(physicalCash)) || parseFloat(physicalCash) < 0) {
+      toast.warn('Please enter the actual physical cash counted in the drawer.');
+      return;
+    }
+    if (requiresDifferenceNote && !closingNotes.trim()) {
+      toast.warn('Please provide an explanation note for the cash difference before closing.');
+      return;
+    }
     setSubmitting(true);
     try {
       const payload = {
         businessDate: statusData.businessDate,
-        physicalCash: parseFloat(physicalCash) || 0,
+        physicalCash: parseFloat(physicalCash),
         notes: closingNotes.trim()
       };
       const res = await api.post('/day-close/confirm', payload);
@@ -264,7 +276,8 @@ export default function DayClosePage() {
       }
     } catch (err) {
       console.error('Error confirming day close:', err);
-      toast.error(err.response?.data?.message || 'Failed to complete Day Close');
+      const errMsg = err.response?.data?.message || err.message || 'Failed to complete Day Close';
+      toast.error(errMsg);
     } finally {
       setSubmitting(false);
     }
@@ -440,8 +453,9 @@ export default function DayClosePage() {
   const openDiffCalc = actualCashNum - expectedOpenCalc;
 
   const expectedClosing = verificationData?.expectedClosingCash !== undefined ? Number(verificationData.expectedClosingCash) : 0;
-  const actualClosingNum = parseFloat(physicalCash) || 0;
-  const closingDiffCalc = Number((actualClosingNum - expectedClosing).toFixed(2));
+  const isPhysicalCashEntered = physicalCash !== '' && !isNaN(parseFloat(physicalCash)) && parseFloat(physicalCash) >= 0;
+  const actualClosingNum = isPhysicalCashEntered ? parseFloat(physicalCash) : null;
+  const closingDiffCalc = actualClosingNum !== null ? Number((actualClosingNum - expectedClosing).toFixed(2)) : null;
 
   const branchCurrency = statusData?.branch || currentUser?.branch || 'AED';
   const currencyMeta = extractCurrencyMeta(branchCurrency);
@@ -454,8 +468,11 @@ export default function DayClosePage() {
   const reviewedCount = checklistKeys.filter(k => checklist[k].isReviewed).length;
   const allChecksComplete = totalChecks > 0 && reviewedCount === totalChecks;
 
+  const requiresDifferenceNote = closingDiffCalc !== null && Math.abs(closingDiffCalc) > 10 && !verificationData?.savedExceptions?.cashbook;
+  const isDifferenceNoteProvided = !requiresDifferenceNote || closingNotes.trim().length > 0;
+
   const criticalIssues = verificationData?.criticalDiscrepancies || [];
-  const canCloseDay = allChecksComplete && criticalIssues.length === 0;
+  const canCloseDay = allChecksComplete && criticalIssues.length === 0 && isPhysicalCashEntered && isDifferenceNoteProvided;
 
   return (
     <div className="w-full space-y-6 pt-1 pb-12">
@@ -806,7 +823,7 @@ export default function DayClosePage() {
                 </div>
               </div>
 
-              {/* 8 Required Verification Checklist Cards */}
+              {/* Required Verification Checklist Cards */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {checklistKeys.map(key => {
                   const item = checklist[key];
@@ -945,25 +962,41 @@ export default function DayClosePage() {
                   <div className="p-3 bg-gray-50 rounded-xl space-y-1">
                     <span className="text-[10px] text-gray-400 font-semibold uppercase">Closing Cash Difference</span>
                     <p className={`text-lg font-extrabold ${
-                      closingDiffCalc === 0
+                      closingDiffCalc === null
+                        ? 'text-gray-400'
+                        : closingDiffCalc === 0
                         ? 'text-emerald-600'
                         : closingDiffCalc > 0
                         ? 'text-blue-600'
                         : 'text-red-600'
                     }`}>
-                      {closingDiffCalc >= 0 ? `+${formatCurrency(closingDiffCalc, branchCurrency)}` : `-${formatCurrency(Math.abs(closingDiffCalc), branchCurrency)}`}
+                      {closingDiffCalc === null
+                        ? '—'
+                        : closingDiffCalc >= 0
+                        ? `+${formatCurrency(closingDiffCalc, branchCurrency)}`
+                        : `-${formatCurrency(Math.abs(closingDiffCalc), branchCurrency)}`}
                     </p>
-                    <span className="text-[10px] text-gray-400">{closingDiffCalc === 0 ? 'Exact match' : 'Difference'}</span>
+                    <span className="text-[10px] text-gray-400">
+                      {closingDiffCalc === null
+                        ? 'Physical count pending'
+                        : closingDiffCalc === 0
+                        ? 'Exact match'
+                        : closingDiffCalc > 0
+                        ? 'Cash Overage (+)'
+                        : 'Cash Shortage (-)'}
+                    </span>
                   </div>
                 </div>
 
                 <div>
-                  <label className="text-[11px] font-semibold text-gray-500">Closing Notes / Remarks (Optional)</label>
+                  <label className="text-[11px] font-semibold text-gray-500">
+                    Closing Notes / Remarks {requiresDifferenceNote ? <span className="text-red-500 font-bold">(Mandatory due to cash discrepancy)</span> : '(Optional)'}
+                  </label>
                   <textarea
                     rows={2}
                     value={closingNotes}
                     onChange={(e) => setClosingNotes(e.target.value)}
-                    placeholder="Enter any notes about cash variance, shift changes, or special events..."
+                    placeholder="Enter notes explaining cash shortage/overage, shift events..."
                     className="w-full mt-1 p-2 text-xs bg-gray-50 border border-gray-200 rounded-lg focus:bg-white focus:outline-none focus:border-emerald-500"
                   />
                 </div>
@@ -974,6 +1007,16 @@ export default function DayClosePage() {
                     <div className="font-bold flex items-center gap-1.5">
                       <FiAlertTriangle /> Day Closing is Currently Blocked:
                     </div>
+                    {!isPhysicalCashEntered && (
+                      <p className="text-[11px]">
+                        • You must enter the actual physical cash counted in the drawer before closing.
+                      </p>
+                    )}
+                    {requiresDifferenceNote && !closingNotes.trim() && (
+                      <p className="text-[11px]">
+                        • An explanation note is required for the cash difference of {formatCurrency(closingDiffCalc, branchCurrency)} before closing.
+                      </p>
+                    )}
                     {!allChecksComplete && (
                       <p className="text-[11px]">
                         • You must inspect and check off all {totalChecks} verification items above ({reviewedCount} completed).
@@ -1372,6 +1415,22 @@ export default function DayClosePage() {
                 </span>
               </div>
             </div>
+
+            {requiresDifferenceNote && (
+              <div className="text-left space-y-1">
+                <label className="text-[11px] font-bold text-amber-800">
+                  Discrepancy Explanation Note <span className="text-red-500">*</span>
+                </label>
+                <textarea
+                  rows={2}
+                  required
+                  value={closingNotes}
+                  onChange={(e) => setClosingNotes(e.target.value)}
+                  placeholder="Explain the cash difference before closing..."
+                  className="w-full p-2 text-xs bg-amber-50 border border-amber-300 rounded-lg focus:outline-none"
+                />
+              </div>
+            )}
 
             <div className="flex gap-3 justify-center pt-2">
               <button
