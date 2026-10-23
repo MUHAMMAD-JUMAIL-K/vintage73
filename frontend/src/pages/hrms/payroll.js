@@ -216,7 +216,7 @@ export default function PayrollPage() {
                                             </div>
                                         </td>
                                         <td className="text-right font-mono text-slate-600">
-                                            {companyProfile?.currencySymbol || '₹'}{Number(p.basicSalary).toLocaleString()}
+                                            {companyProfile?.currencySymbol || 'AED'}{Number(p.basicSalary).toLocaleString()}
                                         </td>
                                         <td className="text-right font-mono text-primary">
                                             +{Number(p.allowances).toLocaleString()}
@@ -225,7 +225,7 @@ export default function PayrollPage() {
                                             -{Number(p.deductions).toLocaleString()}
                                         </td>
                                         <td className="text-right font-mono font-medium text-slate-900 text-sm">
-                                            {companyProfile?.currencySymbol || '₹'}{Number(p.netSalary).toLocaleString()}
+                                            {companyProfile?.currencySymbol || 'AED'}{Number(p.netSalary).toLocaleString()}
                                         </td>
                                         <td className="text-center">
                                             <span className={`px-2.5 py-1 rounded-full text-[9px] font-medium uppercase tracking-widest border ${p.status === 'PAID' ? 'bg-primary-light/10 text-primary border-primary-light/20' :
@@ -262,19 +262,19 @@ export default function PayrollPage() {
                             <div className="flex flex-col items-end">
                                 <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider">Total Allowances</span>
                                 <span className="font-mono font-medium text-primary text-sm">
-                                    {companyProfile?.currencySymbol || '₹'}{payrolls.reduce((sum, p) => sum + Number(p.allowances), 0).toLocaleString()}
+                                    {companyProfile?.currencySymbol || 'AED'}{payrolls.reduce((sum, p) => sum + Number(p.allowances), 0).toLocaleString()}
                                 </span>
                             </div>
                             <div className="flex flex-col items-end">
                                 <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider">Total Deductions</span>
                                 <span className="font-mono font-medium text-red-400 text-sm">
-                                    {companyProfile?.currencySymbol || '₹'}{payrolls.reduce((sum, p) => sum + Number(p.deductions), 0).toLocaleString()}
+                                    {companyProfile?.currencySymbol || 'AED'}{payrolls.reduce((sum, p) => sum + Number(p.deductions), 0).toLocaleString()}
                                 </span>
                             </div>
                             <div className="flex flex-col items-end">
                                 <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider">Total Net Payable</span>
                                 <span className="font-mono font-medium text-slate-900 text-base">
-                                    {companyProfile?.currencySymbol || '₹'}{payrolls.reduce((sum, p) => sum + Number(p.netSalary), 0).toLocaleString()}
+                                    {companyProfile?.currencySymbol || 'AED'}{payrolls.reduce((sum, p) => sum + Number(p.netSalary), 0).toLocaleString()}
                                 </span>
                             </div>
                         </div>
@@ -412,7 +412,7 @@ export default function PayrollPage() {
                                         <p className="text-xs text-slate-400 italic">Only {Number(selectedPayroll.netSalary).toLocaleString()} Rupees</p>
                                     </div>
                                     <div className="text-right">
-                                        <p className="text-3xl font-bold tracking-tight"><span className="text-slate-500 text-lg mr-2">{companyProfile?.currencySymbol || '₹'}</span>{Number(selectedPayroll.netSalary).toLocaleString()}</p>
+                                        <p className="text-3xl font-bold tracking-tight"><span className="text-slate-500 text-lg mr-2">{companyProfile?.currencySymbol || 'AED'}</span>{Number(selectedPayroll.netSalary).toLocaleString()}</p>
                                     </div>
                                 </div>
 
@@ -504,7 +504,7 @@ export default function PayrollPage() {
                                             <th className="border border-slate-300 p-2 text-left">BANK NAME</th>
                                             <th className="border border-slate-300 p-2 text-left">ACCOUNT NUMBER</th>
                                             <th className="border border-slate-300 p-2 text-left">IFSC CODE</th>
-                                            <th className="border border-slate-300 p-2 text-right">AMOUNT ({companyProfile?.currencySymbol || '₹'})</th>
+                                            <th className="border border-slate-300 p-2 text-right">AMOUNT ({companyProfile?.currencySymbol || 'AED'})</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -520,7 +520,7 @@ export default function PayrollPage() {
                                         ))}
                                         <tr className="bg-slate-100 font-medium">
                                             <td colSpan="5" className="border border-slate-300 p-3 text-right text-sm uppercase">Total Payable Amount</td>
-                                            <td className="border border-slate-300 p-3 text-right text-sm">{companyProfile?.currencySymbol || '₹'}{payrolls.reduce((s, p) => s + Number(p.netSalary), 0).toLocaleString()}</td>
+                                            <td className="border border-slate-300 p-3 text-right text-sm">{companyProfile?.currencySymbol || 'AED'}{payrolls.reduce((s, p) => s + Number(p.netSalary), 0).toLocaleString()}</td>
                                         </tr>
                                     </tbody>
                                 </table>

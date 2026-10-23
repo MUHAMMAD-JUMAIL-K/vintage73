@@ -190,9 +190,10 @@ async function validateVoucherForSale(tx, { code, customerId, branchId, items = 
   // 7. Minimum Purchase Requirement
   const minSpend = parseFloat(voucher.minimumPurchaseAmount || 0);
   if (eligibleSubtotal < minSpend) {
+    const sym = voucher.branch?.currencySymbol || (voucher.branch?.currencyCode === 'INR' ? '₹' : 'AED ');
     return {
       valid: false,
-      message: `Minimum purchase of ₹${minSpend.toFixed(2)} required for this voucher (Current eligible: ₹${eligibleSubtotal.toFixed(2)}).`
+      message: `Minimum purchase of ${sym}${minSpend.toFixed(2)} required for this voucher (Current eligible: ${sym}${eligibleSubtotal.toFixed(2)}).`
     };
   }
 
@@ -356,7 +357,7 @@ async function checkAndIssuePurchaseReward(tx, sale) {
       issuedSaleId: sale.id,
       usageLimit: 1,
       usageCount: 0,
-      description: `Automatically awarded for purchase #${sale.invoiceNumber} exceeding ₹${minQualifying.toFixed(2)}`,
+      description: `Automatically awarded for purchase #${sale.invoiceNumber} exceeding ${sale.currencyCode || sale.branch?.currencyCode || 'AED'} ${minQualifying.toFixed(2)}`,
       createdBy: sale.salesmanId || null
     }
   });

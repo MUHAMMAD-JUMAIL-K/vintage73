@@ -14,8 +14,8 @@ export default function B2BInvoice() {
   const [settings, setSettings] = useState(null);
   const [company, setCompany] = useState(null);
   const [user, setUser] = useState(null);
-  const [currencyCode, setCurrencyCode] = useState('INR');
-  const [currencySymbol, setCurrencySymbol] = useState('₹');
+  const [currencyCode, setCurrencyCode] = useState('AED');
+  const [currencySymbol, setCurrencySymbol] = useState('AED');
   const [branchSettings, setBranchSettings] = useState({ stockIncluded: true });
 
   // Tab State
@@ -77,7 +77,7 @@ export default function B2BInvoice() {
         setSettings(settingsRes.data);
         setCompany(companyRes.data);
 
-        let code = companyRes?.data?.currencyCode || 'INR';
+        let code = companyRes?.data?.currencyCode || 'AED';
         let symbol = companyRes?.data?.currencySymbol;
 
         if (user?.branchId) {
@@ -898,7 +898,7 @@ export default function B2BInvoice() {
         <div className="fixed inset-0 z-[100000] flex items-center justify-center bg-black/50 backdrop-blur-sm">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6">
             <h3 className="text-lg font-medium text-slate-800 mb-4">E-Way Bill Required</h3>
-            <p className="text-sm text-slate-500 mb-4">Invoice value exceeds ₹{settings?.ewayBillThreshold}. Please enter E-Way Bill number.</p>
+            <p className="text-sm text-slate-500 mb-4">Invoice value exceeds {formatAmountWithCurrency(settings?.ewayBillThreshold, currencyCode, currencySymbol)}. Please enter E-Way Bill number.</p>
             <input
               type="text"
               value={ewayBillNumber}

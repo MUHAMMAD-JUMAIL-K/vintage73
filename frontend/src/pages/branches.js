@@ -17,7 +17,7 @@ export default function Branches() {
     address: '', 
     phone: '', 
     email: '', 
-    currencyCode: 'INR',
+    currencyCode: 'AED',
     isActive: true, 
     stockIncluded: true
   });
@@ -55,7 +55,7 @@ export default function Branches() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const code = formData.currencyCode || 'INR';
+      const code = formData.currencyCode || 'AED';
       const payload = {
         ...formData,
         currencyCode: code,
@@ -70,7 +70,7 @@ export default function Branches() {
       }
       setShowModal(false);
       setEditingId(null);
-      setFormData({ name: '', address: '', phone: '', email: '', currencyCode: 'INR', isActive: true, stockIncluded: true });
+      setFormData({ name: '', address: '', phone: '', email: '', currencyCode: 'AED', isActive: true, stockIncluded: true });
       fetchBranches();
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to save branch');
@@ -84,7 +84,7 @@ export default function Branches() {
       address: branch.address || '',
       phone: branch.phone || '',
       email: branch.email || '',
-      currencyCode: branch.currencyCode || 'INR',
+      currencyCode: branch.currencyCode || 'AED',
       isActive: branch.isActive,
       stockIncluded: branch.stockIncluded !== undefined ? branch.stockIncluded : true
     });
@@ -155,7 +155,7 @@ export default function Branches() {
                       Stock: {branch.stockIncluded ? 'Enabled' : 'Disabled'}
                     </span>
                     <span className="px-2 py-0.5 rounded text-[10px] font-semibold tracking-wider bg-blue-50 text-blue-700 border border-blue-200">
-                      {branch.currencyCode || 'INR'} ({normalizeCurrencySymbol(branch.currencySymbol, branch.currencyCode)})
+                      {branch.currencyCode || 'AED'} ({normalizeCurrencySymbol(branch.currencySymbol, branch.currencyCode || 'AED')})
                     </span>
                   </div>
                   <div className="flex gap-2">

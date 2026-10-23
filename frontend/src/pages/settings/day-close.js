@@ -190,7 +190,7 @@ export default function DayClosePage() {
       const diff = actualCash - expectedCash;
 
       if (Math.abs(diff) > 0.01 && !openingReason.trim()) {
-        const branchCurr = statusData?.branch || currentUser?.branch || 'INR';
+        const branchCurr = statusData?.branch || currentUser?.branch || 'AED';
         toast.warn(`Please provide an explanation for the opening difference of ${formatCurrency(diff, branchCurr)}.`);
         setSubmitting(false);
         return;
@@ -443,7 +443,7 @@ export default function DayClosePage() {
   const actualClosingNum = parseFloat(physicalCash) || 0;
   const closingDiffCalc = Number((actualClosingNum - expectedClosing).toFixed(2));
 
-  const branchCurrency = statusData?.branch || currentUser?.branch || 'INR';
+  const branchCurrency = statusData?.branch || currentUser?.branch || 'AED';
   const currencyMeta = extractCurrencyMeta(branchCurrency);
   const currencySymbol = currencyMeta.symbol;
 

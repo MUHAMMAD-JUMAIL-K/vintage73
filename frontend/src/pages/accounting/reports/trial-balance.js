@@ -61,12 +61,12 @@ export default function TrialBalance() {
         item.groupName.toLowerCase().includes(searchTerm.toLowerCase())
     ) || [];
 
-    const activeCurrency = data?.currency || { code: 'INR', symbol: '₹' };
+    const activeCurrency = data?.currency || { code: 'AED', symbol: 'AED' };
     const branchLabel = data?.branch ? data.branch.name : 'All Branches (Consolidated)';
 
     const handleExport = () => {
         if (!data) return;
-        const currLabel = activeCurrency?.code || 'INR';
+        const currLabel = activeCurrency?.code || 'AED';
         const csvContent = [
             ['Report', 'Trial Balance'],
             ['Branch', `"${branchLabel.replace(/"/g, '""')}"`],
@@ -164,7 +164,7 @@ export default function TrialBalance() {
                                 <option value="" className="text-slate-800">All Branches (Consolidated)</option>
                                 {branches.map(b => (
                                     <option key={b.id} value={b.id} className="text-slate-800">
-                                        {b.name} ({b.currencyCode || 'INR'})
+                                        {b.name} ({b.currencyCode || 'AED'})
                                     </option>
                                 ))}
                             </select>

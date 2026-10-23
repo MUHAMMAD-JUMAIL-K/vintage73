@@ -230,7 +230,8 @@ exports.createProduct = asyncHandler(async (req, res) => {
     initialStock,
     minDiscount,
     maxDiscount,
-    isTaxInclusive
+    isTaxInclusive,
+    costPrice
   } = req.body;
 
   // Handle Image Upload
@@ -328,6 +329,7 @@ exports.createProduct = asyncHandler(async (req, res) => {
       hasBarcode: (hasBarcode === 'true' || hasBarcode === true) || false,
       minDiscount: minDiscount ? parseFloat(minDiscount) : null,
       maxDiscount: maxDiscount ? parseFloat(maxDiscount) : null,
+      costPrice: costPrice !== undefined && costPrice !== null && costPrice !== '' && !isNaN(parseFloat(costPrice)) ? parseFloat(costPrice) : null,
       isTaxInclusive: (isTaxInclusive === 'true' || isTaxInclusive === true) || false,
       imageUrl: imageUrl,
       isActive: req.body.isActive !== undefined ? (req.body.isActive === 'true' || req.body.isActive === true) : true
@@ -497,6 +499,11 @@ exports.updateProduct = asyncHandler(async (req, res) => {
 
   if (minDiscount !== undefined) dataToUpdate.minDiscount = minDiscount ? parseFloat(minDiscount) : null;
   if (maxDiscount !== undefined) dataToUpdate.maxDiscount = maxDiscount ? parseFloat(maxDiscount) : null;
+
+  if (req.body.costPrice !== undefined) {
+    const cpVal = parseFloat(req.body.costPrice);
+    dataToUpdate.costPrice = !isNaN(cpVal) ? cpVal : null;
+  }
 
   if (isTaxInclusive !== undefined) {
     dataToUpdate.isTaxInclusive = (isTaxInclusive === 'true' || isTaxInclusive === true);

@@ -10,7 +10,7 @@ import { TbBusinessplan } from 'react-icons/tb';
 import { useReactToPrint } from 'react-to-print';
 import { toast } from 'react-toastify';
 import DynamicInvoice from '@/components/DynamicInvoice';
-import { getCurrencySymbol, normalizeCurrencySymbol, formatAmountWithCurrency } from '@/lib/currency';
+import { getCurrencySymbol, normalizeCurrencySymbol, formatAmountWithCurrency, DEFAULT_CURRENCY } from '@/lib/currency';
 
 export default function Dashboard() {
   const router = useRouter();
@@ -253,6 +253,8 @@ export default function Dashboard() {
   const dm = data?.dayManagement;
   const isDayOpened = dm && dm.status !== 'NOT_OPENED';
   const isDayClosed = dm && (dm.status === 'CLOSED' || dm.status === 'ADMIN_CLOSED');
+  const activeCurrencyCode = branch?.currencyCode || companyProfile?.currencyCode || DEFAULT_CURRENCY;
+  const activeCurrencySymbol = normalizeCurrencySymbol(branch?.currencySymbol || companyProfile?.currencySymbol, activeCurrencyCode);
 
   return (
     <div className="space-y-6 md:space-y-8 font-sans relative">
@@ -398,7 +400,7 @@ export default function Dashboard() {
               <div className="flex items-center gap-2">
                 <FiAlertTriangle className="text-amber-600 text-base flex-shrink-0" />
                 <span>
-                  <strong>Prior Day Closing Modified:</strong> The previous business day's closing balance was altered by ₹{dm.priorDayDiscrepancyAmount} after this session was opened.
+                  <strong>Prior Day Closing Modified:</strong> The previous business day's closing balance was altered by {formatAmountWithCurrency(dm.priorDayDiscrepancyAmount, activeCurrencyCode, activeCurrencySymbol)} after this session was opened.
                 </span>
               </div>
               <button

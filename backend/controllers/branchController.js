@@ -44,12 +44,7 @@ exports.getBranchById = asyncHandler(async (req, res) => {
   res.json(branch);
 });
 
-const CURRENCY_SYMBOLS = {
-  INR: '₹',
-  USD: '$',
-  EUR: '€',
-  AED: 'د.إ'
-};
+const { DEFAULT_CURRENCY, DEFAULT_CURRENCY_SYMBOL, getCurrencySymbol, CURRENCY_SYMBOLS } = require('../utils/currencyHelper');
 
 // Create Branch
 exports.createBranch = asyncHandler(async (req, res) => {
@@ -60,8 +55,8 @@ exports.createBranch = asyncHandler(async (req, res) => {
   }
 
   const { name, address, phone, email, stockIncluded, invoiceTemplate, invoiceSettings, currencyCode, currencySymbol } = req.body;
-  const code = (currencyCode || 'INR').trim().toUpperCase();
-  const symbol = (currencySymbol && currencySymbol !== '₹') ? currencySymbol : (CURRENCY_SYMBOLS[code] || '₹');
+  const code = (currencyCode || DEFAULT_CURRENCY).trim().toUpperCase();
+  const symbol = (currencySymbol && currencySymbol.trim()) ? currencySymbol : getCurrencySymbol(code);
 
   const dataToSave = {
     name,
@@ -107,9 +102,9 @@ exports.updateBranch = asyncHandler(async (req, res) => {
   const dataToUpdate = { name, address, phone, email, isActive, stockIncluded };
 
   if (currencyCode !== undefined) {
-    const code = (currencyCode || 'INR').trim().toUpperCase();
+    const code = (currencyCode || DEFAULT_CURRENCY).trim().toUpperCase();
     dataToUpdate.currencyCode = code;
-    dataToUpdate.currencySymbol = (currencySymbol && currencySymbol !== '₹') ? currencySymbol : (CURRENCY_SYMBOLS[code] || '₹');
+    dataToUpdate.currencySymbol = (currencySymbol && currencySymbol.trim()) ? currencySymbol : getCurrencySymbol(code);
   } else if (currencySymbol !== undefined) {
     dataToUpdate.currencySymbol = currencySymbol;
   }

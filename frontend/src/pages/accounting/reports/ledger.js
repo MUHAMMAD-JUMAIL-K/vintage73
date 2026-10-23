@@ -24,7 +24,7 @@ export default function LedgerReport() {
     const [branches, setBranches] = useState([]);
     const [selectedBranch, setSelectedBranch] = useState('');
     const [activeBranch, setActiveBranch] = useState(null);
-    const [activeCurrency, setActiveCurrency] = useState({ code: 'INR', symbol: '₹' });
+    const [activeCurrency, setActiveCurrency] = useState({ code: 'AED', symbol: 'AED' });
 
     // Date Filtering (Default to current month)
     const date = new Date();
@@ -92,7 +92,7 @@ export default function LedgerReport() {
                     setLedgerInfo(res.data.ledger);
                     setTransactions(res.data.statement || []);
                     setActiveBranch(res.data.branch || null);
-                    setActiveCurrency(res.data.currency || { code: 'INR', symbol: '₹' });
+                    setActiveCurrency(res.data.currency || { code: 'AED', symbol: 'AED' });
                 } catch (err) {
                     console.error(err);
                     toast.error('Failed to load Ledger Report');
@@ -125,7 +125,7 @@ export default function LedgerReport() {
             setLedgerInfo(res.data.ledger);
             setTransactions(res.data.statement || []);
             setActiveBranch(res.data.branch || null);
-            setActiveCurrency(res.data.currency || { code: 'INR', symbol: '₹' });
+            setActiveCurrency(res.data.currency || { code: 'AED', symbol: 'AED' });
         } catch (err) {
             console.error(err);
             toast.error('Failed to load Ledger Report');
@@ -171,7 +171,7 @@ export default function LedgerReport() {
             : openingBal;
 
         const branchLabel = activeBranch ? activeBranch.name : 'All Branches (Consolidated)';
-        const currLabel = activeCurrency?.code || 'INR';
+        const currLabel = activeCurrency?.code || 'AED';
 
         const csvContent = [
             ['Report', `${ledgerInfo?.name || 'General Ledger'} Statement`],
@@ -289,7 +289,7 @@ export default function LedgerReport() {
                             <option value="">All Branches (Consolidated)</option>
                             {branches.map(b => (
                                 <option key={b.id} value={b.id}>
-                                    {b.name} ({b.currencyCode || 'INR'})
+                                    {b.name} ({b.currencyCode || 'AED'})
                                 </option>
                             ))}
                         </select>
@@ -380,7 +380,7 @@ export default function LedgerReport() {
                                     {activeBranch ? `Branch: ${activeBranch.name}` : 'All Branches (Consolidated)'}
                                 </span>
                                 <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                    Currency: {activeCurrency?.code || 'INR'} ({activeCurrency?.symbol || '₹'})
+                                    Currency: {activeCurrency?.code || 'AED'} ({activeCurrency?.symbol || 'AED'})
                                 </span>
                             </div>
                             <p className="text-xs text-slate-500 font-semibold mt-1 uppercase tracking-wider">

@@ -186,7 +186,7 @@ export default function Products() {
     if (activeBranchObj?.currencyCode) {
       return getCurrencySymbol(activeBranchObj.currencyCode);
     }
-    return companyProfile?.currencySymbol || getCurrencySymbol(companyProfile?.currencyCode) || '₹';
+    return companyProfile?.currencySymbol || getCurrencySymbol(companyProfile?.currencyCode || 'AED');
   }, [activeBranchObj, companyProfile]);
 
   const fetchProducts = async (targetBranch) => {

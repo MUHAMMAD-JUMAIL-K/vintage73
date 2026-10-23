@@ -99,9 +99,9 @@ exports.getLedgers = asyncHandler(async (req, res) => {
       branch: activeBranch,
       isConsolidated,
       currency: activeBranch ? {
-        code: activeBranch.currencyCode || 'INR',
-        symbol: activeBranch.currencySymbol || '₹'
-      } : { code: 'INR', symbol: '₹' }
+        code: activeBranch.currencyCode || 'AED',
+        symbol: activeBranch.currencySymbol || (activeBranch.currencyCode === 'INR' ? '₹' : 'AED')
+      } : { code: 'AED', symbol: 'AED' }
     });
   }
 
@@ -745,7 +745,14 @@ exports.bulkPostTransactions = asyncHandler(async (req, res) => {
 // ==================== DASHBOARD ====================
 
 exports.getDashboardStats = asyncHandler(async (req, res) => {
-  const { startDate, endDate } = req.query;
+  const { startDate, endDate, branchId: requestedBranchId } = req.query;
+  const { branchId, isConsolidated, activeBranch, branchFilter } = await resolveBranchFilter(req, requestedBranchId);
+
+  const activeCurrency = activeBranch ? {
+    code: activeBranch.currencyCode || 'AED',
+    symbol: activeBranch.currencySymbol || (activeBranch.currencyCode === 'INR' ? '₹' : 'AED')
+  } : { code: 'AED', symbol: 'AED' };
+
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
@@ -775,7 +782,8 @@ exports.getDashboardStats = asyncHandler(async (req, res) => {
   const todayTransactions = await prisma.voucher.count({
     where: {
       date: dateFilter || { gte: today },
-      status: 'POSTED'
+      status: 'POSTED',
+      ...branchFilter
     }
   });
 
@@ -783,6 +791,7 @@ exports.getDashboardStats = asyncHandler(async (req, res) => {
   const pendingVouchers = await prisma.voucher.count({
     where: { 
       status: 'DRAFT',
+      ...branchFilter,
       ...(dateFilter ? { date: dateFilter } : {})
     }
   });
@@ -799,6 +808,7 @@ exports.getDashboardStats = asyncHandler(async (req, res) => {
       where: { 
         voucher: { 
           status: 'POSTED',
+          ...branchFilter,
           ...(dateFilter ? { date: dateFilter } : {})
         } 
       }
@@ -809,6 +819,7 @@ exports.getDashboardStats = asyncHandler(async (req, res) => {
       where: { 
         voucher: { 
           status: 'POSTED',
+          ...branchFilter,
           ...(dateFilter ? { date: dateFilter } : {})
         } 
       }
@@ -863,7 +874,11 @@ exports.getDashboardStats = asyncHandler(async (req, res) => {
 
   const monthlyStatsRaw = await prisma.journalEntry.findMany({
     where: {
-      voucher: { status: 'POSTED', date: { gte: sixMonthsAgo } },
+      voucher: {
+        status: 'POSTED',
+        date: { gte: sixMonthsAgo },
+        ...branchFilter
+      },
       OR: [
         { debitLedger: { group: { groupType: 'EXPENSES' } } },
         { creditLedger: { group: { groupType: 'INCOME' } } }
@@ -903,7 +918,10 @@ exports.getDashboardStats = asyncHandler(async (req, res) => {
   const voucherCounts = await prisma.voucher.groupBy({
     by: ['status'],
     _count: { id: true },
-    ...(dateFilter ? { where: { date: dateFilter } } : {})
+    where: {
+      ...branchFilter,
+      ...(dateFilter ? { date: dateFilter } : {})
+    }
   });
   
   const voucherStatusBreakdown = {
@@ -919,7 +937,10 @@ exports.getDashboardStats = asyncHandler(async (req, res) => {
 
   const recentActivity = await prisma.voucher.findMany({
     take: 5,
-    where: dateFilter ? { date: dateFilter } : undefined,
+    where: {
+      ...branchFilter,
+      ...(dateFilter ? { date: dateFilter } : {})
+    },
     orderBy: { createdAt: 'desc' },
     select: {
       id: true,
@@ -932,6 +953,9 @@ exports.getDashboardStats = asyncHandler(async (req, res) => {
   });
 
   res.json({
+    branch: activeBranch,
+    isConsolidated,
+    currency: activeCurrency,
     summary: {
       totalAccounts,
       todayTransactions,

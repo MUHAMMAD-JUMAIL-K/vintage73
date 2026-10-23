@@ -199,6 +199,8 @@ export default function ContraEntry() {
     const selectedFromAccount = ledgers.find(l => l.id == formData.fromAccount);
     const selectedToAccount = ledgers.find(l => l.id == formData.toAccount);
 
+    const activeBranchCurrency = (formData.branchId ? branches.find(b => b.id.toString() === formData.branchId.toString()) : (user?.branchId ? branches.find(b => b.id === user.branchId) : null)) || 'AED';
+
     return (
         <div className="w-full space-y-6 pb-12 animate-in fade-in duration-300">
             {printVoucher && (
@@ -307,7 +309,7 @@ export default function ContraEntry() {
                                             <div className="flex items-center gap-2">
                                                 <div className={`w-2 h-2 rounded-full ${selectedFromAccount.currentBalance >= 0 ? 'bg-primary' : 'bg-red-500'}`} />
                                                 <span className="text-[11px] font-semibold text-slate-600">
-                                                    Bal: {formatCurrency(Math.abs(selectedFromAccount.currentBalance), 'INR')} {selectedFromAccount.currentBalance >= 0 ? 'Dr' : 'Cr'}
+                                                    Bal: {formatCurrency(Math.abs(selectedFromAccount.currentBalance), activeBranchCurrency)} {selectedFromAccount.currentBalance >= 0 ? 'Dr' : 'Cr'}
                                                 </span>
                                             </div>
                                         )}
@@ -334,7 +336,7 @@ export default function ContraEntry() {
                                             <div className="flex items-center gap-2">
                                                 <div className={`w-2 h-2 rounded-full ${selectedToAccount.currentBalance >= 0 ? 'bg-primary' : 'bg-red-500'}`} />
                                                 <span className="text-[11px] font-semibold text-slate-600">
-                                                    Bal: {formatCurrency(Math.abs(selectedToAccount.currentBalance), 'INR')} {selectedToAccount.currentBalance >= 0 ? 'Dr' : 'Cr'}
+                                                    Bal: {formatCurrency(Math.abs(selectedToAccount.currentBalance), activeBranchCurrency)} {selectedToAccount.currentBalance >= 0 ? 'Dr' : 'Cr'}
                                                 </span>
                                             </div>
                                         )}
@@ -507,7 +509,7 @@ export default function ContraEntry() {
                                                     <td className="px-6 py-4 text-right">
                                                         <div className="flex flex-col items-end">
                                                             <span className="text-sm font-medium text-slate-900 tabular-nums">
-                                                                {formatCurrency(v.totalAmount, v.branch || 'INR')}
+                                                                {formatCurrency(v.totalAmount, v.branch || 'AED')}
                                                             </span>
                                                             {v.status === 'CANCELLED' ? (
                                                                 <span className="mt-1 px-1.5 py-0.5 rounded bg-red-100 text-red-600 text-[8px] font-medium uppercase tracking-widest ring-1 ring-red-200">Reversed</span>
@@ -572,7 +574,7 @@ export default function ContraEntry() {
                     { label: 'Voucher Date', value: formData.date },
                     { label: 'Transfer From', value: ledgers.find(l => l.id == formData.fromAccount)?.name || 'N/A' },
                     { label: 'Transfer To', value: ledgers.find(l => l.id == formData.toAccount)?.name || 'N/A' },
-                    { label: 'Amount', value: formatCurrency(formData.amount || 0, 'INR') }
+                    { label: 'Amount', value: formatCurrency(formData.amount || 0, activeBranchCurrency) }
                 ]}
             />
         </div>

@@ -155,12 +155,12 @@ export default function VoucherPrint({ voucher, onClose }) {
                     {/* Amount Box */}
                     <div className="mt-6 flex border border-slate-900 overflow-hidden">
                         <div className="flex-grow p-3 bg-slate-50 flex flex-col justify-center">
-                            <span className="text-[8px] font-medium uppercase text-slate-400 block mb-1">Amount in words ({voucher.branch?.currencyCode || 'INR'})</span>
-                            <p className="text-[11px] font-medium italic leading-tight uppercase">{voucher.branch?.currencyCode || 'Rupees'} {numberToWords(Math.round(voucher.totalAmount))}</p>
+                            <span className="text-[8px] font-medium uppercase text-slate-400 block mb-1">Amount in words ({voucher.branch?.currencyCode || 'AED'})</span>
+                            <p className="text-[11px] font-medium italic leading-tight uppercase">{voucher.branch?.currencyCode === 'INR' ? 'Rupees' : (voucher.branch?.currencyCode || 'Dirhams')} {numberToWords(Math.round(voucher.totalAmount))}</p>
                         </div>
                         <div className="w-1/4 p-3 border-l border-slate-900 flex flex-col justify-center items-end bg-white">
                             <span className="text-[8px] font-extrabold uppercase text-slate-400 block mb-1">Total Amount</span>
-                            <p className="text-xl font-extrabold tabular-nums tracking-tight">{formatCurrency(voucher.totalAmount, voucher.branch || 'INR')}</p>
+                            <p className="text-xl font-extrabold tabular-nums tracking-tight">{formatCurrency(voucher.totalAmount, voucher.branch || 'AED')}</p>
                         </div>
                     </div>
                 </div>

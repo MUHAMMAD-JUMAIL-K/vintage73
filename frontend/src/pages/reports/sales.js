@@ -110,7 +110,9 @@ export default function SalesReport() {
             subTotal: 0,
             totalDiscount: 0,
             totalTax: 0,
-            netSales: 0
+            netSales: 0,
+            totalCost: 0,
+            grossProfit: 0
         }
     });
 
@@ -150,13 +152,13 @@ export default function SalesReport() {
     const activeCurrencyCode = useMemo(() => {
         if (activeBranch?.currencyCode) return activeBranch.currencyCode;
         if (reportData?.currency?.code) return reportData.currency.code;
-        return companyProfile?.currencyCode || 'INR';
+        return companyProfile?.currencyCode || 'AED';
     }, [activeBranch, reportData?.currency, companyProfile]);
 
     const activeCurrencySymbol = useMemo(() => {
         if (activeBranch?.currencySymbol) return activeBranch.currencySymbol;
         if (reportData?.currency?.symbol) return reportData.currency.symbol;
-        return companyProfile?.currencySymbol || getCurrencySymbol(activeCurrencyCode) || '₹';
+        return companyProfile?.currencySymbol || getCurrencySymbol(activeCurrencyCode) || (activeCurrencyCode === 'INR' ? '₹' : 'AED');
     }, [activeBranch, reportData?.currency, companyProfile, activeCurrencyCode]);
 
     // Initial setup: User, branches, salesmen, settings
@@ -365,13 +367,15 @@ export default function SalesReport() {
     // Detailed Report Totals (Calculated from filteredDetailed)
     const detailedTotals = useMemo(() => {
         return filteredDetailed.reduce((acc, row) => {
-            acc.totalQty += (row.quantity || 0);
-            acc.totalSales += (row.lineTotal || 0);
-            if (row.lineCost !== null && row.lineCost !== undefined) {
-                acc.totalCost += row.lineCost;
-            }
-            if (row.profit !== null && row.profit !== undefined) {
-                acc.totalProfit += row.profit;
+            if (row.status !== 'Void') {
+                acc.totalQty += (row.quantity || 0);
+                acc.totalSales += (row.lineTotal || 0);
+                if (row.lineCost !== null && row.lineCost !== undefined) {
+                    acc.totalCost += row.lineCost;
+                }
+                if (row.profit !== null && row.profit !== undefined) {
+                    acc.totalProfit += row.profit;
+                }
             }
             return acc;
         }, { totalQty: 0, totalSales: 0, totalCost: 0, totalProfit: 0 });
@@ -384,7 +388,7 @@ export default function SalesReport() {
 
         if (activeTab === 'summary') {
             csvRows = [
-                ['Invoice #', 'Date', 'Customer', 'Phone', 'Salesman', 'Payment Methods', `Subtotal (${activeCurrencyCode})`, `Discount (${activeCurrencyCode})`, `Tax (${activeCurrencyCode})`, `Total Amount (${activeCurrencyCode})`, 'Status'],
+                ['Invoice #', 'Date', 'Customer', 'Phone', 'Salesman', 'Payment Methods', `Subtotal (${activeCurrencyCode})`, `Discount (${activeCurrencyCode})`, `Tax (${activeCurrencyCode})`, `Total Amount (${activeCurrencyCode})`, `Purchase Cost (${activeCurrencyCode})`, `Gross Profit (${activeCurrencyCode})`, 'Status'],
                 ...filteredSummary.map(s => [
                     `"${s.invoiceNumber}"`,
                     `"${formatDisplayDate(s.saleDate)}"`,
@@ -392,16 +396,18 @@ export default function SalesReport() {
                     `"${s.customer?.phone || '—'}"`,
                     `"${s.salesman?.name || 'System'}"`,
                     `"${s.paymentMethodDisplay || 'Cash'}"`,
-                    s.subTotal,
+                    s.productTotal || s.subTotal,
                     s.discount,
                     s.taxAmount,
                     s.totalAmount,
+                    s.totalCost ?? 0,
+                    s.grossProfit ?? 0,
                     `"${s.status === 'cancelled' ? 'Void' : (s.isReturn ? 'Return' : 'Active')}"`
                 ])
             ];
         } else if (activeTab === 'detailed') {
             csvRows = [
-                ['Invoice #', 'Date', 'Customer', 'Phone', 'Salesman', 'Payment Method', 'Product Name', 'Product Type', 'Gender', 'Size', 'Barcode', 'Quantity', `Unit Price (${activeCurrencyCode})`, `Discount (${activeCurrencyCode})`, `Tax (${activeCurrencyCode})`, `Line Total (${activeCurrencyCode})`, `Purchase Cost (${activeCurrencyCode})`, `Profit (${activeCurrencyCode})`, 'Status'],
+                ['Invoice #', 'Date', 'Customer', 'Phone', 'Salesman', 'Payment Method', 'Product Name', 'Product Type', 'Gender', 'Size', 'Barcode', 'Quantity', `Selling Price (${activeCurrencyCode})`, `Discount (${activeCurrencyCode})`, `Tax (${activeCurrencyCode})`, `Line Total (${activeCurrencyCode})`, `Purchase Price (${activeCurrencyCode})`, `Gross Profit (${activeCurrencyCode})`, 'Status'],
                 ...filteredDetailed.map(row => [
                     `"${row.invoiceNumber}"`,
                     `"${formatDisplayDate(row.saleDate)}"`,
@@ -1243,7 +1249,7 @@ export default function SalesReport() {
             {activeTab === 'summary' && (
                 <div className="space-y-4">
                     {/* Summary Metric Header Pills */}
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
                         <div className="bg-white p-3 rounded-xl border border-slate-100 shadow-xs">
                             <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Invoices</span>
                             <p className="text-base font-extrabold text-slate-900 mt-0.5">{reportData.summaryTotals.totalInvoices}</p>
@@ -1257,23 +1263,29 @@ export default function SalesReport() {
                             <p className="text-base font-extrabold text-slate-900 mt-0.5">{formatCurrency(reportData.summaryTotals.subTotal, activeCurrencyCode)}</p>
                         </div>
                         <div className="bg-white p-3 rounded-xl border border-slate-100 shadow-xs">
-                            <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Discount</span>
-                            <p className="text-base font-extrabold text-slate-900 mt-0.5">{formatCurrency(reportData.summaryTotals.totalDiscount, activeCurrencyCode)}</p>
-                        </div>
-                        <div className="bg-white p-3 rounded-xl border border-slate-100 shadow-xs">
                             <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Tax</span>
                             <p className="text-base font-extrabold text-slate-900 mt-0.5">{formatCurrency(reportData.summaryTotals.totalTax, activeCurrencyCode)}</p>
                         </div>
                         <div className="bg-white p-3 rounded-xl border border-slate-100 shadow-xs">
                             <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Net Sales Total</span>
-                            <p className="text-base font-black text-emerald-600 mt-0.5">{formatCurrency(reportData.summaryTotals.netSales, activeCurrencyCode)}</p>
+                            <p className="text-base font-black text-slate-900 mt-0.5">{formatCurrency(reportData.summaryTotals.netSales, activeCurrencyCode)}</p>
+                        </div>
+                        <div className="bg-white p-3 rounded-xl border border-slate-100 shadow-xs">
+                            <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Total Purchase Cost</span>
+                            <p className="text-base font-extrabold text-slate-700 mt-0.5">{formatCurrency(reportData.summaryTotals.totalCost || 0, activeCurrencyCode)}</p>
+                        </div>
+                        <div className="bg-white p-3 rounded-xl border border-slate-100 shadow-xs">
+                            <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Gross Profit</span>
+                            <p className={`text-base font-black mt-0.5 ${(reportData.summaryTotals.grossProfit || 0) >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                                {formatCurrency(reportData.summaryTotals.grossProfit || 0, activeCurrencyCode)}
+                            </p>
                         </div>
                     </div>
 
                     {/* Invoice Table Container */}
                     <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
                         <div className="overflow-x-auto">
-                            <table className="w-full text-xs text-left" style={{ minWidth: '1000px' }}>
+                            <table className="w-full text-xs text-left" style={{ minWidth: '1100px' }}>
                                 <thead>
                                     <tr className="bg-slate-50/75 text-slate-500 font-bold uppercase text-[10px] tracking-wider border-b border-slate-200">
                                         <th className="p-3.5">Invoice #</th>
@@ -1285,6 +1297,8 @@ export default function SalesReport() {
                                         <th className="p-3.5 text-right">Discount</th>
                                         <th className="p-3.5 text-right">Tax</th>
                                         <th className="p-3.5 text-right">Total</th>
+                                        <th className="p-3.5 text-right">Cost</th>
+                                        <th className="p-3.5 text-right">Gross Profit</th>
                                         <th className="p-3.5 text-center">Status</th>
                                         <th className="p-3.5 text-center">Actions</th>
                                     </tr>
@@ -1292,7 +1306,7 @@ export default function SalesReport() {
                                 <tbody className="divide-y divide-slate-100">
                                     {paginatedSummary.length === 0 ? (
                                         <tr>
-                                            <td colSpan="11" className="text-center py-12 text-slate-400 italic">
+                                            <td colSpan="13" className="text-center py-12 text-slate-400 italic">
                                                 {loading ? 'Fetching sales summary records...' : 'No invoices found matching criteria'}
                                             </td>
                                         </tr>
@@ -1330,7 +1344,7 @@ export default function SalesReport() {
                                                     </div>
                                                 </td>
                                                 <td className="p-3.5 text-right font-medium text-slate-700 tabular-nums">
-                                                    {formatCurrency(sale.subTotal, activeCurrencyCode)}
+                                                    {formatCurrency(sale.productTotal || sale.subTotal, activeCurrencyCode)}
                                                 </td>
                                                 <td className="p-3.5 text-right font-medium text-amber-600 tabular-nums">
                                                     {sale.discount > 0 ? formatCurrency(sale.discount, activeCurrencyCode) : '—'}
@@ -1340,6 +1354,12 @@ export default function SalesReport() {
                                                 </td>
                                                 <td className="p-3.5 text-right font-extrabold text-slate-900 tabular-nums">
                                                     {formatCurrency(sale.totalAmount, activeCurrencyCode)}
+                                                </td>
+                                                <td className="p-3.5 text-right font-medium text-slate-600 tabular-nums">
+                                                    {formatCurrency(sale.totalCost || 0, activeCurrencyCode)}
+                                                </td>
+                                                <td className={`p-3.5 text-right font-bold tabular-nums ${(sale.grossProfit || 0) >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                                                    {formatCurrency(sale.grossProfit || 0, activeCurrencyCode)}
                                                 </td>
                                                 <td className="p-3.5 text-center whitespace-nowrap">
                                                     <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider ${
@@ -1419,7 +1439,7 @@ export default function SalesReport() {
             {activeTab === 'detailed' && (
                 <div className="space-y-4">
                     {/* Detailed Metric Header Pills */}
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
                         <div className="bg-white p-3 rounded-xl border border-slate-100 shadow-xs">
                             <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Total Sales Lines</span>
                             <p className="text-base font-extrabold text-slate-900 mt-0.5">{filteredDetailed.length}</p>
@@ -1433,8 +1453,14 @@ export default function SalesReport() {
                             <p className="text-base font-extrabold text-slate-900 mt-0.5">{formatCurrency(detailedTotals.totalSales, activeCurrencyCode)}</p>
                         </div>
                         <div className="bg-white p-3 rounded-xl border border-slate-100 shadow-xs">
-                            <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Estimated Profit</span>
-                            <p className="text-base font-extrabold text-emerald-600 mt-0.5">{formatCurrency(detailedTotals.totalProfit, activeCurrencyCode)}</p>
+                            <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Total Purchase Cost</span>
+                            <p className="text-base font-extrabold text-slate-700 mt-0.5">{formatCurrency(detailedTotals.totalCost, activeCurrencyCode)}</p>
+                        </div>
+                        <div className="bg-white p-3 rounded-xl border border-slate-100 shadow-xs">
+                            <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Gross Profit</span>
+                            <p className={`text-base font-black mt-0.5 ${detailedTotals.totalProfit >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                                {formatCurrency(detailedTotals.totalProfit, activeCurrencyCode)}
+                            </p>
                         </div>
                     </div>
 
@@ -1457,8 +1483,8 @@ export default function SalesReport() {
                                         <th className="p-3 text-right">Discount</th>
                                         <th className="p-3 text-right">Tax</th>
                                         <th className="p-3 text-right">Line Total</th>
-                                        <th className="p-3 text-right">Unit Cost</th>
-                                        <th className="p-3 text-right">Line Profit</th>
+                                        <th className="p-3 text-right">Purchase Price</th>
+                                        <th className="p-3 text-right">Gross Profit</th>
                                         <th className="p-3">Payment</th>
                                     </tr>
                                 </thead>
@@ -2235,144 +2261,212 @@ export default function SalesReport() {
             {/* ========================================================================= */}
             {/* INVOICE DETAIL VIEW MODAL */}
             {/* ========================================================================= */}
-            {selectedSale && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm" onClick={() => setSelectedSale(null)}>
-                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-xl overflow-hidden animate-in fade-in duration-200 border border-slate-100" onClick={e => e.stopPropagation()}>
-                        {/* Header */}
-                        <div className="px-6 py-4 border-b flex justify-between items-center bg-slate-50/60">
-                            <div>
-                                <span className="text-[10px] font-bold text-primary uppercase tracking-wider">Invoice Details</span>
-                                <h3 className="text-lg font-bold text-slate-900">#{selectedSale.invoiceNumber}</h3>
-                            </div>
-                            <button onClick={() => setSelectedSale(null)} className="p-1.5 rounded-lg bg-white border border-slate-200 text-slate-400 hover:text-rose-500 transition-colors">
-                                <FiX size={18} />
-                            </button>
-                        </div>
+            {selectedSale && (() => {
+                const modalCurrency = selectedSale.currencyCode || selectedSale.branch?.currencyCode || activeCurrencyCode;
 
-                        {/* Body */}
-                        <div className="p-6 overflow-y-auto max-h-[60vh] space-y-5">
-                            {/* Meta Grid */}
-                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 rounded-xl bg-slate-50/80 border border-slate-100 text-xs">
-                                <div>
-                                    <span className="text-[10px] uppercase font-bold text-slate-400 block">Date</span>
-                                    <span className="font-semibold text-slate-800">{formatDisplayDate(selectedSale.saleDate)}</span>
-                                </div>
-                                <div>
-                                    <span className="text-[10px] uppercase font-bold text-slate-400 block">Customer</span>
-                                    <span className="font-semibold text-slate-800">{selectedSale.customer?.name || 'Walk-in Profile'}</span>
-                                </div>
-                                <div>
-                                    <span className="text-[10px] uppercase font-bold text-slate-400 block">Salesman</span>
-                                    <span className="font-semibold text-slate-800">{selectedSale.salesman?.name || 'System'}</span>
-                                </div>
-                                <div>
-                                    <span className="text-[10px] uppercase font-bold text-slate-400 block">Status</span>
-                                    <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase ${
-                                        selectedSale.status === 'cancelled'
-                                            ? 'bg-rose-100 text-rose-700'
-                                            : (selectedSale.isReturn ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700')
-                                    }`}>
-                                        {selectedSale.status === 'cancelled' ? 'Void' : (selectedSale.isReturn ? 'Return' : 'Active')}
-                                    </span>
-                                </div>
-                            </div>
+                // A. Product Total Before Bill Discount and GST: Sum of applicable unit selling prices × quantities
+                const modalProductTotal = (selectedSale.items && selectedSale.items.length > 0)
+                    ? selectedSale.items.reduce((sum, item) => sum + ((parseFloat(item.unitPrice) || 0) * (parseFloat(item.quantity) || 1)), 0)
+                    : (parseFloat(selectedSale.productTotal) || ((parseFloat(selectedSale.subTotal) || 0) + (parseFloat(selectedSale.discount) || 0) + (parseFloat(selectedSale.voucherDiscount) || 0)));
 
-                            {/* Payment Breakdown */}
-                            <div className="p-3 bg-slate-50/60 rounded-xl border border-slate-100">
-                                <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider block mb-1">
-                                    Payment Method Breakdown
-                                </span>
-                                <div className="flex flex-wrap gap-2">
-                                    {selectedSale.payments && selectedSale.payments.length > 0 ? (
-                                        selectedSale.payments.map((p, idx) => (
-                                            <span key={idx} className="px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-xs font-semibold text-slate-800 flex items-center gap-1.5">
-                                                <span className="w-2 h-2 rounded-full bg-primary" style={{ backgroundColor: theme.primaryColor }}></span>
-                                                {p.method}: <strong className="text-slate-900">{formatCurrency(p.amount, activeCurrencyCode)}</strong>
-                                            </span>
-                                        ))
-                                    ) : (
-                                        <span className="text-xs font-semibold text-slate-700">{selectedSale.paymentMethodDisplay || 'Cash'}</span>
-                                    )}
+                // B. Applicable Discount: The actual discount recorded for the sale
+                const billDiscount = parseFloat(selectedSale.discount) || 0;
+                const voucherDiscount = parseFloat(selectedSale.voucherDiscount) || 0;
+                const itemDiscountsSum = selectedSale.items?.reduce((sum, item) => sum + ((parseFloat(item.discountAmount) || 0) * (parseFloat(item.quantity) || 1)), 0) || 0;
+                const modalDiscount = Math.max(billDiscount, itemDiscountsSum) + voucherDiscount;
+
+                // C. Taxable Amount: Product Total − Applicable Discount (authoritative backend recorded taxable base in subTotal)
+                const modalTaxableAmount = (selectedSale.subTotal !== undefined && selectedSale.subTotal !== null)
+                    ? parseFloat(selectedSale.subTotal)
+                    : Math.max(0, modalProductTotal - modalDiscount);
+
+                // D. GST / Tax Amount
+                const modalTaxAmount = parseFloat(selectedSale.taxAmount) || 0;
+
+                // E. Additional Charges
+                const modalDeliveryCharge = parseFloat(selectedSale.deliveryCharge) || 0;
+                const modalRoundOff = parseFloat(selectedSale.roundOffAmount) || 0;
+                const modalAdvanceUsed = parseFloat(selectedSale.advanceUsed) || 0;
+
+                // F. Total Payable (authoritative total amount)
+                const modalTotalPayable = parseFloat(selectedSale.totalAmount) || 0;
+
+                return (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm" onClick={() => setSelectedSale(null)}>
+                        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-xl overflow-hidden animate-in fade-in duration-200 border border-slate-100" onClick={e => e.stopPropagation()}>
+                            {/* Header */}
+                            <div className="px-6 py-4 border-b flex justify-between items-center bg-slate-50/60">
+                                <div>
+                                    <span className="text-[10px] font-bold text-primary uppercase tracking-wider">Invoice Details</span>
+                                    <h3 className="text-lg font-bold text-slate-900">#{selectedSale.invoiceNumber}</h3>
                                 </div>
+                                <button onClick={() => setSelectedSale(null)} className="p-1.5 rounded-lg bg-white border border-slate-200 text-slate-400 hover:text-rose-500 transition-colors">
+                                    <FiX size={18} />
+                                </button>
                             </div>
 
-                            {/* Items List */}
-                            <div>
-                                <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider block mb-2">
-                                    Sold Line Items ({selectedSale.items?.length || 0})
-                                </span>
-                                <table className="w-full text-xs">
-                                    <thead>
-                                        <tr className="border-b border-slate-100 text-[10px] uppercase font-bold text-slate-400">
-                                            <th className="py-2 text-left">Product</th>
-                                            <th className="py-2 text-left">Type / Size</th>
-                                            <th className="py-2 text-center">Qty</th>
-                                            <th className="py-2 text-right">Price</th>
-                                            <th className="py-2 text-right">Total</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-slate-50">
-                                        {selectedSale.items?.map((item, idx) => (
-                                            <tr key={`item-${item.id}-${idx}`}>
-                                                <td className="py-2.5 font-semibold text-slate-800">{item.productName}</td>
-                                                <td className="py-2.5 text-slate-500">
-                                                    {item.productTypeName !== '—' && <span className="font-medium mr-1.5">{item.productTypeName}</span>}
-                                                    {item.size && item.size !== '—' && (
-                                                        <span className="px-1.5 py-0.5 rounded bg-slate-100 font-bold text-[10px] text-slate-700">
-                                                             {item.size}
-                                                        </span>
-                                                    )}
-                                                </td>
-                                                <td className="py-2.5 text-center font-bold text-slate-800">{item.quantity}</td>
-                                                <td className="py-2.5 text-right font-medium text-slate-700">{formatCurrency(item.unitPrice, activeCurrencyCode)}</td>
-                                                <td className="py-2.5 text-right font-bold text-slate-900">{formatCurrency(item.total, activeCurrencyCode)}</td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-
-                            {/* Financial Summary */}
-                            <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 space-y-1.5 text-xs">
-                                <div className="flex justify-between text-slate-600">
-                                    <span>Subtotal:</span>
-                                    <span className="font-medium">{formatCurrency(selectedSale.subTotal, activeCurrencyCode)}</span>
-                                </div>
-                                {selectedSale.discount > 0 && (
-                                    <div className="flex justify-between text-amber-600">
-                                        <span>Discount:</span>
-                                        <span className="font-medium">-{formatCurrency(selectedSale.discount, activeCurrencyCode)}</span>
+                            {/* Body */}
+                            <div className="p-6 overflow-y-auto max-h-[60vh] space-y-5">
+                                {/* Meta Grid */}
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 rounded-xl bg-slate-50/80 border border-slate-100 text-xs">
+                                    <div>
+                                        <span className="text-[10px] uppercase font-bold text-slate-400 block">Date</span>
+                                        <span className="font-semibold text-slate-800">{formatDisplayDate(selectedSale.saleDate)}</span>
                                     </div>
-                                )}
-                                <div className="flex justify-between text-slate-600">
-                                    <span>Tax Amount:</span>
-                                    <span className="font-medium">{formatCurrency(selectedSale.taxAmount, activeCurrencyCode)}</span>
+                                    <div>
+                                        <span className="text-[10px] uppercase font-bold text-slate-400 block">Customer</span>
+                                        <span className="font-semibold text-slate-800">{selectedSale.customer?.name || 'Walk-in Profile'}</span>
+                                    </div>
+                                    <div>
+                                        <span className="text-[10px] uppercase font-bold text-slate-400 block">Salesman</span>
+                                        <span className="font-semibold text-slate-800">{selectedSale.salesman?.name || 'System'}</span>
+                                    </div>
+                                    <div>
+                                        <span className="text-[10px] uppercase font-bold text-slate-400 block">Status</span>
+                                        <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase ${
+                                            selectedSale.status === 'cancelled'
+                                                ? 'bg-rose-100 text-rose-700'
+                                                : (selectedSale.isReturn ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700')
+                                        }`}>
+                                            {selectedSale.status === 'cancelled' ? 'Void' : (selectedSale.isReturn ? 'Return' : 'Active')}
+                                        </span>
+                                    </div>
                                 </div>
-                                <div className="flex justify-between text-base font-black text-slate-900 border-t border-slate-200 pt-2 mt-2">
-                                    <span>Total Payable:</span>
-                                    <span className="text-primary" style={{ color: theme.primaryColor }}>{formatCurrency(selectedSale.totalAmount, activeCurrencyCode)}</span>
+
+                                {/* Payment Breakdown */}
+                                <div className="p-3 bg-slate-50/60 rounded-xl border border-slate-100">
+                                    <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider block mb-1">
+                                        Payment Method Breakdown
+                                    </span>
+                                    <div className="flex flex-wrap gap-2">
+                                        {selectedSale.payments && selectedSale.payments.length > 0 ? (
+                                            selectedSale.payments.map((p, idx) => (
+                                                <span key={idx} className="px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-xs font-semibold text-slate-800 flex items-center gap-1.5">
+                                                    <span className="w-2 h-2 rounded-full bg-primary" style={{ backgroundColor: theme.primaryColor }}></span>
+                                                    {p.method}: <strong className="text-slate-900">{formatCurrency(p.amount, modalCurrency)}</strong>
+                                                </span>
+                                            ))
+                                        ) : (
+                                            <span className="text-xs font-semibold text-slate-700">{selectedSale.paymentMethodDisplay || 'Cash'}</span>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* Items List */}
+                                <div>
+                                    <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider block mb-2">
+                                        Sold Line Items ({selectedSale.items?.length || 0})
+                                    </span>
+                                    <table className="w-full text-xs">
+                                        <thead>
+                                            <tr className="border-b border-slate-100 text-[10px] uppercase font-bold text-slate-400">
+                                                <th className="py-2 text-left">Product</th>
+                                                <th className="py-2 text-left">Type / Size</th>
+                                                <th className="py-2 text-center">Qty</th>
+                                                <th className="py-2 text-right">Price</th>
+                                                <th className="py-2 text-right">Total</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-slate-50">
+                                            {selectedSale.items?.map((item, idx) => {
+                                                const itemUnitPrice = parseFloat(item.unitPrice) || 0;
+                                                const itemQty = parseFloat(item.quantity) || 1;
+                                                const lineTotal = itemUnitPrice * itemQty;
+                                                return (
+                                                    <tr key={`item-${item.id}-${idx}`}>
+                                                        <td className="py-2.5 font-semibold text-slate-800">{item.productName}</td>
+                                                        <td className="py-2.5 text-slate-500">
+                                                            {item.productTypeName !== '—' && <span className="font-medium mr-1.5">{item.productTypeName}</span>}
+                                                            {item.size && item.size !== '—' && (
+                                                                <span className="px-1.5 py-0.5 rounded bg-slate-100 font-bold text-[10px] text-slate-700">
+                                                                     {item.size}
+                                                                </span>
+                                                            )}
+                                                        </td>
+                                                        <td className="py-2.5 text-center font-bold text-slate-800">{itemQty}</td>
+                                                        <td className="py-2.5 text-right font-medium text-slate-700">{formatCurrency(itemUnitPrice, modalCurrency)}</td>
+                                                        <td className="py-2.5 text-right font-bold text-slate-900">{formatCurrency(lineTotal, modalCurrency)}</td>
+                                                    </tr>
+                                                );
+                                            })}
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                {/* Financial Summary */}
+                                <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 space-y-1.5 text-xs">
+                                    <div className="flex justify-between text-slate-600">
+                                        <span>Subtotal:</span>
+                                        <span className="font-semibold text-slate-800">{formatCurrency(modalProductTotal, modalCurrency)}</span>
+                                    </div>
+                                    {modalDiscount > 0 && (
+                                        <div className="flex justify-between text-amber-600">
+                                            <span>Discount:</span>
+                                            <span className="font-medium">-{formatCurrency(modalDiscount, modalCurrency)}</span>
+                                        </div>
+                                    )}
+                                    {modalDiscount > 0 && (
+                                        <div className="flex justify-between text-slate-600 border-t border-slate-200/60 pt-1">
+                                            <span>Taxable Amount:</span>
+                                            <span className="font-medium">{formatCurrency(modalTaxableAmount, modalCurrency)}</span>
+                                        </div>
+                                    )}
+                                    <div className="flex justify-between text-slate-600">
+                                        <span>Tax Amount:</span>
+                                        <span className="font-medium">{formatCurrency(modalTaxAmount, modalCurrency)}</span>
+                                    </div>
+                                    {modalDeliveryCharge > 0 && (
+                                        <div className="flex justify-between text-slate-600">
+                                            <span>Delivery Charge:</span>
+                                            <span className="font-medium">+{formatCurrency(modalDeliveryCharge, modalCurrency)}</span>
+                                        </div>
+                                    )}
+                                    {Math.abs(modalRoundOff) > 0.001 && (
+                                        <div className="flex justify-between text-slate-600">
+                                            <span>Round-off:</span>
+                                            <span className="font-medium">{modalRoundOff > 0 ? '+' : ''}{formatCurrency(modalRoundOff, modalCurrency)}</span>
+                                        </div>
+                                    )}
+                                    {modalAdvanceUsed > 0 && (
+                                        <div className="flex justify-between text-emerald-600">
+                                            <span>Advance Redeemed:</span>
+                                            <span className="font-medium">-{formatCurrency(modalAdvanceUsed, modalCurrency)}</span>
+                                        </div>
+                                    )}
+                                    <div className="flex justify-between text-base font-black text-slate-900 border-t border-slate-200 pt-2 mt-2">
+                                        <span>Total Payable:</span>
+                                        <span className="text-primary" style={{ color: theme.primaryColor }}>{formatCurrency(modalTotalPayable, modalCurrency)}</span>
+                                    </div>
+                                    <div className="flex justify-between text-slate-600 pt-1">
+                                        <span>Purchase Cost:</span>
+                                        <span className="font-medium text-slate-700">{formatCurrency(selectedSale.totalCost || 0, modalCurrency)}</span>
+                                    </div>
+                                    <div className={`flex justify-between font-bold ${(selectedSale.grossProfit || 0) >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                                        <span>Gross Profit:</span>
+                                        <span className="tabular-nums">{formatCurrency(selectedSale.grossProfit || 0, modalCurrency)}</span>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
 
-                        {/* Footer */}
-                        <div className="px-6 py-4 bg-slate-50/75 border-t border-slate-100 flex justify-between items-center">
-                            <button
-                                onClick={() => setSelectedSale(null)}
-                                className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-200/60 rounded-xl transition-colors"
-                            >
-                                Close
-                            </button>
-                            <button
-                                onClick={() => triggerInvoicePrint(selectedSale)}
-                                className="px-4 py-2 bg-slate-900 hover:bg-black text-white text-xs font-semibold rounded-xl flex items-center gap-1.5 shadow-sm transition-all"
-                            >
-                                <FiPrinter size={14} /> Print Invoice
-                            </button>
+                            {/* Footer */}
+                            <div className="px-6 py-4 bg-slate-50/75 border-t border-slate-100 flex justify-between items-center">
+                                <button
+                                    onClick={() => setSelectedSale(null)}
+                                    className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-200/60 rounded-xl transition-colors"
+                                >
+                                    Close
+                                </button>
+                                <button
+                                    onClick={() => triggerInvoicePrint(selectedSale)}
+                                    className="px-4 py-2 bg-slate-900 hover:bg-black text-white text-xs font-semibold rounded-xl flex items-center gap-1.5 shadow-sm transition-all"
+                                >
+                                    <FiPrinter size={14} /> Print Invoice
+                                </button>
+                            </div>
                         </div>
                     </div>
-                </div>
-            )}
+                );
+            })()}
 
             {/* Hidden Professional Invoice for printing */}
             <div style={{ position: 'absolute', top: '-9999px', left: '-9999px', pointerEvents: 'none' }}>
@@ -2380,7 +2474,7 @@ export default function SalesReport() {
                     ref={componentRef}
                     printData={{ 
                         ...printSale, 
-                        currencyCode: printSale?.branch?.currencyCode || activeCurrencyCode,
+                        currencyCode: printSale?.currencyCode || printSale?.branch?.currencyCode || activeCurrencyCode,
                         currencySymbol: printSale?.branch?.currencySymbol || activeCurrencySymbol,
                         settings: {
                             ...(printSale?.isReturn ? returnSettings : salesSettings),

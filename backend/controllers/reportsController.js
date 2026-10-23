@@ -464,6 +464,74 @@ exports.getStockSummary = asyncHandler(async (req, res) => {
   res.json(report);
 });
 
+// Helper to accurately resolve purchase unit cost for a sold product
+function resolveProductCostPrice(product, item, sale) {
+  if (!product) return 0;
+  const purchaseItems = product.purchaseItems || [];
+  if (purchaseItems.length > 0) {
+    const saleTime = sale ? new Date(sale.saleDate || sale.createdAt).getTime() : Date.now();
+    const itemSize = item?.size && item.size !== '—' ? String(item.size).trim().toLowerCase() : null;
+
+    const validPis = purchaseItems.filter(pi => {
+      const cost = parseFloat(pi.unitCost);
+      return !isNaN(cost) && cost > 0;
+    });
+
+    if (validPis.length > 0) {
+      validPis.sort((a, b) => {
+        const aTime = new Date(a.purchase?.purchaseDate || a.purchase?.createdAt || a.createdAt || 0).getTime();
+        const bTime = new Date(b.purchase?.purchaseDate || b.purchase?.createdAt || b.createdAt || 0).getTime();
+        return bTime - aTime;
+      });
+
+      // 1. Branch + Size match on or before sale
+      if (sale?.branchId && itemSize) {
+        const bSizeMatch = validPis.find(pi => 
+          pi.purchase?.branchId === sale.branchId &&
+          pi.size && String(pi.size).trim().toLowerCase() === itemSize &&
+          new Date(pi.purchase?.purchaseDate || pi.purchase?.createdAt || 0).getTime() <= saleTime + 86400000
+        );
+        if (bSizeMatch) return parseFloat(bSizeMatch.unitCost);
+      }
+
+      // 2. Branch match on or before sale
+      if (sale?.branchId) {
+        const bMatch = validPis.find(pi => 
+          pi.purchase?.branchId === sale.branchId &&
+          new Date(pi.purchase?.purchaseDate || pi.purchase?.createdAt || 0).getTime() <= saleTime + 86400000
+        );
+        if (bMatch) return parseFloat(bMatch.unitCost);
+      }
+
+      // 3. Size match on or before sale across any branch
+      if (itemSize) {
+        const sizeMatch = validPis.find(pi => 
+          pi.size && String(pi.size).trim().toLowerCase() === itemSize &&
+          new Date(pi.purchase?.purchaseDate || pi.purchase?.createdAt || 0).getTime() <= saleTime + 86400000
+        );
+        if (sizeMatch) return parseFloat(sizeMatch.unitCost);
+      }
+
+      // 4. Any purchase on or before sale
+      const priorMatch = validPis.find(pi => 
+        new Date(pi.purchase?.purchaseDate || pi.purchase?.createdAt || 0).getTime() <= saleTime + 86400000
+      );
+      if (priorMatch) return parseFloat(priorMatch.unitCost);
+
+      // 5. Fallback to latest valid purchase item
+      return parseFloat(validPis[0].unitCost);
+    }
+  }
+
+  // Fallback to product.costPrice if set
+  if (product.costPrice !== null && product.costPrice !== undefined) {
+    const cp = parseFloat(product.costPrice);
+    if (!isNaN(cp) && cp > 0) return cp;
+  }
+
+  return 0;
+}
+
 // Comprehensive POS Sales Analytics Report
 // Supplies Dashboard KPIs, Trend Chart data, Payment Breakdown, Top Products,
 // Single-row-per-invoice Summary Report, and Line-item Detailed Report.
@@ -523,6 +591,7 @@ exports.getSalesAnalyticsReport = asyncHandler(async (req, res) => {
     where,
     include: {
       customer: true,
+      branch: true,
       salesman: { select: { id: true, name: true, username: true } },
       payments: true,
       items: {
@@ -530,7 +599,15 @@ exports.getSalesAnalyticsReport = asyncHandler(async (req, res) => {
           product: {
             include: {
               productType: true,
-              category: true
+              category: true,
+              purchaseItems: {
+                include: {
+                  purchase: {
+                    select: { id: true, invoiceNumber: true, purchaseDate: true, branchId: true, createdAt: true }
+                  }
+                },
+                orderBy: { id: 'desc' }
+              }
             }
           }
         }
@@ -590,16 +667,24 @@ exports.getSalesAnalyticsReport = asyncHandler(async (req, res) => {
   const netSales = Number(activeSales.reduce((sum, s) => sum + (parseFloat(s.subTotal) || 0), 0).toFixed(2));
   const avgBillValue = totalInvoices > 0 ? Number((totalSales / totalInvoices).toFixed(2)) : 0;
 
-  // Total cost calculation based on product.costPrice
-  let totalCost = 0;
+  // Total purchase cost calculation (COGS = Purchase Price * Qty)
+  let activeCost = 0;
   activeSales.forEach(s => {
     s.items.forEach(item => {
-      const unitCost = item.product?.costPrice !== null && item.product?.costPrice !== undefined ? parseFloat(item.product.costPrice) : 0;
-      totalCost += unitCost * (item.quantity || 0);
+      const unitCost = resolveProductCostPrice(item.product, item, s);
+      activeCost += unitCost * (item.quantity || 0);
     });
   });
-  totalCost = Number(totalCost.toFixed(2));
 
+  let returnCost = 0;
+  returnSales.forEach(s => {
+    s.items.forEach(item => {
+      const unitCost = resolveProductCostPrice(item.product, item, s);
+      returnCost += unitCost * (item.quantity || 0);
+    });
+  });
+
+  const totalCost = Number(Math.max(0, activeCost - returnCost).toFixed(2));
   const grossProfit = Number((totalSales - totalCost).toFixed(2));
   const profitMargin = totalSales > 0 ? Number(((grossProfit / totalSales) * 100).toFixed(2)) : 0;
 
@@ -711,11 +796,37 @@ exports.getSalesAnalyticsReport = asyncHandler(async (req, res) => {
     const totalQty = s.items.reduce((sum, item) => sum + (item.quantity || 0), 0);
     const effectiveDate = s.createdAt || s.saleDate;
 
+    let invCost = 0;
+    s.items.forEach(item => {
+      const unitCost = resolveProductCostPrice(item.product, item, s);
+      invCost += unitCost * (item.quantity || 0);
+    });
+    invCost = Number(invCost.toFixed(2));
+    const invTotal = s.status !== 'cancelled' ? (parseFloat(s.totalAmount) || 0) : 0;
+    const invProfit = s.status !== 'cancelled' ? Number((invTotal - invCost).toFixed(2)) : 0;
+
+    const productTotal = Number(s.items.reduce((sum, item) => sum + ((parseFloat(item.unitPrice) || 0) * (item.quantity || 1)), 0).toFixed(2));
+    const rawDiscount = Number((parseFloat(s.discount) || 0).toFixed(2));
+    const rawVoucherDiscount = Number((parseFloat(s.voucherDiscount) || 0).toFixed(2));
+    const itemDiscountsSum = Number(s.items.reduce((sum, item) => sum + ((parseFloat(item.discountAmount) || 0) * (item.quantity || 1)), 0).toFixed(2));
+    const effectiveDiscount = Number((Math.max(rawDiscount, itemDiscountsSum) + rawVoucherDiscount).toFixed(2));
+
     return {
       id: s.id,
       invoiceNumber: s.invoiceNumber,
       saleDate: effectiveDate,
       createdAt: s.createdAt,
+      branchId: s.branchId,
+      branch: s.branch ? {
+        id: s.branch.id,
+        name: s.branch.name,
+        currencyCode: s.branch.currencyCode,
+        currencySymbol: s.branch.currencySymbol,
+        taxNumber: s.branch.taxNumber,
+        phone: s.branch.phone,
+        address: s.branch.address,
+        state: s.branch.state
+      } : null,
       customer: s.customer ? {
         id: s.customer.id,
         name: s.customer.name,
@@ -728,10 +839,23 @@ exports.getSalesAnalyticsReport = asyncHandler(async (req, res) => {
       } : { name: 'System' },
       paymentMethodDisplay,
       payments: paymentList,
+      productTotal,
       subTotal: Number((parseFloat(s.subTotal) || 0).toFixed(2)),
-      discount: Number((parseFloat(s.discount) || 0).toFixed(2)),
+      discount: effectiveDiscount > 0 ? effectiveDiscount : rawDiscount,
+      rawDiscount,
+      voucherDiscount: rawVoucherDiscount,
+      voucherCode: s.voucherCode || null,
       taxAmount: Number((parseFloat(s.taxAmount) || 0).toFixed(2)),
       totalAmount: Number((parseFloat(s.totalAmount) || 0).toFixed(2)),
+      deliveryCharge: Number((parseFloat(s.deliveryCharge) || 0).toFixed(2)),
+      hasDeliveryCharge: Boolean(s.hasDeliveryCharge),
+      roundOffAmount: Number((parseFloat(s.roundOffAmount) || 0).toFixed(2)),
+      advanceUsed: Number((parseFloat(s.advanceUsed) || 0).toFixed(2)),
+      currencyCode: s.currencyCode || s.branch?.currencyCode || 'AED',
+      exchangeRate: Number((parseFloat(s.exchangeRate) || 1).toFixed(4)),
+      isTaxInclusive: Boolean(s.isTaxInclusive),
+      totalCost: invCost,
+      grossProfit: invProfit,
       itemCount: s.items.length,
       totalQty,
       status: s.status,
@@ -740,18 +864,30 @@ exports.getSalesAnalyticsReport = asyncHandler(async (req, res) => {
       cancelledAt: s.cancelledAt,
       cancelledBy: s.cancelledBy,
       cancelReason: s.cancelReason,
-      items: s.items.map(i => ({
-        id: i.id,
-        productId: i.productId,
-        productName: i.product?.name || 'Item',
-        productTypeName: i.product?.productTypeName || i.product?.productType?.name || '—',
-        size: i.size || '—',
-        quantity: i.quantity,
-        unitPrice: Number((parseFloat(i.unitPrice) || 0).toFixed(2)),
-        discountAmount: Number((parseFloat(i.discountAmount) || 0).toFixed(2)),
-        taxAmount: Number((parseFloat(i.taxAmount) || 0).toFixed(2)),
-        total: Number((parseFloat(i.total) || 0).toFixed(2))
-      }))
+      items: s.items.map(i => {
+        const uPrice = Number((parseFloat(i.unitPrice) || 0).toFixed(2));
+        const qty = i.quantity || 1;
+        const lineTotal = Number((uPrice * qty).toFixed(2));
+        return {
+          id: i.id,
+          productId: i.productId,
+          productName: i.product?.name || 'Item',
+          productTypeName: i.product?.productTypeName || i.product?.productType?.name || '—',
+          size: i.size || '—',
+          quantity: qty,
+          unitPrice: uPrice,
+          originalUnitPrice: Number((parseFloat(i.originalUnitPrice || i.unitPrice) || 0).toFixed(2)),
+          discountAmount: Number((parseFloat(i.discountAmount) || 0).toFixed(2)),
+          discountPercent: Number((parseFloat(i.discountPercent) || 0).toFixed(2)),
+          voucherDiscountAmount: Number((parseFloat(i.voucherDiscountAmount) || 0).toFixed(2)),
+          taxAmount: Number((parseFloat(i.taxAmount) || 0).toFixed(2)),
+          taxRate: Number((parseFloat(i.taxRate) || 0).toFixed(2)),
+          isTaxInclusive: Boolean(i.isTaxInclusive),
+          lineTotal,
+          total: lineTotal,
+          storedTotal: Number((parseFloat(i.total) || 0).toFixed(2))
+        };
+      })
     };
   });
 
@@ -775,10 +911,17 @@ exports.getSalesAnalyticsReport = asyncHandler(async (req, res) => {
       const taxAmt = parseFloat(item.taxAmount) || 0;
       const lineTotal = parseFloat(item.total) || 0;
 
-      const hasCost = item.product?.costPrice !== null && item.product?.costPrice !== undefined;
-      const costPrice = hasCost ? parseFloat(item.product.costPrice) : null;
-      const lineCost = hasCost ? Number((costPrice * qty).toFixed(2)) : null;
-      const profit = hasCost ? Number((lineTotal - lineCost).toFixed(2)) : null;
+      const costPrice = resolveProductCostPrice(item.product, item, s);
+      const lineCost = Number((costPrice * qty).toFixed(2));
+
+      // Net selling price per unit after discount
+      const netUnitPrice = Math.max(0, unitPrice - discAmt);
+      const voucherAlloc = parseFloat(item.voucherDiscountAmount) || 0;
+      const lineSelling = Math.max(0, (netUnitPrice * qty) - voucherAlloc);
+
+      // Profit = Selling Price - Purchase Price
+      const isCancelled = s.status === 'cancelled';
+      const profit = !isCancelled ? Number((lineSelling - lineCost).toFixed(2)) : 0;
 
       detailed.push({
         id: `${s.id}_${item.id}`,
@@ -802,7 +945,7 @@ exports.getSalesAnalyticsReport = asyncHandler(async (req, res) => {
         discountAmount: Number(discAmt.toFixed(2)),
         taxAmount: Number(taxAmt.toFixed(2)),
         lineTotal: Number(lineTotal.toFixed(2)),
-        purchaseCost: costPrice !== null ? Number(costPrice.toFixed(2)) : null,
+        purchaseCost: Number(costPrice.toFixed(2)),
         lineCost,
         profit,
         status: s.status === 'cancelled' ? 'Void' : (s.isReturn ? 'Return' : 'Active')
@@ -817,20 +960,32 @@ exports.getSalesAnalyticsReport = asyncHandler(async (req, res) => {
     subTotal: Number(summary.reduce((sum, s) => sum + s.subTotal, 0).toFixed(2)),
     totalDiscount: Number(summary.reduce((sum, s) => sum + s.discount, 0).toFixed(2)),
     totalTax: Number(summary.reduce((sum, s) => sum + s.taxAmount, 0).toFixed(2)),
-    netSales: Number(summary.reduce((sum, s) => sum + (s.status !== 'cancelled' ? s.totalAmount : 0), 0).toFixed(2))
+    netSales: Number(summary.reduce((sum, s) => sum + (s.status !== 'cancelled' ? s.totalAmount : 0), 0).toFixed(2)),
+    totalCost: Number(summary.reduce((sum, s) => sum + (s.status !== 'cancelled' ? s.totalCost : 0), 0).toFixed(2)),
+    grossProfit: Number(summary.reduce((sum, s) => sum + (s.status !== 'cancelled' ? s.grossProfit : 0), 0).toFixed(2))
   };
 
   // 8. Resolve active currency for branch / company context
-  let currency = null;
+  let currency = { code: 'AED', symbol: 'AED' };
   if (effectiveBranchId) {
     const branch = await prisma.branch.findUnique({
       where: { id: effectiveBranchId },
       select: { currencyCode: true, currencySymbol: true }
     });
     if (branch) {
+      const code = branch.currencyCode || 'AED';
       currency = {
-        code: branch.currencyCode || 'INR',
-        symbol: branch.currencySymbol || '₹'
+        code,
+        symbol: branch.currencySymbol || (code === 'INR' ? '₹' : 'AED')
+      };
+    }
+  } else {
+    const comp = await prisma.companyProfile.findFirst({ select: { currencyCode: true, currencySymbol: true } });
+    if (comp) {
+      const code = comp.currencyCode || 'AED';
+      currency = {
+        code,
+        symbol: comp.currencySymbol || (code === 'INR' ? '₹' : 'AED')
       };
     }
   }

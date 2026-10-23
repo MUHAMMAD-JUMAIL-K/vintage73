@@ -9,7 +9,7 @@ import { getTerminalId, checkTerminalAccess } from '@/lib/terminal';
 import SearchableSelect from '@/components/SearchableSelect';
 import DynamicInvoice from '@/components/DynamicInvoice';
 import ProfessionalInvoice from '@/components/ProfessionalInvoice';
-import { CURRENCY_SYMBOLS, getCurrencySymbol, normalizeCurrencySymbol } from '@/lib/currency';
+import { CURRENCY_SYMBOLS, getCurrencySymbol, normalizeCurrencySymbol, formatCurrency, formatAmountWithCurrency, DEFAULT_CURRENCY, DEFAULT_CURRENCY_SYMBOL } from '@/lib/currency';
 export default function POS() {
     const router = useRouter();
     const [products, setProducts] = useState([]);
@@ -59,14 +59,14 @@ export default function POS() {
                 if (!activeId && res.data && res.data.length > 0) {
                     const firstBranch = res.data[0];
                     setSelectedBranch(firstBranch.id);
-                    const bCode = firstBranch.currencyCode || 'INR';
+                    const bCode = firstBranch.currencyCode || DEFAULT_CURRENCY;
                     const bSymbol = normalizeCurrencySymbol(firstBranch.currencySymbol, bCode);
                     setCurrencyCode(bCode);
                     setCurrencySymbol(bSymbol);
                 } else if (activeId && res.data) {
                     const match = res.data.find(b => b.id.toString() === activeId.toString());
                     if (match) {
-                        const bCode = match.currencyCode || 'INR';
+                        const bCode = match.currencyCode || DEFAULT_CURRENCY;
                         const bSymbol = normalizeCurrencySymbol(match.currencySymbol, bCode);
                         setCurrencyCode(bCode);
                         setCurrencySymbol(bSymbol);
@@ -131,8 +131,8 @@ const EXCHANGE_RATES = {
     const [taxEnabled, setTaxEnabled] = useState(true);
     const [deliveryChargeEnabled, setDeliveryChargeEnabled] = useState(false);
     const [deliveryCharge, setDeliveryCharge] = useState('');
-    const [currencyCode, setCurrencyCode] = useState('INR');
-    const [currencySymbol, setCurrencySymbol] = useState('₹');
+    const [currencyCode, setCurrencyCode] = useState(DEFAULT_CURRENCY);
+    const [currencySymbol, setCurrencySymbol] = useState(DEFAULT_CURRENCY_SYMBOL);
     const [exchangeRate, setExchangeRate] = useState(1);
 
     // Promotional Voucher State
@@ -375,7 +375,7 @@ const EXCHANGE_RATES = {
                                        branchRes.data.stockIncluded !== '0';
                 setBranchSettings({ stockIncluded: isStockEnabled });
 
-                const bCode = branchRes.data.currencyCode || 'INR';
+                const bCode = branchRes.data.currencyCode || DEFAULT_CURRENCY;
                 const bSymbol = normalizeCurrencySymbol(branchRes.data.currencySymbol, bCode);
                 setCurrencyCode(bCode);
                 setCurrencySymbol(bSymbol);
@@ -387,7 +387,7 @@ const EXCHANGE_RATES = {
                 }
             } else {
                 setAssignedBranch(null);
-                const compCode = compRes.data?.currencyCode || 'INR';
+                const compCode = compRes.data?.currencyCode || DEFAULT_CURRENCY;
                 const compSymbol = normalizeCurrencySymbol(compRes.data?.currencySymbol, compCode);
                 setCurrencyCode(compCode);
                 setCurrencySymbol(compSymbol);
@@ -458,7 +458,7 @@ const EXCHANGE_RATES = {
             setCustomerName(invoice.customerName || 'Walk-in Customer');
             setSalesmanId(invoice.salesmanId || '');
             setSaleDate(new Date(invoice.saleDate).toISOString().split('T')[0]);
-            const invCode = invoice.currencyCode || 'INR';
+            const invCode = invoice.currencyCode || DEFAULT_CURRENCY;
             setCurrencyCode(invCode);
             setCurrencySymbol(normalizeCurrencySymbol(invoice.currencySymbol || CURRENCY_SYMBOLS[invCode], invCode));
             setExchangeRate(1);
@@ -1492,7 +1492,7 @@ const EXCHANGE_RATES = {
                     let msg = wsSettings.salesTemplate || 'Hello [[customer_name]], your invoice [[bill_no]] for [[total_amount]] is ready.';
                     msg = msg.replace(/\[\[customer_name\]\]/g, customerName || customer?.name || 'Customer')
                         .replace(/\[\[bill_no\]\]/g, res.data.invoiceNumber)
-                        .replace(/\[\[total_amount\]\]/g, currencyCode === 'AED' ? `${total.toFixed(2)} ${currencySymbol}` : `${currencySymbol}${total.toFixed(2)}`)
+                        .replace(/\[\[total_amount\]\]/g, formatAmountWithCurrency(total, currencyCode, currencySymbol))
                         .replace(/\[\[company_name\]\]/g, companyProfile?.companyName || 'Our Store');
 
                     try {
@@ -1664,7 +1664,7 @@ const EXCHANGE_RATES = {
 
                                     <div className="flex justify-between items-center pt-2 border-t border-slate-50 mt-auto">
                                         <p className="text-primary font-bold text-sm">
-                                            {currencyCode === 'AED' ? `${parseFloat(product.price || 0).toFixed(2)} ${currencySymbol}` : `${currencySymbol}${parseFloat(product.price || 0).toFixed(2)}`}
+                                            {formatAmountWithCurrency(product.price, currencyCode, currencySymbol)}
                                         </p>
                                         {isOutOfStock ? (
                                             <div className="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center text-slate-300 cursor-not-allowed opacity-50" title="Out of Stock">
@@ -1708,7 +1708,7 @@ const EXCHANGE_RATES = {
                                             setSelectedBranch(val);
                                             const match = branches.find(b => b.id.toString() === val?.toString());
                                             if (match) {
-                                                const bCode = match.currencyCode || 'INR';
+                                                const bCode = match.currencyCode || DEFAULT_CURRENCY;
                                                 const bSymbol = normalizeCurrencySymbol(match.currencySymbol, bCode);
                                                 setCurrencyCode(bCode);
                                                 setCurrencySymbol(bSymbol);
@@ -1751,7 +1751,7 @@ const EXCHANGE_RATES = {
                                     router.replace('/pos', undefined, { shallow: true });
                                     toast.info('Edit mode cancelled');
                                     if (assignedBranch) {
-                                        const bCode = assignedBranch.currencyCode || 'INR';
+                                        const bCode = assignedBranch.currencyCode || DEFAULT_CURRENCY;
                                         const bSymbol = normalizeCurrencySymbol(assignedBranch.currencySymbol, bCode);
                                         setCurrencyCode(bCode);
                                         setCurrencySymbol(bSymbol);
@@ -2036,15 +2036,15 @@ const EXCHANGE_RATES = {
                                                 {lineAlloc > 0 ? (
                                                     <div>
                                                         <div className="text-[10px] text-slate-400 line-through">
-                                                            {currencyCode === 'AED' ? `${linePreTaxBeforeVoucher.toFixed(2)} ${currencySymbol}` : `${currencySymbol}${linePreTaxBeforeVoucher.toFixed(2)}`}
+                                                            {formatAmountWithCurrency(linePreTaxBeforeVoucher, currencyCode, currencySymbol)}
                                                         </div>
                                                         <div className="font-bold text-emerald-700">
-                                                            {currencyCode === 'AED' ? `${linePreTaxAfterVoucher.toFixed(2)} ${currencySymbol}` : `${currencySymbol}${linePreTaxAfterVoucher.toFixed(2)}`}
+                                                            {formatAmountWithCurrency(linePreTaxAfterVoucher, currencyCode, currencySymbol)}
                                                         </div>
                                                     </div>
                                                 ) : (
                                                     <div>
-                                                        {currencyCode === 'AED' ? `${linePreTaxBeforeVoucher.toFixed(2)} ${currencySymbol}` : `${currencySymbol}${linePreTaxBeforeVoucher.toFixed(2)}`}
+                                                        {formatAmountWithCurrency(linePreTaxBeforeVoucher, currencyCode, currencySymbol)}
                                                     </div>
                                                 )}
                                             </div>
@@ -2128,7 +2128,7 @@ const EXCHANGE_RATES = {
                         <div className="flex justify-between text-slate-500">
                             <span className="font-medium text-[10px] uppercase">Subtotal</span>
                             <span className="font-semibold text-slate-700">
-                                {currencyCode === 'AED' ? `${totalCatalogPrice.toFixed(2)} ${currencySymbol}` : `${currencySymbol}${totalCatalogPrice.toFixed(2)}`}
+                                {formatAmountWithCurrency(totalCatalogPrice, currencyCode, currencySymbol)}
                             </span>
                         </div>
 
@@ -2137,7 +2137,7 @@ const EXCHANGE_RATES = {
                             <div className="flex justify-between text-slate-500">
                                 <span className="font-medium text-[10px] uppercase">Product Discount</span>
                                 <span className="font-semibold text-orange-600">
-                                    -{currencyCode === 'AED' ? `${totalProductDiscount.toFixed(2)} ${currencySymbol}` : `${currencySymbol}${totalProductDiscount.toFixed(2)}`}
+                                    -{formatAmountWithCurrency(totalProductDiscount, currencyCode, currencySymbol)}
                                 </span>
                             </div>
                         )}
@@ -2149,7 +2149,7 @@ const EXCHANGE_RATES = {
                                     <FiTag size={10} /> Voucher ({appliedVoucher?.voucher?.code})
                                 </span>
                                 <span className="font-black">
-                                    -{currencyCode === 'AED' ? `${voucherDiscount.toFixed(2)} ${currencySymbol}` : `${currencySymbol}${voucherDiscount.toFixed(2)}`}
+                                    -{formatAmountWithCurrency(voucherDiscount, currencyCode, currencySymbol)}
                                 </span>
                             </div>
                         )}
@@ -2161,13 +2161,13 @@ const EXCHANGE_RATES = {
                                     const isIgst = group.taxType === 'igst';
                                     const label = isIgst ? `IGST (${group.rate}%)` : `GST (${group.rate}%)`;
                                     const tooltipTitle = isIgst
-                                        ? `IGST (${group.rate}%): ${currencySymbol}${group.igst.toFixed(2)}`
-                                        : `CGST (${group.rate / 2}%): ${currencySymbol}${group.cgst.toFixed(2)} | SGST (${group.rate / 2}%): ${currencySymbol}${group.sgst.toFixed(2)}`;
+                                        ? `IGST (${group.rate}%): ${formatAmountWithCurrency(group.igst, currencyCode, currencySymbol)}`
+                                        : `CGST (${group.rate / 2}%): ${formatAmountWithCurrency(group.cgst, currencyCode, currencySymbol)} | SGST (${group.rate / 2}%): ${formatAmountWithCurrency(group.sgst, currencyCode, currencySymbol)}`;
                                     return (
                                         <div key={group.key} className="flex justify-between text-slate-500" title={tooltipTitle}>
                                             <span className="font-medium text-[10px] uppercase">{label}</span>
                                             <span className="font-semibold text-emerald-600">
-                                                +{currencyCode === 'AED' ? `${group.taxAmount.toFixed(2)} ${currencySymbol}` : `${currencySymbol}${group.taxAmount.toFixed(2)}`}
+                                                +{formatAmountWithCurrency(group.taxAmount, currencyCode, currencySymbol)}
                                             </span>
                                         </div>
                                     );
@@ -2176,7 +2176,7 @@ const EXCHANGE_RATES = {
                                 <div className="flex justify-between text-slate-500">
                                     <span className="font-medium text-[10px] uppercase">GST</span>
                                     <span className="font-semibold text-emerald-600">
-                                        +{currencyCode === 'AED' ? `${tax.toFixed(2)} ${currencySymbol}` : `${currencySymbol}${tax.toFixed(2)}`}
+                                        +{formatAmountWithCurrency(tax, currencyCode, currencySymbol)}
                                     </span>
                                 </div>
                             )
@@ -2187,7 +2187,7 @@ const EXCHANGE_RATES = {
                             <div className="flex justify-between text-slate-500">
                                 <span className="font-medium text-[10px] uppercase">Delivery Charge</span>
                                 <span className="font-semibold text-blue-600">
-                                    +{currencyCode === 'AED' ? `${effectiveDelivery.toFixed(2)} ${currencySymbol}` : `${currencySymbol}${effectiveDelivery.toFixed(2)}`}
+                                    +{formatAmountWithCurrency(effectiveDelivery, currencyCode, currencySymbol)}
                                 </span>
                             </div>
                         )}
@@ -2197,7 +2197,7 @@ const EXCHANGE_RATES = {
                             <div className="flex justify-between items-center text-orange-600">
                                 <span className="font-bold text-[10px] uppercase">Advance</span>
                                 <span className="font-black">
-                                    -{currencySymbol}{parseFloat(advanceRedeemed).toFixed(2)}
+                                    -{formatAmountWithCurrency(parseFloat(advanceRedeemed), currencyCode, currencySymbol)}
                                 </span>
                             </div>
                         )}
@@ -2219,7 +2219,7 @@ const EXCHANGE_RATES = {
                     <div className="flex justify-between items-center pt-1 border-t border-slate-200">
                         <span className="text-slate-500 font-bold text-xs uppercase tracking-tight">Bill Total</span>
                         <div className="relative flex items-center gap-1">
-                            <span className="text-xl font-black text-slate-800">{currencySymbol}</span>
+                            <span className="text-sm font-black text-slate-700">{currencySymbol}</span>
                             <input
                                 className="w-32 text-right text-xl font-black text-slate-800 bg-transparent outline-none"
                                 value={total.toFixed(2)}
@@ -2234,7 +2234,7 @@ const EXCHANGE_RATES = {
                             <div>
                                 <span className="block text-[8px] font-black uppercase tracking-widest opacity-80 leading-none mb-0.5">Final Payable</span>
                                 <span className="text-lg font-black leading-none tracking-tight">
-                                    {currencyCode === 'AED' ? `${finalPayable.toFixed(2)} ${currencySymbol}` : `${currencySymbol}${finalPayable.toFixed(2)}`}
+                                    {formatAmountWithCurrency(finalPayable, currencyCode, currencySymbol)}
                                 </span>
                             </div>
                             <FiCreditCard className="opacity-40" />
@@ -2347,8 +2347,8 @@ const EXCHANGE_RATES = {
                                             const paid = parseFloat(paymentData.paidAmount || 0);
                                             const alreadyPaid = addedPayments.reduce((s, x) => s + (parseFloat(x.amount) || 0), 0);
                                             const balance = finalPayable - alreadyPaid - paid;
-                                            if (balance < -0.01) return `Change: ${currencySymbol}${Math.abs(balance).toFixed(2)}`;
-                                            if (balance > 0.01) return `Balance: ${currencySymbol}${balance.toFixed(2)}`;
+                                            if (balance < -0.01) return `Change: ${formatAmountWithCurrency(Math.abs(balance), currencyCode, currencySymbol)}`;
+                                            if (balance > 0.01) return `Balance: ${formatAmountWithCurrency(balance, currencyCode, currencySymbol)}`;
                                             return 'Settled';
                                         })()}
                                     </span>
@@ -2356,13 +2356,13 @@ const EXCHANGE_RATES = {
 
                                 <div className="flex gap-2">
                                     <div className="relative flex-1">
-                                        <span className={`absolute top-1/2 -translate-y-1/2 text-slate-400 font-medium ${currencyCode === 'AED' ? 'right-3' : 'left-3'}`}>
+                                        <span className="absolute top-1/2 -translate-y-1/2 left-3 text-slate-400 font-semibold text-xs">
                                             {currencySymbol}
                                         </span>
                                         <input
                                             autoFocus
                                             type="number"
-                                            className={`w-full py-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 font-medium text-lg text-slate-800 transition-all ${currencyCode === 'AED' ? 'pr-12 pl-4' : 'pl-8 pr-4'}`}
+                                            className="w-full py-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 font-medium text-lg text-slate-800 transition-all pl-14 pr-4"
                                             placeholder="0.00"
                                             value={paymentData.paidAmount}
                                             onChange={e => setPaymentData({ ...paymentData, paidAmount: e.target.value })}
@@ -2486,11 +2486,7 @@ const EXCHANGE_RATES = {
                                                 <td className="p-3 text-right text-slate-500">{sale.taxAmount > 0 ? sale.taxAmount : '-'}</td>
                                                 <td className="p-3 text-right text-orange-500">{sale.advanceUsed > 0 ? sale.advanceUsed : '-'}</td>
                                                  <td className="p-3 text-right font-medium text-slate-800">
-                                                    {(() => {
-                                                        const sym = getCurrencySymbol(sale.currencyCode);
-                                                        const val = parseFloat(sale.totalAmount).toFixed(2);
-                                                        return sale.currencyCode === 'AED' ? `${val} ${sym}` : `${sym}${val}`;
-                                                    })()}
+                                                    {formatAmountWithCurrency(sale.totalAmount, sale.currencyCode, sale.currencySymbol)}
                                                  </td>
                                                 <td className="p-3 text-primary"><FiMonitor /></td>
                                             </tr>
@@ -2524,11 +2520,7 @@ const EXCHANGE_RATES = {
                                                         let msg = wsSettings.salesTemplate || '';
                                                         msg = msg.replace(/\[\[customer_name\]\]/g, selectedHistorySale.customer?.name || 'Customer')
                                                             .replace(/\[\[bill_no\]\]/g, selectedHistorySale.invoiceNumber)
-                                                            .replace(/\[\[total_amount\]\]/g, (() => {
-                                                                const sym = getCurrencySymbol(selectedHistorySale.currencyCode);
-                                                                const val = parseFloat(selectedHistorySale.totalAmount).toFixed(2);
-                                                                return selectedHistorySale.currencyCode === 'AED' ? `${val} ${sym}` : `${sym}${val}`;
-                                                            })())
+                                                            .replace(/\[\[total_amount\]\]/g, formatAmountWithCurrency(selectedHistorySale.totalAmount, selectedHistorySale.currencyCode, selectedHistorySale.currencySymbol))
                                                             .replace(/\[\[company_name\]\]/g, companyProfile?.companyName || 'Our Store');
 
                                                         try {
@@ -2566,18 +2558,10 @@ const EXCHANGE_RATES = {
                                                         <td className="p-2 text-slate-700">{item.product?.name}</td>
                                                         <td className="p-2 text-center">{item.quantity}</td>
                                                         <td className="p-2 text-right">
-                                                            {(() => {
-                                                                const sym = CURRENCY_SYMBOLS[selectedHistorySale.currencyCode] || '₹';
-                                                                const val = parseFloat(item.unitPrice || 0).toFixed(2);
-                                                                return selectedHistorySale.currencyCode === 'AED' ? `${val} ${sym}` : `${sym}${val}`;
-                                                            })()}
+                                                            {formatAmountWithCurrency(item.unitPrice, selectedHistorySale.currencyCode, selectedHistorySale.currencySymbol)}
                                                         </td>
                                                         <td className="p-2 text-right font-medium">
-                                                            {(() => {
-                                                                const sym = CURRENCY_SYMBOLS[selectedHistorySale.currencyCode] || '₹';
-                                                                const val = parseFloat(item.total || 0).toFixed(2);
-                                                                return selectedHistorySale.currencyCode === 'AED' ? `${val} ${sym}` : `${sym}${val}`;
-                                                            })()}
+                                                            {formatAmountWithCurrency((parseFloat(item.unitPrice || item.price || 0) * (parseFloat(item.quantity) || 1)), selectedHistorySale.currencyCode, selectedHistorySale.currencySymbol)}
                                                         </td>
                                                     </tr>
                                                 ))}
@@ -2588,22 +2572,14 @@ const EXCHANGE_RATES = {
                                             <div className="flex justify-between items-center text-sm font-semibold text-slate-700 border-t pt-2">
                                                 <span>Delivery Charge</span>
                                                 <span>
-                                                    {(() => {
-                                                        const sym = CURRENCY_SYMBOLS[selectedHistorySale.currencyCode] || '₹';
-                                                        const val = parseFloat(selectedHistorySale.deliveryCharge || 0).toFixed(2);
-                                                        return selectedHistorySale.currencyCode === 'AED' ? `${val} ${sym}` : `${sym}${val}`;
-                                                    })()}
+                                                    {formatAmountWithCurrency(selectedHistorySale.deliveryCharge, selectedHistorySale.currencyCode, selectedHistorySale.currencySymbol)}
                                                 </span>
                                             </div>
                                         )}
                                         <div className="flex justify-between items-center text-xl font-bold text-slate-900 border-t pt-4">
                                             <span>Total Amount</span>
                                             <span>
-                                                {(() => {
-                                                    const sym = getCurrencySymbol(selectedHistorySale.currencyCode);
-                                                    const val = parseFloat(selectedHistorySale.totalAmount).toFixed(2);
-                                                    return selectedHistorySale.currencyCode === 'AED' ? `${val} ${sym}` : `${sym}${val}`;
-                                                })()}
+                                                {formatAmountWithCurrency(selectedHistorySale.totalAmount, selectedHistorySale.currencyCode, selectedHistorySale.currencySymbol)}
                                             </span>
                                         </div>
 
@@ -2670,7 +2646,7 @@ const EXCHANGE_RATES = {
                                         </span>
                                     )}
                                     <span className="text-xs font-bold text-primary">
-                                        • {currencyCode === 'AED' ? `${parseFloat(sizeModalProduct.price || 0).toFixed(2)} ${currencySymbol}` : `${currencySymbol}${parseFloat(sizeModalProduct.price || 0).toFixed(2)}`}
+                                        • {formatAmountWithCurrency(sizeModalProduct.price, currencyCode, currencySymbol)}
                                     </span>
                                 </div>
                             </div>

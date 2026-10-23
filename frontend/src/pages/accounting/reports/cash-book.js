@@ -18,7 +18,7 @@ export default function CashBookReport() {
     const [branches, setBranches] = useState([]);
     const [selectedBranch, setSelectedBranch] = useState('');
     const [activeBranch, setActiveBranch] = useState(null);
-    const [reportCurrency, setReportCurrency] = useState({ code: 'INR', symbol: '₹' });
+    const [reportCurrency, setReportCurrency] = useState({ code: 'AED', symbol: 'AED' });
 
     const toggleRow = (id) => {
         setExpandedRows(prev => ({
@@ -76,11 +76,11 @@ export default function CashBookReport() {
                 setReportCurrency(res.data.currency);
             } else if (res.data.branch) {
                 setReportCurrency({
-                    code: res.data.branch.currencyCode || 'INR',
-                    symbol: res.data.branch.currencySymbol || '₹'
+                    code: res.data.branch.currencyCode || 'AED',
+                    symbol: res.data.branch.currencySymbol || (res.data.branch.currencyCode === 'INR' ? '₹' : 'AED')
                 });
             } else {
-                setReportCurrency({ code: 'INR', symbol: '₹' });
+                setReportCurrency({ code: 'AED', symbol: 'AED' });
             }
         } catch (err) {
             console.error("Cash Book fetch error:", err);
@@ -134,7 +134,7 @@ export default function CashBookReport() {
             : openingBal;
 
         const branchLabel = activeBranch ? activeBranch.name : 'All Branches (Consolidated)';
-        const currLabel = reportCurrency?.code || 'INR';
+        const currLabel = reportCurrency?.code || 'AED';
 
         const csvContent = [
             ['Report', 'Cash Book Report'],
@@ -256,7 +256,7 @@ export default function CashBookReport() {
                             <option value="">All Branches (Consolidated)</option>
                             {branches.map(b => (
                                 <option key={b.id} value={b.id}>
-                                    {b.name} ({b.currencyCode || 'INR'})
+                                    {b.name} ({b.currencyCode || 'AED'})
                                 </option>
                             ))}
                         </select>
@@ -322,7 +322,7 @@ export default function CashBookReport() {
                             {activeBranch ? `Branch: ${activeBranch.name}` : 'All Branches (Consolidated)'}
                         </span>
                         <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                            Currency: {reportCurrency?.code || 'INR'} ({reportCurrency?.symbol || '₹'})
+                            Currency: {reportCurrency?.code || 'AED'} ({reportCurrency?.symbol || 'AED'})
                         </span>
                     </div>
                     <p className="text-xs text-slate-500 font-semibold mt-1 uppercase tracking-wider">

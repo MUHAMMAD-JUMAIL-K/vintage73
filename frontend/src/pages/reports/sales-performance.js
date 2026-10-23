@@ -85,7 +85,7 @@ export default function SalesPerformance() {
 
     // Calculations
     const currentBranch = branches.find(b => b.id?.toString() === selectedBranch?.toString());
-    const activeCurrencyCode = currentBranch?.currencyCode || companyProfile?.currencyCode || 'INR';
+    const activeCurrencyCode = currentBranch?.currencyCode || companyProfile?.currencyCode || 'AED';
     const activeCurrencySymbol = normalizeCurrencySymbol(currentBranch?.currencySymbol || companyProfile?.currencySymbol, activeCurrencyCode);
 
     const activeSales = filteredSales.filter(s => s.status !== 'cancelled');

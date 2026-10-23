@@ -43,31 +43,54 @@ export default function Layout({ children }) {
         });
 
         // Fallback: Fetch branch name if missing from existing session
-        if (userData.branchId && !userData.branchName) {
-          api.get(`/branches/${userData.branchId}`)
+        const branchIdToLoad = userData.branchId || localStorage.getItem('activeBranchId');
+        if (branchIdToLoad) {
+          api.get(`/branches/${branchIdToLoad}`)
             .then(res => {
               setBranch(res.data);
-              // Update localStorage for next time
-              const updatedUser = { ...userData, branchName: res.data.name };
-              localStorage.setItem('user', JSON.stringify(updatedUser));
+              if (userData.branchId) {
+                const updatedUser = { ...userData, branchName: res.data.name };
+                localStorage.setItem('user', JSON.stringify(updatedUser));
+              }
             })
-            .catch(err => console.error("Error fetching branch:", err));
+            .catch(err => {
+              console.error("Error fetching branch:", err);
+              if (userData.branchName) setBranch({ name: userData.branchName, currencyCode: 'AED' });
+            });
         } else if (userData.branchName) {
-          setBranch({ name: userData.branchName });
+          setBranch({ name: userData.branchName, currencyCode: 'AED' });
         }
       } else {
         // Customers also get socket for real-time notifications
         initSocket(userData.id);
         if (userData.branchName) {
-          setBranch({ name: userData.branchName });
+          setBranch({ name: userData.branchName, currencyCode: 'AED' });
         }
       }
     }
+
+    const handleActiveBranchEvent = (e) => {
+      const bId = e.detail?.branchId || localStorage.getItem('activeBranchId');
+      if (bId) {
+        api.get(`/branches/${bId}`)
+          .then(res => setBranch(res.data))
+          .catch(() => {});
+      } else {
+        const u = localStorage.getItem('user');
+        const parsed = u ? JSON.parse(u) : null;
+        if (!parsed?.branchId) setBranch(null);
+      }
+    };
+    window.addEventListener('activeBranchChanged', handleActiveBranchEvent);
 
     // Set login time (simulated for today's session)
     if (!loginTime) {
       setLoginTime(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
     }
+
+    return () => {
+      window.removeEventListener('activeBranchChanged', handleActiveBranchEvent);
+    };
   }, [router.pathname]);
 
   const checkUnclosedDayClose = async () => {
@@ -143,9 +166,12 @@ export default function Layout({ children }) {
             {/* Right - Profile & Global Actions */}
             <div className="flex items-center gap-2 md:gap-6">
               {branch && (
-                <div className="hidden md:flex items-center gap-1.5 px-3 py-1 bg-gray-50 text-slate-600 rounded-full border border-gray-200">
-                  <FiMapPin className="text-xs" />
-                  <span className="text-[11px] font-medium uppercase tracking-wider">{branch.name}</span>
+                <div className="hidden md:flex items-center gap-2 px-3 py-1 bg-gray-50 text-slate-700 rounded-full border border-gray-200 text-xs">
+                  <FiMapPin className="text-xs text-primary" />
+                  <span className="text-[11px] font-bold uppercase tracking-wider">{branch.name}</span>
+                  <span className="px-1.5 py-0.5 bg-emerald-100 text-emerald-800 rounded font-black text-[10px]">
+                    {branch.currencyCode || 'AED'}
+                  </span>
                 </div>
               )}
 

@@ -1,7 +1,12 @@
 import React, { forwardRef } from 'react';
+import { formatAmountWithCurrency, normalizeCurrencySymbol, DEFAULT_CURRENCY } from '@/lib/currency';
 
 const DynamicInvoice = forwardRef(({ printData, companyProfile, invoiceSettings }, ref) => {
   if (!printData) return null;
+
+  const curCode = printData.currencyCode || printData.branch?.currencyCode || companyProfile?.currencyCode || DEFAULT_CURRENCY;
+  const curSymbol = normalizeCurrencySymbol(printData.currencySymbol || printData.branch?.currencySymbol || companyProfile?.currencySymbol, curCode);
+  const fmt = (val) => formatAmountWithCurrency(val, curCode, curSymbol);
 
   const activeTab = printData.isReturn ? 'return' : 'sales';
   const config = invoiceSettings?.[activeTab] || {};
@@ -187,49 +192,49 @@ const DynamicInvoice = forwardRef(({ printData, companyProfile, invoiceSettings 
             <div style={{ marginTop: '8px', borderTop: '2px solid #000', paddingTop: '8px', display: 'flex', flexDirection: 'column', alignItems: alignment }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', width: '200px', fontSize: '10px' }}>
                 <span>Subtotal:</span>
-                <span>{companyProfile?.currencySymbol || '₹'}{parseFloat(printData.subTotal || printData.totalAmount).toFixed(2)}</span>
+                <span>{fmt(printData.subTotal || printData.totalAmount)}</span>
               </div>
 
               {totalDiscount > 0 && (
                 <div style={{ display: 'flex', justifyContent: 'space-between', width: '200px', fontSize: '10px', color: '#dc2626' }}>
                   <span>Total Discount:</span>
-                  <span>- {companyProfile?.currencySymbol || '₹'}{totalDiscount.toFixed(2)}</span>
+                  <span>- {fmt(totalDiscount)}</span>
                 </div>
               )}
 
               {Object.entries(taxSummary).map(([type, amount]) => (
                 <div key={type} style={{ display: 'flex', justifyContent: 'space-between', width: '200px', fontSize: '10px' }}>
                   <span>{type}:</span>
-                  <span>{companyProfile?.currencySymbol || '₹'}{amount.toFixed(2)}</span>
+                  <span>{fmt(amount)}</span>
                 </div>
               ))}
 
               {(parseFloat(printData.deliveryCharge || 0) > 0 || printData.hasDeliveryCharge) && (
                 <div style={{ display: 'flex', justifyContent: 'space-between', width: '200px', fontSize: '10px' }}>
                   <span>Delivery Charge:</span>
-                  <span>+{companyProfile?.currencySymbol || '₹'}{parseFloat(printData.deliveryCharge || 0).toFixed(2)}</span>
+                  <span>+{fmt(parseFloat(printData.deliveryCharge || 0))}</span>
                 </div>
               )}
 
               {(parseFloat(printData.roundOffAmount || 0) !== 0) && (
                 <div style={{ display: 'flex', justifyContent: 'space-between', width: '200px', fontSize: '10px', fontStyle: 'italic' }}>
                   <span>Round Off:</span>
-                  <span>{companyProfile?.currencySymbol || '₹'}{parseFloat(printData.roundOffAmount).toFixed(2)}</span>
+                  <span>{fmt(parseFloat(printData.roundOffAmount))}</span>
                 </div>
               )}
 
               <div style={{ display: 'flex', justifyContent: 'space-between', width: '200px', fontSize: '14px', fontWeight: 'bold', borderTop: '1px solid #000', marginTop: '4px', paddingTop: '4px' }}>
                 <span>Grand Total:</span>
-                <span>{companyProfile?.currencySymbol || '₹'}{parseFloat(printData.totalAmount).toFixed(2)}</span>
+                <span>{fmt(printData.totalAmount)}</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', width: '200px', fontSize: '11px', color: '#16a34a', marginTop: '2px' }}>
                 <span>Amount Paid:</span>
-                <span>{companyProfile?.currencySymbol || '₹'}{parseFloat(printData.paidAmount !== undefined ? printData.paidAmount : (printData.totalAmount || 0)).toFixed(2)}</span>
+                <span>{fmt(printData.paidAmount !== undefined ? printData.paidAmount : (printData.totalAmount || 0))}</span>
               </div>
               {parseFloat(printData.balanceAmount || 0) > 0.01 && (
                 <div style={{ display: 'flex', justifyContent: 'space-between', width: '200px', fontSize: '11px', color: '#dc2626', fontWeight: 'bold', marginTop: '2px' }}>
                   <span>Balance Due:</span>
-                  <span>{companyProfile?.currencySymbol || '₹'}{parseFloat(printData.balanceAmount).toFixed(2)}</span>
+                  <span>{fmt(printData.balanceAmount)}</span>
                 </div>
               )}
             </div>
@@ -249,12 +254,12 @@ const DynamicInvoice = forwardRef(({ printData, companyProfile, invoiceSettings 
             {printData.payments && printData.payments.length > 1 && (
               <div style={{ fontSize: '10px', marginTop: '4px', color: '#4b5563' }}>
                 {printData.payments.map((p, idx) => (
-                  <span key={idx} style={{ marginRight: '8px' }}>{p.method}: <b>{companyProfile?.currencySymbol || '₹'}{parseFloat(p.amount).toFixed(2)}</b></span>
+                  <span key={idx} style={{ marginRight: '8px' }}>{p.method}: <b>{fmt(p.amount)}</b></span>
                 ))}
               </div>
             )}
             <p style={{ margin: '2px 0 0 0', fontSize: '11px' }}>
-              Amount Paid: <b>{companyProfile?.currencySymbol || '₹'}{paidAmt.toFixed(2)}</b> | Balance: <b>{companyProfile?.currencySymbol || '₹'}{balAmt.toFixed(2)}</b>
+              Amount Paid: <b>{fmt(paidAmt)}</b> | Balance: <b>{fmt(balAmt)}</b>
             </p>
           </div>
         );

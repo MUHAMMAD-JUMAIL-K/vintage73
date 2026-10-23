@@ -804,7 +804,7 @@ export default function Users() {
                       />
                     </div>
                     <div>
-                      <label className="block text-[10px] font-medium text-slate-400 uppercase tracking-widest mb-1.5">Basic Salary ({companyProfile?.currencySymbol || '₹'})</label>
+                      <label className="block text-[10px] font-medium text-slate-400 uppercase tracking-widest mb-1.5">Basic Salary ({companyProfile?.currencySymbol || 'AED'})</label>
                       <input
                         type="number"
                         className="input w-full bg-slate-50 border-slate-100 focus:bg-white transition-all font-normal text-sm py-2.5"

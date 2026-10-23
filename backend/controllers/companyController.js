@@ -21,10 +21,10 @@ exports.getCompanyProfile = asyncHandler(async (req, res) => {
         website: '',
         registrationNumber: '',
         logoUrl: '',
-        currencyCode: 'INR',
-        currencySymbol: '₹',
-        country: 'India',
-        taxSystem: 'GST',
+        currencyCode: 'AED',
+        currencySymbol: 'AED',
+        country: 'United Arab Emirates',
+        taxSystem: 'VAT',
         showOnlyLogoOnDashboard: true,
       }
     });

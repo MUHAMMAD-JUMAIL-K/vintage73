@@ -614,7 +614,7 @@ exports.recordReferralPayment = asyncHandler(async (req, res) => {
     // Check if fully paid
     const lead = await prisma.lead.findUnique({
         where: { id: leadId },
-        include: { referralPayments: true }
+        include: { referralPayments: true, branch: true }
     });
 
     const totalPaid = lead.referralPayments.reduce((sum, p) => sum + Number(p.amountPaid), 0);
@@ -625,12 +625,14 @@ exports.recordReferralPayment = asyncHandler(async (req, res) => {
         });
     }
 
+    const leadCurrSym = lead.branch?.currencySymbol || (lead.branch?.currencyCode === 'INR' ? '₹' : 'AED ');
+
     // Log Activity
     await prisma.leadActivity.create({
         data: {
             leadId,
             type: 'NOTE',
-            description: `Referral payment of ₹${amountPaid} recorded via ${paymentMethod}. Reference: ${transactionNumber || 'N/A'}`
+            description: `Referral payment of ${leadCurrSym}${amountPaid} recorded via ${paymentMethod}. Reference: ${transactionNumber || 'N/A'}`
         }
     });
 
