@@ -160,6 +160,14 @@ exports.createPurchase = asyncHandler(async (req, res) => {
         }
       });
 
+      // Keep product costPrice synchronized with latest purchase unitCost
+      if (item.unitCost !== null && item.unitCost !== undefined && parseFloat(item.unitCost) > 0) {
+        await tx.product.update({
+          where: { id: productId },
+          data: { costPrice: parseFloat(item.unitCost) }
+        });
+      }
+
       if (existingStock) {
         await tx.productStock.update({
           where: { id: existingStock.id },

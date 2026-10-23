@@ -19,7 +19,7 @@ exports.createSale = asyncHandler(async (req, res) => {
   const { 
     customerId, items, paymentMethod, paidAmount, discount = 0, advanceRedeemed = 0, saleDate, salesmanId, 
     terminalId, isReturn = false, returnReason = '', originalInvoice = '',
-    currencyCode = 'INR', exchangeRate = 1.0, description,
+    currencyCode = 'AED', exchangeRate = 1.0, description,
     deliveryCharge = 0, hasDeliveryCharge = false,
     voucherCode
   } = req.body;
@@ -418,7 +418,7 @@ exports.createSale = asyncHandler(async (req, res) => {
         isReturn,
         returnReason,
         originalInvoice,
-        currencyCode: branchExists.currencyCode || currencyCode || 'INR',
+        currencyCode: branchExists?.currencyCode || currencyCode || 'AED',
         exchangeRate: parseFloat(exchangeRate),
         description,
         placeOfSupply: req.body.placeOfSupply || customer?.state || null,
@@ -702,7 +702,7 @@ exports.updateSale = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const { 
     customerId, items, paymentMethod, paidAmount, discount = 0, saleDate, salesmanId, 
-    terminalId, currencyCode = 'INR', exchangeRate = 1.0, advanceRedeemed = 0, description,
+    terminalId, currencyCode = 'AED', exchangeRate = 1.0, advanceRedeemed = 0, description,
     deliveryCharge, hasDeliveryCharge
   } = req.body;
   let branchId = req.body.branchId || req.user?.branchId;

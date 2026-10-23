@@ -1,7 +1,8 @@
 import { useMemo } from 'react';
+import { formatAmountWithCurrency, normalizeCurrencySymbol, DEFAULT_CURRENCY } from '@/lib/currency';
 
-// Convert number to words (Indian format)
-const numberToWords = (num) => {
+// Convert number to words
+const numberToWords = (num, currencyCode = DEFAULT_CURRENCY) => {
   const ones = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten',
     'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
   const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
@@ -22,18 +23,26 @@ const numberToWords = (num) => {
     return convertLessThanThousand(Math.floor(n / 10000000)) + ' Crore ' + convert(n % 10000000);
   };
 
-  const rupees = Math.floor(num);
-  const paise = Math.round((num - rupees) * 100);
+  const mainUnits = Math.floor(num);
+  const subUnits = Math.round((num - mainUnits) * 100);
   
-  let result = 'Rupees ' + convert(rupees);
-  if (paise > 0) {
-    result += ' and ' + convert(paise) + ' Paise';
+  const code = (currencyCode || DEFAULT_CURRENCY).toUpperCase();
+  const mainLabel = code === 'AED' ? 'UAE Dirhams ' : (code === 'INR' ? 'Rupees ' : `${code} `);
+  const subLabel = code === 'AED' ? ' Fils' : (code === 'INR' ? ' Paise' : ' Cents');
+
+  let result = mainLabel + convert(mainUnits);
+  if (subUnits > 0) {
+    result += ' and ' + convert(subUnits) + subLabel;
   }
   return result + ' Only';
 };
 
 export default function GSTInvoicePrint({ data }) {
   const { sale, company, settings, taxType, hsnSummary } = data || {};
+
+  const curCode = sale?.currencyCode || sale?.branch?.currencyCode || company?.currencyCode || DEFAULT_CURRENCY;
+  const curSymbol = normalizeCurrencySymbol(sale?.currencySymbol || sale?.branch?.currencySymbol || company?.currencySymbol, curCode);
+  const fmt = (val) => formatAmountWithCurrency(val, curCode, curSymbol);
 
   const formatDate = (dateStr) => {
     if (!dateStr) return '';
@@ -43,8 +52,8 @@ export default function GSTInvoicePrint({ data }) {
 
   const amountInWords = useMemo(() => {
     if (!sale?.totalAmount) return '';
-    return numberToWords(parseFloat(sale.totalAmount));
-  }, [sale?.totalAmount]);
+    return numberToWords(parseFloat(sale.totalAmount), curCode);
+  }, [sale?.totalAmount, curCode]);
 
   if (!sale || !company) {
     return <div>Loading...</div>;
@@ -131,17 +140,17 @@ export default function GSTInvoicePrint({ data }) {
                 <td className="border border-black p-2">{item.product?.name}</td>
                 <td className="border border-black p-2 text-center">{item.product?.hsnCode || '-'}</td>
                 <td className="border border-black p-2 text-center">{item.quantity}</td>
-                <td className="border border-black p-2 text-right">₹{parseFloat(item.unitPrice).toFixed(2)}</td>
-                <td className="border border-black p-2 text-right">₹{taxable.toFixed(2)}</td>
+                <td className="border border-black p-2 text-right">{fmt(item.unitPrice)}</td>
+                <td className="border border-black p-2 text-right">{fmt(taxable)}</td>
                 {taxType === 'INTRA' ? (
                   <>
-                    <td className="border border-black p-2 text-right">₹{(tax / 2).toFixed(2)}</td>
-                    <td className="border border-black p-2 text-right">₹{(tax / 2).toFixed(2)}</td>
+                    <td className="border border-black p-2 text-right">{fmt(tax / 2)}</td>
+                    <td className="border border-black p-2 text-right">{fmt(tax / 2)}</td>
                   </>
                 ) : (
-                  <td className="border border-black p-2 text-right">₹{tax.toFixed(2)}</td>
+                  <td className="border border-black p-2 text-right">{fmt(tax)}</td>
                 )}
-                <td className="border border-black p-2 text-right font-semibold">₹{parseFloat(item.total).toFixed(2)}</td>
+                <td className="border border-black p-2 text-right font-semibold">{fmt(item.total)}</td>
               </tr>
             );
           })}
@@ -172,16 +181,16 @@ export default function GSTInvoicePrint({ data }) {
               {hsnSummary.map((h, idx) => (
                 <tr key={idx}>
                   <td className="border border-black p-1">{h.hsn}</td>
-                  <td className="border border-black p-1 text-right">₹{h.taxableValue.toFixed(2)}</td>
+                  <td className="border border-black p-1 text-right">{fmt(h.taxableValue)}</td>
                   {taxType === 'INTRA' ? (
                     <>
-                      <td className="border border-black p-1 text-right">₹{h.cgst.toFixed(2)}</td>
-                      <td className="border border-black p-1 text-right">₹{h.sgst.toFixed(2)}</td>
+                      <td className="border border-black p-1 text-right">{fmt(h.cgst)}</td>
+                      <td className="border border-black p-1 text-right">{fmt(h.sgst)}</td>
                     </>
                   ) : (
-                    <td className="border border-black p-1 text-right">₹{h.igst.toFixed(2)}</td>
+                    <td className="border border-black p-1 text-right">{fmt(h.igst)}</td>
                   )}
-                  <td className="border border-black p-1 text-right">₹{(h.cgst + h.sgst + h.igst).toFixed(2)}</td>
+                  <td className="border border-black p-1 text-right">{fmt(h.cgst + h.sgst + h.igst)}</td>
                 </tr>
               ))}
             </tbody>
@@ -194,40 +203,40 @@ export default function GSTInvoicePrint({ data }) {
         <div className="w-72 border border-black">
           <div className="flex justify-between p-2 border-b border-black">
             <span>Subtotal:</span>
-            <span>₹{parseFloat(sale.subTotal).toFixed(2)}</span>
+            <span>{fmt(sale.subTotal)}</span>
           </div>
           {taxType === 'INTRA' ? (
             <>
               <div className="flex justify-between p-2 border-b border-black">
                 <span>CGST:</span>
-                <span>₹{(parseFloat(sale.taxAmount) / 2).toFixed(2)}</span>
+                <span>{fmt(parseFloat(sale.taxAmount) / 2)}</span>
               </div>
               <div className="flex justify-between p-2 border-b border-black">
                 <span>SGST:</span>
-                <span>₹{(parseFloat(sale.taxAmount) / 2).toFixed(2)}</span>
+                <span>{fmt(parseFloat(sale.taxAmount) / 2)}</span>
               </div>
             </>
           ) : (
             <div className="flex justify-between p-2 border-b border-black">
               <span>IGST:</span>
-              <span>₹{parseFloat(sale.taxAmount).toFixed(2)}</span>
+              <span>{fmt(sale.taxAmount)}</span>
             </div>
           )}
           {(parseFloat(sale.deliveryCharge || 0) > 0 || sale.hasDeliveryCharge) && (
             <div className="flex justify-between p-2 border-b border-black">
               <span>Delivery Charge:</span>
-              <span>₹{parseFloat(sale.deliveryCharge || 0).toFixed(2)}</span>
+              <span>{fmt(parseFloat(sale.deliveryCharge || 0))}</span>
             </div>
           )}
           {parseFloat(sale.roundOffAmount) !== 0 && (
             <div className="flex justify-between p-2 border-b border-black">
               <span>Round Off:</span>
-              <span>₹{parseFloat(sale.roundOffAmount).toFixed(2)}</span>
+              <span>{fmt(sale.roundOffAmount)}</span>
             </div>
           )}
           <div className="flex justify-between p-2 font-medium bg-gray-100">
             <span>Grand Total:</span>
-            <span>₹{parseFloat(sale.totalAmount).toFixed(2)}</span>
+            <span>{fmt(sale.totalAmount)}</span>
           </div>
         </div>
       </div>

@@ -8,9 +8,10 @@ import {
 import { TbReceipt } from 'react-icons/tb';
 import { toast } from 'react-toastify';
 import SearchableSelect from '@/components/SearchableSelect';
-import { formatAmountWithCurrency, getCurrencySymbol } from '@/lib/currency';
+import { formatAmountWithCurrency, getCurrencySymbol, formatCurrency, resolveActiveCurrency, DEFAULT_CURRENCY } from '@/lib/currency';
 
 export default function VoucherManagement() {
+  const [activeCurrency, setActiveCurrency] = useState({ code: 'AED', symbol: 'AED' });
   const [stats, setStats] = useState({
     totalVouchers: 0,
     activeVouchers: 0,
@@ -82,7 +83,14 @@ export default function VoucherManagement() {
       if (statsRes.data) setStats(statsRes.data);
       if (vouchersRes.data) setVouchers(vouchersRes.data);
       if (custRes.data) setCustomers(custRes.data);
-      if (branchRes.data) setBranches(branchRes.data);
+      if (branchRes.data) {
+        setBranches(branchRes.data);
+        const stored = typeof window !== 'undefined' ? localStorage.getItem('user') : null;
+        const currentUser = stored ? JSON.parse(stored) : null;
+        const activeBranchId = currentUser?.branchId || (typeof window !== 'undefined' ? localStorage.getItem('activeBranchId') : null);
+        const currentBranch = branchRes.data.find(b => String(b.id) === String(activeBranchId));
+        setActiveCurrency(resolveActiveCurrency(currentBranch, null));
+      }
       if (rewardRes.data) setRewardRule(rewardRes.data);
     } catch (err) {
       console.error(err);
@@ -253,7 +261,7 @@ export default function VoucherManagement() {
           </div>
           <p className="text-3xl font-extrabold text-slate-800 mt-2">{stats.redeemedVouchers}</p>
           <p className="text-xs text-indigo-600 font-semibold mt-1">
-            ₹{parseFloat(stats.totalDiscountRedeemed || 0).toFixed(2)} total savings
+            {formatAmountWithCurrency(stats.totalDiscountRedeemed, activeCurrency.code, activeCurrency.symbol)} total savings
           </p>
         </div>
 
@@ -263,7 +271,7 @@ export default function VoucherManagement() {
             <span className="p-2 bg-primary-light/10 text-primary rounded-lg"><FiTag size={18} /></span>
           </div>
           <p className="text-3xl font-extrabold text-slate-800 mt-2">{stats.totalVouchers}</p>
-          <p className="text-xs text-slate-400 mt-1">₹{parseFloat(stats.totalValueIssued || 0).toFixed(2)} face value</p>
+          <p className="text-xs text-slate-400 mt-1">{formatAmountWithCurrency(stats.totalValueIssued, activeCurrency.code, activeCurrency.symbol)} face value</p>
         </div>
 
         <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
@@ -371,13 +379,13 @@ export default function VoucherManagement() {
                       </td>
                       <td className="py-3.5 px-4 font-bold text-slate-900">
                         {v.type === 'PERCENTAGE' ? (
-                          <span>{v.value}% {v.maximumDiscount ? `(Max ₹${v.maximumDiscount})` : ''}</span>
+                          <span>{v.value}% {v.maximumDiscount ? `(Max ${formatAmountWithCurrency(v.maximumDiscount, v.branch?.currencyCode || activeCurrency.code, v.branch?.currencySymbol || activeCurrency.symbol)})` : ''}</span>
                         ) : (
-                          <span>₹{parseFloat(v.value).toFixed(2)}</span>
+                          <span>{formatAmountWithCurrency(v.value, v.branch?.currencyCode || activeCurrency.code, v.branch?.currencySymbol || activeCurrency.symbol)}</span>
                         )}
                       </td>
                       <td className="py-3.5 px-4 text-xs font-medium text-slate-600">
-                        {parseFloat(v.minimumPurchaseAmount) > 0 ? `₹${parseFloat(v.minimumPurchaseAmount).toFixed(2)}` : 'No minimum'}
+                        {parseFloat(v.minimumPurchaseAmount) > 0 ? formatAmountWithCurrency(v.minimumPurchaseAmount, v.branch?.currencyCode || activeCurrency.code, v.branch?.currencySymbol || activeCurrency.symbol) : 'No minimum'}
                       </td>
                       <td className="py-3.5 px-4 text-xs font-semibold">
                         <span className={v.usageCount >= v.usageLimit ? 'text-indigo-600' : 'text-slate-700'}>
@@ -482,7 +490,7 @@ export default function VoucherManagement() {
                 <input
                   type="text"
                   required
-                  placeholder="e.g. Summer Festive ₹50 Off"
+                  placeholder={`e.g. Festive ${activeCurrency.symbol}50 Off`}
                   className="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm outline-none focus:border-primary"
                   value={formData.name}
                   onChange={e => setFormData({ ...formData, name: e.target.value })}
@@ -520,14 +528,14 @@ export default function VoucherManagement() {
                     value={formData.type}
                     onChange={e => setFormData({ ...formData, type: e.target.value })}
                   >
-                    <option value="FIXED">Fixed Discount (₹)</option>
+                    <option value="FIXED">Fixed Discount ({activeCurrency.symbol})</option>
                     <option value="PERCENTAGE">Percentage Discount (%)</option>
                     <option value="PURCHASE_REWARD">Purchase Reward</option>
                   </select>
                 </div>
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">
-                    Value {formData.type === 'PERCENTAGE' ? '(%)' : '(₹)'} *
+                    Value {formData.type === 'PERCENTAGE' ? '(%)' : `(${activeCurrency.symbol})`} *
                   </label>
                   <input
                     type="number"
@@ -545,7 +553,7 @@ export default function VoucherManagement() {
               {formData.type === 'PERCENTAGE' && (
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">
-                    Maximum Discount Cap (₹)
+                    Maximum Discount Cap ({activeCurrency.symbol})
                   </label>
                   <input
                     type="number"
@@ -561,7 +569,7 @@ export default function VoucherManagement() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">
-                    Min Purchase (₹)
+                    Min Purchase ({activeCurrency.symbol})
                   </label>
                   <input
                     type="number"
@@ -703,7 +711,7 @@ export default function VoucherManagement() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">
-                    Qualifying Bill Spend (₹)
+                    Qualifying Bill Spend ({activeCurrency.symbol})
                   </label>
                   <input
                     type="number"
@@ -716,7 +724,7 @@ export default function VoucherManagement() {
                 </div>
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">
-                    Reward Voucher Value (₹)
+                    Reward Voucher Value ({activeCurrency.symbol})
                   </label>
                   <input
                     type="number"
@@ -732,7 +740,7 @@ export default function VoucherManagement() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">
-                    Future Min Purchase (₹)
+                    Future Min Purchase ({activeCurrency.symbol})
                   </label>
                   <input
                     type="number"
@@ -818,12 +826,14 @@ export default function VoucherManagement() {
               <div>
                 <span className="text-slate-400 font-bold uppercase">Discount</span>
                 <p className="font-bold text-slate-800 text-sm mt-0.5">
-                  {selectedVoucher.type === 'PERCENTAGE' ? `${selectedVoucher.value}%` : `₹${selectedVoucher.value}`}
+                  {selectedVoucher.type === 'PERCENTAGE' ? `${selectedVoucher.value}%` : formatAmountWithCurrency(selectedVoucher.value, selectedVoucher.branch?.currencyCode || activeCurrency.code, selectedVoucher.branch?.currencySymbol || activeCurrency.symbol)}
                 </p>
               </div>
               <div>
                 <span className="text-slate-400 font-bold uppercase">Min Spend</span>
-                <p className="font-bold text-slate-800 text-sm mt-0.5">₹{selectedVoucher.minimumPurchaseAmount}</p>
+                <p className="font-bold text-slate-800 text-sm mt-0.5">
+                  {parseFloat(selectedVoucher.minimumPurchaseAmount) > 0 ? formatAmountWithCurrency(selectedVoucher.minimumPurchaseAmount, selectedVoucher.branch?.currencyCode || activeCurrency.code, selectedVoucher.branch?.currencySymbol || activeCurrency.symbol) : 'None'}
+                </p>
               </div>
               <div>
                 <span className="text-slate-400 font-bold uppercase">Status</span>
@@ -852,7 +862,7 @@ export default function VoucherManagement() {
                       {selectedVoucher.redemptions.map(r => (
                         <tr key={r.id}>
                           <td className="p-2.5 font-bold text-slate-800">{r.sale?.invoiceNumber || `#${r.saleId}`}</td>
-                          <td className="p-2.5 font-semibold text-emerald-600">₹{parseFloat(r.discountAmount).toFixed(2)}</td>
+                          <td className="p-2.5 font-semibold text-emerald-600">{formatAmountWithCurrency(r.discountAmount, selectedVoucher.branch?.currencyCode || activeCurrency.code, selectedVoucher.branch?.currencySymbol || activeCurrency.symbol)}</td>
                           <td className="p-2.5 text-slate-500">{new Date(r.redeemedAt).toLocaleString()}</td>
                         </tr>
                       ))}

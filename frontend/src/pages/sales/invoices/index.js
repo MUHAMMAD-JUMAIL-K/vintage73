@@ -492,37 +492,55 @@ export default function InvoicesList() {
                                 </div>
                             </div>
 
-                            <div className="space-y-2 border-t pt-4">
-                                <div className="flex justify-between items-center text-sm">
-                                    <span className="text-slate-500">Subtotal</span>
-                                    <span className="font-semibold text-slate-700">{getCurrencySymbol(historyInvoice.currencyCode)}{Number(historyInvoice.subTotal).toFixed(2)}</span>
-                                </div>
-                                {Number(historyInvoice.taxAmount) > 0 && (
-                                    <div className="flex justify-between items-center text-sm">
-                                        <span className="text-slate-500">Tax Total</span>
-                                        <span className="font-semibold text-slate-700">{getCurrencySymbol(historyInvoice.currencyCode)}{Number(historyInvoice.taxAmount).toFixed(2)}</span>
+                            {(() => {
+                                const invoiceProductTotal = historyInvoice.items?.length > 0
+                                    ? historyInvoice.items.reduce((sum, i) => sum + ((parseFloat(i.unitPrice || i.price || 0)) * (parseFloat(i.quantity) || 1)), 0)
+                                    : (Number(historyInvoice.subTotal || 0) + Number(historyInvoice.discount || 0) + Number(historyInvoice.voucherDiscount || 0));
+                                const invoiceDiscount = Number(historyInvoice.discount || 0) + Number(historyInvoice.voucherDiscount || 0);
+                                const invoiceTaxable = historyInvoice.subTotal !== undefined && historyInvoice.subTotal !== null
+                                    ? Number(historyInvoice.subTotal)
+                                    : Math.max(0, invoiceProductTotal - invoiceDiscount);
+
+                                return (
+                                    <div className="space-y-2 border-t pt-4">
+                                        <div className="flex justify-between items-center text-sm">
+                                            <span className="text-slate-500">Subtotal</span>
+                                            <span className="font-semibold text-slate-700">{getCurrencySymbol(historyInvoice.currencyCode)}{invoiceProductTotal.toFixed(2)}</span>
+                                        </div>
+                                        {invoiceDiscount > 0 && (
+                                            <div className="flex justify-between items-center text-sm">
+                                                <span className="text-slate-500">Discount Applied</span>
+                                                <span className="font-bold text-red-500">-{getCurrencySymbol(historyInvoice.currencyCode)}{invoiceDiscount.toFixed(2)}</span>
+                                            </div>
+                                        )}
+                                        {invoiceDiscount > 0 && (
+                                            <div className="flex justify-between items-center text-sm text-slate-500 border-t border-slate-100 pt-1">
+                                                <span>Taxable Amount</span>
+                                                <span className="font-semibold text-slate-700">{getCurrencySymbol(historyInvoice.currencyCode)}{invoiceTaxable.toFixed(2)}</span>
+                                            </div>
+                                        )}
+                                        {Number(historyInvoice.taxAmount) > 0 && (
+                                            <div className="flex justify-between items-center text-sm">
+                                                <span className="text-slate-500">Tax Total</span>
+                                                <span className="font-semibold text-slate-700">{getCurrencySymbol(historyInvoice.currencyCode)}{Number(historyInvoice.taxAmount).toFixed(2)}</span>
+                                            </div>
+                                        )}
+                                        {Number(historyInvoice.advanceUsed) > 0 && (
+                                            <div className="flex justify-between items-center text-sm">
+                                                <span className="text-emerald-500 font-medium flex items-center gap-1.5"><FiCreditCard size={12} /> Advance Used</span>
+                                                <span className="font-bold text-emerald-600">-{getCurrencySymbol(historyInvoice.currencyCode)}{Number(historyInvoice.advanceUsed).toFixed(2)}</span>
+                                            </div>
+                                        )}
+                                        <div className="flex justify-between items-center pt-3 border-t-2 border-dashed">
+                                            <span className="font-bold text-slate-800 uppercase tracking-tight">Grand Total</span>
+                                            <span className="text-xl font-black text-primary">
+                                                {getCurrencySymbol(historyInvoice.currencyCode)}
+                                                {(Number(historyInvoice.totalAmount) * Number(historyInvoice.exchangeRate || 1)).toFixed(2)}
+                                            </span>
+                                        </div>
                                     </div>
-                                )}
-                                {Number(historyInvoice.discount) > 0 && (
-                                    <div className="flex justify-between items-center text-sm">
-                                        <span className="text-slate-500">Discount Applied</span>
-                                        <span className="font-bold text-red-500">-{getCurrencySymbol(historyInvoice.currencyCode)}{Number(historyInvoice.discount).toFixed(2)}</span>
-                                    </div>
-                                )}
-                                {Number(historyInvoice.advanceUsed) > 0 && (
-                                    <div className="flex justify-between items-center text-sm">
-                                        <span className="text-emerald-500 font-medium flex items-center gap-1.5"><FiCreditCard size={12} /> Advance Used</span>
-                                        <span className="font-bold text-emerald-600">-{getCurrencySymbol(historyInvoice.currencyCode)}{Number(historyInvoice.advanceUsed).toFixed(2)}</span>
-                                    </div>
-                                )}
-                                <div className="flex justify-between items-center pt-3 border-t-2 border-dashed">
-                                    <span className="font-bold text-slate-800 uppercase tracking-tight">Grand Total</span>
-                                    <span className="text-xl font-black text-primary">
-                                        {getCurrencySymbol(historyInvoice.currencyCode)}
-                                        {(Number(historyInvoice.totalAmount) * Number(historyInvoice.exchangeRate || 1)).toFixed(2)}
-                                    </span>
-                                </div>
-                            </div>
+                                );
+                            })()}
                         </div>
 
                         <div className="p-4 bg-slate-50 border-t flex justify-end">

@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react';
 import api from '@/lib/api';
 import { toast } from 'react-toastify';
-import { FiImage, FiBriefcase, FiGlobe, FiMapPin, FiPhone, FiMail } from 'react-icons/fi';
+import { FiImage, FiBriefcase, FiGlobe, FiMapPin, FiPhone, FiMail, FiDollarSign } from 'react-icons/fi';
 import SearchableSelect from '@/components/SearchableSelect';
+import { CURRENCY_LIST, getCurrencySymbol, DEFAULT_CURRENCY, DEFAULT_CURRENCY_SYMBOL } from '@/lib/currency';
 
 export default function CompanyProfile() {
   const [formData, setFormData] = useState({
     registrationNumber: '', logoUrl: '', website: '', pincode: '',
-    currencyCode: 'INR', currencySymbol: '₹', country: 'India', taxSystem: 'GST',
+    currencyCode: DEFAULT_CURRENCY, currencySymbol: DEFAULT_CURRENCY_SYMBOL, country: 'United Arab Emirates', taxSystem: 'GST',
     bankId: ''
   });
   const [states, setStates] = useState([]);
@@ -206,6 +207,26 @@ export default function CompanyProfile() {
                       value={formData.email}
                       onChange={e => setFormData({ ...formData, email: e.target.value })}
                     />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Default Base Currency</label>
+                    <select
+                      className="input w-full"
+                      value={formData.currencyCode || DEFAULT_CURRENCY}
+                      onChange={e => {
+                        const code = e.target.value;
+                        setFormData({
+                          ...formData,
+                          currencyCode: code,
+                          currencySymbol: getCurrencySymbol(code, { raw: true })
+                        });
+                      }}
+                    >
+                      {CURRENCY_LIST.map(c => (
+                        <option key={c.code} value={c.code}>{c.label}</option>
+                      ))}
+                    </select>
                   </div>
 
 

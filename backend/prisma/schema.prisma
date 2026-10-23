@@ -74,8 +74,8 @@ model Branch {
   invoiceSettings   Json?
   stockIncluded     Boolean            @default(true)
   invoiceTemplate   String?
-  currencyCode      String?            @default("INR")
-  currencySymbol    String?            @default("₹")
+  currencyCode      String?            @default("AED")
+  currencySymbol    String?            @default("AED")
   attendance        Attendance[]
   barcodeSetting    BarcodeSetting?
   customers         Customer[]
@@ -115,8 +115,8 @@ model CompanyProfile {
   website                 String?
   registrationNumber      String?
   logoUrl                 String?
-  currencyCode            String   @default("INR")
-  currencySymbol          String   @default("₹")
+  currencyCode            String   @default("AED")
+  currencySymbol          String   @default("AED")
   country                 String   @default("India")
   taxSystem               String   @default("GST")
   createdAt               DateTime @default(now())
@@ -380,7 +380,7 @@ model Sale {
   financialYearId Int?
   isInvoice       Boolean        @default(false)
   quotationId     Int?           @unique
-  currencyCode    String?        @default("INR")
+  currencyCode    String?        @default("AED")
   exchangeRate    Decimal?       @default(1.0) @db.Decimal(10, 4)
   discount        Float          @default(0)
   advanceUsed     Decimal        @default(0) @db.Decimal(10, 2)

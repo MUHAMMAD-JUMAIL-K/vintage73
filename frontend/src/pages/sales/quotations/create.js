@@ -11,8 +11,8 @@ export default function CreateQuotation() {
     const [loading, setLoading] = useState(false);
     const [customers, setCustomers] = useState([]);
     const [products, setProducts] = useState([]);
-    const [currencyCode, setCurrencyCode] = useState('INR');
-    const [currencySymbol, setCurrencySymbol] = useState('₹');
+    const [currencyCode, setCurrencyCode] = useState('AED');
+    const [currencySymbol, setCurrencySymbol] = useState('AED');
 
     // Form State
     const [formData, setFormData] = useState({
@@ -46,7 +46,7 @@ export default function CreateQuotation() {
             setCustomers(custRes.data);
             setProducts(prodRes.data);
 
-            let code = compRes?.data?.currencyCode || 'INR';
+            let code = compRes?.data?.currencyCode || 'AED';
             let symbol = compRes?.data?.currencySymbol;
 
             const stored = typeof window !== 'undefined' ? localStorage.getItem('user') : null;

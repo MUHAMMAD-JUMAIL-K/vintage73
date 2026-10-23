@@ -35,11 +35,16 @@ export default function PaymentVoucher() {
     const [filterStartDate, setFilterStartDate] = useState('');
     const [filterEndDate, setFilterEndDate] = useState('');
     const [filterLedgerId, setFilterLedgerId] = useState('');
+    const [user, setUser] = useState(null);
 
     // Print State
     const [printVoucher, setPrintVoucher] = useState(null);
 
     useEffect(() => {
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+            try { setUser(JSON.parse(storedUser)); } catch (e) {}
+        }
         fetchLedgers();
         fetchHistory();
     }, []);
@@ -317,7 +322,7 @@ export default function PaymentVoucher() {
                                             <div className="flex items-center gap-2">
                                                 <div className={`w-1.5 h-1.5 rounded-full ${selectedPaymentAccount.currentBalance >= 0 ? 'bg-primary' : 'bg-red-500'}`} />
                                                 <span className="text-[10px] font-medium text-slate-500">
-                                                    Bal: {formatCurrency(Math.abs(selectedPaymentAccount.currentBalance), 'INR')} {selectedPaymentAccount.currentBalance >= 0 ? 'Dr' : 'Cr'}
+                                                    Bal: {formatCurrency(Math.abs(selectedPaymentAccount.currentBalance), user?.branch || 'AED')} {selectedPaymentAccount.currentBalance >= 0 ? 'Dr' : 'Cr'}
                                                 </span>
                                             </div>
                                         )}
@@ -340,7 +345,7 @@ export default function PaymentVoucher() {
                                             <div className="flex items-center gap-2">
                                                 <div className={`w-1.5 h-1.5 rounded-full ${selectedExpenseAccount.currentBalance >= 0 ? 'bg-primary' : 'bg-red-500'}`} />
                                                 <span className="text-[10px] font-medium text-slate-500">
-                                                    Bal: {formatCurrency(Math.abs(selectedExpenseAccount.currentBalance), 'INR')} {selectedExpenseAccount.currentBalance >= 0 ? 'Dr' : 'Cr'}
+                                                    Bal: {formatCurrency(Math.abs(selectedExpenseAccount.currentBalance), user?.branch || 'AED')} {selectedExpenseAccount.currentBalance >= 0 ? 'Dr' : 'Cr'}
                                                 </span>
                                             </div>
                                         )}
@@ -514,7 +519,7 @@ export default function PaymentVoucher() {
                                                     <td className="px-6 py-4 text-right">
                                                         <div className="flex flex-col items-end">
                                                             <span className="text-sm font-medium text-slate-900 tabular-nums">
-                                                                {formatCurrency(v.totalAmount, v.branch || 'INR')}
+                                                                {formatCurrency(v.totalAmount, v.branch || 'AED')}
                                                             </span>
                                                             {v.status === 'CANCELLED' ? (
                                                                 <span className="mt-1 px-1.5 py-0.5 rounded bg-red-100 text-red-600 text-[8px] font-medium uppercase tracking-widest ring-1 ring-red-200">Voided</span>
@@ -578,7 +583,7 @@ export default function PaymentVoucher() {
                 details={[
                     { label: 'Voucher Date', value: formData.date },
                     { label: 'Payment From', value: ledgers.find(l => l.id == formData.paymentAccount)?.name || 'N/A' },
-                    { label: 'Amount', value: formatCurrency(formData.amount || 0, 'INR') },
+                    { label: 'Amount', value: formatCurrency(formData.amount || 0, user?.branch || 'AED') },
                     { label: 'Reference', value: formData.reference || 'N/A' }
                 ]}
             />

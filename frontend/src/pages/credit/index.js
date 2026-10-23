@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import api from '@/lib/api';
 import { toast } from 'react-toastify';
 import { FiMessageCircle, FiEye, FiPhone } from 'react-icons/fi';
+import { formatCurrency as formatCurrencyLib, resolveActiveCurrency, DEFAULT_CURRENCY } from '@/lib/currency';
 
 export default function CreditManagement() {
     const [debtors, setDebtors] = useState([]);
@@ -61,8 +62,9 @@ export default function CreditManagement() {
 
         let msg = wsSettings.creditTemplate || 'Hello [[customer_name]], your outstanding balance is [[total_amount]]. Please pay at your earliest convenience. Thank you.';
 
+        const activeCurrency = resolveActiveCurrency(null, companyProfile);
         msg = msg.replace(/\[\[customer_name\]\]/g, name)
-            .replace(/\[\[total_amount\]\]/g, `₹${parseFloat(amount).toFixed(2)}`)
+            .replace(/\[\[total_amount\]\]/g, formatCurrencyLib(amount, activeCurrency))
             .replace(/\[\[pending_invoices\]\]/g, pendingInvoices || 'N/A')
             .replace(/\[\[company_name\]\]/g, companyProfile?.companyName || 'Our Store');
 
@@ -75,7 +77,7 @@ export default function CreditManagement() {
         }
     };
 
-    const formatCurrency = (val) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(val);
+    const formatCurrency = (val) => formatCurrencyLib(val, resolveActiveCurrency(null, companyProfile));
 
     const handleSettle = async (e) => {
         e.preventDefault();
@@ -98,7 +100,7 @@ export default function CreditManagement() {
     return (
         <div className="p-4 sm:p-8 w-full">
             <div className="mb-8">
-                <span className="text-3xl font-extrabold text-slate-800 tracking-tight">{companyProfile?.currencySymbol || '₹'}{Number(stats.totalCredit).toFixed(0)}</span>
+                <span className="text-3xl font-extrabold text-slate-800 tracking-tight">{formatCurrency(stats.totalCredit)}</span>
                 <p className="text-slate-500 mt-1 font-medium">Track outstanding payments and send reminders</p>
             </div>
 

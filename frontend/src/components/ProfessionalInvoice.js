@@ -25,12 +25,16 @@ const numberToWords = (num) => {
         return convertLessThanThousand(Math.floor(n / 10000000)) + ' Crore ' + convert(n % 10000000);
     };
 
-    const rupees = Math.floor(num);
-    const paise = Math.round((num - rupees) * 100);
+    const mainUnits = Math.floor(num);
+    const subUnits = Math.round((num - mainUnits) * 100);
 
-    let result = convert(rupees) + ' Rupees';
-    if (paise > 0) {
-        result += ' and ' + convert(paise) + ' Paise';
+    const code = (currencyCode || 'AED').toUpperCase();
+    const mainLabel = code === 'AED' ? 'UAE Dirhams' : (code === 'INR' ? 'Rupees' : code);
+    const subLabel = code === 'AED' ? 'Fils' : (code === 'INR' ? 'Paise' : 'Cents');
+
+    let result = convert(mainUnits) + ' ' + mainLabel;
+    if (subUnits > 0) {
+        result += ' and ' + convert(subUnits) + ' ' + subLabel;
     }
     return result + ' Only';
 };
@@ -56,11 +60,11 @@ const ProfessionalInvoice = React.forwardRef(({ printData, companyProfile, previ
     // fallback to saleDate if createdAt is missing
     const invoiceDate = quotationDate || createdAt || saleDate || null;
 
-    const activeCurrencyCode = currencyCode || companyProfile?.currencyCode || 'INR';
+    const activeCurrencyCode = currencyCode || printData.branch?.currencyCode || companyProfile?.currencyCode || 'AED';
     const rawSym = (currencyCode && currencyCode !== 'INR' && currencySymbol === '₹')
         ? getAppCurrencySymbol(activeCurrencyCode)
-        : (currencySymbol || getAppCurrencySymbol(activeCurrencyCode) || companyProfile?.currencySymbol || '₹');
-    const currentSymbol = normalizeCurrencySymbol(rawSym, activeCurrencyCode);
+        : (currencySymbol || getAppCurrencySymbol(activeCurrencyCode) || companyProfile?.currencySymbol || (activeCurrencyCode === 'INR' ? '₹' : 'AED'));
+    const currentSymbol = activeCurrencyCode === 'AED' ? 'AED ' : normalizeCurrencySymbol(rawSym, activeCurrencyCode);
     const settings = printData.settings || {};
     const tpl = (settings.template || 'modern').toLowerCase();
     const pageSize = settings.pageSize || 'A5';

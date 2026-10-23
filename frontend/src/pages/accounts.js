@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/router';
 import api from '@/lib/api';
 import { FiPlus, FiTrash2, FiDollarSign, FiFilter } from 'react-icons/fi';
 import { toast } from 'react-toastify';
+import { formatCurrency } from '@/lib/currency';
 
 export default function Accounts() {
   const router = useRouter();
@@ -42,6 +43,20 @@ export default function Accounts() {
     date: new Date().toISOString().split('T')[0],
     category: ''
   });
+
+  const activeBranchObj = useMemo(() => {
+    if (selectedBranch && selectedBranch !== 'all') {
+      return branches.find(b => b.id.toString() === selectedBranch.toString()) || null;
+    }
+    if (user?.branchId) {
+      return branches.find(b => b.id === user.branchId) || null;
+    }
+    return null;
+  }, [branches, selectedBranch, user]);
+
+  const activeCurrency = useMemo(() => {
+    return activeBranchObj || companyProfile || 'AED';
+  }, [activeBranchObj, companyProfile]);
 
   useEffect(() => {
     if (selectedBranch) {
@@ -150,12 +165,12 @@ export default function Accounts() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
                 <div className="bg-primary-light/10 p-6 rounded-2xl border border-primary/20">
                   <p className="text-xs font-medium text-primary uppercase tracking-widest mb-1">Total Receivables</p>
-                  <p className="text-3xl font-extrabold text-primary-dark">₹{outstandingData.customers.reduce((s, c) => s + c.totalBalance, 0).toFixed(2)}</p>
+                  <p className="text-3xl font-extrabold text-primary-dark">{formatCurrency(outstandingData.customers.reduce((s, c) => s + c.totalBalance, 0), activeCurrency)}</p>
                   <p className="text-[10px] text-primary/80 mt-2 font-medium">From {outstandingData.customers.length} Customers</p>
                 </div>
                 <div className="bg-red-50 p-6 rounded-2xl border border-red-100">
                   <p className="text-xs font-medium text-red-600 uppercase tracking-widest mb-1">Total Payables</p>
-                  <p className="text-3xl font-extrabold text-red-700">₹{outstandingData.suppliers.reduce((s, p) => s + p.totalBalance, 0).toFixed(2)}</p>
+                  <p className="text-3xl font-extrabold text-red-700">{formatCurrency(outstandingData.suppliers.reduce((s, p) => s + p.totalBalance, 0), activeCurrency)}</p>
                   <p className="text-[10px] text-red-500 mt-2 font-medium">To {outstandingData.suppliers.length} Suppliers</p>
                 </div>
               </div>
@@ -171,7 +186,7 @@ export default function Accounts() {
                       <div key={c.id} className="p-4 bg-slate-50 rounded-xl border border-slate-100">
                         <div className="flex justify-between items-start mb-2">
                           <span className="font-medium text-slate-800">{c.name}</span>
-                          <span className="text-primary font-extrabold text-lg">₹{c.totalBalance.toFixed(2)}</span>
+                          <span className="text-primary font-extrabold text-lg">{formatCurrency(c.totalBalance, activeCurrency)}</span>
                         </div>
                         <div className="text-[10px] text-slate-400 font-medium uppercase tracking-tight">
                           {c.items.length} Invoices Pending
@@ -197,7 +212,7 @@ export default function Accounts() {
                       <div key={s.id} className="p-4 bg-slate-50 rounded-xl border border-slate-100">
                         <div className="flex justify-between items-start mb-2">
                           <span className="font-medium text-slate-800">{s.name}</span>
-                          <span className="text-red-600 font-extrabold text-lg">{companyProfile?.currencySymbol || '₹'}{s.totalBalance.toFixed(2)}</span>
+                          <span className="text-red-600 font-extrabold text-lg">{formatCurrency(s.totalBalance, activeCurrency)}</span>
                         </div>
                         <div className="text-[10px] text-slate-400 font-medium uppercase tracking-tight">
                           {s.items.length} Purchases Unpaid
@@ -239,7 +254,7 @@ export default function Accounts() {
                       </span>
                     </td>
                     <td className={`text-right font-medium ${activeTab === 'receipts' ? 'text-primary' : 'text-red-500'}`}>
-                      {activeTab === 'receipts' ? '+' : '-'} ₹ {parseFloat(t.amount).toFixed(2)}
+                      {activeTab === 'receipts' ? '+' : '-'} {formatCurrency(parseFloat(t.amount || 0), activeCurrency)}
                     </td>
                     <td className="text-right">
                       <button className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"><FiTrash2 /></button>
@@ -272,8 +287,8 @@ export default function Accounts() {
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Amount</label>
                 <div className="relative">
-                  <span className="absolute left-3 top-2.5 text-slate-400">₹</span>
-                  <input type="number" className="input pl-8" required value={formData.amount} onChange={e => setFormData({ ...formData, amount: e.target.value })} />
+                  <span className="absolute left-3 top-2.5 text-slate-400 text-xs font-semibold">{activeCurrency.currencySymbol || activeCurrency.currencyCode || 'AED'}</span>
+                  <input type="number" className="input pl-14" required value={formData.amount} onChange={e => setFormData({ ...formData, amount: e.target.value })} />
                 </div>
               </div>
               <div>

@@ -5,6 +5,7 @@ import { toast } from 'react-toastify';
 import { useReactToPrint } from 'react-to-print';
 import { FiX, FiPrinter, FiSearch, FiSave, FiAlertCircle, FiRefreshCw } from 'react-icons/fi';
 import ProfessionalInvoice from '@/components/ProfessionalInvoice';
+import { formatCurrency, formatAmountWithCurrency, DEFAULT_CURRENCY } from '@/lib/currency';
 
 export default function SalesReturn() {
   const [invoiceNo, setInvoiceNo] = useState('');
@@ -208,7 +209,7 @@ export default function SalesReturn() {
                           <td className="text-center font-medium text-slate-600">{item.quantity}</td>
                           <td className="text-center font-medium text-amber-600">{item.alreadyReturnedQty || 0}</td>
                           <td className="text-center font-medium text-slate-900">{remaining}</td>
-                          <td className="text-right font-medium text-slate-700">₹ {parseFloat(item.unitPrice).toFixed(2)}</td>
+                          <td className="text-right font-medium text-slate-700">{formatAmountWithCurrency(item.unitPrice, invoiceData?.currencyCode || DEFAULT_CURRENCY, invoiceData?.currencySymbol)}</td>
                           <td className="text-center">
                             <input
                               type="number"
@@ -249,15 +250,15 @@ export default function SalesReturn() {
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-slate-500">Current Balance</span>
-                  <span className="font-medium text-red-500">₹ {customerBalance.toFixed(2)}</span>
+                  <span className="font-medium text-red-500">{formatAmountWithCurrency(customerBalance, invoiceData?.currencyCode || DEFAULT_CURRENCY, invoiceData?.currencySymbol)}</span>
                 </div>
                 <div className="flex justify-between text-sm py-2 border-t border-dashed">
                   <span className="text-slate-800 font-medium">Return Value</span>
-                  <span className="font-medium text-primary">- ₹ {returnTotal.toFixed(2)}</span>
+                  <span className="font-medium text-primary">- {formatAmountWithCurrency(returnTotal, invoiceData?.currencyCode || DEFAULT_CURRENCY, invoiceData?.currencySymbol)}</span>
                 </div>
                 <div className="flex justify-between text-lg pt-2 border-t font-medium">
                   <span className="text-slate-900">New Balance</span>
-                  <span className="text-primary font-medium">₹ {Math.max(0, customerBalance - returnTotal).toFixed(2)}</span>
+                  <span className="text-primary font-medium">{formatAmountWithCurrency(Math.max(0, customerBalance - returnTotal), invoiceData?.currencyCode || DEFAULT_CURRENCY, invoiceData?.currencySymbol)}</span>
                 </div>
               </div>
 

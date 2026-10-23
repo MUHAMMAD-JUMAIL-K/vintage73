@@ -183,7 +183,7 @@ export default function BankStatementPage() {
                                 <th className="border border-slate-300 p-2 text-left">BANK NAME</th>
                                 <th className="border border-slate-300 p-2 text-left w-32">ACCOUNT NUMBER</th>
                                 <th className="border border-slate-300 p-2 text-left w-24">IFSC CODE</th>
-                                <th className="border border-slate-300 p-2 text-right w-24">AMOUNT ({companyProfile?.currencySymbol || '₹'})</th>
+                                <th className="border border-slate-300 p-2 text-right w-24">AMOUNT ({companyProfile?.currencySymbol || 'AED'})</th>
                             </tr>
                         </thead>
                             <tbody>
@@ -199,7 +199,7 @@ export default function BankStatementPage() {
                                 ))}
                                 <tr className="bg-slate-50 font-medium">
                                     <td colSpan="5" className="border border-slate-300 p-3 text-right text-xs uppercase">Total Transfer Amount</td>
-                                    <td className="border border-slate-300 p-3 text-right text-xs">{companyProfile?.currencySymbol || '₹'}{totalAmount.toLocaleString()}</td>
+                                    <td className="border border-slate-300 p-3 text-right text-xs">{companyProfile?.currencySymbol || 'AED'}{totalAmount.toLocaleString()}</td>
                                 </tr>
                             </tbody>
                         </table>

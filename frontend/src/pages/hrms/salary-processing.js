@@ -214,7 +214,7 @@ export default function SalaryProcessing() {
             details: [
                 { label: 'Employee', value: payroll.user?.name },
                 { label: 'Period', value: `${payroll.month} ${payroll.year}` },
-                { label: 'Net Salary', value: `${companyProfile?.currencySymbol || '₹'}${parseFloat(payroll.netSalary).toLocaleString()}` }
+                { label: 'Net Salary', value: `${companyProfile?.currencySymbol || 'AED'}${parseFloat(payroll.netSalary).toLocaleString()}` }
             ]
         });
     };
@@ -241,7 +241,7 @@ export default function SalaryProcessing() {
             details: [
                 { label: 'Employee', value: payroll.user?.name },
                 { label: 'Period', value: `${payroll.month} ${payroll.year}` },
-                { label: 'Amount to Void', value: `${companyProfile?.currencySymbol || '₹'}${parseFloat(payroll.netSalary).toLocaleString()}` }
+                { label: 'Amount to Void', value: `${companyProfile?.currencySymbol || 'AED'}${parseFloat(payroll.netSalary).toLocaleString()}` }
             ]
         });
     };
@@ -289,7 +289,7 @@ export default function SalaryProcessing() {
                     <div>
                         <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Total Salary</p>
                         <p className="text-2xl font-extrabold text-slate-800">
-                            {companyProfile?.currencySymbol || '₹'}{stats.totalSalary.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            {companyProfile?.currencySymbol || 'AED'}{stats.totalSalary.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </p>
                     </div>
                 </div>
@@ -393,7 +393,7 @@ export default function SalaryProcessing() {
                                     <SearchableSelect
                                         options={users.map(u => ({
                                             value: u.id,
-                                            label: `${u.name} (@${u.username})${u.employeeProfile?.basicSalary ? ` - ${companyProfile?.currencySymbol || '₹'}${u.employeeProfile.basicSalary}` : ' - No salary set'}`
+                                            label: `${u.name} (@${u.username})${u.employeeProfile?.basicSalary ? ` - ${companyProfile?.currencySymbol || 'AED'}${u.employeeProfile.basicSalary}` : ' - No salary set'}`
                                         }))}
                                         value={processingData.userId}
                                         onChange={val => setProcessingData({ ...processingData, userId: val })}
@@ -462,26 +462,26 @@ export default function SalaryProcessing() {
                                     <div className="space-y-2 px-1">
                                         <div className="flex justify-between text-xs font-medium text-slate-600">
                                             <span>Monthly Basic</span>
-                                            <span>{companyProfile?.currencySymbol || '₹'}{parseFloat(preview.basicSalary).toLocaleString()}</span>
+                                            <span>{companyProfile?.currencySymbol || 'AED'}{parseFloat(preview.basicSalary).toLocaleString()}</span>
                                         </div>
                                         {preview.calculation.totalDays > preview.calculation.payableDays && (
                                             <div className="flex justify-between text-xs font-medium text-red-500">
                                                 <span className="flex items-center gap-1">
                                                     Deductions ({Number(preview.calculation.totalDays - preview.calculation.payableDays).toFixed(1).replace(/\.0$/, '')} days)
                                                 </span>
-                                                <span>-{companyProfile?.currencySymbol || '₹'}{(parseFloat(preview.basicSalary) - parseFloat(preview.calculation.calculatedBasic)).toLocaleString()}</span>
+                                                <span>-{companyProfile?.currencySymbol || 'AED'}{(parseFloat(preview.basicSalary) - parseFloat(preview.calculation.calculatedBasic)).toLocaleString()}</span>
                                             </div>
                                         )}
                                         {preview.pendingAdvances > 0 && (
                                             <div className="flex justify-between text-xs font-medium text-amber-600 bg-amber-50 p-2 rounded-lg border border-amber-100 mt-2">
                                                 <span>Salary Advances</span>
-                                                <span>-{companyProfile?.currencySymbol || '₹'}{parseFloat(preview.pendingAdvances).toLocaleString()}</span>
+                                                <span>-{companyProfile?.currencySymbol || 'AED'}{parseFloat(preview.pendingAdvances).toLocaleString()}</span>
                                             </div>
                                         )}
                                         <div className="border-t border-slate-200 pt-2 flex justify-between items-center">
                                             <span className="text-xs font-medium text-slate-800 uppercase tracking-wider">Final Pay</span>
                                             <span className="text-lg font-medium text-slate-900 leading-none">
-                                                {companyProfile?.currencySymbol || '₹'}{(parseFloat(preview.calculation.calculatedBasic) - parseFloat(preview.pendingAdvances || 0)).toLocaleString()}
+                                                {companyProfile?.currencySymbol || 'AED'}{(parseFloat(preview.calculation.calculatedBasic) - parseFloat(preview.pendingAdvances || 0)).toLocaleString()}
                                             </span>
                                         </div>
                                     </div>
@@ -497,7 +497,7 @@ export default function SalaryProcessing() {
 
                             <div>
                                 <label className="block text-xs font-medium text-slate-400 uppercase tracking-widest mb-2">
-                                    Allowances ({companyProfile?.currencySymbol || '₹'})
+                                    Allowances ({companyProfile?.currencySymbol || 'AED'})
                                 </label>
                                 <input
                                     type="number"
@@ -510,7 +510,7 @@ export default function SalaryProcessing() {
 
                             <div>
                                 <label className="block text-xs font-medium text-slate-400 uppercase tracking-widest mb-2">
-                                    Deductions ({companyProfile?.currencySymbol || '₹'})
+                                    Deductions ({companyProfile?.currencySymbol || 'AED'})
                                 </label>
                                 <input
                                     type="number"
@@ -573,7 +573,7 @@ export default function SalaryProcessing() {
                                             <div className="flex items-center gap-4">
                                                 <div className="text-right">
                                                     <div className="font-medium text-primary">
-                                                        {companyProfile?.currencySymbol || '₹'}{parseFloat(p.netSalary).toFixed(2)}
+                                                        {companyProfile?.currencySymbol || 'AED'}{parseFloat(p.netSalary).toFixed(2)}
                                                     </div>
                                                     <div className={`text-[10px] font-medium uppercase tracking-widest ${p.status === 'GENERATED' ? 'text-amber-500' : 'text-primary'}`}>
                                                         {p.status}

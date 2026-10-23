@@ -40,8 +40,13 @@ export default function JournalEntry() {
     const [filterStartDate, setFilterStartDate] = useState('');
     const [filterEndDate, setFilterEndDate] = useState('');
     const [filterLedgerId, setFilterLedgerId] = useState('');
+    const [user, setUser] = useState(null);
 
     useEffect(() => {
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+            try { setUser(JSON.parse(storedUser)); } catch (e) {}
+        }
         fetchLedgers();
         fetchHistory();
     }, []);
@@ -132,7 +137,7 @@ export default function JournalEntry() {
         e.preventDefault();
 
         if (!isBalanced) {
-            toast.error(`Voucher is not balanced. Current Difference: ${formatCurrency(difference, 'INR')}`);
+            toast.error(`Voucher is not balanced. Current Difference: ${formatCurrency(difference, user?.branch || 'AED')}`);
             return;
         }
 
@@ -286,7 +291,7 @@ export default function JournalEntry() {
                             <div className="flex items-center gap-4">
                                 <span className="text-[10px] font-medium text-white/70 uppercase tracking-widest">Transaction Status:</span>
                                 <span className="text-xs font-medium text-white uppercase tracking-wider">
-                                    {isBalanced ? 'READY TO POST (BALANCED)' : `UNBALANCED (DIFF: ${formatCurrency(difference, 'INR')})`}
+                                    {isBalanced ? 'READY TO POST (BALANCED)' : `UNBALANCED (DIFF: ${formatCurrency(difference, user?.branch || 'AED')})`}
                                 </span>
                             </div>
                             {editId && (
@@ -365,7 +370,7 @@ export default function JournalEntry() {
                                                                 <div className="flex items-center gap-2 pl-2">
                                                                     <div className={`w-1.5 h-1.5 rounded-full ${selectedLedger.currentBalance >= 0 ? 'bg-primary' : 'bg-red-500'}`} />
                                                                     <span className="text-[10px] font-semibold text-slate-400">
-                                                                        Balance: {formatCurrency(Math.abs(selectedLedger.currentBalance), 'INR')} {selectedLedger.currentBalance >= 0 ? 'Dr' : 'Cr'}
+                                                                        Balance: {formatCurrency(Math.abs(selectedLedger.currentBalance), user?.branch || 'AED')} {selectedLedger.currentBalance >= 0 ? 'Dr' : 'Cr'}
                                                                     </span>
                                                                 </div>
                                                             )}
@@ -434,20 +439,20 @@ export default function JournalEntry() {
                                             <td className="px-5 py-3 text-right bg-primary-dark/80">
                                                 <div className="flex flex-col text-right">
                                                     <span className="text-[9px] font-medium text-white/50 uppercase tracking-widest">Total DR</span>
-                                                    <span className="text-sm font-medium tabular-nums">{formatCurrency(totalDebit, 'INR')}</span>
+                                                    <span className="text-sm font-medium tabular-nums">{formatCurrency(totalDebit, user?.branch || 'AED')}</span>
                                                 </div>
                                             </td>
                                             <td className="px-5 py-3 text-right bg-primary-dark/80">
                                                 <div className="flex flex-col text-right">
                                                     <span className="text-[9px] font-medium text-white/50 uppercase tracking-widest">Total CR</span>
-                                                    <span className="text-sm font-medium tabular-nums">{formatCurrency(totalCredit, 'INR')}</span>
+                                                    <span className="text-sm font-medium tabular-nums">{formatCurrency(totalCredit, user?.branch || 'AED')}</span>
                                                 </div>
                                             </td>
                                             <td colSpan="2" className="px-5 py-3 bg-primary-darker/20">
                                                 <div className="flex flex-col items-center">
                                                     <span className="text-[9px] font-medium text-white/50 uppercase tracking-widest">Difference</span>
                                                     <span className={`text-sm font-medium tabular-nums ${difference === 0 ? 'text-primary' : 'text-orange-400'}`}>
-                                                        {formatCurrency(difference, 'INR')}
+                                                        {formatCurrency(difference, user?.branch || 'AED')}
                                                     </span>
                                                 </div>
                                             </td>
@@ -612,7 +617,7 @@ export default function JournalEntry() {
                                                 </td>
                                                 <td className="px-6 py-4 text-right">
                                                     <span className="text-sm font-medium text-slate-900 tabular-nums">
-                                                        {formatCurrency(v.totalAmount, v.branch || 'INR')}
+                                                        {formatCurrency(v.totalAmount, v.branch || 'AED')}
                                                     </span>
                                                 </td>
                                                 <td className="px-6 py-4">
@@ -669,7 +674,7 @@ export default function JournalEntry() {
                 details={[
                     { label: 'Voucher Date', value: formData.date },
                     { label: 'Account Items', value: entries.filter(e => e.ledgerId).length },
-                    { label: 'Total Value', value: formatCurrency(totalDebit, 'INR') },
+                    { label: 'Total Value', value: formatCurrency(totalDebit, user?.branch || 'AED') },
                     { label: 'Status', value: 'BALANCED' }
                 ]}
             />

@@ -90,7 +90,7 @@ export default function SalaryAdvance() {
     };
 
     const isAdmin = user?.role === 'admin';
-    const currencySymbol = companyProfile?.currencySymbol || '₹';
+    const currencySymbol = companyProfile?.currencySymbol || 'AED';
 
     // Calculate pending approved advances total
     const pendingTotal = advances

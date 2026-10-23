@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import api from '@/lib/api';
 import { useTabs } from '@/context/TabContext';
+import { formatCurrency as formatCurrencyLib, resolveActiveCurrency, DEFAULT_CURRENCY } from '@/lib/currency';
 import { 
   FiFileText, FiRefreshCw, FiBook, FiLayers, FiCheckCircle, 
   FiSettings, FiLock, FiList, FiArrowUpRight, FiPieChart, 
   FiArrowDownLeft, FiActivity, FiDollarSign, FiBriefcase,
   FiTrendingUp, FiCreditCard, FiTarget, FiPlus, FiFilter,
-  FiCalendar, FiX, FiAlertTriangle
+  FiCalendar, FiX, FiAlertTriangle, FiGlobe
 } from 'react-icons/fi';
 import { Bar, Line, Doughnut, Pie } from 'react-chartjs-2';
 import {
@@ -42,22 +43,54 @@ export default function AccountingDashboard() {
   const [loading, setLoading] = useState(true);
   const [filterStartDate, setFilterStartDate] = useState('');
   const [filterEndDate, setFilterEndDate] = useState('');
+  const [selectedBranchId, setSelectedBranchId] = useState('');
+  const [branches, setBranches] = useState([]);
+  const [activeCurrency, setActiveCurrency] = useState({ code: 'AED', symbol: 'AED' });
 
   useEffect(() => {
-    fetchDashboardStats();
+    const saved = localStorage.getItem('activeBranchId');
+    if (saved) setSelectedBranchId(saved);
+
+    const fetchBranches = async () => {
+      try {
+        const res = await api.get('/branches');
+        const branchList = Array.isArray(res.data) ? res.data : (res.data?.branches || []);
+        setBranches(branchList);
+      } catch (e) {
+        console.error('Failed to load branches:', e);
+      }
+    };
+    fetchBranches();
+
+    const handleBranchChange = (e) => {
+      const nextId = e.detail?.branchId || localStorage.getItem('activeBranchId') || '';
+      setSelectedBranchId(nextId);
+    };
+    window.addEventListener('activeBranchChanged', handleBranchChange);
+    return () => window.removeEventListener('activeBranchChanged', handleBranchChange);
   }, []);
 
-  const fetchDashboardStats = async (start = filterStartDate, end = filterEndDate) => {
+  useEffect(() => {
+    fetchDashboardStats(filterStartDate, filterEndDate, selectedBranchId);
+  }, [selectedBranchId]);
+
+  const fetchDashboardStats = async (start = filterStartDate, end = filterEndDate, branchId = selectedBranchId) => {
     try {
-      let url = '/accounting/dashboard';
-      if (start || end) {
-        const params = new URLSearchParams();
-        if (start) params.append('startDate', start);
-        if (end) params.append('endDate', end);
-        url += `?${params.toString()}`;
-      }
+      const params = new URLSearchParams();
+      if (start) params.append('startDate', start);
+      if (end) params.append('endDate', end);
+      if (branchId) params.append('branchId', branchId);
+      const queryString = params.toString();
+      const url = `/accounting/dashboard${queryString ? `?${queryString}` : ''}`;
+      
       const res = await api.get(url);
       setStats(res.data);
+      if (res.data?.currency) {
+        setActiveCurrency(res.data.currency);
+      } else {
+        const matchedBranch = branches.find(b => String(b.id) === String(branchId));
+        setActiveCurrency(resolveActiveCurrency(matchedBranch, null));
+      }
     } catch (err) {
       console.error(err);
     } finally {
@@ -65,14 +98,24 @@ export default function AccountingDashboard() {
     }
   };
 
+  const handleBranchSelect = (branchId) => {
+    setSelectedBranchId(branchId);
+    if (branchId) {
+      localStorage.setItem('activeBranchId', branchId);
+    } else {
+      localStorage.removeItem('activeBranchId');
+    }
+    window.dispatchEvent(new CustomEvent('activeBranchChanged', { detail: { branchId } }));
+  };
+
   const handleClear = () => {
     setFilterStartDate('');
     setFilterEndDate('');
-    fetchDashboardStats('', '');
+    fetchDashboardStats('', '', selectedBranchId);
   };
 
   const formatCurrency = (val) => {
-    return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(val || 0);
+    return formatCurrencyLib(val, activeCurrency);
   };
 
   if (loading) return <div className="p-8 text-center text-slate-400">Loading Dashboard...</div>;
@@ -105,6 +148,27 @@ export default function AccountingDashboard() {
           </div>
           
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
+            {branches.length > 0 && (
+              <div className="flex items-center bg-white border border-slate-200 rounded-xl px-3 py-1.5 shadow-sm text-xs font-semibold gap-2">
+                <FiGlobe className="text-slate-400" />
+                <select
+                  value={selectedBranchId}
+                  onChange={e => handleBranchSelect(e.target.value)}
+                  className="bg-transparent border-none text-xs font-semibold text-slate-700 outline-none cursor-pointer"
+                >
+                  <option value="">All Branches</option>
+                  {branches.map(b => (
+                    <option key={b.id} value={b.id}>
+                      {b.name} ({b.currencyCode || 'AED'})
+                    </option>
+                  ))}
+                </select>
+                <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 rounded-md font-bold text-[11px] border border-emerald-200">
+                  {activeCurrency.code || 'AED'}
+                </span>
+              </div>
+            )}
+
             <div className="flex items-center bg-white border border-slate-200 rounded-xl p-1 shadow-sm w-full sm:w-auto transition-all focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/10">
               <div className="hidden sm:flex items-center px-3 border-r border-slate-100">
                 <FiCalendar className="text-slate-400 mr-2" size={14} />

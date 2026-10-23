@@ -45,7 +45,7 @@ export default function BalanceSheet() {
         }
     };
 
-    const activeCurrency = data?.currency || { code: 'INR', symbol: '₹' };
+    const activeCurrency = data?.currency || { code: 'AED', symbol: 'AED' };
     const branchLabel = data?.branch ? data.branch.name : 'All Branches (Consolidated)';
 
     return (
@@ -81,7 +81,7 @@ export default function BalanceSheet() {
                                 <option value="" className="text-slate-800">All Branches (Consolidated)</option>
                                 {branches.map(b => (
                                     <option key={b.id} value={b.id} className="text-slate-800">
-                                        {b.name} ({b.currencyCode || 'INR'})
+                                        {b.name} ({b.currencyCode || 'AED'})
                                     </option>
                                 ))}
                             </select>

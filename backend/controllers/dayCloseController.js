@@ -12,6 +12,7 @@ const {
   parseBusinessDateStart,
   parseBusinessDateEnd
 } = require('../utils/cashDrawerHelper');
+const { formatCurrency, getCurrencySymbol } = require('../utils/currencyHelper');
 
 // Resolves effective branch id respecting user permissions
 const resolveEffectiveBranchId = async (req) => {
@@ -67,8 +68,8 @@ const getDayCloseStatus = asyncHandler(async (req, res) => {
     success: true,
     branchId: targetBranchId,
     branchName: branch?.name || 'Branch',
-    currencySymbol: branch?.currencySymbol || '₹',
-    currencyCode: branch?.currencyCode || 'INR',
+    currencySymbol: branch?.currencySymbol || (branch?.currencyCode === 'INR' ? '₹' : 'AED'),
+    currencyCode: branch?.currencyCode || 'AED',
     businessDate: selectedDateStr,
     businessDateDisplay: formatDisplayDate(selectedDateStr),
     activeDate: activeDateInfo.dateStr,
@@ -262,8 +263,9 @@ const openDay = asyncHandler(async (req, res) => {
 
   // If opening difference is not zero, require an explanation
   if (Math.abs(openingDifference) > 0.01 && !openingDiscrepancyReason?.trim()) {
+    const branchForDiff = await prisma.branch.findUnique({ where: { id: targetBranchId }, select: { currencyCode: true, currencySymbol: true } });
     res.status(400);
-    throw new Error(`Opening difference of ₹${openingDifference.toFixed(2)} requires an explanation before opening.`);
+    throw new Error(`Opening difference of ${formatCurrency(openingDifference, branchForDiff?.currencyCode || 'AED', branchForDiff?.currencySymbol)} requires an explanation before opening.`);
   }
 
   // Perform database upsert in a safe transaction
@@ -324,9 +326,10 @@ const openDay = asyncHandler(async (req, res) => {
     data: { closingExpectedCash: updatedDrawer.expectedClosingCash }
   });
 
+  const branchForMsg = await prisma.branch.findUnique({ where: { id: targetBranchId }, select: { currencyCode: true, currencySymbol: true } });
   res.json({
     success: true,
-    message: `Business Day ${formatDisplayDate(dateStr)} opened successfully with balance ₹${actualCash.toFixed(2)}.`,
+    message: `Business Day ${formatDisplayDate(dateStr)} opened successfully with balance ${formatCurrency(actualCash, branchForMsg?.currencyCode || 'AED', branchForMsg?.currencySymbol)}.`,
     dayClose: {
       ...dayCloseRecord,
       closingExpectedCash: updatedDrawer.expectedClosingCash
@@ -441,9 +444,10 @@ const editOpeningAmount = asyncHandler(async (req, res) => {
     }
   });
 
+  const branchForMsg = await prisma.branch.findUnique({ where: { id: targetBranchId }, select: { currencyCode: true, currencySymbol: true } });
   res.json({
     success: true,
-    message: `Opening amount successfully updated to ₹${correctedCash.toFixed(2)}.`,
+    message: `Opening amount successfully updated to ${formatCurrency(correctedCash, branchForMsg?.currencyCode || 'AED', branchForMsg?.currencySymbol)}.`,
     dayClose: {
       ...updatedRecord,
       closingExpectedCash: updatedDrawer.expectedClosingCash,
@@ -555,9 +559,10 @@ const editClosingCash = asyncHandler(async (req, res) => {
     });
   });
 
+  const branchForMsg = await prisma.branch.findUnique({ where: { id: targetBranchId }, select: { currencyCode: true, currencySymbol: true } });
   res.json({
     success: true,
-    message: `Physical cash count updated to ₹${physicalCash.toFixed(2)}. Difference: ₹${cashDifference.toFixed(2)}.`,
+    message: `Physical cash count updated to ${formatCurrency(physicalCash, branchForMsg?.currencyCode || 'AED', branchForMsg?.currencySymbol)}. Difference: ${formatCurrency(cashDifference, branchForMsg?.currencyCode || 'AED', branchForMsg?.currencySymbol)}.`,
     dayClose: updatedRecord,
     auditEntry
   });
@@ -767,8 +772,8 @@ const getSessionReport = asyncHandler(async (req, res) => {
     success: true,
     branchId: targetBranchId,
     branchName: branch?.name || 'Branch',
-    currencySymbol: branch?.currencySymbol || '₹',
-    currencyCode: branch?.currencyCode || 'INR',
+    currencySymbol: branch?.currencySymbol || (branch?.currencyCode === 'INR' ? '₹' : 'AED'),
+    currencyCode: branch?.currencyCode || 'AED',
     businessDate: dateStr,
     businessDateDisplay: formatDisplayDate(dateStr),
     report: drawer
@@ -1397,10 +1402,11 @@ const confirmDayClose = asyncHandler(async (req, res) => {
 
   const cashDifference = Number((physicalCash - closingExpectedCash).toFixed(2));
 
-  // If cash difference is significant (> ₹10) and no note / manager approval, warn
+  // If cash difference is significant (> 10) and no note / manager approval, warn
   if (Math.abs(cashDifference) > 10 && !notes?.trim() && !savedExceptions.cashbook) {
+    const branchForDiff = await prisma.branch.findUnique({ where: { id: targetBranchId }, select: { currencyCode: true, currencySymbol: true } });
     res.status(400);
-    throw new Error(`Cash difference of ₹${cashDifference.toFixed(2)} requires an explanation note or manager approval before closing.`);
+    throw new Error(`Cash difference of ${formatCurrency(cashDifference, branchForDiff?.currencyCode || 'AED', branchForDiff?.currencySymbol)} requires an explanation note or manager approval before closing.`);
   }
 
   const startUtc = parseBusinessDateStart(dateStr);
@@ -1484,9 +1490,10 @@ const confirmDayClose = asyncHandler(async (req, res) => {
     });
   });
 
+  const branchForMsg = await prisma.branch.findUnique({ where: { id: targetBranchId }, select: { currencyCode: true, currencySymbol: true } });
   res.json({
     success: true,
-    message: `Day Close for ${formatDisplayDate(dateStr)} saved successfully with final closing cash ₹${physicalCash.toFixed(2)}.`,
+    message: `Day Close for ${formatDisplayDate(dateStr)} saved successfully with final closing cash ${formatCurrency(physicalCash, branchForMsg?.currencyCode || 'AED', branchForMsg?.currencySymbol)}.`,
     dayClose: dayCloseRecord
   });
 });

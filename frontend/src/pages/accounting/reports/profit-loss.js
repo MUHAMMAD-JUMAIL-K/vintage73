@@ -54,7 +54,7 @@ export default function ProfitLoss() {
         fetchProfitLoss();
     };
 
-    const activeCurrency = data?.currency || { code: 'INR', symbol: '₹' };
+    const activeCurrency = data?.currency || { code: 'AED', symbol: 'AED' };
     const branchLabel = data?.branch ? data.branch.name : 'All Branches (Consolidated)';
 
     const filteredIncome = data?.income?.filter(item =>
@@ -67,7 +67,7 @@ export default function ProfitLoss() {
 
     const handleExport = () => {
         if (!data) return;
-        const currLabel = activeCurrency?.code || 'INR';
+        const currLabel = activeCurrency?.code || 'AED';
         const csvContent = [
             ['Report', 'Profit & Loss Statement'],
             ['Branch', `"${branchLabel.replace(/"/g, '""')}"`],
@@ -130,7 +130,7 @@ export default function ProfitLoss() {
                                 <option value="" className="text-slate-800">All Branches (Consolidated)</option>
                                 {branches.map(b => (
                                     <option key={b.id} value={b.id} className="text-slate-800">
-                                        {b.name} ({b.currencyCode || 'INR'})
+                                        {b.name} ({b.currencyCode || 'AED'})
                                     </option>
                                 ))}
                             </select>

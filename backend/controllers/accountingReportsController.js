@@ -127,11 +127,11 @@ exports.getTrialBalance = asyncHandler(async (req, res) => {
   if (isConsolidated) {
     const currencyTotals = {};
     for (const b of (branches || [])) {
-      const bCode = b.currencyCode || 'INR';
+      const bCode = b.currencyCode || 'AED';
       if (!currencyTotals[bCode]) {
         currencyTotals[bCode] = {
           currencyCode: bCode,
-          currencySymbol: b.currencySymbol || '₹',
+          currencySymbol: b.currencySymbol || (bCode === 'INR' ? '₹' : 'AED'),
           branchNames: [b.name],
           totalDebit: 0,
           totalCredit: 0
@@ -152,7 +152,7 @@ exports.getTrialBalance = asyncHandler(async (req, res) => {
 
     for (const vb of vouchersByBranch) {
       const b = (branches || []).find(br => br.id === vb.branchId);
-      const bCode = b?.currencyCode || 'INR';
+      const bCode = b?.currencyCode || 'AED';
       if (currencyTotals[bCode]) {
         currencyTotals[bCode].totalDebit += Number(vb._sum.totalAmount || 0);
         currencyTotals[bCode].totalCredit += Number(vb._sum.totalAmount || 0);
@@ -171,9 +171,9 @@ exports.getTrialBalance = asyncHandler(async (req, res) => {
     branch: activeBranch,
     isConsolidated,
     currency: activeBranch ? {
-      code: activeBranch.currencyCode || 'INR',
-      symbol: activeBranch.currencySymbol || '₹'
-    } : { code: 'INR', symbol: '₹' },
+      code: activeBranch.currencyCode || 'AED',
+      symbol: activeBranch.currencySymbol || (activeBranch.currencyCode === 'INR' ? '₹' : 'AED')
+    } : { code: 'AED', symbol: 'AED' },
     currencyBreakdown
   });
 });
@@ -273,9 +273,9 @@ exports.getProfitLoss = asyncHandler(async (req, res) => {
     branch: activeBranch,
     isConsolidated,
     currency: activeBranch ? {
-      code: activeBranch.currencyCode || 'INR',
-      symbol: activeBranch.currencySymbol || '₹'
-    } : { code: 'INR', symbol: '₹' }
+      code: activeBranch.currencyCode || 'AED',
+      symbol: activeBranch.currencySymbol || (activeBranch.currencyCode === 'INR' ? '₹' : 'AED')
+    } : { code: 'AED', symbol: 'AED' }
   });
 });
 
@@ -392,9 +392,9 @@ exports.getBalanceSheet = asyncHandler(async (req, res) => {
     branch: activeBranch,
     isConsolidated,
     currency: activeBranch ? {
-      code: activeBranch.currencyCode || 'INR',
-      symbol: activeBranch.currencySymbol || '₹'
-    } : { code: 'INR', symbol: '₹' }
+      code: activeBranch.currencyCode || 'AED',
+      symbol: activeBranch.currencySymbol || (activeBranch.currencyCode === 'INR' ? '₹' : 'AED')
+    } : { code: 'AED', symbol: 'AED' }
   });
 });
 
@@ -586,7 +586,7 @@ exports.getLedgerStatement = asyncHandler(async (req, res) => {
         particulars: `Sales Invoice #${s.invoiceNumber}`,
         debit: finalPending, // DEBIT (OUT) = Pending / Credit Given to Customer
         credit: paid,        // CREDIT (IN) = Cash / Amount Received at Sale
-        narration: s.description || (paid > 0 ? `Paid: ₹${paid}, Pending: ₹${finalPending}` : 'Full Credit Sale'),
+        narration: s.description || (paid > 0 ? `Paid: ${s.currencyCode || activeBranch?.currencyCode || 'AED'} ${paid}, Pending: ${finalPending}` : 'Full Credit Sale'),
         balanceImpact: finalPending
       };
     });
@@ -650,9 +650,9 @@ exports.getLedgerStatement = asyncHandler(async (req, res) => {
       branch: activeBranch,
       isConsolidated,
       currency: activeBranch ? {
-        code: activeBranch.currencyCode || 'INR',
-        symbol: activeBranch.currencySymbol || '₹'
-      } : { code: 'INR', symbol: '₹' }
+        code: activeBranch.currencyCode || 'AED',
+        symbol: activeBranch.currencySymbol || (activeBranch.currencyCode === 'INR' ? '₹' : 'AED')
+      } : { code: 'AED', symbol: 'AED' }
     });
   }
 
@@ -824,9 +824,9 @@ exports.getLedgerStatement = asyncHandler(async (req, res) => {
     branch: activeBranch,
     isConsolidated,
     currency: activeBranch ? {
-      code: activeBranch.currencyCode || 'INR',
-      symbol: activeBranch.currencySymbol || '₹'
-    } : { code: 'INR', symbol: '₹' }
+      code: activeBranch.currencyCode || 'AED',
+      symbol: activeBranch.currencySymbol || (activeBranch.currencyCode === 'INR' ? '₹' : 'AED')
+    } : { code: 'AED', symbol: 'AED' }
   });
 });
 
@@ -996,7 +996,7 @@ function buildDailySaleAndCreditRows(daySales) {
       ? (isSettled
           ? `Credit settled (${custName})`
           : (breakdown.currentOutstanding < breakdown.initialCredit
-              ? `Credit to ${custName} (₹${(breakdown.initialCredit - breakdown.currentOutstanding).toFixed(2)} received)`
+              ? `Credit to ${custName} (${sale.currencyCode || activeBranch?.currencyCode || 'AED'} ${(breakdown.initialCredit - breakdown.currentOutstanding).toFixed(2)} received)`
               : `Credit to ${custName}`))
       : (isSettled ? 'Credit settled' : 'Customer Credit');
 
@@ -1405,9 +1405,9 @@ exports.getCashBook = asyncHandler(async (req, res) => {
     branch: activeBranch,
     isConsolidated,
     currency: activeBranch ? {
-      code: activeBranch.currencyCode || 'INR',
-      symbol: activeBranch.currencySymbol || '₹'
-    } : { code: 'INR', symbol: '₹' }
+      code: activeBranch.currencyCode || 'AED',
+      symbol: activeBranch.currencySymbol || (activeBranch.currencyCode === 'INR' ? '₹' : 'AED')
+    } : { code: 'AED', symbol: 'AED' }
   });
 });
 

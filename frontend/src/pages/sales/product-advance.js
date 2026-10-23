@@ -4,6 +4,7 @@ import api from '@/lib/api';
 import { FiPlus, FiCreditCard, FiSearch, FiClock, FiX } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import SearchableSelect from '@/components/SearchableSelect';
+import { formatCurrency, resolveActiveCurrency, DEFAULT_CURRENCY } from '@/lib/currency';
 
 export default function ProductAdvance() {
     const [advances, setAdvances] = useState([]);
@@ -11,6 +12,7 @@ export default function ProductAdvance() {
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
+    const [activeCurrency, setActiveCurrency] = useState({ code: 'AED', symbol: 'AED' });
 
     const [formData, setFormData] = useState({
         customerId: '',
@@ -33,7 +35,26 @@ export default function ProductAdvance() {
     useEffect(() => {
         fetchAdvances();
         fetchCustomers();
+        fetchActiveCurrency();
     }, []);
+
+    const fetchActiveCurrency = async () => {
+        try {
+            const userStr = typeof window !== 'undefined' ? localStorage.getItem('user') : null;
+            const currentUser = userStr ? JSON.parse(userStr) : null;
+            const branchId = currentUser?.branchId || (typeof window !== 'undefined' ? localStorage.getItem('activeBranchId') : null);
+
+            let branch = null;
+            if (branchId) {
+                const bRes = await api.get(`/branches/${branchId}`).catch(() => null);
+                branch = bRes?.data;
+            }
+            const compRes = await api.get('/company/profile').catch(() => null);
+            setActiveCurrency(resolveActiveCurrency(branch, compRes?.data));
+        } catch (e) {
+            console.error('Failed to resolve active currency:', e);
+        }
+    };
 
     const fetchAdvances = async () => {
         try {
@@ -152,9 +173,9 @@ export default function ProductAdvance() {
                                 filteredAdvances.map(advance => (
                                     <tr key={advance.id} className="hover:bg-slate-50 transition-colors">
                                         <td className="p-4 font-medium text-slate-800">{advance.customer?.name}</td>
-                                        <td className="p-4 text-right text-slate-600 font-medium">₹{Number(advance.totalAmount).toFixed(2)}</td>
-                                        <td className="p-4 text-right text-orange-500 font-medium">₹{Number(advance.usedAmount).toFixed(2)}</td>
-                                        <td className="p-4 text-right text-emerald-600 font-bold">₹{Number(advance.balance).toFixed(2)}</td>
+                                        <td className="p-4 text-right text-slate-600 font-medium">{formatCurrency(advance.totalAmount, activeCurrency)}</td>
+                                        <td className="p-4 text-right text-orange-500 font-medium">{formatCurrency(advance.usedAmount, activeCurrency)}</td>
+                                        <td className="p-4 text-right text-emerald-600 font-bold">{formatCurrency(advance.balance, activeCurrency)}</td>
                                         <td className="p-4 text-slate-400 text-xs truncate max-w-[150px]">{advance.notes || '-'}</td>
                                         <td className="p-4 text-center">
                                             <button 
@@ -192,7 +213,7 @@ export default function ProductAdvance() {
                             </div>
                             
                             <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">Advance Amount (₹) <span className="text-red-500">*</span></label>
+                                <label className="block text-sm font-medium text-slate-700 mb-1">Advance Amount ({activeCurrency.code || 'AED'}) <span className="text-red-500">*</span></label>
                                 <input
                                     type="number"
                                     required
@@ -287,9 +308,9 @@ export default function ProductAdvance() {
                                                     </span>
                                                 </td>
                                                 <td className={`p-4 text-right font-medium ${log.action === 'ADD' ? 'text-emerald-600' : 'text-orange-600'}`}>
-                                                    {log.action === 'ADD' ? '+' : '-'}₹{Number(log.amount).toFixed(2)}
+                                                    {log.action === 'ADD' ? '+' : '-'} {formatCurrency(log.amount, activeCurrency)}
                                                 </td>
-                                                <td className="p-4 text-right text-slate-700 font-semibold">₹{Number(log.balanceAfter).toFixed(2)}</td>
+                                                <td className="p-4 text-right text-slate-700 font-semibold">{formatCurrency(log.balanceAfter, activeCurrency)}</td>
                                                 <td className="p-4 text-slate-500 text-xs italic">{log.reference || '-'}</td>
                                             </tr>
                                         ))

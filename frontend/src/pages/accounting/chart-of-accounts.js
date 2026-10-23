@@ -30,7 +30,7 @@ export default function ChartOfAccounts() {
     const [branches, setBranches] = useState([]);
     const [selectedBranch, setSelectedBranch] = useState('');
     const [activeBranch, setActiveBranch] = useState(null);
-    const [activeCurrency, setActiveCurrency] = useState({ code: 'INR', symbol: '₹' });
+    const [activeCurrency, setActiveCurrency] = useState({ code: 'AED', symbol: 'AED' });
 
     useEffect(() => {
         fetchBranches();
@@ -63,11 +63,11 @@ export default function ChartOfAccounts() {
             if (ledgersRes.data && ledgersRes.data.ledgers) {
                 setLedgers(ledgersRes.data.ledgers);
                 setActiveBranch(ledgersRes.data.branch || null);
-                setActiveCurrency(ledgersRes.data.currency || { code: 'INR', symbol: '₹' });
+                setActiveCurrency(ledgersRes.data.currency || { code: 'AED', symbol: 'AED' });
             } else {
                 setLedgers(Array.isArray(ledgersRes.data) ? ledgersRes.data : []);
                 setActiveBranch(null);
-                setActiveCurrency({ code: 'INR', symbol: '₹' });
+                setActiveCurrency({ code: 'AED', symbol: 'AED' });
             }
 
             setGroups(groupsRes.data || []);
@@ -227,7 +227,7 @@ export default function ChartOfAccounts() {
     // Export to CSV with filter context
     const handleExport = () => {
         const branchLabel = activeBranch ? activeBranch.name : 'All Branches (Consolidated)';
-        const currLabel = activeCurrency?.code || 'INR';
+        const currLabel = activeCurrency?.code || 'AED';
 
         const filterSummary = [];
         if (searchTerm.trim()) filterSummary.push(`Search: "${searchTerm.trim()}"`);
@@ -279,7 +279,7 @@ export default function ChartOfAccounts() {
                             {activeBranch ? `Branch: ${activeBranch.name}` : 'Consolidated (All Branches)'}
                         </span>
                         <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-                            Currency: {activeCurrency?.code || 'INR'} ({activeCurrency?.symbol || '₹'})
+                            Currency: {activeCurrency?.code || 'AED'} ({activeCurrency?.symbol || 'AED'})
                         </span>
                     </div>
                 </div>
@@ -298,7 +298,7 @@ export default function ChartOfAccounts() {
                             <option value="">All Branches (Consolidated)</option>
                             {branches.map(b => (
                                 <option key={b.id} value={b.id}>
-                                    {b.name} ({b.currencyCode || 'INR'})
+                                    {b.name} ({b.currencyCode || 'AED'})
                                 </option>
                             ))}
                         </select>

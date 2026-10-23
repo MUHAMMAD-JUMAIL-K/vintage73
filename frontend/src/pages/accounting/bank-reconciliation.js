@@ -235,10 +235,10 @@ export default function BankReconciliation() {
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4 text-right font-medium text-blue-600 tabular-nums">
-                                                {tx.debitLedgerId === parseInt(selectedLedgerId) ? formatCurrency(parseFloat(tx.amount), tx.voucher?.branch || 'INR') : '-'}
+                                                {tx.debitLedgerId === parseInt(selectedLedgerId) ? formatCurrency(parseFloat(tx.amount), tx.voucher?.branch || 'AED') : '-'}
                                             </td>
                                             <td className="px-6 py-4 text-right font-medium text-red-500 tabular-nums">
-                                                {tx.creditLedgerId === parseInt(selectedLedgerId) ? formatCurrency(parseFloat(tx.amount), tx.voucher?.branch || 'INR') : '-'}
+                                                {tx.creditLedgerId === parseInt(selectedLedgerId) ? formatCurrency(parseFloat(tx.amount), tx.voucher?.branch || 'AED') : '-'}
                                             </td>
                                             <td className="px-6 py-4">
                                                 <input
@@ -278,7 +278,7 @@ function SummaryCard({ title, amount, icon, hint, highlight, warning }) {
                 </div>
             </div>
             <div className={`text-xl font-bold tabular-nums ${highlight ? 'text-emerald-700' : warning ? 'text-red-700' : 'text-slate-900'}`}>
-                {formatCurrency(Math.abs(amount || 0), 'INR')}
+                {formatCurrency(Math.abs(amount || 0), 'AED')}
                 <span className="text-[10px] ml-1 font-medium">{(amount || 0) >= 0 ? 'Dr' : 'Cr'}</span>
             </div>
             <p className="text-[10px] text-slate-400 mt-1 font-medium italic">{hint}</p>
