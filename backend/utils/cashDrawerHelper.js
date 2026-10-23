@@ -27,25 +27,45 @@ async function findPreviousClosedSession(branchId, beforeDateUtc, terminalId = n
     return { exists: false, session: null, closingCash: null };
   }
 
-  const where = {
+  const baseWhere = {
     branchId: parseInt(branchId),
     status: { in: ['CLOSED', 'ADMIN_CLOSED'] },
     businessDate: { lt: beforeDateUtc }
   };
 
+  let previousClosedDay = null;
+
   if (terminalId) {
-    where.terminalId = parseInt(terminalId);
+    // 1. Look for immediately preceding closed session for this specific terminal
+    previousClosedDay = await prisma.dayClose.findFirst({
+      where: {
+        ...baseWhere,
+        terminalId: parseInt(terminalId)
+      },
+      orderBy: { businessDate: 'desc' },
+      include: {
+        finalizedBy: { select: { id: true, name: true, username: true } },
+        openedBy: { select: { id: true, name: true, username: true } },
+        terminal: { select: { id: true, name: true, terminalCode: true } }
+      }
+    });
   }
 
-  const previousClosedDay = await prisma.dayClose.findFirst({
-    where,
-    orderBy: { businessDate: 'desc' },
-    include: {
-      finalizedBy: { select: { id: true, name: true, username: true } },
-      openedBy: { select: { id: true, name: true, username: true } },
-      terminal: { select: { id: true, name: true, terminalCode: true } }
-    }
-  });
+  // 2. If no terminal-specific closed session found, look for branch session (terminalId: null)
+  if (!previousClosedDay) {
+    previousClosedDay = await prisma.dayClose.findFirst({
+      where: {
+        ...baseWhere,
+        terminalId: null
+      },
+      orderBy: { businessDate: 'desc' },
+      include: {
+        finalizedBy: { select: { id: true, name: true, username: true } },
+        openedBy: { select: { id: true, name: true, username: true } },
+        terminal: { select: { id: true, name: true, terminalCode: true } }
+      }
+    });
+  }
 
   if (!previousClosedDay) {
     return { exists: false, session: null, closingCash: null };
@@ -174,7 +194,10 @@ async function calculateSessionCashDrawer(branchId, businessDateStr, terminalId 
         }
       });
     } else if ((s.paymentMethod || 'Cash').toLowerCase() === 'cash') {
-      saleCash += Number(s.paidAmount ?? s.totalAmount ?? 0);
+      const actualPaid = s.paidAmount !== null && s.paidAmount !== undefined
+        ? Number(s.paidAmount)
+        : (s.status === 'completed' ? Number(s.totalAmount || 0) : 0);
+      saleCash += actualPaid;
     }
 
     if (saleCash > 0) {

@@ -17,7 +17,8 @@ export default function ContraEntry() {
         toAccount: '',
         amount: '',
         narration: '',
-        reference: ''
+        reference: '',
+        branchId: ''
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -36,11 +37,27 @@ export default function ContraEntry() {
     const [filterStartDate, setFilterStartDate] = useState('');
     const [filterEndDate, setFilterEndDate] = useState('');
     const [filterLedgerId, setFilterLedgerId] = useState('');
+    const [user, setUser] = useState(null);
+    const [branches, setBranches] = useState([]);
 
     useEffect(() => {
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+            try { setUser(JSON.parse(storedUser)); } catch (e) {}
+        }
+        fetchBranches();
         fetchLedgers();
         fetchHistory();
     }, []);
+
+    const fetchBranches = async () => {
+        try {
+            const res = await api.get('/branches');
+            setBranches(res.data || []);
+        } catch (err) {
+            console.error('Failed to load branches', err);
+        }
+    };
 
     const fetchLedgers = async () => {
         try {
@@ -148,7 +165,8 @@ export default function ContraEntry() {
             toAccount: '',
             amount: '',
             narration: '',
-            reference: ''
+            reference: '',
+            branchId: ''
         });
         setEditId(null);
     };
@@ -164,7 +182,8 @@ export default function ContraEntry() {
             toAccount: debitEntry?.ledgerId || debitEntry?.debitLedgerId || '',
             amount: v.totalAmount,
             narration: v.narration || '',
-            reference: v.reference || ''
+            reference: v.reference || '',
+            branchId: v.branchId || ''
         });
         setActiveTab('create');
     };
@@ -199,7 +218,12 @@ export default function ContraEntry() {
     const selectedFromAccount = ledgers.find(l => l.id == formData.fromAccount);
     const selectedToAccount = ledgers.find(l => l.id == formData.toAccount);
 
-    const activeBranchCurrency = (formData.branchId ? branches.find(b => b.id.toString() === formData.branchId.toString()) : (user?.branchId ? branches.find(b => b.id === user.branchId) : null)) || 'AED';
+    const activeBranchCurrency = (
+        (formData.branchId && Array.isArray(branches) ? branches.find(b => b.id?.toString() === formData.branchId?.toString()) : null) ||
+        (user?.branchId && Array.isArray(branches) ? branches.find(b => b.id === user.branchId) : null) ||
+        user?.branch ||
+        'AED'
+    );
 
     return (
         <div className="w-full space-y-6 pb-12 animate-in fade-in duration-300">

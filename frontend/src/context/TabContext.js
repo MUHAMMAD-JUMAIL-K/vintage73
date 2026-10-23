@@ -29,8 +29,10 @@ export function TabProvider({ children }) {
       if (prev.some((t) => t.path === tab.path)) return prev;
       return [...prev, tab];
     });
-    // Navigate to the new tab
-    router.push(tab.path);
+    // Navigate to the new tab only if not already there
+    if (router.asPath !== tab.path && router.pathname !== tab.path) {
+      router.push(tab.path);
+    }
   };
 
   const removeTab = (path, currentPath) => {
@@ -40,9 +42,14 @@ export function TabProvider({ children }) {
       // If we closed the active tab, navigate to the last remaining tab or dashboard
       if (path === currentPath) {
         if (newTabs.length > 0) {
-          router.push(newTabs[newTabs.length - 1].path);
+          const target = newTabs[newTabs.length - 1].path;
+          if (router.asPath !== target && router.pathname !== target) {
+            router.push(target);
+          }
         } else {
-          router.push('/dashboard');
+          if (router.asPath !== '/dashboard' && router.pathname !== '/dashboard') {
+            router.push('/dashboard');
+          }
         }
       }
       return newTabs;
@@ -51,7 +58,9 @@ export function TabProvider({ children }) {
 
   const closeAllTabs = () => {
     setTabs([]);
-    router.push('/dashboard');
+    if (router.asPath !== '/dashboard' && router.pathname !== '/dashboard') {
+      router.push('/dashboard');
+    }
   };
 
   const clearAllTabs = () => {

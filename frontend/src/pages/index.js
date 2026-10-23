@@ -1,10 +1,14 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
 
 export default function Home() {
   const router = useRouter();
+  const navigatedRef = useRef(false);
 
   useEffect(() => {
+    if (navigatedRef.current) return;
+    navigatedRef.current = true;
+
     const token = localStorage.getItem('token');
     if (token) {
       const storedUser = localStorage.getItem('user');
@@ -12,20 +16,20 @@ export default function Home() {
         try {
           const user = JSON.parse(storedUser);
           if (user.role === 'customer') {
-            router.push('/customer-dashboard');
+            router.replace('/customer-dashboard');
           } else {
-            router.push('/dashboard');
+            router.replace('/dashboard');
           }
         } catch (e) {
-          router.push('/dashboard');
+          router.replace('/dashboard');
         }
       } else {
-        router.push('/dashboard');
+        router.replace('/dashboard');
       }
     } else {
-      router.push('/login');
+      router.replace('/login');
     }
-  }, [router]);
+  }, []);
 
   return <div className="flex items-center justify-center h-screen">Loading...</div>;
 }

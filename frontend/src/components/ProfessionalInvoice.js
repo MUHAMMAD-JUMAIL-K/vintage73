@@ -134,9 +134,33 @@ const ProfessionalInvoice = React.forwardRef(({ printData, companyProfile, previ
     const isDeliveryActive = deliveryAmt > 0 || (hasDeliveryCharge === true || hasDeliveryCharge === 'true');
     const roundOffAmt = parseFloat(roundOffAmount || 0);
     const advanceAmt = parseFloat(advanceUsed || 0);
-    const paidAmt = printData.paidAmount !== undefined ? parseFloat(printData.paidAmount) : parseFloat(paidAmount || 0);
-    const balanceAmt = printData.balanceAmount !== undefined ? parseFloat(printData.balanceAmount) : Math.max(0, grandTotalAmt - paidAmt - advanceAmt);
     const paymentsList = printData.payments || [];
+
+    // Sum of actual payment records if available
+    const recordedPaymentsSum = Array.isArray(paymentsList) && paymentsList.length > 0
+        ? paymentsList.reduce((sum, p) => sum + (parseFloat(p.amount) || 0), 0)
+        : null;
+
+    let computedPaid = 0;
+    if (printData.paidAmount !== undefined && printData.paidAmount !== null) {
+        computedPaid = parseFloat(printData.paidAmount);
+        if (recordedPaymentsSum !== null && recordedPaymentsSum > computedPaid) {
+            computedPaid = recordedPaymentsSum;
+        }
+    } else if (recordedPaymentsSum !== null) {
+        computedPaid = recordedPaymentsSum;
+    } else if (paidAmount !== undefined && paidAmount !== null) {
+        computedPaid = parseFloat(paidAmount);
+    } else if (paymentMethod && paymentMethod.toLowerCase() === 'credit') {
+        computedPaid = 0;
+    } else {
+        computedPaid = grandTotalAmt;
+    }
+
+    const paidAmt = Math.max(0, computedPaid);
+    const balanceAmt = printData.balanceAmount !== undefined && printData.balanceAmount !== null
+        ? Math.max(0, parseFloat(printData.balanceAmount))
+        : Math.max(0, grandTotalAmt - paidAmt - advanceAmt);
 
     // Exact catalog subtotal = sum of (Actual Selling Price * Quantity)
     const totalCatalogPrice = useMemo(() => {

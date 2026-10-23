@@ -13,6 +13,7 @@ const {
   parseBusinessDateEnd
 } = require('../utils/cashDrawerHelper');
 const { formatCurrency, getCurrencySymbol } = require('../utils/currencyHelper');
+const { ensureLedger, postVoucher } = require('../utils/accountingHelper');
 
 // Resolves effective branch id respecting user permissions
 const resolveEffectiveBranchId = async (req) => {
@@ -152,6 +153,7 @@ const getDayCloseStatus = asyncHandler(async (req, res) => {
 const openDay = asyncHandler(async (req, res) => {
   const targetBranchId = await resolveEffectiveBranchId(req);
   const {
+    businessDate: inputDateStr,
     terminalId,
     previousClosingCash: inputPrevCash,
     additionalCashAdded: inputAddCash,
@@ -164,7 +166,7 @@ const openDay = asyncHandler(async (req, res) => {
 
   const todayStr = getLocalDateString();
   const activeDateInfo = await getBranchActiveBusinessDate(targetBranchId);
-  const dateStr = activeDateInfo.dateStr;
+  const dateStr = inputDateStr || activeDateInfo.dateStr;
 
   if (dateStr > todayStr) {
     res.status(400);
@@ -186,6 +188,11 @@ const openDay = asyncHandler(async (req, res) => {
   if (existing && (existing.status === 'CLOSED' || existing.status === 'ADMIN_CLOSED')) {
     res.status(400);
     throw new Error(`Business date ${formatDisplayDate(dateStr)} is already closed.`);
+  }
+
+  if (existing && (existing.status === 'OPEN' || existing.status === 'CLOSING_PENDING')) {
+    res.status(400);
+    throw new Error(`Business date ${formatDisplayDate(dateStr)} is already open. Use Edit Opening Amount if an adjustment is needed.`);
   }
 
   // Rule: Chronological Check: Verify no earlier date before dateStr is unclosed
@@ -1394,13 +1401,23 @@ const confirmDayClose = asyncHandler(async (req, res) => {
 
   // Authoritative financial calculations
   const drawer = await calculateSessionCashDrawer(targetBranchId, dateStr);
-  const closingExpectedCash = drawer.expectedClosingCash;
+  const expectedClosingCash = drawer.expectedClosingCash;
+  const closingExpectedCash = expectedClosingCash;
 
-  const physicalCash = inputPhysicalCash !== undefined && inputPhysicalCash !== null && inputPhysicalCash !== ''
-    ? parseFloat(inputPhysicalCash)
-    : (existingRecord?.physicalCash !== null ? Number(existingRecord.physicalCash) : closingExpectedCash);
+  // Actual Physical Cash Counted validation: never silently default to expectedClosingCash
+  let physicalCash = null;
+  if (inputPhysicalCash !== undefined && inputPhysicalCash !== null && inputPhysicalCash !== '') {
+    physicalCash = parseFloat(inputPhysicalCash);
+  } else if (existingRecord?.physicalCash !== null && existingRecord?.physicalCash !== undefined) {
+    physicalCash = Number(existingRecord.physicalCash);
+  }
 
-  const cashDifference = Number((physicalCash - closingExpectedCash).toFixed(2));
+  if (physicalCash === null || isNaN(physicalCash) || physicalCash < 0) {
+    res.status(400);
+    throw new Error('Actual physical cash counted is mandatory and must be a valid non-negative number to finalize Day Close.');
+  }
+
+  const cashDifference = Number((physicalCash - expectedClosingCash).toFixed(2));
 
   // If cash difference is significant (> 10) and no note / manager approval, warn
   if (Math.abs(cashDifference) > 10 && !notes?.trim() && !savedExceptions.cashbook) {
@@ -1445,9 +1462,9 @@ const confirmDayClose = asyncHandler(async (req, res) => {
     cashDifference
   };
 
-  // Save Day Close record as CLOSED
+  // Save Day Close record as CLOSED in an atomic transaction and handle Cash Over/Short accounting
   const dayCloseRecord = await prisma.$transaction(async (tx) => {
-    return await tx.dayClose.upsert({
+    const closedRecord = await tx.dayClose.upsert({
       where: {
         branchId_businessDate: {
           branchId: targetBranchId,
@@ -1488,6 +1505,47 @@ const confirmDayClose = asyncHandler(async (req, res) => {
         branch: { select: { id: true, name: true } }
       }
     });
+
+    // Accounting Integration: Post Cash Over/Short Journal Voucher if discrepancy exists and not already posted
+    if (Math.abs(cashDifference) > 0.01) {
+      const voucherRef = `DAYCLOSE-${targetBranchId}-${dateStr}`;
+      const existingVoucher = await tx.voucher.findFirst({
+        where: { reference: voucherRef, branchId: targetBranchId }
+      });
+
+      if (!existingVoucher) {
+        const isOverage = cashDifference > 0;
+        const diffAbs = Math.abs(cashDifference);
+        const cashLedger = await ensureLedger(tx, 'Cash', 'Cash-in-Hand');
+        const overShortLedger = await ensureLedger(
+          tx,
+          'Cash Over/Short',
+          isOverage ? 'Indirect Incomes' : 'Indirect Expenses'
+        );
+
+        const entries = isOverage
+          ? [
+              { ledgerId: cashLedger.id, type: 'DEBIT', amount: diffAbs },
+              { ledgerId: overShortLedger.id, type: 'CREDIT', amount: diffAbs }
+            ]
+          : [
+              { ledgerId: overShortLedger.id, type: 'DEBIT', amount: diffAbs },
+              { ledgerId: cashLedger.id, type: 'CREDIT', amount: diffAbs }
+            ];
+
+        await postVoucher(tx, {
+          type: 'JOURNAL',
+          date: dateUtc,
+          amount: diffAbs,
+          narration: `Day Close ${formatDisplayDate(dateStr)}: Cash ${isOverage ? 'Overage' : 'Shortage'} discrepancy adjustment. ${notes ? `Notes: ${notes}` : ''}`.trim(),
+          reference: voucherRef,
+          createdBy: req.user.id,
+          branchId: targetBranchId
+        }, entries);
+      }
+    }
+
+    return closedRecord;
   });
 
   const branchForMsg = await prisma.branch.findUnique({ where: { id: targetBranchId }, select: { currencyCode: true, currencySymbol: true } });

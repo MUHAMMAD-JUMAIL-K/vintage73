@@ -335,7 +335,7 @@ export default function Dashboard() {
                   <button
                     type="button"
                     onClick={() => {
-                      setEditClosingCashVal(dm.actualClosingCash !== null ? dm.actualClosingCash.toString() : dm.expectedClosingCash.toString());
+                      setEditClosingCashVal(dm.actualClosingCash !== null ? dm.actualClosingCash.toString() : '');
                       setEditClosingReason('');
                       setShowEditCloseModal(true);
                     }}

@@ -1109,13 +1109,13 @@ export default function SalesReport() {
                                 {salesTrend.length} Days Active
                             </span>
                         </div>
-                        <div className="h-72 w-full">
+                        <div className="h-72 w-full min-w-0" style={{ minHeight: 288 }}>
                             {salesTrend.length === 0 ? (
                                 <div className="h-full flex items-center justify-center text-slate-400 text-sm italic">
                                     No sales trend recorded for this period
                                 </div>
                             ) : (
-                                <ResponsiveContainer width="100%" height="100%">
+                                <ResponsiveContainer width="100%" height={280} minWidth={0} minHeight={280} debounce={50}>
                                     <AreaChart data={salesTrend} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                                         <defs>
                                             <linearGradient id="salesGradient" x1="0" y1="0" x2="0" y2="1">
@@ -2437,6 +2437,16 @@ export default function SalesReport() {
                                         <span>Total Payable:</span>
                                         <span className="text-primary" style={{ color: theme.primaryColor }}>{formatCurrency(modalTotalPayable, modalCurrency)}</span>
                                     </div>
+                                    <div className="flex justify-between text-emerald-600 font-semibold pt-1">
+                                        <span>Amount Paid:</span>
+                                        <span className="tabular-nums">{formatCurrency(selectedSale.paidAmount !== undefined ? selectedSale.paidAmount : modalTotalPayable, modalCurrency)}</span>
+                                    </div>
+                                    {(selectedSale.balanceAmount > 0.005) && (
+                                        <div className="flex justify-between text-rose-600 font-bold pt-1">
+                                            <span>Balance Due:</span>
+                                            <span className="tabular-nums">{formatCurrency(selectedSale.balanceAmount, modalCurrency)}</span>
+                                        </div>
+                                    )}
                                     <div className="flex justify-between text-slate-600 pt-1">
                                         <span>Purchase Cost:</span>
                                         <span className="font-medium text-slate-700">{formatCurrency(selectedSale.totalCost || 0, modalCurrency)}</span>
