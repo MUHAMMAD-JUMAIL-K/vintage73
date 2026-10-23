@@ -56,16 +56,23 @@ export default function CashBookReport() {
         }
     };
 
+    const sanitizeBranchId = (b) => {
+        if (!b) return undefined;
+        if (typeof b === 'object') return b.id?.toString() || b.value?.toString() || undefined;
+        if (b === '[object Object]' || b === 'all' || b === 'undefined' || b === 'null') return undefined;
+        return b.toString();
+    };
+
     const fetchCashReport = async (overrideBranchId) => {
         setLoading(true);
-        const targetBranchId = overrideBranchId !== undefined ? overrideBranchId : selectedBranch;
+        const targetBranchId = sanitizeBranchId(overrideBranchId !== undefined ? overrideBranchId : selectedBranch);
         try {
             // Call dedicated Cash Book report endpoint with branchId
             const res = await api.get('/accounting/reports/cash-book', {
                 params: {
                     startDate,
                     endDate,
-                    branchId: targetBranchId || undefined
+                    branchId: targetBranchId
                 }
             });
 
@@ -98,7 +105,7 @@ export default function CashBookReport() {
                             ledgerId: cashLedger.id,
                             startDate,
                             endDate,
-                            branchId: targetBranchId || undefined,
+                            branchId: targetBranchId,
                             isCashBook: 'true'
                         }
                     });

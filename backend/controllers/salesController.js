@@ -21,7 +21,7 @@ exports.createSale = asyncHandler(async (req, res) => {
     terminalId, isReturn = false, returnReason = '', originalInvoice = '',
     currencyCode = 'AED', exchangeRate = 1.0, description,
     deliveryCharge = 0, hasDeliveryCharge = false,
-    voucherCode
+    voucherCode, voucherName, showVoucherOnBill
   } = req.body;
   let { branchId } = req.body;
 
@@ -141,7 +141,8 @@ exports.createSale = asyncHandler(async (req, res) => {
 
     // Voucher Validation & Proportional Allocation
     let voucherValidation = null;
-    if (voucherCode && !isReturn) {
+    const isApplyVoucherDiscount = req.body.appliedVoucher !== null && req.body.applyVoucherDiscount !== false && (req.body.voucherDiscount === undefined || parseFloat(req.body.voucherDiscount) > 0);
+    if (voucherCode && !isReturn && isApplyVoucherDiscount) {
       voucherValidation = await validateVoucherForSale(tx, {
         code: voucherCode,
         customerId: customer?.id || customerId,
@@ -154,6 +155,14 @@ exports.createSale = asyncHandler(async (req, res) => {
     }
     const finalVoucherDiscount = voucherValidation ? voucherValidation.finalVoucherDiscount : 0;
     const lineAllocations = voucherValidation ? voucherValidation.lineAllocations : {};
+
+    let finalVoucherCode = voucherValidation ? voucherValidation.voucher.code : (voucherCode || null);
+    let finalVoucherName = voucherValidation ? voucherValidation.voucher.name : (voucherName || null);
+    if (!finalVoucherName && finalVoucherCode) {
+      const vRec = await tx.customerVoucher.findUnique({ where: { code: finalVoucherCode.trim().toUpperCase() } });
+      if (vRec) finalVoucherName = vRec.name;
+    }
+    const finalShowVoucherOnBill = showVoucherOnBill === true || showVoucherOnBill === 'true';
 
     // 1. Calculate Totals
     let subTotal = 0;
@@ -402,7 +411,9 @@ exports.createSale = asyncHandler(async (req, res) => {
         roundOffAmount: finalRoundOffAmount,
         deliveryCharge: effectiveDeliveryCharge,
         hasDeliveryCharge: isDeliveryEnabled,
-        voucherCode: voucherValidation ? voucherValidation.voucher.code : null,
+        voucherCode: finalVoucherCode,
+        voucherName: finalVoucherName,
+        showVoucherOnBill: finalShowVoucherOnBill,
         voucherDiscount: finalVoucherDiscount,
         advanceUsed: reqAdvanceUsed,
         paidAmount: finalPaidAmount,
@@ -433,8 +444,8 @@ exports.createSale = asyncHandler(async (req, res) => {
       }
     });
 
-    // Voucher Redemption
-    if (voucherValidation) {
+    // Voucher Redemption only if a discount was validated and applied
+    if (voucherValidation && finalVoucherDiscount > 0) {
       await redeemVoucherInSale(tx, {
         voucherId: voucherValidation.voucher.id,
         saleId: sale.id,
@@ -600,6 +611,8 @@ exports.getAllSales = asyncHandler(async (req, res) => {
       advanceUsed: Number(s.advanceUsed || 0),
       voucherDiscount: Number(s.voucherDiscount || 0),
       voucherCode: s.voucherCode || null,
+      voucherName: s.voucherName || null,
+      showVoucherOnBill: Boolean(s.showVoucherOnBill),
       paidAmount: paidAmt,
       balanceAmount: balAmt,
       payments: paymentsList,
@@ -674,19 +687,22 @@ exports.cancelSale = asyncHandler(async (req, res) => {
 
     // Restore redeemed CustomerVoucher if one was used
     if (sale.voucherCode) {
-      const redeemedVoucher = await tx.customerVoucher.findUnique({ where: { code: sale.voucherCode } });
-      if (redeemedVoucher) {
-        await tx.customerVoucher.update({
-          where: { id: redeemedVoucher.id },
-          data: {
-            usageCount: Math.max(0, redeemedVoucher.usageCount - 1),
-            status: 'ACTIVE',
-            redeemedSaleId: null,
-            redeemedAt: null
-          }
-        });
+      const redemption = await tx.customerVoucherRedemption.findFirst({ where: { saleId: parseInt(id) } });
+      if (redemption) {
+        const redeemedVoucher = await tx.customerVoucher.findUnique({ where: { code: sale.voucherCode } });
+        if (redeemedVoucher) {
+          await tx.customerVoucher.update({
+            where: { id: redeemedVoucher.id },
+            data: {
+              usageCount: Math.max(0, redeemedVoucher.usageCount - 1),
+              status: 'ACTIVE',
+              redeemedSaleId: null,
+              redeemedAt: null
+            }
+          });
+        }
+        await tx.customerVoucherRedemption.deleteMany({ where: { saleId: parseInt(id) } });
       }
-      await tx.customerVoucherRedemption.deleteMany({ where: { saleId: parseInt(id) } });
     }
 
     // Cancel any purchase rewards issued on this sale
@@ -998,6 +1014,16 @@ exports.updateSale = asyncHandler(async (req, res) => {
       }
     }
 
+    let updateVoucherCode = req.body.voucherCode !== undefined ? req.body.voucherCode : existing.voucherCode;
+    let updateVoucherName = req.body.voucherName !== undefined ? req.body.voucherName : existing.voucherName;
+    if (!updateVoucherName && updateVoucherCode) {
+      const vRec = await tx.customerVoucher.findUnique({ where: { code: updateVoucherCode.trim().toUpperCase() } });
+      if (vRec) updateVoucherName = vRec.name;
+    }
+    const updateShowVoucherOnBill = req.body.showVoucherOnBill !== undefined 
+      ? (req.body.showVoucherOnBill === true || req.body.showVoucherOnBill === 'true')
+      : existing.showVoucherOnBill;
+
     const updated = await tx.sale.update({
       where: { id: validSaleId },
       data: {
@@ -1010,6 +1036,9 @@ exports.updateSale = asyncHandler(async (req, res) => {
         roundOffAmount: finalRoundOffAmount,
         deliveryCharge: effectiveDeliveryCharge,
         hasDeliveryCharge: isDeliveryEnabled,
+        voucherCode: updateVoucherCode,
+        voucherName: updateVoucherName,
+        showVoucherOnBill: updateShowVoucherOnBill,
         paidAmount: finalPaidAmount,
         advanceUsed: parseFloat(advanceRedeemed || 0),
         balanceAmount: finalBalanceAmount,

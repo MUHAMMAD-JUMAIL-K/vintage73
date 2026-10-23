@@ -22,10 +22,14 @@ const resolveEffectiveBranchId = async (req) => {
 
   if (isAdmin) {
     if (req.query?.branchId && req.query.branchId !== 'all') {
-      return parseInt(req.query.branchId);
+      const qVal = typeof req.query.branchId === 'object' ? req.query.branchId.id : req.query.branchId;
+      const parsed = parseInt(qVal);
+      if (!isNaN(parsed)) return parsed;
     }
     if (req.body?.branchId && req.body.branchId !== 'all') {
-      return parseInt(req.body.branchId);
+      const bVal = typeof req.body.branchId === 'object' ? req.body.branchId.id : req.body.branchId;
+      const parsed = parseInt(bVal);
+      if (!isNaN(parsed)) return parsed;
     }
     if (user?.branchId) {
       return user.branchId;
@@ -1077,53 +1081,6 @@ const getVerificationData = asyncHandler(async (req, res) => {
       reviewedBy: savedChecks.returnsRefunds?.verifiedBy || null,
       actionRoute: '/sales-return',
       actionLabel: 'View Returns & Cancellations'
-    },
-    gst: {
-      key: 'gst',
-      title: 'GST & Tax Verification',
-      summary: `Taxable: ₹${gstBreakdown.taxableSales.toLocaleString('en-IN')} | CGST: ₹${gstBreakdown.cgst.toLocaleString('en-IN')} | SGST: ₹${gstBreakdown.sgst.toLocaleString('en-IN')}`,
-      details: gstBreakdown,
-      hasDiscrepancy: false,
-      discrepancyMessage: null,
-      isReviewed: Boolean(savedChecks.gst?.reviewed),
-      reviewedAt: savedChecks.gst?.verifiedAt || null,
-      reviewedBy: savedChecks.gst?.verifiedBy || null,
-      actionRoute: '/reports/gstr-1',
-      actionLabel: 'View GST Summary'
-    },
-    expenses: {
-      key: 'expenses',
-      title: 'Expenses & Cash Entries',
-      summary: `${expenseList.length} expense entries recorded totaling ₹${drawer.cashExpenses.toLocaleString('en-IN')}`,
-      details: {
-        expenseCount: expenseList.length,
-        totalExpenses: drawer.cashExpenses,
-        expenseList
-      },
-      hasDiscrepancy: false,
-      discrepancyMessage: null,
-      isReviewed: Boolean(savedChecks.expenses?.reviewed),
-      reviewedAt: savedChecks.expenses?.verifiedAt || null,
-      reviewedBy: savedChecks.expenses?.verifiedBy || null,
-      actionRoute: '/accounting/reports/cash-book',
-      actionLabel: 'View Expenses & Entries'
-    },
-    branchSession: {
-      key: 'branchSession',
-      title: 'Branch & Business Session Alignment',
-      summary: `All ${sales.length} transactions belong cleanly to Branch #${targetBranchId} (${dayCloseRecord?.branch?.name || 'Active'}).`,
-      details: {
-        orphanTransactionsCount,
-        branchId: targetBranchId,
-        businessDate: dateStr
-      },
-      hasDiscrepancy: orphanTransactionsCount > 0,
-      discrepancyMessage: orphanTransactionsCount > 0 ? `${orphanTransactionsCount} transactions mismatch branch session!` : null,
-      isReviewed: Boolean(savedChecks.branchSession?.reviewed),
-      reviewedAt: savedChecks.branchSession?.verifiedAt || null,
-      reviewedBy: savedChecks.branchSession?.verifiedBy || null,
-      actionRoute: '/branches',
-      actionLabel: 'Verify Branch'
     }
   };
 
@@ -1379,7 +1336,7 @@ const confirmDayClose = asyncHandler(async (req, res) => {
   }
 
   // Rule 4: Mandatory Verification Check
-  const requiredKeys = ['salesInvoices', 'payments', 'cashbook', 'inventory', 'returnsRefunds', 'gst', 'expenses', 'branchSession'];
+  const requiredKeys = ['salesInvoices', 'payments', 'cashbook', 'inventory', 'returnsRefunds'];
   const savedChecks = existingRecord?.verificationChecks || {};
   const savedExceptions = existingRecord?.verificationExceptions || {};
 

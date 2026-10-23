@@ -47,7 +47,7 @@ const ProfessionalInvoice = React.forwardRef(({ printData, companyProfile, previ
         customer, customerName, previousBalance, currentBalance, placeOfSupply,
         currencyCode, currencySymbol, exchangeRate, discount, advanceUsed, description, notes, terms, paidAmount, paymentMethod,
         deliveryCharge, hasDeliveryCharge,
-        voucherCode, voucherDiscount, issuedRewardVoucher, issuedVoucher
+        voucherCode, voucherName, showVoucherOnBill, voucherDiscount, issuedRewardVoucher, issuedVoucher
     } = printData;
 
     const isQuotation = !!quotationNumber;
@@ -88,6 +88,8 @@ const ProfessionalInvoice = React.forwardRef(({ printData, companyProfile, previ
     const invoiceDiscount = parseFloat(printData.discount || 0);
     const vDiscount = parseFloat(voucherDiscount || printData.voucherDiscount || 0);
     const vCode = voucherCode || printData.voucherCode || null;
+    const vName = voucherName || printData.voucherName || 'Discount';
+    const vShow = Boolean(showVoucherOnBill !== undefined ? showVoucherOnBill : printData.showVoucherOnBill);
     const itemDiscountAmt = Math.max(0, invoiceDiscount - vDiscount);
     const rewardVoucher = (settings?.showRewardCoupon === true) ? (issuedRewardVoucher || issuedVoucher || printData.issuedRewardVoucher || printData.issuedVoucher || null) : null;
 
@@ -544,11 +546,19 @@ const ProfessionalInvoice = React.forwardRef(({ printData, companyProfile, previ
                             <span>{currentSymbol}{formatAmt(effectiveTotalBeforeDiscount)}</span>
                         </div>
 
-                        {/* 2. Discount */}
-                        {effectiveTotalDiscount > 0.005 && (
+                        {/* 2. Product / Line Discount */}
+                        {prodDiscountAmt > 0.005 && (
                             <div className="flex justify-between w-full">
                                 <span>Discount:</span>
-                                <span>- {currentSymbol}{formatAmt(effectiveTotalDiscount)}</span>
+                                <span>- {currentSymbol}{formatAmt(prodDiscountAmt)}</span>
+                            </div>
+                        )}
+
+                        {/* 3. Voucher Discount */}
+                        {vDiscount > 0.005 && (
+                            <div className="flex justify-between w-full font-semibold text-emerald-800">
+                                <span>Voucher Discount {vCode ? `(${vCode})` : ''}:</span>
+                                <span>- {currentSymbol}{formatAmt(vDiscount)}</span>
                             </div>
                         )}
 
@@ -666,6 +676,20 @@ const ProfessionalInvoice = React.forwardRef(({ printData, companyProfile, previ
                             </div>
                         )}
                     </div>
+
+                    {/* VOUCHER DETAILS ON BILL (WHEN TOGGLED ON) */}
+                    {vShow && vCode && (
+                        <div className="mt-2 pt-1.5 pb-1 px-1.5 border border-dashed border-black rounded text-[10px] text-black">
+                            <div className="flex justify-between items-center">
+                                <span className="font-semibold text-[9.5px]">Voucher Name:</span>
+                                <span className="font-bold">{vName}</span>
+                            </div>
+                            <div className="flex justify-between items-center mt-0.5">
+                                <span className="font-semibold text-[9.5px]">Voucher Code:</span>
+                                <span className="font-mono font-bold">{vCode}</span>
+                            </div>
+                        </div>
+                    )}
 
                     {/* REWARD VOUCHER CARD */}
                     {rewardVoucher && (
@@ -1122,11 +1146,19 @@ const ProfessionalInvoice = React.forwardRef(({ printData, companyProfile, previ
                             <span className="font-semibold text-slate-900 whitespace-nowrap print:text-black">{currentSymbol}{formatAmt(effectiveTotalBeforeDiscount)}</span>
                         </div>
 
-                        {/* 2. Discount */}
-                        {effectiveTotalDiscount > 0.005 && (
+                        {/* 2. Product / Line Discount */}
+                        {prodDiscountAmt > 0.005 && (
                             <div className="flex justify-between items-center text-slate-700 text-[11.5px] font-normal tracking-tight">
                                 <span className="whitespace-nowrap mr-2">Discount:</span>
-                                <span className="font-semibold text-red-600 whitespace-nowrap print:text-black">- {currentSymbol}{formatAmt(effectiveTotalDiscount)}</span>
+                                <span className="font-semibold text-red-600 whitespace-nowrap print:text-black">- {currentSymbol}{formatAmt(prodDiscountAmt)}</span>
+                            </div>
+                        )}
+
+                        {/* 3. Voucher Discount */}
+                        {vDiscount > 0.005 && (
+                            <div className="flex justify-between items-center text-emerald-700 text-[11.5px] font-bold tracking-tight">
+                                <span className="whitespace-nowrap mr-2">Voucher Discount {vCode ? `(${vCode})` : ''}:</span>
+                                <span className="font-bold text-emerald-700 whitespace-nowrap print:text-black">- {currentSymbol}{formatAmt(vDiscount)}</span>
                             </div>
                         )}
 
@@ -1265,6 +1297,20 @@ const ProfessionalInvoice = React.forwardRef(({ printData, companyProfile, previ
                             <span className="text-[15px] font-black text-red-600 tracking-tight print:text-black">
                                 {currentSymbol}{formatAmt(balanceAmt)}
                             </span>
+                        </div>
+                    )}
+
+                    {/* VOUCHER DETAILS ON BILL (WHEN TOGGLED ON) */}
+                    {vShow && vCode && (
+                        <div className="pt-2 mt-2 border-t border-dashed border-slate-300 text-[11px] text-slate-800 print:text-black">
+                            <div className="flex justify-between items-center">
+                                <span className="font-semibold text-slate-600 print:text-black">Voucher Name:</span>
+                                <span className="font-bold text-slate-900 print:text-black">{vName}</span>
+                            </div>
+                            <div className="flex justify-between items-center mt-0.5">
+                                <span className="font-semibold text-slate-600 print:text-black">Voucher Code:</span>
+                                <span className="font-mono font-bold text-slate-900 print:text-black">{vCode}</span>
+                            </div>
                         </div>
                     )}
                 </div>

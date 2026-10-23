@@ -8,6 +8,9 @@ router.use(authMiddleware);
 // Fast POS validation endpoint
 router.post('/validate', customerVoucherController.validateVoucher);
 
+// Active vouchers for POS selection
+router.get('/active-for-pos', customerVoucherController.getActiveVouchersForPos);
+
 // Dashboard metrics
 router.get('/dashboard', customerVoucherController.getVoucherDashboardStats);
 

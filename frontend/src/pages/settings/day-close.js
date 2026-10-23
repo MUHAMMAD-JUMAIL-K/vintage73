@@ -461,11 +461,15 @@ export default function DayClosePage() {
   const currencyMeta = extractCurrencyMeta(branchCurrency);
   const currencySymbol = currencyMeta.symbol;
 
-  // Verification readiness check
-  const checklist = verificationData?.checklist || {};
+  // Verification readiness check - only the 5 necessary operational domains
+  const EXCLUDED_CHECKLIST_KEYS = ['gst', 'expenses', 'branchSession'];
+  const rawChecklist = verificationData?.checklist || {};
+  const checklist = Object.fromEntries(
+    Object.entries(rawChecklist).filter(([key]) => !EXCLUDED_CHECKLIST_KEYS.includes(key))
+  );
   const checklistKeys = Object.keys(checklist);
   const totalChecks = checklistKeys.length;
-  const reviewedCount = checklistKeys.filter(k => checklist[k].isReviewed).length;
+  const reviewedCount = checklistKeys.filter(k => checklist[k]?.isReviewed).length;
   const allChecksComplete = totalChecks > 0 && reviewedCount === totalChecks;
 
   const requiresDifferenceNote = closingDiffCalc !== null && Math.abs(closingDiffCalc) > 10 && !verificationData?.savedExceptions?.cashbook;

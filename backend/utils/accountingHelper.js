@@ -398,6 +398,20 @@ async function processPurchasePosting(tx, purchase, userId) {
  * @returns {Promise<Object>} { branchId, isConsolidated, activeBranch, branches, branchFilter }
  */
 async function resolveBranchFilter(req, requestedBranchId) {
+  // Normalize requestedBranchId against object passing, undefined, null, or stringified objects
+  if (typeof requestedBranchId === 'object' && requestedBranchId !== null) {
+    requestedBranchId = requestedBranchId.id || requestedBranchId.value || requestedBranchId.branchId || null;
+  }
+  if (
+    requestedBranchId === '[object Object]' ||
+    requestedBranchId === 'undefined' ||
+    requestedBranchId === 'null' ||
+    requestedBranchId === '' ||
+    requestedBranchId === undefined
+  ) {
+    requestedBranchId = null;
+  }
+
   const user = req.user || {};
   const allBranches = await prisma.branch.findMany({
     where: { isActive: true },
@@ -407,7 +421,8 @@ async function resolveBranchFilter(req, requestedBranchId) {
 
   // User restricted to a specific branch
   if (user.branchId) {
-    if (requestedBranchId && requestedBranchId !== 'all' && parseInt(requestedBranchId) !== user.branchId) {
+    const parsedRequested = requestedBranchId ? parseInt(requestedBranchId) : null;
+    if (parsedRequested && !isNaN(parsedRequested) && parsedRequested !== user.branchId) {
       const err = new Error('Access denied: You do not have permission to access another branch');
       err.status = 403;
       throw err;
@@ -434,6 +449,16 @@ async function resolveBranchFilter(req, requestedBranchId) {
   }
 
   const parsedId = parseInt(requestedBranchId);
+  if (isNaN(parsedId)) {
+    return {
+      branchId: null,
+      isConsolidated: true,
+      activeBranch: null,
+      branches: allBranches,
+      branchFilter: {}
+    };
+  }
+
   const targetBranch = allBranches.find(b => b.id === parsedId);
   if (!targetBranch) {
     const err = new Error('Branch not found');

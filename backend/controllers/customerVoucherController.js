@@ -341,3 +341,89 @@ exports.updateRewardSettings = asyncHandler(async (req, res) => {
   await updatePurchaseRewardRule(ruleData, prisma);
   res.json({ message: 'Purchase reward settings updated successfully.', settings: ruleData });
 });
+
+// 12. Get Active Vouchers available for POS (filtered by branch and customer)
+exports.getActiveVouchersForPos = asyncHandler(async (req, res) => {
+  const { branchId: queryBranchId, customerId } = req.query;
+  const user = req.user;
+
+  let branchId = queryBranchId;
+  const isGlobalAdmin = user?.role === 'admin' && !user?.branchId;
+  if (!isGlobalAdmin && user?.branchId) {
+    branchId = user.branchId;
+  }
+  const parsedBranchId = branchId && !isNaN(parseInt(branchId)) ? parseInt(branchId) : null;
+  const parsedCustId = customerId && !isNaN(parseInt(customerId)) ? parseInt(customerId) : null;
+
+  const now = new Date();
+
+  const where = {
+    status: 'ACTIVE',
+    OR: [
+      { expiryDate: null },
+      { expiryDate: { gte: now } }
+    ]
+  };
+
+  // Branch filter: available at this branch OR valid across all branches
+  if (parsedBranchId) {
+    where.AND = [
+      {
+        OR: [
+          { branchId: parsedBranchId },
+          { branchId: null }
+        ]
+      }
+    ];
+  }
+
+  // Customer filter:
+  // If customer selected: show vouchers exclusive to this customer OR general vouchers
+  // If no customer selected (walk-in): show only general vouchers
+  if (parsedCustId) {
+    where.AND = [
+      ...(where.AND || []),
+      {
+        OR: [
+          { customerId: parsedCustId },
+          { customerId: null }
+        ]
+      }
+    ];
+  } else {
+    where.AND = [
+      ...(where.AND || []),
+      { customerId: null }
+    ];
+  }
+
+  const rawVouchers = await prisma.customerVoucher.findMany({
+    where,
+    select: {
+      id: true,
+      code: true,
+      name: true,
+      type: true,
+      value: true,
+      maximumDiscount: true,
+      minimumPurchaseAmount: true,
+      expiryDate: true,
+      usageLimit: true,
+      usageCount: true,
+      description: true,
+      customerId: true,
+      branchId: true
+    },
+    orderBy: { createdAt: 'desc' }
+  });
+
+  // Filter out exhausted vouchers
+  const availableVouchers = rawVouchers.filter(v => {
+    if (v.usageLimit > 0 && v.usageCount >= v.usageLimit) {
+      return false;
+    }
+    return true;
+  });
+
+  res.json(availableVouchers);
+});

@@ -67,15 +67,24 @@ export default function LedgerReport() {
         }
     };
 
+    // Helper to safely format branch ID as string/scalar
+    const sanitizeBranchId = (b) => {
+        if (!b) return undefined;
+        if (typeof b === 'object') return b.id?.toString() || b.value?.toString() || undefined;
+        if (b === '[object Object]' || b === 'all' || b === 'undefined' || b === 'null') return undefined;
+        return b.toString();
+    };
+
     // Auto-fetch if ledgerId is in query
     useEffect(() => {
         if (router.isReady && router.query.ledgerId) {
             const { ledgerId, startDate: qStart, endDate: qEnd, branchId: qBranch } = router.query;
+            const cleanBranch = sanitizeBranchId(qBranch);
 
             setSelectedLedgerId(ledgerId);
             if (qStart) setStartDate(qStart);
             if (qEnd) setEndDate(qEnd);
-            if (qBranch) setSelectedBranch(qBranch);
+            if (cleanBranch) setSelectedBranch(cleanBranch);
 
             const autoFetch = async () => {
                 setLoading(true);
@@ -85,7 +94,7 @@ export default function LedgerReport() {
                             ledgerId: ledgerId,
                             startDate: qStart || startDate,
                             endDate: qEnd || endDate,
-                            branchId: qBranch || undefined
+                            branchId: cleanBranch
                         }
                     });
 
@@ -111,14 +120,14 @@ export default function LedgerReport() {
         }
 
         setLoading(true);
-        const targetBranchId = overrideBranchId !== undefined ? overrideBranchId : selectedBranch;
+        const targetBranchId = sanitizeBranchId(overrideBranchId !== undefined ? overrideBranchId : selectedBranch);
         try {
             const res = await api.get('/accounting/reports/ledger-statement', {
                 params: {
-                    ledgerId: selectedLedgerId,
+                    ledgerId: typeof selectedLedgerId === 'object' ? selectedLedgerId.value || selectedLedgerId.id : selectedLedgerId,
                     startDate,
                     endDate,
-                    branchId: targetBranchId || undefined
+                    branchId: targetBranchId
                 }
             });
 

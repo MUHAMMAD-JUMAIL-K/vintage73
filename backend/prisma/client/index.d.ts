@@ -26201,6 +26201,8 @@ export namespace Prisma {
     deliveryCharge: Decimal | null
     hasDeliveryCharge: boolean | null
     voucherCode: string | null
+    voucherName: string | null
+    showVoucherOnBill: boolean | null
     voucherDiscount: Decimal | null
   }
 
@@ -26249,6 +26251,8 @@ export namespace Prisma {
     deliveryCharge: Decimal | null
     hasDeliveryCharge: boolean | null
     voucherCode: string | null
+    voucherName: string | null
+    showVoucherOnBill: boolean | null
     voucherDiscount: Decimal | null
   }
 
@@ -26297,6 +26301,8 @@ export namespace Prisma {
     deliveryCharge: number
     hasDeliveryCharge: number
     voucherCode: number
+    voucherName: number
+    showVoucherOnBill: number
     voucherDiscount: number
     _all: number
   }
@@ -26391,6 +26397,8 @@ export namespace Prisma {
     deliveryCharge?: true
     hasDeliveryCharge?: true
     voucherCode?: true
+    voucherName?: true
+    showVoucherOnBill?: true
     voucherDiscount?: true
   }
 
@@ -26439,6 +26447,8 @@ export namespace Prisma {
     deliveryCharge?: true
     hasDeliveryCharge?: true
     voucherCode?: true
+    voucherName?: true
+    showVoucherOnBill?: true
     voucherDiscount?: true
   }
 
@@ -26487,6 +26497,8 @@ export namespace Prisma {
     deliveryCharge?: true
     hasDeliveryCharge?: true
     voucherCode?: true
+    voucherName?: true
+    showVoucherOnBill?: true
     voucherDiscount?: true
     _all?: true
   }
@@ -26622,6 +26634,8 @@ export namespace Prisma {
     deliveryCharge: Decimal
     hasDeliveryCharge: boolean
     voucherCode: string | null
+    voucherName: string | null
+    showVoucherOnBill: boolean
     voucherDiscount: Decimal
     _count: SaleCountAggregateOutputType | null
     _avg: SaleAvgAggregateOutputType | null
@@ -26689,6 +26703,8 @@ export namespace Prisma {
     deliveryCharge?: boolean
     hasDeliveryCharge?: boolean
     voucherCode?: boolean
+    voucherName?: boolean
+    showVoucherOnBill?: boolean
     voucherDiscount?: boolean
     payments?: boolean | Sale$paymentsArgs<ExtArgs>
     branch?: boolean | BranchDefaultArgs<ExtArgs>
@@ -26750,6 +26766,8 @@ export namespace Prisma {
     deliveryCharge?: boolean
     hasDeliveryCharge?: boolean
     voucherCode?: boolean
+    voucherName?: boolean
+    showVoucherOnBill?: boolean
     voucherDiscount?: boolean
   }
 
@@ -26831,6 +26849,8 @@ export namespace Prisma {
       deliveryCharge: Prisma.Decimal
       hasDeliveryCharge: boolean
       voucherCode: string | null
+      voucherName: string | null
+      showVoucherOnBill: boolean
       voucherDiscount: Prisma.Decimal
     }, ExtArgs["result"]["sale"]>
     composites: {}
@@ -27293,6 +27313,8 @@ export namespace Prisma {
     readonly deliveryCharge: FieldRef<"Sale", 'Decimal'>
     readonly hasDeliveryCharge: FieldRef<"Sale", 'Boolean'>
     readonly voucherCode: FieldRef<"Sale", 'String'>
+    readonly voucherName: FieldRef<"Sale", 'String'>
+    readonly showVoucherOnBill: FieldRef<"Sale", 'Boolean'>
     readonly voucherDiscount: FieldRef<"Sale", 'Decimal'>
   }
     
@@ -82928,6 +82950,8 @@ export namespace Prisma {
     deliveryCharge: 'deliveryCharge',
     hasDeliveryCharge: 'hasDeliveryCharge',
     voucherCode: 'voucherCode',
+    voucherName: 'voucherName',
+    showVoucherOnBill: 'showVoucherOnBill',
     voucherDiscount: 'voucherDiscount'
   };
 
@@ -85661,6 +85685,8 @@ export namespace Prisma {
     deliveryCharge?: DecimalFilter<"Sale"> | Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: BoolFilter<"Sale"> | boolean
     voucherCode?: StringNullableFilter<"Sale"> | string | null
+    voucherName?: StringNullableFilter<"Sale"> | string | null
+    showVoucherOnBill?: BoolFilter<"Sale"> | boolean
     voucherDiscount?: DecimalFilter<"Sale"> | Decimal | DecimalJsLike | number | string
     payments?: PaymentListRelationFilter
     branch?: XOR<BranchRelationFilter, BranchWhereInput>
@@ -85721,6 +85747,8 @@ export namespace Prisma {
     deliveryCharge?: SortOrder
     hasDeliveryCharge?: SortOrder
     voucherCode?: SortOrderInput | SortOrder
+    voucherName?: SortOrderInput | SortOrder
+    showVoucherOnBill?: SortOrder
     voucherDiscount?: SortOrder
     payments?: PaymentOrderByRelationAggregateInput
     branch?: BranchOrderByWithRelationInput
@@ -85785,6 +85813,8 @@ export namespace Prisma {
     deliveryCharge?: DecimalFilter<"Sale"> | Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: BoolFilter<"Sale"> | boolean
     voucherCode?: StringNullableFilter<"Sale"> | string | null
+    voucherName?: StringNullableFilter<"Sale"> | string | null
+    showVoucherOnBill?: BoolFilter<"Sale"> | boolean
     voucherDiscount?: DecimalFilter<"Sale"> | Decimal | DecimalJsLike | number | string
     payments?: PaymentListRelationFilter
     branch?: XOR<BranchRelationFilter, BranchWhereInput>
@@ -85845,6 +85875,8 @@ export namespace Prisma {
     deliveryCharge?: SortOrder
     hasDeliveryCharge?: SortOrder
     voucherCode?: SortOrderInput | SortOrder
+    voucherName?: SortOrderInput | SortOrder
+    showVoucherOnBill?: SortOrder
     voucherDiscount?: SortOrder
     _count?: SaleCountOrderByAggregateInput
     _avg?: SaleAvgOrderByAggregateInput
@@ -85901,6 +85933,8 @@ export namespace Prisma {
     deliveryCharge?: DecimalWithAggregatesFilter<"Sale"> | Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: BoolWithAggregatesFilter<"Sale"> | boolean
     voucherCode?: StringNullableWithAggregatesFilter<"Sale"> | string | null
+    voucherName?: StringNullableWithAggregatesFilter<"Sale"> | string | null
+    showVoucherOnBill?: BoolWithAggregatesFilter<"Sale"> | boolean
     voucherDiscount?: DecimalWithAggregatesFilter<"Sale"> | Decimal | DecimalJsLike | number | string
   }
 
@@ -92605,6 +92639,8 @@ export namespace Prisma {
     deliveryCharge?: Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: boolean
     voucherCode?: string | null
+    voucherName?: string | null
+    showVoucherOnBill?: boolean
     voucherDiscount?: Decimal | DecimalJsLike | number | string
     payments?: PaymentCreateNestedManyWithoutSaleInput
     branch: BranchCreateNestedOneWithoutSalesInput
@@ -92665,6 +92701,8 @@ export namespace Prisma {
     deliveryCharge?: Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: boolean
     voucherCode?: string | null
+    voucherName?: string | null
+    showVoucherOnBill?: boolean
     voucherDiscount?: Decimal | DecimalJsLike | number | string
     payments?: PaymentUncheckedCreateNestedManyWithoutSaleInput
     items?: SaleItemUncheckedCreateNestedManyWithoutSaleInput
@@ -92712,6 +92750,8 @@ export namespace Prisma {
     deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
     voucherCode?: NullableStringFieldUpdateOperationsInput | string | null
+    voucherName?: NullableStringFieldUpdateOperationsInput | string | null
+    showVoucherOnBill?: BoolFieldUpdateOperationsInput | boolean
     voucherDiscount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     payments?: PaymentUpdateManyWithoutSaleNestedInput
     branch?: BranchUpdateOneRequiredWithoutSalesNestedInput
@@ -92772,6 +92812,8 @@ export namespace Prisma {
     deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
     voucherCode?: NullableStringFieldUpdateOperationsInput | string | null
+    voucherName?: NullableStringFieldUpdateOperationsInput | string | null
+    showVoucherOnBill?: BoolFieldUpdateOperationsInput | boolean
     voucherDiscount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     payments?: PaymentUncheckedUpdateManyWithoutSaleNestedInput
     items?: SaleItemUncheckedUpdateManyWithoutSaleNestedInput
@@ -92826,6 +92868,8 @@ export namespace Prisma {
     deliveryCharge?: Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: boolean
     voucherCode?: string | null
+    voucherName?: string | null
+    showVoucherOnBill?: boolean
     voucherDiscount?: Decimal | DecimalJsLike | number | string
   }
 
@@ -92867,6 +92911,8 @@ export namespace Prisma {
     deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
     voucherCode?: NullableStringFieldUpdateOperationsInput | string | null
+    voucherName?: NullableStringFieldUpdateOperationsInput | string | null
+    showVoucherOnBill?: BoolFieldUpdateOperationsInput | boolean
     voucherDiscount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
   }
 
@@ -92915,6 +92961,8 @@ export namespace Prisma {
     deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
     voucherCode?: NullableStringFieldUpdateOperationsInput | string | null
+    voucherName?: NullableStringFieldUpdateOperationsInput | string | null
+    showVoucherOnBill?: BoolFieldUpdateOperationsInput | boolean
     voucherDiscount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
   }
 
@@ -99684,6 +99732,8 @@ export namespace Prisma {
     deliveryCharge?: SortOrder
     hasDeliveryCharge?: SortOrder
     voucherCode?: SortOrder
+    voucherName?: SortOrder
+    showVoucherOnBill?: SortOrder
     voucherDiscount?: SortOrder
   }
 
@@ -99754,6 +99804,8 @@ export namespace Prisma {
     deliveryCharge?: SortOrder
     hasDeliveryCharge?: SortOrder
     voucherCode?: SortOrder
+    voucherName?: SortOrder
+    showVoucherOnBill?: SortOrder
     voucherDiscount?: SortOrder
   }
 
@@ -99802,6 +99854,8 @@ export namespace Prisma {
     deliveryCharge?: SortOrder
     hasDeliveryCharge?: SortOrder
     voucherCode?: SortOrder
+    voucherName?: SortOrder
+    showVoucherOnBill?: SortOrder
     voucherDiscount?: SortOrder
   }
 
@@ -111279,6 +111333,8 @@ export namespace Prisma {
     deliveryCharge?: Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: boolean
     voucherCode?: string | null
+    voucherName?: string | null
+    showVoucherOnBill?: boolean
     voucherDiscount?: Decimal | DecimalJsLike | number | string
     payments?: PaymentCreateNestedManyWithoutSaleInput
     branch: BranchCreateNestedOneWithoutSalesInput
@@ -111337,6 +111393,8 @@ export namespace Prisma {
     deliveryCharge?: Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: boolean
     voucherCode?: string | null
+    voucherName?: string | null
+    showVoucherOnBill?: boolean
     voucherDiscount?: Decimal | DecimalJsLike | number | string
     payments?: PaymentUncheckedCreateNestedManyWithoutSaleInput
     items?: SaleItemUncheckedCreateNestedManyWithoutSaleInput
@@ -113145,6 +113203,8 @@ export namespace Prisma {
     deliveryCharge?: DecimalFilter<"Sale"> | Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: BoolFilter<"Sale"> | boolean
     voucherCode?: StringNullableFilter<"Sale"> | string | null
+    voucherName?: StringNullableFilter<"Sale"> | string | null
+    showVoucherOnBill?: BoolFilter<"Sale"> | boolean
     voucherDiscount?: DecimalFilter<"Sale"> | Decimal | DecimalJsLike | number | string
   }
 
@@ -114553,6 +114613,8 @@ export namespace Prisma {
     deliveryCharge?: Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: boolean
     voucherCode?: string | null
+    voucherName?: string | null
+    showVoucherOnBill?: boolean
     voucherDiscount?: Decimal | DecimalJsLike | number | string
     payments?: PaymentCreateNestedManyWithoutSaleInput
     customer?: CustomerCreateNestedOneWithoutSalesInput
@@ -114611,6 +114673,8 @@ export namespace Prisma {
     deliveryCharge?: Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: boolean
     voucherCode?: string | null
+    voucherName?: string | null
+    showVoucherOnBill?: boolean
     voucherDiscount?: Decimal | DecimalJsLike | number | string
     payments?: PaymentUncheckedCreateNestedManyWithoutSaleInput
     items?: SaleItemUncheckedCreateNestedManyWithoutSaleInput
@@ -116219,6 +116283,8 @@ export namespace Prisma {
     deliveryCharge?: Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: boolean
     voucherCode?: string | null
+    voucherName?: string | null
+    showVoucherOnBill?: boolean
     voucherDiscount?: Decimal | DecimalJsLike | number | string
     payments?: PaymentCreateNestedManyWithoutSaleInput
     branch: BranchCreateNestedOneWithoutSalesInput
@@ -116277,6 +116343,8 @@ export namespace Prisma {
     deliveryCharge?: Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: boolean
     voucherCode?: string | null
+    voucherName?: string | null
+    showVoucherOnBill?: boolean
     voucherDiscount?: Decimal | DecimalJsLike | number | string
     payments?: PaymentUncheckedCreateNestedManyWithoutSaleInput
     items?: SaleItemUncheckedCreateNestedManyWithoutSaleInput
@@ -120698,6 +120766,8 @@ export namespace Prisma {
     deliveryCharge?: Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: boolean
     voucherCode?: string | null
+    voucherName?: string | null
+    showVoucherOnBill?: boolean
     voucherDiscount?: Decimal | DecimalJsLike | number | string
     payments?: PaymentCreateNestedManyWithoutSaleInput
     branch: BranchCreateNestedOneWithoutSalesInput
@@ -120757,6 +120827,8 @@ export namespace Prisma {
     deliveryCharge?: Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: boolean
     voucherCode?: string | null
+    voucherName?: string | null
+    showVoucherOnBill?: boolean
     voucherDiscount?: Decimal | DecimalJsLike | number | string
     payments?: PaymentUncheckedCreateNestedManyWithoutSaleInput
     lead?: LeadUncheckedCreateNestedOneWithoutSaleInput
@@ -120909,6 +120981,8 @@ export namespace Prisma {
     deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
     voucherCode?: NullableStringFieldUpdateOperationsInput | string | null
+    voucherName?: NullableStringFieldUpdateOperationsInput | string | null
+    showVoucherOnBill?: BoolFieldUpdateOperationsInput | boolean
     voucherDiscount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     payments?: PaymentUpdateManyWithoutSaleNestedInput
     branch?: BranchUpdateOneRequiredWithoutSalesNestedInput
@@ -120968,6 +121042,8 @@ export namespace Prisma {
     deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
     voucherCode?: NullableStringFieldUpdateOperationsInput | string | null
+    voucherName?: NullableStringFieldUpdateOperationsInput | string | null
+    showVoucherOnBill?: BoolFieldUpdateOperationsInput | boolean
     voucherDiscount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     payments?: PaymentUncheckedUpdateManyWithoutSaleNestedInput
     lead?: LeadUncheckedUpdateOneWithoutSaleNestedInput
@@ -121382,6 +121458,8 @@ export namespace Prisma {
     deliveryCharge?: Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: boolean
     voucherCode?: string | null
+    voucherName?: string | null
+    showVoucherOnBill?: boolean
     voucherDiscount?: Decimal | DecimalJsLike | number | string
     branch: BranchCreateNestedOneWithoutSalesInput
     customer?: CustomerCreateNestedOneWithoutSalesInput
@@ -121441,6 +121519,8 @@ export namespace Prisma {
     deliveryCharge?: Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: boolean
     voucherCode?: string | null
+    voucherName?: string | null
+    showVoucherOnBill?: boolean
     voucherDiscount?: Decimal | DecimalJsLike | number | string
     items?: SaleItemUncheckedCreateNestedManyWithoutSaleInput
     lead?: LeadUncheckedCreateNestedOneWithoutSaleInput
@@ -121747,6 +121827,8 @@ export namespace Prisma {
     deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
     voucherCode?: NullableStringFieldUpdateOperationsInput | string | null
+    voucherName?: NullableStringFieldUpdateOperationsInput | string | null
+    showVoucherOnBill?: BoolFieldUpdateOperationsInput | boolean
     voucherDiscount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     branch?: BranchUpdateOneRequiredWithoutSalesNestedInput
     customer?: CustomerUpdateOneWithoutSalesNestedInput
@@ -121806,6 +121888,8 @@ export namespace Prisma {
     deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
     voucherCode?: NullableStringFieldUpdateOperationsInput | string | null
+    voucherName?: NullableStringFieldUpdateOperationsInput | string | null
+    showVoucherOnBill?: BoolFieldUpdateOperationsInput | boolean
     voucherDiscount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     items?: SaleItemUncheckedUpdateManyWithoutSaleNestedInput
     lead?: LeadUncheckedUpdateOneWithoutSaleNestedInput
@@ -122158,6 +122242,8 @@ export namespace Prisma {
     deliveryCharge?: Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: boolean
     voucherCode?: string | null
+    voucherName?: string | null
+    showVoucherOnBill?: boolean
     voucherDiscount?: Decimal | DecimalJsLike | number | string
     payments?: PaymentCreateNestedManyWithoutSaleInput
     branch: BranchCreateNestedOneWithoutSalesInput
@@ -122216,6 +122302,8 @@ export namespace Prisma {
     deliveryCharge?: Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: boolean
     voucherCode?: string | null
+    voucherName?: string | null
+    showVoucherOnBill?: boolean
     voucherDiscount?: Decimal | DecimalJsLike | number | string
     payments?: PaymentUncheckedCreateNestedManyWithoutSaleInput
     items?: SaleItemUncheckedCreateNestedManyWithoutSaleInput
@@ -122599,6 +122687,8 @@ export namespace Prisma {
     deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
     voucherCode?: NullableStringFieldUpdateOperationsInput | string | null
+    voucherName?: NullableStringFieldUpdateOperationsInput | string | null
+    showVoucherOnBill?: BoolFieldUpdateOperationsInput | boolean
     voucherDiscount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     payments?: PaymentUpdateManyWithoutSaleNestedInput
     branch?: BranchUpdateOneRequiredWithoutSalesNestedInput
@@ -122657,6 +122747,8 @@ export namespace Prisma {
     deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
     voucherCode?: NullableStringFieldUpdateOperationsInput | string | null
+    voucherName?: NullableStringFieldUpdateOperationsInput | string | null
+    showVoucherOnBill?: BoolFieldUpdateOperationsInput | boolean
     voucherDiscount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     payments?: PaymentUncheckedUpdateManyWithoutSaleNestedInput
     items?: SaleItemUncheckedUpdateManyWithoutSaleNestedInput
@@ -126788,6 +126880,8 @@ export namespace Prisma {
     deliveryCharge?: Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: boolean
     voucherCode?: string | null
+    voucherName?: string | null
+    showVoucherOnBill?: boolean
     voucherDiscount?: Decimal | DecimalJsLike | number | string
     payments?: PaymentCreateNestedManyWithoutSaleInput
     branch: BranchCreateNestedOneWithoutSalesInput
@@ -126847,6 +126941,8 @@ export namespace Prisma {
     deliveryCharge?: Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: boolean
     voucherCode?: string | null
+    voucherName?: string | null
+    showVoucherOnBill?: boolean
     voucherDiscount?: Decimal | DecimalJsLike | number | string
     payments?: PaymentUncheckedCreateNestedManyWithoutSaleInput
     items?: SaleItemUncheckedCreateNestedManyWithoutSaleInput
@@ -127493,6 +127589,8 @@ export namespace Prisma {
     deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
     voucherCode?: NullableStringFieldUpdateOperationsInput | string | null
+    voucherName?: NullableStringFieldUpdateOperationsInput | string | null
+    showVoucherOnBill?: BoolFieldUpdateOperationsInput | boolean
     voucherDiscount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     payments?: PaymentUpdateManyWithoutSaleNestedInput
     branch?: BranchUpdateOneRequiredWithoutSalesNestedInput
@@ -127552,6 +127650,8 @@ export namespace Prisma {
     deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
     voucherCode?: NullableStringFieldUpdateOperationsInput | string | null
+    voucherName?: NullableStringFieldUpdateOperationsInput | string | null
+    showVoucherOnBill?: BoolFieldUpdateOperationsInput | boolean
     voucherDiscount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     payments?: PaymentUncheckedUpdateManyWithoutSaleNestedInput
     items?: SaleItemUncheckedUpdateManyWithoutSaleNestedInput
@@ -131899,6 +131999,8 @@ export namespace Prisma {
     deliveryCharge?: Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: boolean
     voucherCode?: string | null
+    voucherName?: string | null
+    showVoucherOnBill?: boolean
     voucherDiscount?: Decimal | DecimalJsLike | number | string
     payments?: PaymentCreateNestedManyWithoutSaleInput
     branch: BranchCreateNestedOneWithoutSalesInput
@@ -131957,6 +132059,8 @@ export namespace Prisma {
     deliveryCharge?: Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: boolean
     voucherCode?: string | null
+    voucherName?: string | null
+    showVoucherOnBill?: boolean
     voucherDiscount?: Decimal | DecimalJsLike | number | string
     payments?: PaymentUncheckedCreateNestedManyWithoutSaleInput
     items?: SaleItemUncheckedCreateNestedManyWithoutSaleInput
@@ -132998,6 +133102,8 @@ export namespace Prisma {
     deliveryCharge?: Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: boolean
     voucherCode?: string | null
+    voucherName?: string | null
+    showVoucherOnBill?: boolean
     voucherDiscount?: Decimal | DecimalJsLike | number | string
     payments?: PaymentCreateNestedManyWithoutSaleInput
     branch: BranchCreateNestedOneWithoutSalesInput
@@ -133056,6 +133162,8 @@ export namespace Prisma {
     deliveryCharge?: Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: boolean
     voucherCode?: string | null
+    voucherName?: string | null
+    showVoucherOnBill?: boolean
     voucherDiscount?: Decimal | DecimalJsLike | number | string
     payments?: PaymentUncheckedCreateNestedManyWithoutSaleInput
     items?: SaleItemUncheckedCreateNestedManyWithoutSaleInput
@@ -138899,6 +139007,8 @@ export namespace Prisma {
     deliveryCharge?: Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: boolean
     voucherCode?: string | null
+    voucherName?: string | null
+    showVoucherOnBill?: boolean
     voucherDiscount?: Decimal | DecimalJsLike | number | string
     payments?: PaymentCreateNestedManyWithoutSaleInput
     branch: BranchCreateNestedOneWithoutSalesInput
@@ -138958,6 +139068,8 @@ export namespace Prisma {
     deliveryCharge?: Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: boolean
     voucherCode?: string | null
+    voucherName?: string | null
+    showVoucherOnBill?: boolean
     voucherDiscount?: Decimal | DecimalJsLike | number | string
     payments?: PaymentUncheckedCreateNestedManyWithoutSaleInput
     items?: SaleItemUncheckedCreateNestedManyWithoutSaleInput
@@ -139009,6 +139121,8 @@ export namespace Prisma {
     deliveryCharge?: Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: boolean
     voucherCode?: string | null
+    voucherName?: string | null
+    showVoucherOnBill?: boolean
     voucherDiscount?: Decimal | DecimalJsLike | number | string
     payments?: PaymentCreateNestedManyWithoutSaleInput
     branch: BranchCreateNestedOneWithoutSalesInput
@@ -139068,6 +139182,8 @@ export namespace Prisma {
     deliveryCharge?: Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: boolean
     voucherCode?: string | null
+    voucherName?: string | null
+    showVoucherOnBill?: boolean
     voucherDiscount?: Decimal | DecimalJsLike | number | string
     payments?: PaymentUncheckedCreateNestedManyWithoutSaleInput
     items?: SaleItemUncheckedCreateNestedManyWithoutSaleInput
@@ -139313,6 +139429,8 @@ export namespace Prisma {
     deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
     voucherCode?: NullableStringFieldUpdateOperationsInput | string | null
+    voucherName?: NullableStringFieldUpdateOperationsInput | string | null
+    showVoucherOnBill?: BoolFieldUpdateOperationsInput | boolean
     voucherDiscount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     payments?: PaymentUpdateManyWithoutSaleNestedInput
     branch?: BranchUpdateOneRequiredWithoutSalesNestedInput
@@ -139372,6 +139490,8 @@ export namespace Prisma {
     deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
     voucherCode?: NullableStringFieldUpdateOperationsInput | string | null
+    voucherName?: NullableStringFieldUpdateOperationsInput | string | null
+    showVoucherOnBill?: BoolFieldUpdateOperationsInput | boolean
     voucherDiscount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     payments?: PaymentUncheckedUpdateManyWithoutSaleNestedInput
     items?: SaleItemUncheckedUpdateManyWithoutSaleNestedInput
@@ -139429,6 +139549,8 @@ export namespace Prisma {
     deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
     voucherCode?: NullableStringFieldUpdateOperationsInput | string | null
+    voucherName?: NullableStringFieldUpdateOperationsInput | string | null
+    showVoucherOnBill?: BoolFieldUpdateOperationsInput | boolean
     voucherDiscount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     payments?: PaymentUpdateManyWithoutSaleNestedInput
     branch?: BranchUpdateOneRequiredWithoutSalesNestedInput
@@ -139488,6 +139610,8 @@ export namespace Prisma {
     deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
     voucherCode?: NullableStringFieldUpdateOperationsInput | string | null
+    voucherName?: NullableStringFieldUpdateOperationsInput | string | null
+    showVoucherOnBill?: BoolFieldUpdateOperationsInput | boolean
     voucherDiscount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     payments?: PaymentUncheckedUpdateManyWithoutSaleNestedInput
     items?: SaleItemUncheckedUpdateManyWithoutSaleNestedInput
@@ -139602,6 +139726,8 @@ export namespace Prisma {
     deliveryCharge?: Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: boolean
     voucherCode?: string | null
+    voucherName?: string | null
+    showVoucherOnBill?: boolean
     voucherDiscount?: Decimal | DecimalJsLike | number | string
     payments?: PaymentCreateNestedManyWithoutSaleInput
     branch: BranchCreateNestedOneWithoutSalesInput
@@ -139661,6 +139787,8 @@ export namespace Prisma {
     deliveryCharge?: Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: boolean
     voucherCode?: string | null
+    voucherName?: string | null
+    showVoucherOnBill?: boolean
     voucherDiscount?: Decimal | DecimalJsLike | number | string
     payments?: PaymentUncheckedCreateNestedManyWithoutSaleInput
     items?: SaleItemUncheckedCreateNestedManyWithoutSaleInput
@@ -139781,6 +139909,8 @@ export namespace Prisma {
     deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
     voucherCode?: NullableStringFieldUpdateOperationsInput | string | null
+    voucherName?: NullableStringFieldUpdateOperationsInput | string | null
+    showVoucherOnBill?: BoolFieldUpdateOperationsInput | boolean
     voucherDiscount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     payments?: PaymentUpdateManyWithoutSaleNestedInput
     branch?: BranchUpdateOneRequiredWithoutSalesNestedInput
@@ -139840,6 +139970,8 @@ export namespace Prisma {
     deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
     voucherCode?: NullableStringFieldUpdateOperationsInput | string | null
+    voucherName?: NullableStringFieldUpdateOperationsInput | string | null
+    showVoucherOnBill?: BoolFieldUpdateOperationsInput | boolean
     voucherDiscount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     payments?: PaymentUncheckedUpdateManyWithoutSaleNestedInput
     items?: SaleItemUncheckedUpdateManyWithoutSaleNestedInput
@@ -140066,6 +140198,8 @@ export namespace Prisma {
     deliveryCharge?: Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: boolean
     voucherCode?: string | null
+    voucherName?: string | null
+    showVoucherOnBill?: boolean
     voucherDiscount?: Decimal | DecimalJsLike | number | string
   }
 
@@ -141015,6 +141149,8 @@ export namespace Prisma {
     deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
     voucherCode?: NullableStringFieldUpdateOperationsInput | string | null
+    voucherName?: NullableStringFieldUpdateOperationsInput | string | null
+    showVoucherOnBill?: BoolFieldUpdateOperationsInput | boolean
     voucherDiscount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     payments?: PaymentUpdateManyWithoutSaleNestedInput
     branch?: BranchUpdateOneRequiredWithoutSalesNestedInput
@@ -141073,6 +141209,8 @@ export namespace Prisma {
     deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
     voucherCode?: NullableStringFieldUpdateOperationsInput | string | null
+    voucherName?: NullableStringFieldUpdateOperationsInput | string | null
+    showVoucherOnBill?: BoolFieldUpdateOperationsInput | boolean
     voucherDiscount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     payments?: PaymentUncheckedUpdateManyWithoutSaleNestedInput
     items?: SaleItemUncheckedUpdateManyWithoutSaleNestedInput
@@ -141126,6 +141264,8 @@ export namespace Prisma {
     deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
     voucherCode?: NullableStringFieldUpdateOperationsInput | string | null
+    voucherName?: NullableStringFieldUpdateOperationsInput | string | null
+    showVoucherOnBill?: BoolFieldUpdateOperationsInput | boolean
     voucherDiscount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
   }
 
@@ -142713,6 +142853,8 @@ export namespace Prisma {
     deliveryCharge?: Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: boolean
     voucherCode?: string | null
+    voucherName?: string | null
+    showVoucherOnBill?: boolean
     voucherDiscount?: Decimal | DecimalJsLike | number | string
   }
 
@@ -143569,6 +143711,8 @@ export namespace Prisma {
     deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
     voucherCode?: NullableStringFieldUpdateOperationsInput | string | null
+    voucherName?: NullableStringFieldUpdateOperationsInput | string | null
+    showVoucherOnBill?: BoolFieldUpdateOperationsInput | boolean
     voucherDiscount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     payments?: PaymentUpdateManyWithoutSaleNestedInput
     customer?: CustomerUpdateOneWithoutSalesNestedInput
@@ -143627,6 +143771,8 @@ export namespace Prisma {
     deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
     voucherCode?: NullableStringFieldUpdateOperationsInput | string | null
+    voucherName?: NullableStringFieldUpdateOperationsInput | string | null
+    showVoucherOnBill?: BoolFieldUpdateOperationsInput | boolean
     voucherDiscount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     payments?: PaymentUncheckedUpdateManyWithoutSaleNestedInput
     items?: SaleItemUncheckedUpdateManyWithoutSaleNestedInput
@@ -143680,6 +143826,8 @@ export namespace Prisma {
     deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
     voucherCode?: NullableStringFieldUpdateOperationsInput | string | null
+    voucherName?: NullableStringFieldUpdateOperationsInput | string | null
+    showVoucherOnBill?: BoolFieldUpdateOperationsInput | boolean
     voucherDiscount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
   }
 
@@ -144452,6 +144600,8 @@ export namespace Prisma {
     deliveryCharge?: Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: boolean
     voucherCode?: string | null
+    voucherName?: string | null
+    showVoucherOnBill?: boolean
     voucherDiscount?: Decimal | DecimalJsLike | number | string
   }
 
@@ -144747,6 +144897,8 @@ export namespace Prisma {
     deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
     voucherCode?: NullableStringFieldUpdateOperationsInput | string | null
+    voucherName?: NullableStringFieldUpdateOperationsInput | string | null
+    showVoucherOnBill?: BoolFieldUpdateOperationsInput | boolean
     voucherDiscount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     payments?: PaymentUpdateManyWithoutSaleNestedInput
     branch?: BranchUpdateOneRequiredWithoutSalesNestedInput
@@ -144805,6 +144957,8 @@ export namespace Prisma {
     deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
     voucherCode?: NullableStringFieldUpdateOperationsInput | string | null
+    voucherName?: NullableStringFieldUpdateOperationsInput | string | null
+    showVoucherOnBill?: BoolFieldUpdateOperationsInput | boolean
     voucherDiscount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     payments?: PaymentUncheckedUpdateManyWithoutSaleNestedInput
     items?: SaleItemUncheckedUpdateManyWithoutSaleNestedInput
@@ -144858,6 +145012,8 @@ export namespace Prisma {
     deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
     voucherCode?: NullableStringFieldUpdateOperationsInput | string | null
+    voucherName?: NullableStringFieldUpdateOperationsInput | string | null
+    showVoucherOnBill?: BoolFieldUpdateOperationsInput | boolean
     voucherDiscount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
   }
 
@@ -147651,6 +147807,8 @@ export namespace Prisma {
     deliveryCharge?: Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: boolean
     voucherCode?: string | null
+    voucherName?: string | null
+    showVoucherOnBill?: boolean
     voucherDiscount?: Decimal | DecimalJsLike | number | string
   }
 
@@ -147872,6 +148030,8 @@ export namespace Prisma {
     deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
     voucherCode?: NullableStringFieldUpdateOperationsInput | string | null
+    voucherName?: NullableStringFieldUpdateOperationsInput | string | null
+    showVoucherOnBill?: BoolFieldUpdateOperationsInput | boolean
     voucherDiscount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     payments?: PaymentUpdateManyWithoutSaleNestedInput
     branch?: BranchUpdateOneRequiredWithoutSalesNestedInput
@@ -147930,6 +148090,8 @@ export namespace Prisma {
     deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
     voucherCode?: NullableStringFieldUpdateOperationsInput | string | null
+    voucherName?: NullableStringFieldUpdateOperationsInput | string | null
+    showVoucherOnBill?: BoolFieldUpdateOperationsInput | boolean
     voucherDiscount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     payments?: PaymentUncheckedUpdateManyWithoutSaleNestedInput
     items?: SaleItemUncheckedUpdateManyWithoutSaleNestedInput
@@ -147983,6 +148145,8 @@ export namespace Prisma {
     deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
     voucherCode?: NullableStringFieldUpdateOperationsInput | string | null
+    voucherName?: NullableStringFieldUpdateOperationsInput | string | null
+    showVoucherOnBill?: BoolFieldUpdateOperationsInput | boolean
     voucherDiscount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
   }
 
@@ -148164,6 +148328,8 @@ export namespace Prisma {
     deliveryCharge?: Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: boolean
     voucherCode?: string | null
+    voucherName?: string | null
+    showVoucherOnBill?: boolean
     voucherDiscount?: Decimal | DecimalJsLike | number | string
   }
 
@@ -148240,6 +148406,8 @@ export namespace Prisma {
     deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
     voucherCode?: NullableStringFieldUpdateOperationsInput | string | null
+    voucherName?: NullableStringFieldUpdateOperationsInput | string | null
+    showVoucherOnBill?: BoolFieldUpdateOperationsInput | boolean
     voucherDiscount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     payments?: PaymentUpdateManyWithoutSaleNestedInput
     branch?: BranchUpdateOneRequiredWithoutSalesNestedInput
@@ -148298,6 +148466,8 @@ export namespace Prisma {
     deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
     voucherCode?: NullableStringFieldUpdateOperationsInput | string | null
+    voucherName?: NullableStringFieldUpdateOperationsInput | string | null
+    showVoucherOnBill?: BoolFieldUpdateOperationsInput | boolean
     voucherDiscount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     payments?: PaymentUncheckedUpdateManyWithoutSaleNestedInput
     items?: SaleItemUncheckedUpdateManyWithoutSaleNestedInput
@@ -148351,6 +148521,8 @@ export namespace Prisma {
     deliveryCharge?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     hasDeliveryCharge?: BoolFieldUpdateOperationsInput | boolean
     voucherCode?: NullableStringFieldUpdateOperationsInput | string | null
+    voucherName?: NullableStringFieldUpdateOperationsInput | string | null
+    showVoucherOnBill?: BoolFieldUpdateOperationsInput | boolean
     voucherDiscount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
   }
 
