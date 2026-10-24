@@ -4,7 +4,6 @@ import { useRouter } from 'next/router';
 import { MENU_STRUCTURE } from '@/lib/menuStructure';
 import { useTabs } from '@/context/TabContext';
 import { FiChevronDown, FiGrid, FiSearch, FiSettings, FiLogOut } from 'react-icons/fi';
-import NotificationBell from './NotificationBell';
 
 export default function TopNavigation() {
   const router = useRouter();

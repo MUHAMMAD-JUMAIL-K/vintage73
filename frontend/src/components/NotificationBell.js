@@ -93,7 +93,7 @@ const NotificationBell = ({ variant = 'default' }) => {
     const unreadCount = notifications.filter(n => !n.isRead).length;
 
     return (
-        <div className="relative" ref={dropdownRef}>
+        <div className="relative z-[1001]" ref={dropdownRef}>
             <button
                 onClick={() => setShowDropdown(!showDropdown)}
                 className={`p-2 rounded-full transition-colors relative ${variant === 'white' ? 'hover:bg-white/10' : 'hover:bg-gray-100 dark:hover:bg-gray-700'}`}
@@ -107,7 +107,7 @@ const NotificationBell = ({ variant = 'default' }) => {
             </button>
 
             {showDropdown && (
-                <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 z-50 max-h-96 flex flex-col overflow-hidden">
+                <div className="absolute right-0 top-full mt-2 w-80 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 z-[1001] max-h-96 flex flex-col overflow-hidden">
                     <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center bg-gray-50 dark:bg-gray-800/50">
                         <h3 className="font-medium dark:text-white">Notifications</h3>
                         <div className="flex gap-2">
