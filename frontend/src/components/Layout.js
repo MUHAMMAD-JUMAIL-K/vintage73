@@ -144,7 +144,7 @@ export default function Layout({ children }) {
       {showNavigation && (
         <div className="flex flex-col bg-white border-b border-gray-200 sticky top-0 z-[9999]">
           {/* 1. Global Header */}
-          <header className="h-14 flex items-center justify-between px-3 md:px-6 border-b border-gray-100">
+          <header className="h-14 flex items-center justify-between px-3 md:px-6 border-b border-gray-100 relative z-[1000]">
             {/* Left - Logo */}
             <div className="flex items-center gap-2 md:gap-3">
               {theme.companyProfile?.logoUrl ? (
