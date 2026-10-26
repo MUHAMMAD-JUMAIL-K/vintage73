@@ -18,6 +18,7 @@ export default function Branches() {
     phone: '', 
     email: '', 
     currencyCode: 'AED',
+    currencySymbol: 'AED',
     isActive: true, 
     stockIncluded: true
   });
@@ -56,10 +57,13 @@ export default function Branches() {
     e.preventDefault();
     try {
       const code = formData.currencyCode || 'AED';
+      const symbol = (formData.currencySymbol && formData.currencySymbol.trim())
+        ? formData.currencySymbol.trim()
+        : getCurrencySymbol(code);
       const payload = {
         ...formData,
         currencyCode: code,
-        currencySymbol: getCurrencySymbol(code, { raw: true })
+        currencySymbol: symbol
       };
       if (editingId) {
         await api.put(`/branches/${editingId}`, payload);
@@ -70,7 +74,7 @@ export default function Branches() {
       }
       setShowModal(false);
       setEditingId(null);
-      setFormData({ name: '', address: '', phone: '', email: '', currencyCode: 'AED', isActive: true, stockIncluded: true });
+      setFormData({ name: '', address: '', phone: '', email: '', currencyCode: 'AED', currencySymbol: 'AED', isActive: true, stockIncluded: true });
       fetchBranches();
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to save branch');
@@ -85,6 +89,7 @@ export default function Branches() {
       phone: branch.phone || '',
       email: branch.email || '',
       currencyCode: branch.currencyCode || 'AED',
+      currencySymbol: branch.currencySymbol || getCurrencySymbol(branch.currencyCode || 'AED'),
       isActive: branch.isActive,
       stockIncluded: branch.stockIncluded !== undefined ? branch.stockIncluded : true
     });
@@ -259,17 +264,32 @@ export default function Branches() {
                 </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1.5">Currency</label>
-                <select
-                  className="input w-full"
-                  value={formData.currencyCode}
-                  onChange={e => setFormData({ ...formData, currencyCode: e.target.value })}
-                >
-                  {CURRENCY_LIST.map(c => (
-                    <option key={c.code} value={c.code}>{c.label}</option>
-                  ))}
-                </select>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1.5">Currency</label>
+                  <select
+                    className="input w-full"
+                    value={formData.currencyCode}
+                    onChange={e => {
+                      const code = e.target.value;
+                      const sym = getCurrencySymbol(code);
+                      setFormData({ ...formData, currencyCode: code, currencySymbol: sym });
+                    }}
+                  >
+                    {CURRENCY_LIST.map(c => (
+                      <option key={c.code} value={c.code}>{c.label}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1.5">Currency Symbol</label>
+                  <input
+                    className="input w-full"
+                    placeholder="e.g. AED, ₹, $"
+                    value={formData.currencySymbol || ''}
+                    onChange={e => setFormData({ ...formData, currencySymbol: e.target.value })}
+                  />
+                </div>
               </div>
 
               <div className="flex flex-col gap-3 py-2 mt-1">
