@@ -8,7 +8,7 @@ import {
   FiChevronRight, FiEdit, FiTrendingUp, FiBookOpen
 } from 'react-icons/fi';
 import { useRouter } from 'next/router';
-import { formatCurrency, extractCurrencyMeta } from '@/lib/currency';
+import { formatCurrency, extractCurrencyMeta, normalizeCurrencySymbol } from '@/lib/currency';
 
 const formatDisplayFromIso = (isoStr) => {
   if (!isoStr) return '';
@@ -18,6 +18,10 @@ const formatDisplayFromIso = (isoStr) => {
 
 export default function DayClosePage() {
   const router = useRouter();
+
+  // Branch Selection State
+  const [branches, setBranches] = useState([]);
+  const [selectedBranchId, setSelectedBranchId] = useState('');
 
   // Session & Status States
   const [statusData, setStatusData] = useState(null);
@@ -90,28 +94,77 @@ export default function DayClosePage() {
       const u = localStorage.getItem('user');
       if (u) setCurrentUser(JSON.parse(u));
     } catch (e) {}
+
+    api.get('/branches')
+      .then(res => {
+        if (Array.isArray(res.data)) {
+          setBranches(res.data);
+        }
+      })
+      .catch(err => console.error('Error fetching branches:', err));
   }, []);
 
-  // Fetch session status whenever router query changes or initially
+  // Sync initial branch selection from query, storage, or user
   useEffect(() => {
-    fetchSessionStatus(router.query.date);
-  }, [router.query.date]);
+    const qBranch = router.query.branchId;
+    const storedBranch = typeof window !== 'undefined' ? localStorage.getItem('activeBranchId') : null;
+    const userBranch = currentUser?.branchId;
+    const targetBranchId = qBranch || storedBranch || userBranch || '';
+    if (targetBranchId && String(targetBranchId) !== String(selectedBranchId)) {
+      setSelectedBranchId(String(targetBranchId));
+    }
+  }, [router.query.branchId, currentUser?.branchId]);
 
-  const fetchSessionStatus = async (dateOverride = null) => {
+  // Listen to activeBranchChanged events from navigation / other tabs
+  useEffect(() => {
+    const handleActiveBranchEvent = (e) => {
+      const nextId = e.detail?.branchId || localStorage.getItem('activeBranchId');
+      if (nextId && String(nextId) !== String(selectedBranchId)) {
+        setSelectedBranchId(String(nextId));
+      }
+    };
+    window.addEventListener('activeBranchChanged', handleActiveBranchEvent);
+    return () => window.removeEventListener('activeBranchChanged', handleActiveBranchEvent);
+  }, [selectedBranchId]);
+
+  // Fetch session status whenever router query changes or selectedBranchId changes
+  useEffect(() => {
+    fetchSessionStatus(router.query.date, selectedBranchId);
+  }, [router.query.date, selectedBranchId]);
+
+  const handleBranchChange = (e) => {
+    const newBranchId = e.target.value;
+    setSelectedBranchId(newBranchId);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('activeBranchId', newBranchId);
+      window.dispatchEvent(new CustomEvent('activeBranchChanged', { detail: { branchId: newBranchId } }));
+    }
+    fetchSessionStatus(router.query.date || null, newBranchId);
+  };
+
+  const fetchSessionStatus = async (dateOverride = null, branchOverride = null) => {
     setLoading(true);
     setError(null);
     try {
       const params = {};
       if (dateOverride) params.date = dateOverride;
+      const bId = (branchOverride !== null && branchOverride !== undefined && branchOverride !== '')
+        ? branchOverride
+        : (selectedBranchId || currentUser?.branchId || (typeof window !== 'undefined' ? localStorage.getItem('activeBranchId') : null));
+      if (bId) params.branchId = bId;
+
       const res = await api.get('/day-close/status', { params });
       if (res.data && res.data.success) {
         setStatusData(res.data);
+        if (res.data.branchId && !selectedBranchId) {
+          setSelectedBranchId(String(res.data.branchId));
+        }
         // Restore saved physical cash count if previously saved; do NOT pre-fill with expectedClosingCash
         if (res.data.physicalCash !== null && res.data.physicalCash !== undefined) {
           setPhysicalCash(res.data.physicalCash.toString());
         }
         if (res.data.status !== 'CLOSED') {
-          fetchVerificationDetails(res.data.businessDate);
+          fetchVerificationDetails(res.data.businessDate, bId || res.data.branchId);
         }
       }
     } catch (err) {
@@ -123,11 +176,17 @@ export default function DayClosePage() {
     }
   };
 
-  const fetchVerificationDetails = async (businessDate) => {
+  const fetchVerificationDetails = async (businessDate, branchOverride = null) => {
     setVerifLoading(true);
     try {
+      const bId = (branchOverride !== null && branchOverride !== undefined && branchOverride !== '')
+        ? branchOverride
+        : (selectedBranchId || statusData?.branchId);
+      const params = { date: businessDate };
+      if (bId) params.branchId = bId;
+
       const res = await api.get('/day-close/verification-data', {
-        params: { date: businessDate }
+        params
       });
       if (res.data && res.data.success) {
         setVerificationData(res.data);
@@ -168,6 +227,7 @@ export default function DayClosePage() {
 
     try {
       await api.post('/day-close/save-verification', {
+        branchId: selectedBranchId || statusData?.branchId,
         businessDate: statusData.businessDate,
         checks: {
           [key]: { reviewed: newReviewed }
@@ -194,14 +254,14 @@ export default function DayClosePage() {
       const diff = actualCash - expectedCash;
 
       if (Math.abs(diff) > 0.01 && !openingReason.trim()) {
-        const branchCurr = statusData?.branch || currentUser?.branch || 'AED';
+        const branchCurr = activeBranchObj || statusData?.branch || currentUser?.branch || 'AED';
         toast.warn(`Please provide an explanation for the opening difference of ${formatCurrency(diff, branchCurr)}.`);
         setSubmitting(false);
         return;
       }
 
       const payload = {
-        branchId: statusData.branchId,
+        branchId: selectedBranchId || statusData.branchId,
         previousClosingCash: prevCash,
         additionalCashAdded: addCash,
         cashRemovedBeforeOpening: remCash,
@@ -214,7 +274,7 @@ export default function DayClosePage() {
       if (res.data && res.data.success) {
         toast.success(res.data.message || 'Business day opened successfully!');
         setShowOpenModal(false);
-        await fetchSessionStatus(statusData.businessDate);
+        await fetchSessionStatus(statusData.businessDate, selectedBranchId || statusData.branchId);
       }
     } catch (err) {
       console.error('Error opening business day:', err);
@@ -233,6 +293,7 @@ export default function DayClosePage() {
     setApprovingException(true);
     try {
       const res = await api.post('/day-close/resolve-exception', {
+        branchId: selectedBranchId || statusData?.branchId,
         businessDate: statusData.businessDate,
         exceptionKey: selectedExceptionKey,
         reason: exceptionReason.trim()
@@ -241,7 +302,7 @@ export default function DayClosePage() {
         toast.success(`Exception for "${selectedExceptionKey}" approved.`);
         setShowExceptionModal(false);
         setExceptionReason('');
-        await fetchVerificationDetails(statusData.businessDate);
+        await fetchVerificationDetails(statusData.businessDate, selectedBranchId || statusData?.branchId);
       }
     } catch (err) {
       console.error('Error approving exception:', err);
@@ -264,6 +325,7 @@ export default function DayClosePage() {
     setSubmitting(true);
     try {
       const payload = {
+        branchId: selectedBranchId || statusData.branchId,
         businessDate: statusData.businessDate,
         physicalCash: parseFloat(physicalCash),
         notes: closingNotes.trim()
@@ -272,7 +334,7 @@ export default function DayClosePage() {
       if (res.data && res.data.success) {
         toast.success(res.data.message || 'Day Close completed successfully!');
         setShowConfirmModal(false);
-        await fetchSessionStatus(statusData.businessDate);
+        await fetchSessionStatus(statusData.businessDate, selectedBranchId || statusData.branchId);
       }
     } catch (err) {
       console.error('Error confirming day close:', err);
@@ -293,7 +355,7 @@ export default function DayClosePage() {
     setSavingEditOpen(true);
     try {
       const res = await api.post('/day-close/edit-opening', {
-        branchId: statusData.branchId,
+        branchId: selectedBranchId || statusData.branchId,
         businessDate: statusData.businessDate,
         actualOpeningCash: parseFloat(editOpeningVal) || 0,
         reason: editOpeningReason.trim()
@@ -301,7 +363,7 @@ export default function DayClosePage() {
       if (res.data && res.data.success) {
         toast.success(res.data.message || 'Opening balance updated successfully!');
         setShowEditOpenModal(false);
-        await fetchSessionStatus(statusData.businessDate);
+        await fetchSessionStatus(statusData.businessDate, selectedBranchId || statusData.branchId);
       }
     } catch (err) {
       console.error(err);
@@ -316,7 +378,7 @@ export default function DayClosePage() {
     setSavingEditClose(true);
     try {
       const res = await api.post('/day-close/edit-closing-cash', {
-        branchId: statusData.branchId,
+        branchId: selectedBranchId || statusData.branchId,
         businessDate: statusData.businessDate,
         physicalCash: parseFloat(physicalCash) || 0,
         notes: closingNotes.trim(),
@@ -324,7 +386,7 @@ export default function DayClosePage() {
       });
       if (res.data && res.data.success) {
         toast.success(res.data.message || 'Cash count recorded successfully!');
-        await fetchSessionStatus(statusData.businessDate);
+        await fetchSessionStatus(statusData.businessDate, selectedBranchId || statusData.branchId);
       }
     } catch (err) {
       console.error(err);
@@ -344,7 +406,7 @@ export default function DayClosePage() {
     setSavingPriorReconcile(true);
     try {
       const res = await api.post('/day-close/post-close-adjust', {
-        branchId: statusData.branchId,
+        branchId: selectedBranchId || statusData.branchId,
         businessDate: statusData.businessDate,
         action: 'RECONCILE_PRIOR_DAY',
         reason: priorReconcileReason.trim()
@@ -352,7 +414,7 @@ export default function DayClosePage() {
       if (res.data && res.data.success) {
         toast.success(res.data.message || 'Prior day adjustment reconciled!');
         setShowPriorReconcileModal(false);
-        await fetchSessionStatus(statusData.businessDate);
+        await fetchSessionStatus(statusData.businessDate, selectedBranchId || statusData.branchId);
       }
     } catch (err) {
       console.error(err);
@@ -372,7 +434,7 @@ export default function DayClosePage() {
     setSavingPostClose(true);
     try {
       const payload = {
-        branchId: statusData.branchId,
+        branchId: selectedBranchId || statusData.branchId,
         businessDate: statusData.businessDate,
         action: postCloseAction,
         reason: postCloseReason.trim()
@@ -385,7 +447,7 @@ export default function DayClosePage() {
       if (res.data && res.data.success) {
         toast.success(res.data.message || 'Action executed successfully!');
         setShowPostCloseModal(false);
-        await fetchSessionStatus(statusData.businessDate);
+        await fetchSessionStatus(statusData.businessDate, selectedBranchId || statusData.branchId);
       }
     } catch (err) {
       console.error(err);
@@ -402,7 +464,7 @@ export default function DayClosePage() {
     try {
       const targetDate = dateStr || statusData?.businessDate;
       const res = await api.get('/day-close/session-report', {
-        params: { branchId: statusData?.branchId, date: targetDate }
+        params: { branchId: selectedBranchId || statusData?.branchId, date: targetDate }
       });
       if (res.data && res.data.success) {
         setSessionReportData(res.data);
@@ -419,7 +481,7 @@ export default function DayClosePage() {
   const handleFetchOpenDays = async () => {
     setOpenDaysLoading(true);
     try {
-      const params = {};
+      const params = { branchId: selectedBranchId || statusData?.branchId };
       if (openDaysFilter.fromDate) params.fromDate = openDaysFilter.fromDate;
       if (openDaysFilter.toDate) params.toDate = openDaysFilter.toDate;
       if (openDaysFilter.status !== 'all') params.status = openDaysFilter.status;
@@ -457,9 +519,14 @@ export default function DayClosePage() {
   const actualClosingNum = isPhysicalCashEntered ? parseFloat(physicalCash) : null;
   const closingDiffCalc = actualClosingNum !== null ? Number((actualClosingNum - expectedClosing).toFixed(2)) : null;
 
-  const branchCurrency = statusData?.branch || currentUser?.branch || 'AED';
+  // Authoritative branch currency and symbol
+  const activeBranchObj = branches.find(b => String(b.id) === String(selectedBranchId || statusData?.branchId)) || statusData?.branch || verificationData?.branch;
+  const branchCurrency = activeBranchObj || verificationData?.branch || statusData?.branch || currentUser?.branch || 'AED';
   const currencyMeta = extractCurrencyMeta(branchCurrency);
-  const currencySymbol = currencyMeta.symbol;
+  const currencySymbol = normalizeCurrencySymbol(
+    activeBranchObj?.currencySymbol || verificationData?.currencySymbol || verificationData?.branch?.currencySymbol || statusData?.currencySymbol || statusData?.branch?.currencySymbol || currencyMeta.symbol,
+    currencyMeta.code
+  );
 
   // Verification readiness check - only the 5 necessary operational domains
   const EXCLUDED_CHECKLIST_KEYS = ['gst', 'expenses', 'branchSession'];
@@ -477,6 +544,54 @@ export default function DayClosePage() {
 
   const criticalIssues = verificationData?.criticalDiscrepancies || [];
   const canCloseDay = allChecksComplete && criticalIssues.length === 0 && isPhysicalCashEntered && isDifferenceNoteProvided;
+
+  // Formatter for checklist card summaries using active branch's currency
+  const renderItemSummary = (item, key) => {
+    if (!item) return '';
+    const d = item.details;
+    if (!d) return item.summary || '';
+
+    if (key === 'salesInvoices') {
+      const posted = d.postedInvoices || 0;
+      const net = formatCurrency(d.netSales || 0, branchCurrency);
+      const cancelled = d.cancelledInvoicesCount || 0;
+      const paid = d.paidInvoices || 0;
+      return `${posted} posted invoices (${net}), ${cancelled} cancelled, ${paid} paid`;
+    }
+
+    if (key === 'payments') {
+      const cash = formatCurrency(d.Cash || 0, branchCurrency);
+      const upi = formatCurrency(d.UPI || 0, branchCurrency);
+      const card = formatCurrency(d.Card || 0, branchCurrency);
+      return `Cash: ${cash} | UPI: ${upi} | Card: ${card}`;
+    }
+
+    if (key === 'cashbook') {
+      const opening = formatCurrency(d.openingCash || 0, branchCurrency);
+      const rec = formatCurrency(d.totalCashReceived || 0, branchCurrency);
+      const pay = formatCurrency(d.totalCashPaid || 0, branchCurrency);
+      const tr = formatCurrency(d.netTransfers || 0, branchCurrency);
+      const exp = formatCurrency(d.expectedClosingCash || 0, branchCurrency);
+      return `Opening: ${opening} + Receipts: ${rec} - Payments: ${pay} + Transfers: ${tr} = Expected Closing Cash: ${exp}`;
+    }
+
+    if (key === 'returnsRefunds') {
+      const count = d.returnCount || 0;
+      const total = formatCurrency(d.returnTotal || 0, branchCurrency);
+      const cancelled = d.cancelledCount || 0;
+      return `${count} returns (${total}), ${cancelled} cancelled invoices`;
+    }
+
+    return item.summary || '';
+  };
+
+  const renderDiscrepancyMessage = (item, key) => {
+    if (!item || !item.hasDiscrepancy) return null;
+    if (key === 'cashbook' && item.details?.cashDifference !== undefined && item.details?.cashDifference !== null && Math.abs(item.details.cashDifference) > 10) {
+      return `Cash difference of ${formatCurrency(item.details.cashDifference, branchCurrency)} between physical count and expected balance.`;
+    }
+    return item.discrepancyMessage;
+  };
 
   return (
     <div className="w-full space-y-6 pt-1 pb-12">
@@ -496,7 +611,23 @@ export default function DayClosePage() {
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          {currentUser?.role === 'admin' && branches.length > 0 && (
+            <div className="flex items-center gap-1.5 mr-1">
+              <span className="text-xs font-semibold text-gray-500">Branch:</span>
+              <select
+                className="input py-1.5 px-3 text-xs font-bold text-gray-800 border rounded-xl bg-gray-50 hover:bg-gray-100 focus:bg-white transition-all cursor-pointer shadow-sm border-gray-200"
+                value={selectedBranchId}
+                onChange={handleBranchChange}
+              >
+                {branches.map(b => (
+                  <option key={b.id} value={b.id}>
+                    {b.name} ({b.currencySymbol || b.currencyCode || 'AED'})
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
           <button
             type="button"
             onClick={() => handleFetchSessionReport(statusData?.businessDate)}
@@ -516,7 +647,7 @@ export default function DayClosePage() {
           </button>
           <button
             type="button"
-            onClick={() => fetchSessionStatus(statusData?.businessDate)}
+            onClick={() => fetchSessionStatus(statusData?.businessDate, selectedBranchId)}
             className="p-2 bg-slate-50 hover:bg-slate-100 text-slate-600 rounded-xl transition-all cursor-pointer"
             title="Refresh Status"
           >
@@ -534,7 +665,7 @@ export default function DayClosePage() {
         <div className="bg-white rounded-2xl shadow-sm border border-red-100 p-8 text-center space-y-4">
           <div className="text-red-500 text-sm font-semibold">{error}</div>
           <button
-            onClick={() => fetchSessionStatus()}
+            onClick={() => fetchSessionStatus(null, selectedBranchId)}
             className="px-4 py-2 bg-emerald-600 text-white text-xs font-bold rounded-lg hover:bg-emerald-700 transition-colors inline-flex items-center gap-1.5 cursor-pointer"
           >
             <FiRefreshCw /> Retry Loading
@@ -557,7 +688,7 @@ export default function DayClosePage() {
               {pendingDateIso && statusData.businessDate !== pendingDateIso && (
                 <button
                   type="button"
-                  onClick={() => router.push(`/settings/day-close?date=${pendingDateIso}`)}
+                  onClick={() => router.push(`/settings/day-close?date=${pendingDateIso}${selectedBranchId ? `&branchId=${selectedBranchId}` : ''}`)}
                   className="px-3.5 py-1.5 bg-white text-amber-900 text-xs font-bold rounded-lg shadow-sm hover:bg-amber-50 transition-colors whitespace-nowrap self-start sm:self-auto cursor-pointer"
                 >
                   Go to {pendingDateDisplay} →
@@ -574,8 +705,8 @@ export default function DayClosePage() {
                 <div>
                   <h4 className="font-bold text-sm text-amber-900">Prior Day Closing Discrepancy Detected</h4>
                   <p className="mt-0.5 text-amber-800">
-                    The immediately preceding business day's closing balance was modified by <strong>₹{statusData.priorDayDiscrepancyAmount}</strong> after this session was opened.
-                    (Session recorded: ₹{statusData.priorDayRecordedClosingCash} → Current saved: ₹{statusData.priorDayCurrentClosingCash}).
+                    The immediately preceding business day's closing balance was modified by <strong>{formatCurrency(statusData.priorDayDiscrepancyAmount, branchCurrency)}</strong> after this session was opened.
+                    (Session recorded: {formatCurrency(statusData.priorDayRecordedClosingCash, branchCurrency)} → Current saved: {formatCurrency(statusData.priorDayCurrentClosingCash, branchCurrency)}).
                   </p>
                 </div>
               </div>
@@ -645,7 +776,12 @@ export default function DayClosePage() {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
               <div className="p-3 bg-gray-50 rounded-xl space-y-0.5">
                 <span className="text-[10px] text-gray-400 font-semibold uppercase">Branch</span>
-                <p className="font-bold text-gray-800">{statusData.branchName}</p>
+                <p className="font-bold text-gray-800 flex items-center gap-1.5">
+                  {statusData.branchName}
+                  <span className="px-1.5 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded text-[10px] font-black">
+                    {currencySymbol}
+                  </span>
+                </p>
               </div>
               <div className="p-3 bg-gray-50 rounded-xl space-y-0.5">
                 <span className="text-[10px] text-gray-400 font-semibold uppercase">Register / Terminal</span>
@@ -858,7 +994,7 @@ export default function DayClosePage() {
                               {item.title}
                             </h4>
                             <p className="text-[11px] text-gray-500 mt-0.5 leading-snug">
-                              {item.summary}
+                              {renderItemSummary(item, key)}
                             </p>
                           </div>
                         </label>
@@ -884,7 +1020,7 @@ export default function DayClosePage() {
                       {/* Discrepancy Alert & Resolution */}
                       {hasDiscrepancy && (
                         <div className="p-2 bg-red-50 border border-red-200 rounded-lg text-[11px] text-red-800 flex items-center justify-between gap-2">
-                          <span>{item.discrepancyMessage}</span>
+                          <span>{renderDiscrepancyMessage(item, key)}</span>
                           {currentUser?.role === 'admin' && !isApproved && (
                             <button
                               type="button"
@@ -1259,8 +1395,8 @@ export default function DayClosePage() {
                         <td className="p-3 text-gray-600">{od.branchName}</td>
                         <td className="p-3 text-gray-600">{od.cashier}</td>
                         <td className="p-3 text-right text-gray-800">{od.salesCount}</td>
-                        <td className="p-3 text-right font-bold text-gray-900">{formatCurrency(od.totalSales, branchCurrency)}</td>
-                        <td className="p-3 text-right text-emerald-600 font-bold">{formatCurrency(od.cashCollections, branchCurrency)}</td>
+                        <td className="p-3 text-right font-bold text-gray-900">{formatCurrency(od.totalSales, od.branch || branchCurrency)}</td>
+                        <td className="p-3 text-right text-emerald-600 font-bold">{formatCurrency(od.cashCollections, od.branch || branchCurrency)}</td>
                         <td className="p-3">
                           <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
                             od.isPendingClosure
@@ -1275,7 +1411,12 @@ export default function DayClosePage() {
                             type="button"
                             onClick={() => {
                               setShowOpenDaysModal(false);
-                              router.push(`/settings/day-close?date=${od.businessDate}`);
+                              if (od.branchId) {
+                                setSelectedBranchId(String(od.branchId));
+                                localStorage.setItem('activeBranchId', String(od.branchId));
+                                window.dispatchEvent(new CustomEvent('activeBranchChanged', { detail: { branchId: String(od.branchId) } }));
+                              }
+                              router.push(`/settings/day-close?date=${od.businessDate}${od.branchId ? `&branchId=${od.branchId}` : ''}`);
                             }}
                             className="px-3 py-1 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-bold rounded-lg text-xs"
                           >
@@ -1543,15 +1684,15 @@ export default function DayClosePage() {
                 <p className="font-bold">Prior Day Closing Balance Modified Post-Opening:</p>
                 <div className="flex justify-between text-xs">
                   <span>Balance at Session Open:</span>
-                  <span className="font-mono font-bold">₹{statusData?.priorDayRecordedClosingCash}</span>
+                  <span className="font-mono font-bold">{formatCurrency(statusData?.priorDayRecordedClosingCash, branchCurrency)}</span>
                 </div>
                 <div className="flex justify-between text-xs">
                   <span>Current Saved Prior Closing:</span>
-                  <span className="font-mono font-bold">₹{statusData?.priorDayCurrentClosingCash}</span>
+                  <span className="font-mono font-bold">{formatCurrency(statusData?.priorDayCurrentClosingCash, branchCurrency)}</span>
                 </div>
                 <div className="flex justify-between text-xs border-t border-amber-200 pt-1 font-bold">
                   <span>Variance to Reconcile:</span>
-                  <span className="font-mono text-amber-900">₹{statusData?.priorDayDiscrepancyAmount}</span>
+                  <span className="font-mono text-amber-900">{formatCurrency(statusData?.priorDayDiscrepancyAmount, branchCurrency)}</span>
                 </div>
                 <p className="text-[11px] text-amber-800 pt-1">
                   Reconciling acknowledges this adjustment and updates the current session opening baseline in the audit trail without silently overwriting previous historical closing records.

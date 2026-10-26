@@ -31,6 +31,10 @@ const resolveEffectiveBranchId = async (req) => {
       const parsed = parseInt(bVal);
       if (!isNaN(parsed)) return parsed;
     }
+    if (req.headers && req.headers['x-branch-id'] && req.headers['x-branch-id'] !== 'all') {
+      const hVal = parseInt(req.headers['x-branch-id']);
+      if (!isNaN(hVal)) return hVal;
+    }
     if (user?.branchId) {
       return user.branchId;
     }
@@ -44,6 +48,10 @@ const resolveEffectiveBranchId = async (req) => {
   }
 
   // Fallback for users without branchId
+  if (req.headers && req.headers['x-branch-id'] && req.headers['x-branch-id'] !== 'all') {
+    const hVal = parseInt(req.headers['x-branch-id']);
+    if (!isNaN(hVal)) return hVal;
+  }
   const firstBranch = await prisma.branch.findFirst({ where: { isActive: true }, orderBy: { id: 'asc' } });
   return firstBranch ? firstBranch.id : 1;
 };
@@ -73,7 +81,7 @@ const getDayCloseStatus = asyncHandler(async (req, res) => {
     success: true,
     branchId: targetBranchId,
     branchName: branch?.name || 'Branch',
-    currencySymbol: branch?.currencySymbol || (branch?.currencyCode === 'INR' ? '₹' : 'AED'),
+    currencySymbol: branch?.currencySymbol || getCurrencySymbol(branch?.currencyCode),
     currencyCode: branch?.currencyCode || 'AED',
     businessDate: selectedDateStr,
     businessDateDisplay: formatDisplayDate(selectedDateStr),
@@ -783,7 +791,7 @@ const getSessionReport = asyncHandler(async (req, res) => {
     success: true,
     branchId: targetBranchId,
     branchName: branch?.name || 'Branch',
-    currencySymbol: branch?.currencySymbol || (branch?.currencyCode === 'INR' ? '₹' : 'AED'),
+    currencySymbol: branch?.currencySymbol || getCurrencySymbol(branch?.currencyCode),
     currencyCode: branch?.currencyCode || 'AED',
     businessDate: dateStr,
     businessDateDisplay: formatDisplayDate(dateStr),
@@ -798,6 +806,11 @@ const getSessionReport = asyncHandler(async (req, res) => {
  */
 const getVerificationData = asyncHandler(async (req, res) => {
   const targetBranchId = await resolveEffectiveBranchId(req);
+  const branch = await prisma.branch.findUnique({
+    where: { id: targetBranchId },
+    select: { id: true, name: true, currencyCode: true, currencySymbol: true }
+  });
+
   const activeDateInfo = await getBranchActiveBusinessDate(targetBranchId);
   const dateStr = req.query.date || activeDateInfo.dateStr;
   const dateUtc = getUtcDateObj(dateStr);
@@ -969,7 +982,7 @@ const getVerificationData = asyncHandler(async (req, res) => {
     salesInvoices: {
       key: 'salesInvoices',
       title: "Today's Sales & Invoices",
-      summary: `${postedInvoices} posted invoices (₹${netSalesTotal.toLocaleString('en-IN')}), ${cancelledInvoicesCount} cancelled, ${paidInvoices} paid`,
+      summary: `${postedInvoices} posted invoices (${formatCurrency(netSalesTotal, branch)}), ${cancelledInvoicesCount} cancelled, ${paidInvoices} paid`,
       details: {
         totalInvoicesCreated,
         postedInvoices,
@@ -993,7 +1006,7 @@ const getVerificationData = asyncHandler(async (req, res) => {
     payments: {
       key: 'payments',
       title: 'Payment & Collection Verification',
-      summary: `Cash: ₹${paymentBreakdown.Cash.toLocaleString('en-IN')} | UPI: ₹${paymentBreakdown.UPI.toLocaleString('en-IN')} | Card: ₹${paymentBreakdown.Card.toLocaleString('en-IN')}`,
+      summary: `Cash: ${formatCurrency(paymentBreakdown.Cash, branch)} | UPI: ${formatCurrency(paymentBreakdown.UPI, branch)} | Card: ${formatCurrency(paymentBreakdown.Card, branch)}`,
       details: {
         ...paymentBreakdown,
         totalCreditSales,
@@ -1010,7 +1023,7 @@ const getVerificationData = asyncHandler(async (req, res) => {
     cashbook: {
       key: 'cashbook',
       title: 'Cash & Cashbook Reconciliation',
-      summary: `Opening: ₹${drawer.openingCash.toLocaleString('en-IN')} + Receipts: ₹${drawer.totalCashReceived.toLocaleString('en-IN')} - Payments: ₹${drawer.totalCashPaid.toLocaleString('en-IN')} + Transfers: ₹${drawer.netTransfers.toLocaleString('en-IN')} = Expected Closing Cash: ₹${drawer.expectedClosingCash.toLocaleString('en-IN')}`,
+      summary: `Opening: ${formatCurrency(drawer.openingCash, branch)} + Receipts: ${formatCurrency(drawer.totalCashReceived, branch)} - Payments: ${formatCurrency(drawer.totalCashPaid, branch)} + Transfers: ${formatCurrency(drawer.netTransfers, branch)} = Expected Closing Cash: ${formatCurrency(drawer.expectedClosingCash, branch)}`,
       details: {
         openingCash: drawer.openingCash,
         previousClosingCash: drawer.previousClosingCash,
@@ -1032,7 +1045,7 @@ const getVerificationData = asyncHandler(async (req, res) => {
       },
       hasDiscrepancy: drawer.cashDifference !== null && Math.abs(drawer.cashDifference) > 10,
       discrepancyMessage: drawer.cashDifference !== null && Math.abs(drawer.cashDifference) > 10
-        ? `Cash difference of ₹${drawer.cashDifference.toFixed(2)} between physical count and expected balance.`
+        ? `Cash difference of ${formatCurrency(drawer.cashDifference, branch)} between physical count and expected balance.`
         : null,
       isReviewed: Boolean(savedChecks.cashbook?.reviewed),
       reviewedAt: savedChecks.cashbook?.verifiedAt || null,
@@ -1066,7 +1079,7 @@ const getVerificationData = asyncHandler(async (req, res) => {
     returnsRefunds: {
       key: 'returnsRefunds',
       title: 'Sales Returns & Cancellations',
-      summary: `${returnSales.length} returns (₹${salesReturnTotal.toLocaleString('en-IN')}), ${cancelledInvoicesCount} cancelled invoices`,
+      summary: `${returnSales.length} returns (${formatCurrency(salesReturnTotal, branch)}), ${cancelledInvoicesCount} cancelled invoices`,
       details: {
         returnCount: returnSales.length,
         returnTotal: salesReturnTotal,
@@ -1092,6 +1105,15 @@ const getVerificationData = asyncHandler(async (req, res) => {
   res.json({
     success: true,
     branchId: targetBranchId,
+    branchName: branch?.name || 'Branch',
+    currencySymbol: branch?.currencySymbol || getCurrencySymbol(branch?.currencyCode),
+    currencyCode: branch?.currencyCode || 'AED',
+    branch: branch ? {
+      id: branch.id,
+      name: branch.name,
+      currencyCode: branch.currencyCode,
+      currencySymbol: branch.currencySymbol
+    } : null,
     businessDate: dateStr,
     businessDateDisplay: formatDisplayDate(dateStr),
     status: dayCloseRecord?.status || 'NOT_OPENED',
@@ -1578,7 +1600,7 @@ const findOpenDays = asyncHandler(async (req, res) => {
       }
     },
     include: {
-      branch: { select: { id: true, name: true } },
+      branch: { select: { id: true, name: true, currencyCode: true, currencySymbol: true } },
       openedBy: { select: { id: true, name: true, username: true } },
       terminal: { select: { id: true, name: true } }
     }
@@ -1588,6 +1610,12 @@ const findOpenDays = asyncHandler(async (req, res) => {
   dayCloseRecords.forEach(dc => {
     const dStr = getLocalDateString(dc.businessDate);
     dayCloseByDate[dStr] = dc;
+  });
+
+  // Also fetch target branch details for fallback
+  const targetBranch = await prisma.branch.findUnique({
+    where: { id: targetBranchId },
+    select: { id: true, name: true, currencyCode: true, currencySymbol: true }
   });
 
   // Combine all distinct dates
@@ -1617,12 +1645,21 @@ const findOpenDays = asyncHandler(async (req, res) => {
 
     const openingCash = Number(dc?.actualOpeningCash || dc?.openingCash || 0);
     const expectedCash = Number((openingCash + sInfo.cashCollections).toFixed(2));
+    const effectiveBranch = dc?.branch || targetBranch;
 
     openDaysList.push({
       businessDate: dStr,
       businessDateDisplay: formatDisplayDate(dStr),
       branchId: targetBranchId,
-      branchName: dc?.branch?.name || 'Main Branch',
+      branchName: effectiveBranch?.name || 'Main Branch',
+      currencyCode: effectiveBranch?.currencyCode || 'AED',
+      currencySymbol: effectiveBranch?.currencySymbol || getCurrencySymbol(effectiveBranch?.currencyCode),
+      branch: effectiveBranch ? {
+        id: effectiveBranch.id,
+        name: effectiveBranch.name,
+        currencyCode: effectiveBranch.currencyCode,
+        currencySymbol: effectiveBranch.currencySymbol
+      } : null,
       cashier: dc?.openedBy ? (dc.openedBy.name || dc.openedBy.username) : 'Unassigned',
       register: dc?.terminal?.name || 'Default Register',
       openingTime: dc?.openedAt || null,
