@@ -38,29 +38,12 @@ export default function InvoicesList() {
     // History Modal State
     const [showHistoryModal, setShowHistoryModal] = useState(false);
     const [historyInvoice, setHistoryInvoice] = useState(null);
-    const [closedDatesSet, setClosedDatesSet] = useState(new Set());
+    const closedDatesSet = new Set();
 
     useEffect(() => {
         fetchInvoices();
         fetchSettings();
-        fetchClosedDates();
     }, []);
-
-    const fetchClosedDates = async () => {
-        try {
-            const res = await api.get('/day-close/history', { params: { limit: 100 } });
-            if (res.data?.records) {
-                const set = new Set(
-                    res.data.records
-                        .filter(r => r.status === 'CLOSED' || r.status === 'ADMIN_CLOSED')
-                        .map(r => r.businessDate.split('T')[0])
-                );
-                setClosedDatesSet(set);
-            }
-        } catch (e) {
-            console.error('Failed to fetch closed dates', e);
-        }
-    };
 
     // Clear printData when preview modal closes to avoid stale data
     useEffect(() => {

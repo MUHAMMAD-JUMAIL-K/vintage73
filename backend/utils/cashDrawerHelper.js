@@ -416,14 +416,9 @@ async function calculateSessionCashDrawer(branchId, businessDateStr, terminalId 
     : null;
 
   const isClosed = dayClose && (dayClose.status === 'CLOSED' || dayClose.status === 'ADMIN_CLOSED');
-  const isOpen = dayClose && dayClose.status === 'OPEN';
   const isClosingPending = dayClose && dayClose.status === 'CLOSING_PENDING';
 
-  let currentStatus = 'NOT_OPENED';
-  if (isClosed) currentStatus = 'CLOSED';
-  else if (isClosingPending) currentStatus = 'CLOSING_PENDING';
-  else if (isOpen) currentStatus = 'OPEN';
-  else if (dayClose) currentStatus = dayClose.status;
+  let currentStatus = isClosed ? 'CLOSED' : (isClosingPending ? 'CLOSING_PENDING' : 'OPEN');
 
   return {
     branchId: targetBranchId,

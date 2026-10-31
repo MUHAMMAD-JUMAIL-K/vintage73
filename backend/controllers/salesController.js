@@ -50,29 +50,7 @@ exports.createSale = asyncHandler(async (req, res) => {
   }
 
   const validBranchId = parseInt(branchId);
-
-  let effectiveSaleDate = saleDate ? new Date(saleDate) : null;
-  if (!effectiveSaleDate) {
-    const activeBiz = await getBranchActiveBusinessDate(validBranchId);
-    effectiveSaleDate = activeBiz.dateObj;
-  }
-
-  // Prevent assigning sales to closed business sessions
-  const saleDateStr = getLocalDateString(effectiveSaleDate);
-  const saleDateUtc = getUtcDateObj(saleDateStr);
-  const dayCloseRecord = await prisma.dayClose.findUnique({
-    where: {
-      branchId_businessDate: {
-        branchId: validBranchId,
-        businessDate: saleDateUtc
-      }
-    }
-  });
-
-  if (dayCloseRecord && (dayCloseRecord.status === 'CLOSED' || dayCloseRecord.status === 'ADMIN_CLOSED')) {
-    res.status(400);
-    throw new Error(`Cannot create sales for closed business date ${formatDisplayDate(saleDateStr)}. This business session is closed and immutable.`);
-  }
+  const effectiveSaleDate = saleDate ? new Date(saleDate) : new Date();
 
   if (!items || !Array.isArray(items) || items.length === 0) {
     res.status(400);
@@ -630,23 +608,6 @@ exports.cancelSale = asyncHandler(async (req, res) => {
   const sale = await prisma.sale.findUnique({ where: { id: parseInt(id) }, include: { items: true } });
   if (!sale || sale.status === 'cancelled') throw new Error('Invalid sale or already cancelled');
 
-  // Strict Business-Session Locking: Invoices belonging to a closed business day cannot be cancelled
-  const saleDateStr = getLocalDateString(sale.saleDate);
-  const saleDateUtc = getUtcDateObj(saleDateStr);
-  const dayCloseRecord = await prisma.dayClose.findUnique({
-    where: {
-      branchId_businessDate: {
-        branchId: sale.branchId,
-        businessDate: saleDateUtc
-      }
-    }
-  });
-
-  if (dayCloseRecord && (dayCloseRecord.status === 'CLOSED' || dayCloseRecord.status === 'ADMIN_CLOSED')) {
-    res.status(403);
-    throw new Error(`This invoice belongs to a closed business day (${formatDisplayDate(saleDateStr)}). Invoices belonging to a closed business day cannot be cancelled. Closed financial records are locked and immutable.`);
-  }
-
   await prisma.$transaction(async (tx) => {
     await tx.sale.update({
       where: { id: parseInt(id) },
@@ -726,23 +687,6 @@ exports.updateSale = asyncHandler(async (req, res) => {
   const validSaleId = parseInt(id);
   const existing = await prisma.sale.findUnique({ where: { id: validSaleId }, include: { items: true } });
   if (!existing) throw new Error('Sale not found');
-
-  // Strict Business-Session Locking: Invoices belonging to a closed business day cannot be modified
-  const saleDateStr = getLocalDateString(existing.saleDate);
-  const saleDateUtc = getUtcDateObj(saleDateStr);
-  const dayCloseRecord = await prisma.dayClose.findUnique({
-    where: {
-      branchId_businessDate: {
-        branchId: existing.branchId,
-        businessDate: saleDateUtc
-      }
-    }
-  });
-
-  if (dayCloseRecord && (dayCloseRecord.status === 'CLOSED' || dayCloseRecord.status === 'ADMIN_CLOSED')) {
-    res.status(403);
-    throw new Error(`This invoice belongs to a closed business day (${formatDisplayDate(saleDateStr)}). Invoices belonging to a closed business day cannot be modified. Closed financial records are locked and immutable.`);
-  }
 
   let effectiveDeliveryCharge = 0;
   let isDeliveryEnabled = false;
@@ -1146,23 +1090,6 @@ exports.deleteSale = asyncHandler(async (req, res) => {
   if (!sale) {
     res.status(404);
     throw new Error('Sale not found');
-  }
-
-  // Strict Business-Session Locking: Invoices belonging to a closed business day cannot be deleted
-  const saleDateStr = getLocalDateString(sale.saleDate);
-  const saleDateUtc = getUtcDateObj(saleDateStr);
-  const dayCloseRecord = await prisma.dayClose.findUnique({
-    where: {
-      branchId_businessDate: {
-        branchId: sale.branchId,
-        businessDate: saleDateUtc
-      }
-    }
-  });
-
-  if (dayCloseRecord && (dayCloseRecord.status === 'CLOSED' || dayCloseRecord.status === 'ADMIN_CLOSED')) {
-    res.status(403);
-    throw new Error(`This invoice belongs to a closed business day (${formatDisplayDate(saleDateStr)}). Invoices belonging to a closed business day cannot be deleted. Closed financial records are locked and immutable.`);
   }
 
   // For completed/posted invoices, require cancellation to preserve financial integrity

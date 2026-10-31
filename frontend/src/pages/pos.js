@@ -143,35 +143,13 @@ const EXCHANGE_RATES = {
     const [showVoucherDropdown, setShowVoucherDropdown] = useState(false);
     const [showVoucherOnBill, setShowVoucherOnBill] = useState(true);
 
-    // Fetch the authoritative active business date from Day Close API
     const fetchBusinessDate = async (branchId) => {
-        try {
-            setBusinessDateLoading(true);
-            const params = branchId ? { branchId } : {};
-            const res = await api.get('/day-close/status', { params });
-            if (res.data && res.data.activeDate) {
-                setSaleDate(res.data.activeDate);
-            } else if (res.data && res.data.currentDate) {
-                setSaleDate(res.data.currentDate);
-            } else {
-                // Fallback: use today only if API fails to return a date
-                const today = new Date();
-                const y = today.getFullYear();
-                const m = String(today.getMonth() + 1).padStart(2, '0');
-                const d = String(today.getDate()).padStart(2, '0');
-                setSaleDate(`${y}-${m}-${d}`);
-            }
-        } catch (err) {
-            console.error('Failed to fetch active business date:', err);
-            // Fallback on error
-            const today = new Date();
-            const y = today.getFullYear();
-            const m = String(today.getMonth() + 1).padStart(2, '0');
-            const d = String(today.getDate()).padStart(2, '0');
-            setSaleDate(`${y}-${m}-${d}`);
-        } finally {
-            setBusinessDateLoading(false);
-        }
+        const today = new Date();
+        const y = today.getFullYear();
+        const m = String(today.getMonth() + 1).padStart(2, '0');
+        const d = String(today.getDate()).padStart(2, '0');
+        setSaleDate(`${y}-${m}-${d}`);
+        setBusinessDateLoading(false);
     };
 
     // Restore POS state on mount or when user changes

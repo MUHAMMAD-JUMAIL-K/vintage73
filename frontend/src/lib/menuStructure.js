@@ -133,7 +133,6 @@ export const MENU_STRUCTURE = [
     icon: FiSettings,
     items: [
       { name: 'Change Password', icon: FiKey, path: '/settings/change-password' },
-      { name: 'Day Close', icon: FiClock, path: '/settings/day-close' },
       { name: 'GST Settings', icon: FiFileText, path: '/settings/gst-settings' },
       { name: 'Screen Layout', icon: FiGrid, path: '/settings/screen-layout' },
       { name: 'Terminal Master', icon: FiMonitor, path: '/settings/terminal-master' },

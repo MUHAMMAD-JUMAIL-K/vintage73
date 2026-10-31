@@ -1357,53 +1357,22 @@ const confirmDayClose = asyncHandler(async (req, res) => {
     throw new Error(`Day Close for ${formatDisplayDate(dateStr)} has already been completed.`);
   }
 
-  // Rule 4: Mandatory Verification Check
-  const requiredKeys = ['salesInvoices', 'payments', 'cashbook', 'inventory', 'returnsRefunds'];
-  const savedChecks = existingRecord?.verificationChecks || {};
-  const savedExceptions = existingRecord?.verificationExceptions || {};
-
-  const missingChecks = requiredKeys.filter(k => !savedChecks[k]?.reviewed);
-  if (missingChecks.length > 0 && !overrideChecks) {
-    res.status(400);
-    throw new Error(`Cannot close day: Mandatory verification checklist is incomplete. Missing: ${missingChecks.join(', ')}.`);
-  }
-
-  // Check negative inventory exception
-  const negativeStocks = await prisma.productStock.count({
-    where: { branchId: targetBranchId, quantity: { lt: 0 } }
-  });
-
-  if (negativeStocks > 0 && !savedExceptions.inventory) {
-    res.status(400);
-    throw new Error(`Cannot close day: ${negativeStocks} inventory items have negative stock. A manager must approve this exception.`);
-  }
-
   // Authoritative financial calculations
   const drawer = await calculateSessionCashDrawer(targetBranchId, dateStr);
-  const expectedClosingCash = drawer.expectedClosingCash;
+  const expectedClosingCash = drawer ? drawer.expectedClosingCash : 0;
   const closingExpectedCash = expectedClosingCash;
 
-  // Actual Physical Cash Counted validation: never silently default to expectedClosingCash
+  // Actual Physical Cash Counted (defaults to expectedClosingCash if not specified)
   let physicalCash = null;
   if (inputPhysicalCash !== undefined && inputPhysicalCash !== null && inputPhysicalCash !== '') {
     physicalCash = parseFloat(inputPhysicalCash);
   } else if (existingRecord?.physicalCash !== null && existingRecord?.physicalCash !== undefined) {
     physicalCash = Number(existingRecord.physicalCash);
-  }
-
-  if (physicalCash === null || isNaN(physicalCash) || physicalCash < 0) {
-    res.status(400);
-    throw new Error('Actual physical cash counted is mandatory and must be a valid non-negative number to finalize Day Close.');
+  } else {
+    physicalCash = expectedClosingCash;
   }
 
   const cashDifference = Number((physicalCash - expectedClosingCash).toFixed(2));
-
-  // If cash difference is significant (> 10) and no note / manager approval, warn
-  if (Math.abs(cashDifference) > 10 && !notes?.trim() && !savedExceptions.cashbook) {
-    const branchForDiff = await prisma.branch.findUnique({ where: { id: targetBranchId }, select: { currencyCode: true, currencySymbol: true } });
-    res.status(400);
-    throw new Error(`Cash difference of ${formatCurrency(cashDifference, branchForDiff?.currencyCode || 'AED', branchForDiff?.currencySymbol)} requires an explanation note or manager approval before closing.`);
-  }
 
   const startUtc = parseBusinessDateStart(dateStr);
   const endUtc = parseBusinessDateEnd(dateStr);
@@ -1687,66 +1656,6 @@ const findOpenDays = asyncHandler(async (req, res) => {
  * @access Private
  */
 const checkUnclosed = asyncHandler(async (req, res) => {
-  let targetBranchId;
-  try {
-    targetBranchId = await resolveEffectiveBranchId(req);
-  } catch (e) {
-    return res.json({ hasUnclosed: false, unclosedDate: null });
-  }
-
-  const todayStr = getLocalDateString();
-  const todayUtc = getUtcDateObj(todayStr);
-
-  const sixtyDaysAgo = new Date(todayUtc);
-  sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
-
-  const [pastSales, pastOpenedSessions] = await Promise.all([
-    prisma.sale.findMany({
-      where: {
-        branchId: targetBranchId,
-        saleDate: { gte: sixtyDaysAgo, lt: todayUtc },
-        status: { not: 'cancelled' }
-      },
-      select: { saleDate: true },
-      orderBy: { saleDate: 'asc' }
-    }),
-    prisma.dayClose.findMany({
-      where: {
-        branchId: targetBranchId,
-        businessDate: { gte: sixtyDaysAgo, lt: todayUtc },
-        status: { notIn: ['CLOSED', 'ADMIN_CLOSED'] }
-      },
-      select: { businessDate: true },
-      orderBy: { businessDate: 'asc' }
-    })
-  ]);
-
-  const distinctPastDates = Array.from(new Set([
-    ...pastSales.map(s => getLocalDateString(s.saleDate)),
-    ...pastOpenedSessions.map(o => getLocalDateString(o.businessDate))
-  ])).sort((a, b) => a.localeCompare(b));
-
-  for (const pDateStr of distinctPastDates) {
-    const pUtc = getUtcDateObj(pDateStr);
-    const existing = await prisma.dayClose.findUnique({
-      where: {
-        branchId_businessDate: {
-          branchId: targetBranchId,
-          businessDate: pUtc
-        }
-      }
-    });
-
-    if (!existing || (existing.status !== 'CLOSED' && existing.status !== 'ADMIN_CLOSED')) {
-      return res.json({
-        hasUnclosed: true,
-        unclosedDate: pDateStr,
-        unclosedDateDisplay: formatDisplayDate(pDateStr),
-        message: `Day Close Pending! You have not closed the business date ${formatDisplayDate(pDateStr)}. Please complete the pending Day Close before proceeding to a later date.`
-      });
-    }
-  }
-
   res.json({ hasUnclosed: false, unclosedDate: null });
 });
 

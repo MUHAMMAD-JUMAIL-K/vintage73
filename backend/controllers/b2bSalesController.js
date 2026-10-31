@@ -42,15 +42,7 @@ exports.createB2BInvoice = asyncHandler(async (req, res) => {
     throw new Error('Branch selection is required.');
   }
 
-  // Resolve the authoritative business date for this branch
-  let effectiveSaleDate;
-  if (saleDate) {
-    // Explicit date provided (e.g., editing/backdating) — use as-is
-    effectiveSaleDate = new Date(saleDate);
-  } else {
-    const activeBiz = await getBranchActiveBusinessDate(branchIdInt);
-    effectiveSaleDate = activeBiz.dateObj;
-  }
+  const effectiveSaleDate = saleDate ? new Date(saleDate) : new Date();
 
   if (!customerId) {
     res.status(400);

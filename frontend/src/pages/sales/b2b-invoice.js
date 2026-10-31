@@ -90,20 +90,7 @@ export default function B2BInvoice() {
             symbol = bData.currencySymbol;
           }
 
-          // Fetch the authoritative active business date
-          try {
-            const bdRes = await api.get('/day-close/status', { params: { branchId: user.branchId } });
-            if (bdRes.data?.activeDate) {
-              setInvoiceDate(bdRes.data.activeDate);
-            } else if (bdRes.data?.currentDate) {
-              setInvoiceDate(bdRes.data.currentDate);
-            } else {
-              setInvoiceDate(new Date().toISOString().split('T')[0]);
-            }
-          } catch (bdErr) {
-            console.error('Failed to fetch business date:', bdErr);
-            setInvoiceDate(new Date().toISOString().split('T')[0]);
-          }
+          setInvoiceDate(new Date().toISOString().split('T')[0]);
         } else {
           // No branch — fall back to calendar date
           setInvoiceDate(new Date().toISOString().split('T')[0]);

@@ -22,7 +22,6 @@ export default function Layout({ children }) {
   const [branch, setBranch] = useState(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [totalUnread, setTotalUnread] = useState(0);
-  const [unclosedInfo, setUnclosedInfo] = useState(null);
 
   useEffect(() => {
     // Company Profile is now managed by ThemeContext
@@ -35,7 +34,6 @@ export default function Layout({ children }) {
       if (userData.role !== 'customer') {
         initSocket(userData.id);
         fetchUnreadCount();
-        checkUnclosedDayClose();
 
         const socket = initSocket(userData.id);
         socket.on('receive_message', () => {
@@ -92,21 +90,6 @@ export default function Layout({ children }) {
       window.removeEventListener('activeBranchChanged', handleActiveBranchEvent);
     };
   }, [router.pathname]);
-
-  const checkUnclosedDayClose = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) return;
-      const res = await api.get('/day-close/check-unclosed');
-      if (res.data && res.data.hasUnclosed) {
-        setUnclosedInfo(res.data);
-      } else {
-        setUnclosedInfo(null);
-      }
-    } catch (err) {
-      console.error('Error checking unclosed day close:', err);
-    }
-  };
 
   const fetchUnreadCount = async () => {
     try {
@@ -227,27 +210,6 @@ export default function Layout({ children }) {
       {/* 4. Main Content Area */}
       <main className="flex-1 overflow-x-hidden p-3 md:p-6 relative">
         <div className="max-w-[1920px] mx-auto">
-          {unclosedInfo?.hasUnclosed && router.pathname !== '/settings/day-close' && (
-            <div className="mb-5 bg-gradient-to-r from-amber-500 to-orange-600 text-white p-4 rounded-xl shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-pulse">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-white/20 rounded-lg">
-                  <FiAlertTriangle className="text-xl text-white" />
-                </div>
-                <div>
-                  <h4 className="font-bold text-sm">Day Close Pending!</h4>
-                  <p className="text-xs text-amber-50 mt-0.5">
-                    You have not closed the business date <span className="font-bold text-white">{unclosedInfo.unclosedDateDisplay || unclosedInfo.unclosedDate}</span>. Please complete the pending Day Close before proceeding to a later date.
-                  </p>
-                </div>
-              </div>
-              <button
-                onClick={() => router.push(`/settings/day-close?date=${unclosedInfo.unclosedDate}`)}
-                className="px-4 py-2 bg-white text-amber-900 text-xs font-bold rounded-lg shadow-sm hover:bg-amber-50 transition-colors whitespace-nowrap self-start sm:self-auto cursor-pointer"
-              >
-                Go to Day Close →
-              </button>
-            </div>
-          )}
           {children}
         </div>
       </main>

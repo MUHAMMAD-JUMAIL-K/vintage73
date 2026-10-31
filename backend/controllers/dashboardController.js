@@ -180,7 +180,7 @@ exports.getDashboardStats = asyncHandler(async (req, res) => {
     let dayManagement = {
         businessDate: null,
         businessDateDisplay: null,
-        status: 'NOT_OPENED',
+        status: 'OPEN',
         openingCash: 0,
         previousClosingCash: 0,
         previousClosingDate: null,
@@ -200,7 +200,7 @@ exports.getDashboardStats = asyncHandler(async (req, res) => {
         expectedClosingCash: 0,
         actualClosingCash: null,
         cashDifference: null,
-        closingStatus: 'NOT_OPENED',
+        closingStatus: 'OPEN',
         closedAt: null,
         closedBy: null,
         todayCancelledCount: 0,
