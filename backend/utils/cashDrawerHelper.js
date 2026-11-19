@@ -267,17 +267,24 @@ async function calculateSessionCashDrawer(branchId, businessDateStr, terminalId 
 
   returnSales.forEach(r => {
     if ((r.paymentMethod || 'Cash').toLowerCase() === 'cash') {
-      const amt = Number(r.totalAmount || 0);
-      cashRefunds += amt;
-      refundList.push({
-        id: r.id,
-        invoiceNumber: r.invoiceNumber,
-        originalInvoice: r.originalInvoice,
-        amount: amt,
-        reason: r.returnReason || 'Product Return',
-        customerName: r.customer?.name || 'Walk-in',
-        date: r.createdAt
-      });
+      let amt = 0;
+      if (r.refundAmount !== undefined && r.refundAmount !== null && Number(r.refundAmount) > 0) {
+        amt = Number(r.refundAmount);
+      } else if (!r.isExchange && (r.returnCreditUsed === undefined || Number(r.returnCreditUsed) === 0)) {
+        amt = Number(r.totalAmount || 0);
+      }
+      if (amt > 0) {
+        cashRefunds += amt;
+        refundList.push({
+          id: r.id,
+          invoiceNumber: r.invoiceNumber,
+          originalInvoice: r.originalInvoice,
+          amount: amt,
+          reason: r.returnReason || 'Product Return',
+          customerName: r.customer?.name || 'Walk-in',
+          date: r.createdAt
+        });
+      }
     }
   });
 

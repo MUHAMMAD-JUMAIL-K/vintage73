@@ -623,6 +623,32 @@ exports.getAllSales = asyncHandler(async (req, res) => {
     };
   });
 
+  // If a specific invoice was searched, enrich its items with alreadyReturnedQty & remainingQty
+  if (invoice && normalized.length > 0) {
+    const targetSale = normalized[0];
+    const previousReturns = await prisma.sale.findMany({
+      where: { originalInvoice: targetSale.invoiceNumber, isReturn: true, status: { not: 'cancelled' } },
+      include: { items: true }
+    });
+    const returnedMap = {};
+    previousReturns.forEach(ret => {
+      ret.items.forEach(it => {
+        const key = `${it.productId}_${it.size || 'nosize'}`;
+        returnedMap[key] = (returnedMap[key] || 0) + it.quantity;
+        returnedMap[it.productId] = (returnedMap[it.productId] || 0) + it.quantity;
+      });
+    });
+    targetSale.items = (targetSale.items || []).map(item => {
+      const key = `${item.productId}_${item.size || 'nosize'}`;
+      const alreadyReturned = returnedMap[key] !== undefined ? returnedMap[key] : (returnedMap[item.productId] || 0);
+      return {
+        ...item,
+        alreadyReturnedQty: alreadyReturned,
+        remainingQty: Math.max(0, item.quantity - alreadyReturned)
+      };
+    });
+  }
+
   res.json(normalized);
 });
 
@@ -1131,5 +1157,950 @@ exports.deleteSale = asyncHandler(async (req, res) => {
   });
 
   res.json({ success: true, message: 'Invoice deleted successfully.' });
+});
+
+// Search Invoices for Return / Exchange
+exports.searchInvoicesForReturn = asyncHandler(async (req, res) => {
+  const { query, q, branchId } = req.query;
+  const searchTerm = (query || q || '').trim();
+
+  let targetBranchId = null;
+  if (req.user && req.user.branchId) {
+    targetBranchId = req.user.branchId;
+  } else if (branchId && branchId !== 'all') {
+    targetBranchId = parseInt(branchId);
+  }
+
+  const where = {
+    isReturn: false,
+    status: { not: 'cancelled' }
+  };
+
+  if (targetBranchId) {
+    where.branchId = targetBranchId;
+  }
+
+  if (searchTerm) {
+    where.OR = [
+      { invoiceNumber: { contains: searchTerm, mode: 'insensitive' } },
+      { customer: { name: { contains: searchTerm, mode: 'insensitive' } } },
+      { customer: { phone: { contains: searchTerm } } },
+      {
+        items: {
+          some: {
+            OR: [
+              { product: { name: { contains: searchTerm, mode: 'insensitive' } } },
+              { product: { barcode: { contains: searchTerm, mode: 'insensitive' } } }
+            ]
+          }
+        }
+      }
+    ];
+  }
+
+  const sales = await prisma.sale.findMany({
+    where,
+    take: 30,
+    orderBy: { createdAt: 'desc' },
+    include: {
+      customer: true,
+      branch: true,
+      salesman: { select: { id: true, name: true } },
+      payments: true,
+      items: {
+        include: {
+          product: {
+            select: {
+              id: true,
+              name: true,
+              barcode: true,
+              price: true,
+              sizeStocks: true,
+              brandPrices: true,
+              category: { select: { id: true, name: true } }
+            }
+          }
+        }
+      }
+    }
+  });
+
+  // Calculate return eligibility details for every item in each invoice
+  const enrichedSales = await Promise.all(
+    sales.map(async (sale) => {
+      const previousReturns = await prisma.sale.findMany({
+        where: {
+          originalInvoice: sale.invoiceNumber,
+          isReturn: true,
+          status: { not: 'cancelled' }
+        },
+        include: { items: true }
+      });
+
+      const returnedMap = {};
+      previousReturns.forEach(ret => {
+        ret.items.forEach(it => {
+          const key = `${it.productId}_${it.size || 'nosize'}`;
+          returnedMap[key] = (returnedMap[key] || 0) + it.quantity;
+          returnedMap[it.productId] = (returnedMap[it.productId] || 0) + it.quantity;
+        });
+      });
+
+      const enrichedItems = sale.items.map(item => {
+        const key = `${item.productId}_${item.size || 'nosize'}`;
+        const alreadyReturned = returnedMap[key] !== undefined ? returnedMap[key] : (returnedMap[item.productId] || 0);
+        const remaining = Math.max(0, item.quantity - alreadyReturned);
+        return {
+          ...item,
+          alreadyReturnedQty: alreadyReturned,
+          remainingQty: remaining,
+          isEligibleForReturn: remaining > 0
+        };
+      });
+
+      let customerBalance = 0;
+      if (sale.customerId) {
+        const custSales = await prisma.sale.findMany({
+          where: { customerId: sale.customerId, status: { not: 'cancelled' } }
+        });
+        customerBalance = custSales.reduce((sum, s) => {
+          if (s.isReturn) {
+            const unapplied = Math.max(0, parseFloat(s.totalAmount || 0) - parseFloat(s.returnCreditUsed || 0) - parseFloat(s.refundAmount || 0));
+            return sum - unapplied;
+          } else {
+            return sum + parseFloat(s.balanceAmount || 0);
+          }
+        }, 0);
+      }
+
+      return {
+        ...sale,
+        customerBalance: Number(customerBalance.toFixed(2)),
+        items: enrichedItems,
+        totalEligibleItems: enrichedItems.filter(i => i.remainingQty > 0).length
+      };
+    })
+  );
+
+  res.json(enrichedSales);
+});
+
+// Get Return & Exchange History with Dashboard KPIs
+exports.getReturnExchangeHistory = asyncHandler(async (req, res) => {
+  const { startDate, endDate, branchId, customerId, originalInvoice, status, transactionType, search } = req.query;
+
+  let targetBranchId = null;
+  if (req.user && req.user.branchId) {
+    targetBranchId = req.user.branchId;
+  } else if (branchId && branchId !== 'all') {
+    targetBranchId = parseInt(branchId);
+  }
+
+  // Fetch ExchangeTransactions
+  const exchangeWhere = {};
+  if (targetBranchId) exchangeWhere.branchId = targetBranchId;
+  if (customerId) exchangeWhere.customerId = parseInt(customerId);
+  if (originalInvoice) exchangeWhere.originalInvoice = { contains: originalInvoice, mode: 'insensitive' };
+  if (status && status !== 'all') exchangeWhere.status = status;
+  if (startDate && endDate) {
+    exchangeWhere.createdAt = { gte: new Date(startDate), lte: new Date(endDate) };
+  }
+
+  const exchanges = await prisma.exchangeTransaction.findMany({
+    where: exchangeWhere,
+    orderBy: { createdAt: 'desc' },
+    include: {
+      returnSale: {
+        include: {
+          items: { include: { product: true } },
+          payments: true,
+          customer: true,
+          salesman: { select: { id: true, name: true } }
+        }
+      },
+      newSale: {
+        include: {
+          items: { include: { product: true } },
+          payments: true,
+          customer: true,
+          salesman: { select: { id: true, name: true } }
+        }
+      },
+      customer: true,
+      branch: true
+    }
+  });
+
+  // Also fetch standalone returns that might not have an ExchangeTransaction record (e.g. legacy returns)
+  const exchangeReturnSaleIds = new Set(exchanges.map(e => e.returnSaleId));
+  const standaloneWhere = {
+    isReturn: true,
+    id: { notIn: Array.from(exchangeReturnSaleIds) }
+  };
+  if (targetBranchId) standaloneWhere.branchId = targetBranchId;
+  if (customerId) standaloneWhere.customerId = parseInt(customerId);
+  if (originalInvoice) standaloneWhere.originalInvoice = { contains: originalInvoice, mode: 'insensitive' };
+  if (status && status !== 'all') standaloneWhere.status = status;
+  if (startDate && endDate) {
+    standaloneWhere.saleDate = { gte: new Date(startDate), lte: new Date(endDate) };
+  }
+
+  const standaloneReturns = await prisma.sale.findMany({
+    where: standaloneWhere,
+    orderBy: { createdAt: 'desc' },
+    include: {
+      items: { include: { product: true } },
+      payments: true,
+      customer: true,
+      branch: true,
+      salesman: { select: { id: true, name: true } }
+    }
+  });
+
+  // Combine and normalize transactions
+  let combined = [
+    ...exchanges.map(e => {
+      const isExch = Boolean(e.newSaleId && e.newSale);
+      return {
+        id: e.id,
+        exchangeId: e.id,
+        exchangeNumber: e.exchangeNumber,
+        transactionType: isExch ? 'EXCHANGE' : 'RETURN',
+        originalInvoice: e.originalInvoice,
+        returnNumber: e.returnSale?.invoiceNumber || '-',
+        exchangeNumberInvoice: e.newSale?.invoiceNumber || null,
+        returnSale: e.returnSale,
+        newSale: e.newSale,
+        customer: e.customer || e.returnSale?.customer || null,
+        branch: e.branch || e.returnSale?.branch || null,
+        returnValue: Number(e.returnTotal || 0),
+        purchaseValue: Number(e.newPurchaseTotal || 0),
+        creditApplied: Number(e.creditApplied || 0),
+        amountPaid: Number(e.additionalPaid || 0),
+        remainingCredit: Number(e.remainingCredit || 0),
+        refundAmount: Number(e.refundAmount || 0),
+        settlementType: e.settlementType,
+        paymentMethod: e.paymentMethod || e.newSale?.paymentMethod || 'Cash',
+        status: e.status || e.returnSale?.status || 'completed',
+        notes: e.notes || e.returnSale?.returnReason || '',
+        returnedItemsCount: e.returnSale?.items?.reduce((sum, i) => sum + i.quantity, 0) || 0,
+        purchasedItemsCount: e.newSale?.items?.reduce((sum, i) => sum + i.quantity, 0) || 0,
+        createdAt: e.createdAt
+      };
+    }),
+    ...standaloneReturns.map(r => ({
+      id: `legacy_${r.id}`,
+      exchangeId: null,
+      exchangeNumber: r.invoiceNumber,
+      transactionType: 'RETURN',
+      originalInvoice: r.originalInvoice || '-',
+      returnNumber: r.invoiceNumber,
+      exchangeNumberInvoice: null,
+      returnSale: r,
+      newSale: null,
+      customer: r.customer,
+      branch: r.branch,
+      returnValue: Number(r.totalAmount || 0),
+      purchaseValue: 0,
+      creditApplied: 0,
+      amountPaid: 0,
+      remainingCredit: Number(Number(r.refundAmount || 0) > 0 ? 0 : r.totalAmount),
+      refundAmount: Number(r.refundAmount || 0),
+      settlementType: Number(r.refundAmount || 0) > 0 ? 'REFUNDED' : 'STORE_CREDIT',
+      paymentMethod: r.paymentMethod || 'Cash',
+      status: r.status,
+      notes: r.returnReason || '',
+      returnedItemsCount: r.items?.reduce((sum, i) => sum + i.quantity, 0) || 0,
+      purchasedItemsCount: 0,
+      createdAt: r.createdAt
+    }))
+  ];
+
+  // Apply filters
+  if (transactionType && transactionType !== 'ALL') {
+    combined = combined.filter(t => t.transactionType === transactionType);
+  }
+
+  if (search) {
+    const q = search.toLowerCase().trim();
+    combined = combined.filter(t => 
+      (t.exchangeNumber && t.exchangeNumber.toLowerCase().includes(q)) ||
+      (t.returnNumber && t.returnNumber.toLowerCase().includes(q)) ||
+      (t.originalInvoice && t.originalInvoice.toLowerCase().includes(q)) ||
+      (t.exchangeNumberInvoice && t.exchangeNumberInvoice.toLowerCase().includes(q)) ||
+      (t.customer?.name && t.customer.name.toLowerCase().includes(q)) ||
+      (t.customer?.phone && t.customer.phone.includes(q))
+    );
+  }
+
+  combined.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+  // Compute Dashboard KPIs
+  const activeTransactions = combined.filter(t => t.status !== 'cancelled');
+  const totalReturns = activeTransactions.length;
+  const totalReturnValue = Number(activeTransactions.reduce((sum, t) => sum + t.returnValue, 0).toFixed(2));
+  const totalExchanges = activeTransactions.filter(t => t.transactionType === 'EXCHANGE').length;
+  const totalCreditNotes = activeTransactions.filter(t => t.returnNumber).length;
+  const productsRestocked = activeTransactions.reduce((sum, t) => sum + t.returnedItemsCount, 0);
+  const pendingRefunds = Number(activeTransactions.reduce((sum, t) => sum + (t.settlementType === 'STORE_CREDIT' ? t.remainingCredit : 0), 0).toFixed(2));
+
+  res.json({
+    kpis: {
+      totalReturns,
+      totalReturnValue,
+      totalExchanges,
+      totalCreditNotes,
+      productsRestocked,
+      pendingRefunds
+    },
+    transactions: combined
+  });
+});
+
+// Process Advanced Sales Return & Product Exchange
+exports.processExchange = asyncHandler(async (req, res) => {
+  const {
+    originalInvoice,
+    customerId,
+    returnReason = 'Product Return / Exchange',
+    returnItems = [],
+    newItems = [],
+    settlementType = 'DIFFERENCE_PAID', // 'DIFFERENCE_PAID', 'EXACT_EXCHANGE', 'STORE_CREDIT', 'REFUNDED', 'RETURN_ONLY'
+    paymentMethod = 'Cash',
+    payments = [],
+    notes = '',
+    terminalId,
+    salesmanId,
+    saleDate
+  } = req.body;
+  let { branchId } = req.body;
+
+  if (!originalInvoice) {
+    res.status(400);
+    throw new Error('Original Invoice number is required.');
+  }
+
+  if (!Array.isArray(returnItems) || returnItems.length === 0) {
+    res.status(400);
+    throw new Error('At least one item must be selected for return.');
+  }
+
+  // 1. Verify Original Invoice
+  const originalSale = await prisma.sale.findFirst({
+    where: { invoiceNumber: originalInvoice },
+    include: { items: { include: { product: true } }, branch: true, customer: true }
+  });
+
+  if (!originalSale) {
+    res.status(404);
+    throw new Error(`Original invoice "${originalInvoice}" not found.`);
+  }
+
+  if (originalSale.status === 'cancelled') {
+    res.status(400);
+    throw new Error('Cannot process return against a cancelled invoice.');
+  }
+
+  if (!branchId) {
+    branchId = originalSale.branchId;
+  }
+  const validBranchId = parseInt(branchId);
+  const effectiveDate = saleDate ? new Date(saleDate) : new Date();
+
+  // 2. Validate Return Limits against past returns
+  const previousReturns = await prisma.sale.findMany({
+    where: {
+      originalInvoice,
+      isReturn: true,
+      status: { not: 'cancelled' }
+    },
+    include: { items: true }
+  });
+
+  const returnedQtyMap = {};
+  previousReturns.forEach(ret => {
+    ret.items.forEach(it => {
+      const key = `${it.productId}_${it.size || 'nosize'}`;
+      returnedQtyMap[key] = (returnedQtyMap[key] || 0) + it.quantity;
+      returnedQtyMap[it.productId] = (returnedQtyMap[it.productId] || 0) + it.quantity;
+    });
+  });
+
+  for (const item of returnItems) {
+    const qtyToReturn = parseInt(item.quantity || 0);
+    if (qtyToReturn <= 0) {
+      res.status(400);
+      throw new Error(`Invalid return quantity for product ID ${item.productId}.`);
+    }
+
+    const origItem = originalSale.items.find(i => 
+      i.productId === parseInt(item.productId) && 
+      (!item.size || !i.size || String(i.size).trim().toLowerCase() === String(item.size).trim().toLowerCase())
+    ) || originalSale.items.find(i => i.productId === parseInt(item.productId));
+
+    if (!origItem) {
+      res.status(400);
+      throw new Error(`Product ID ${item.productId} was not part of the original invoice.`);
+    }
+
+    const key = `${item.productId}_${item.size || origItem.size || 'nosize'}`;
+    const alreadyReturned = returnedQtyMap[key] !== undefined ? returnedQtyMap[key] : (returnedQtyMap[item.productId] || 0);
+    const remaining = origItem.quantity - alreadyReturned;
+
+    if (qtyToReturn > remaining) {
+      res.status(400);
+      throw new Error(`Cannot return ${qtyToReturn} units for "${origItem.product?.name || 'product'}". Only ${remaining} units eligible.`);
+    }
+  }
+
+  // 3. Execute in Atomic Database Transaction
+  const result = await prisma.$transaction(async (tx) => {
+    const branch = await tx.branch.findUnique({ where: { id: validBranchId } });
+    if (!branch) throw new Error(`Branch with ID ${validBranchId} not found.`);
+    const stockIncluded = branch.stockIncluded === true || branch.stockIncluded === 'true';
+
+    // A. Calculate Return Items Line Totals
+    let returnSubTotal = 0;
+    let returnTaxAmount = 0;
+    const returnSaleItemsData = [];
+
+    for (const rItem of returnItems) {
+      const pId = parseInt(rItem.productId);
+      const origItem = originalSale.items.find(i => 
+        i.productId === pId && 
+        (!rItem.size || !i.size || String(i.size).trim().toLowerCase() === String(rItem.size).trim().toLowerCase())
+      ) || originalSale.items.find(i => i.productId === pId);
+
+      const rQty = parseInt(rItem.quantity);
+      const unitPrice = rItem.unitPrice !== undefined ? parseFloat(rItem.unitPrice) : parseFloat(origItem.unitPrice);
+      const discAmt = rItem.discountAmount !== undefined ? parseFloat(rItem.discountAmount) : parseFloat(origItem.discountAmount || 0);
+      const netUnitPrice = Math.max(0, unitPrice - discAmt);
+      const taxRate = origItem.taxRate ? parseFloat(origItem.taxRate) : 0;
+      const isTaxInclusive = origItem.isTaxInclusive === true || origItem.isTaxInclusive === 'true';
+
+      const lineTotalPayable = rQty * netUnitPrice;
+      let lineTax = 0;
+      let lineBase = lineTotalPayable;
+
+      if (isTaxInclusive && taxRate > 0) {
+        lineBase = lineTotalPayable / (1 + (taxRate / 100));
+        lineTax = lineTotalPayable - lineBase;
+      } else if (taxRate > 0) {
+        lineBase = lineTotalPayable;
+        lineTax = (lineTotalPayable * taxRate) / 100;
+      }
+
+      returnSubTotal += lineBase;
+      returnTaxAmount += lineTax;
+
+      returnSaleItemsData.push({
+        productId: pId,
+        size: rItem.size || origItem.size || null,
+        quantity: rQty,
+        unitPrice: parseFloat(unitPrice.toFixed(2)),
+        originalUnitPrice: parseFloat(origItem.originalUnitPrice || origItem.unitPrice),
+        discountAmount: parseFloat(discAmt.toFixed(2)),
+        discountPercent: parseFloat(origItem.discountPercent || 0),
+        taxRate: parseFloat(taxRate.toFixed(2)),
+        taxAmount: parseFloat(lineTax.toFixed(2)),
+        isTaxInclusive: isTaxInclusive,
+        total: parseFloat((lineBase + lineTax).toFixed(2))
+      });
+    }
+
+    const finalReturnTotal = Number((returnSubTotal + returnTaxAmount).toFixed(2));
+
+    // B. Calculate New Purchase Line Totals (if any)
+    const hasNewItems = Array.isArray(newItems) && newItems.length > 0;
+    let newSubTotal = 0;
+    let newTaxAmount = 0;
+    let newTotalDiscount = 0;
+    const newSaleItemsData = [];
+
+    if (hasNewItems) {
+      for (const nItem of newItems) {
+        const prodId = parseInt(nItem.productId);
+        const product = await tx.product.findUnique({ where: { id: prodId } });
+        if (!product) throw new Error(`Product ${prodId} not found.`);
+
+        const nQty = parseInt(nItem.quantity || 1);
+        const selSize = nItem.size || nItem.selectedSize;
+
+        // Zero-stock variant check
+        if (selSize && product.sizeStocks) {
+          let pStocks = product.sizeStocks;
+          if (typeof pStocks === 'string') {
+            try { pStocks = JSON.parse(pStocks); } catch(e) { pStocks = []; }
+          }
+          if (Array.isArray(pStocks)) {
+            const entry = pStocks.find(s => String(s.size).trim().toLowerCase() === String(selSize).trim().toLowerCase());
+            if (entry && (parseInt(entry.stock, 10) || 0) < nQty) {
+              throw new Error(`Size "${selSize}" for product "${product.name}" has insufficient stock. Available: ${entry.stock || 0}`);
+            }
+          }
+        }
+
+        // Branch-level stock check
+        if (stockIncluded) {
+          const bStock = await tx.productStock.findUnique({
+            where: { branchId_productId: { branchId: validBranchId, productId: prodId } }
+          });
+          if (!bStock || bStock.quantity < nQty) {
+            throw new Error(`Insufficient stock for "${product.name}". Available: ${bStock?.quantity || 0}`);
+          }
+        }
+
+        const unitPrice = parseFloat(nItem.unitPrice || nItem.price || product.price || 0);
+        const discAmt = parseFloat(nItem.discountAmount || 0);
+        const netPrice = Math.max(0, unitPrice - discAmt);
+        const taxRate = nItem.taxRate !== undefined ? parseFloat(nItem.taxRate) : parseFloat(product.taxRate || 0);
+        const isTaxInc = nItem.isTaxInclusive === true || nItem.isTaxInclusive === 'true';
+
+        const linePayable = nQty * netPrice;
+        let lineTax = 0;
+        let lineBase = linePayable;
+
+        if (isTaxInc && taxRate > 0) {
+          lineBase = linePayable / (1 + (taxRate / 100));
+          lineTax = linePayable - lineBase;
+        } else if (taxRate > 0) {
+          lineBase = linePayable;
+          lineTax = (linePayable * taxRate) / 100;
+        }
+
+        newSubTotal += lineBase;
+        newTaxAmount += lineTax;
+        newTotalDiscount += (discAmt * nQty);
+
+        newSaleItemsData.push({
+          productId: prodId,
+          size: selSize || null,
+          quantity: nQty,
+          unitPrice: parseFloat(unitPrice.toFixed(2)),
+          originalUnitPrice: parseFloat(product.price || unitPrice),
+          discountAmount: parseFloat(discAmt.toFixed(2)),
+          discountPercent: parseFloat(nItem.discountPercent || 0),
+          taxRate: parseFloat(taxRate.toFixed(2)),
+          taxAmount: parseFloat(lineTax.toFixed(2)),
+          isTaxInclusive: isTaxInc,
+          total: parseFloat((lineBase + lineTax).toFixed(2))
+        });
+      }
+    }
+
+    const finalNewGrandTotal = hasNewItems ? Number((newSubTotal + newTaxAmount).toFixed(2)) : 0;
+
+    // C. Automatic Credit Adjustment
+    const creditApplied = hasNewItems ? Number(Math.min(finalReturnTotal, finalNewGrandTotal).toFixed(2)) : 0;
+    const remainingCredit = Number(Math.max(0, finalReturnTotal - finalNewGrandTotal).toFixed(2));
+    const remainingPayable = Number(Math.max(0, finalNewGrandTotal - finalReturnTotal).toFixed(2));
+
+    let finalSettlementType = settlementType;
+    if (!hasNewItems) {
+      finalSettlementType = (settlementType === 'REFUNDED' ? 'REFUNDED' : 'STORE_CREDIT');
+    } else if (Math.abs(finalNewGrandTotal - finalReturnTotal) < 0.01) {
+      finalSettlementType = 'EXACT_EXCHANGE';
+    } else if (finalNewGrandTotal > finalReturnTotal) {
+      finalSettlementType = 'DIFFERENCE_PAID';
+    } else {
+      finalSettlementType = (settlementType === 'REFUNDED' ? 'REFUNDED' : 'STORE_CREDIT');
+    }
+
+    const actualRefundAmount = (finalSettlementType === 'REFUNDED')
+      ? (hasNewItems ? remainingCredit : finalReturnTotal)
+      : 0;
+
+    // D. Numbering & Reference
+    const exchangeNumber = `EXC-${Date.now().toString().slice(-6)}-${Math.floor(100 + Math.random() * 900)}`;
+
+    const { number: returnDocNumber, nextSeq: retSeq, financialYearId: retFyId } = await generateNextNumber(tx, 'invoice', validBranchId, effectiveDate);
+    if (retFyId) {
+      await tx.financialYear.update({ where: { id: retFyId }, data: { invoiceSequence: retSeq } });
+    }
+
+    let newInvoiceNumber = null;
+    if (hasNewItems) {
+      const { number: newDocNumber, nextSeq: newSeq, financialYearId: newFyId } = await generateNextNumber(tx, 'invoice', validBranchId, effectiveDate);
+      newInvoiceNumber = newDocNumber;
+      if (newFyId) {
+        await tx.financialYear.update({ where: { id: newFyId }, data: { invoiceSequence: newSeq } });
+      }
+    }
+
+    const resolvedCustomerId = customerId ? parseInt(customerId) : (originalSale.customerId || null);
+
+    // E. Create Return Sale Record
+    const returnSale = await tx.sale.create({
+      data: {
+        invoiceNumber: returnDocNumber,
+        customerId: resolvedCustomerId,
+        branchId: validBranchId,
+        salesmanId: salesmanId ? parseInt(salesmanId) : originalSale.salesmanId,
+        terminalId: terminalId ? parseInt(terminalId) : null,
+        saleDate: effectiveDate,
+        subTotal: Number(returnSubTotal.toFixed(2)),
+        taxAmount: Number(returnTaxAmount.toFixed(2)),
+        totalAmount: finalReturnTotal,
+        roundOffAmount: 0,
+        paidAmount: actualRefundAmount,
+        balanceAmount: 0,
+        paymentMethod: actualRefundAmount > 0 ? (paymentMethod || 'Cash') : 'Credit',
+        status: 'completed',
+        isInvoice: false,
+        isReturn: true,
+        isExchange: hasNewItems,
+        exchangeReference: exchangeNumber,
+        returnReason: returnReason,
+        originalInvoice: originalInvoice,
+        returnCreditUsed: creditApplied,
+        refundAmount: actualRefundAmount,
+        currencyCode: branch.currencyCode || 'AED',
+        description: `Sales Return for #${originalInvoice}${notes ? ` - ${notes}` : ''}`,
+        items: { create: returnSaleItemsData }
+      },
+      include: {
+        customer: true,
+        branch: true,
+        items: { include: { product: true } }
+      }
+    });
+
+    // F. Restock Returned Products
+    for (const rItem of returnItems) {
+      const pId = parseInt(rItem.productId);
+      const q = parseInt(rItem.quantity);
+      await tx.productStock.upsert({
+        where: { branchId_productId: { branchId: validBranchId, productId: pId } },
+        create: { branchId: validBranchId, productId: pId, quantity: q },
+        update: { quantity: { increment: q } }
+      });
+
+      const selSize = rItem.size;
+      if (selSize) {
+        const prod = await tx.product.findUnique({ where: { id: pId } });
+        if (prod && prod.sizeStocks) {
+          let pStocks = prod.sizeStocks;
+          if (typeof pStocks === 'string') {
+            try { pStocks = JSON.parse(pStocks); } catch(e) { pStocks = []; }
+          }
+          if (Array.isArray(pStocks)) {
+            const updated = pStocks.map(s => {
+              if (String(s.size).trim().toLowerCase() === String(selSize).trim().toLowerCase()) {
+                return { ...s, stock: (parseInt(s.stock, 10) || 0) + q };
+              }
+              return s;
+            });
+            await tx.product.update({ where: { id: pId }, data: { sizeStocks: updated } });
+          }
+        }
+      }
+    }
+
+    // G. Create New Sale Record & Decrement Inventory if replacement purchased
+    let newSale = null;
+    if (hasNewItems) {
+      let calculatedPaidAmount = 0;
+      if (Array.isArray(payments) && payments.length > 0) {
+        calculatedPaidAmount = payments
+          .filter(p => p.method && p.method.toLowerCase() !== 'credit')
+          .reduce((sum, p) => sum + parseFloat(p.amount || 0), 0);
+      } else if (remainingPayable > 0) {
+        calculatedPaidAmount = remainingPayable;
+      }
+
+      const finalPaidAmount = Number(calculatedPaidAmount.toFixed(2));
+      const finalBalanceAmount = Number(Math.max(0, remainingPayable - finalPaidAmount).toFixed(2));
+
+      let resolvedMethod = paymentMethod;
+      if (!resolvedMethod) {
+        if (payments.length > 1) resolvedMethod = 'Split';
+        else if (payments.length === 1) resolvedMethod = payments[0].method;
+        else resolvedMethod = 'Cash';
+      }
+
+      newSale = await tx.sale.create({
+        data: {
+          invoiceNumber: newInvoiceNumber,
+          customerId: resolvedCustomerId,
+          branchId: validBranchId,
+          salesmanId: salesmanId ? parseInt(salesmanId) : null,
+          terminalId: terminalId ? parseInt(terminalId) : null,
+          saleDate: effectiveDate,
+          subTotal: Number(newSubTotal.toFixed(2)),
+          taxAmount: Number(newTaxAmount.toFixed(2)),
+          totalAmount: finalNewGrandTotal,
+          roundOffAmount: 0,
+          discount: newTotalDiscount,
+          advanceUsed: 0,
+          returnCreditUsed: creditApplied,
+          paidAmount: finalPaidAmount,
+          balanceAmount: finalBalanceAmount,
+          paymentMethod: resolvedMethod,
+          status: finalBalanceAmount > 0.01 ? 'partial' : 'completed',
+          isInvoice: true,
+          isReturn: false,
+          isExchange: true,
+          exchangeReference: exchangeNumber,
+          originalInvoice: originalInvoice,
+          currencyCode: branch.currencyCode || 'AED',
+          description: `Product Exchange against Return #${returnDocNumber} (Orig: ${originalInvoice})`,
+          items: { create: newSaleItemsData }
+        },
+        include: {
+          customer: true,
+          branch: true,
+          items: { include: { product: true } }
+        }
+      });
+
+      // Deduct inventory for new products
+      for (const nItem of newItems) {
+        const prodId = parseInt(nItem.productId);
+        const q = parseInt(nItem.quantity || 1);
+        await tx.productStock.upsert({
+          where: { branchId_productId: { branchId: validBranchId, productId: prodId } },
+          create: { branchId: validBranchId, productId: prodId, quantity: -q },
+          update: { quantity: { decrement: q } }
+        });
+
+        const selSize = nItem.size || nItem.selectedSize;
+        if (selSize) {
+          const prod = await tx.product.findUnique({ where: { id: prodId } });
+          if (prod && prod.sizeStocks) {
+            let pStocks = prod.sizeStocks;
+            if (typeof pStocks === 'string') {
+              try { pStocks = JSON.parse(pStocks); } catch(e) { pStocks = []; }
+            }
+            if (Array.isArray(pStocks)) {
+              const updated = pStocks.map(s => {
+                if (String(s.size).trim().toLowerCase() === String(selSize).trim().toLowerCase()) {
+                  return { ...s, stock: Math.max(0, (parseInt(s.stock, 10) || 0) - q) };
+                }
+                return s;
+              });
+              await tx.product.update({ where: { id: prodId }, data: { sizeStocks: updated } });
+            }
+          }
+        }
+      }
+
+      // Record Payments for remaining difference
+      if (finalPaidAmount > 0) {
+        const paymentsList = (Array.isArray(payments) && payments.length > 0)
+          ? payments
+          : [{ method: resolvedMethod, amount: finalPaidAmount }];
+
+        for (const p of paymentsList) {
+          const pAmt = parseFloat(p.amount || 0);
+          if (pAmt > 0 && p.method && p.method.toLowerCase() !== 'credit') {
+            await tx.payment.create({
+              data: {
+                type: 'receipt',
+                amount: pAmt,
+                method: p.method,
+                reference: `Exchange Difference for #${newInvoiceNumber}`,
+                description: `Payment for Exchange Invoice ${newInvoiceNumber} (Credit Applied: ${creditApplied})`,
+                saleId: newSale.id,
+                branchId: validBranchId,
+                customerId: resolvedCustomerId
+              }
+            });
+          }
+        }
+      }
+    }
+
+    // H. If Cash Refund was paid out, record Payment record for return
+    if (actualRefundAmount > 0) {
+      await tx.payment.create({
+        data: {
+          type: 'payment',
+          amount: actualRefundAmount,
+          method: paymentMethod || 'Cash',
+          reference: `Refund for Return #${returnDocNumber}`,
+          description: `Cash Refund for Return Credit Note ${returnDocNumber}`,
+          saleId: returnSale.id,
+          branchId: validBranchId,
+          customerId: resolvedCustomerId
+        }
+      });
+    }
+
+    // I. Accounting Integration
+    try {
+      await processSalePosting(tx, returnSale, req.user?.id || 1);
+      if (newSale) {
+        await processSalePosting(tx, newSale, req.user?.id || 1);
+      }
+    } catch (accErr) {
+      console.warn('Accounting posting notice in Exchange:', accErr.message);
+    }
+
+    // J. Create Master ExchangeTransaction Record
+    const exchangeTx = await tx.exchangeTransaction.create({
+      data: {
+        exchangeNumber,
+        originalInvoice,
+        returnSaleId: returnSale.id,
+        newSaleId: newSale ? newSale.id : null,
+        customerId: resolvedCustomerId,
+        branchId: validBranchId,
+        returnTotal: finalReturnTotal,
+        newPurchaseTotal: finalNewGrandTotal,
+        creditApplied: creditApplied,
+        remainingCredit: remainingCredit,
+        additionalPaid: hasNewItems ? remainingPayable : 0,
+        refundAmount: actualRefundAmount,
+        settlementType: finalSettlementType,
+        paymentMethod: paymentMethod || 'Cash',
+        status: 'completed',
+        notes: notes || returnReason
+      },
+      include: {
+        returnSale: { include: { items: { include: { product: true } }, payments: true, customer: true } },
+        newSale: { include: { items: { include: { product: true } }, payments: true, customer: true } },
+        branch: true,
+        customer: true
+      }
+    });
+
+    return {
+      success: true,
+      exchange: exchangeTx,
+      returnSale,
+      newSale,
+      financials: {
+        returnTotal: finalReturnTotal,
+        newPurchaseTotal: finalNewGrandTotal,
+        creditApplied,
+        remainingCredit,
+        remainingPayable,
+        refundAmount: actualRefundAmount,
+        settlementType: finalSettlementType
+      }
+    };
+  });
+
+  res.status(201).json(result);
+});
+
+// Cancel an Exchange Transaction
+exports.cancelExchange = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { cancelReason, cancelledBy } = req.body;
+
+  const exchange = await prisma.exchangeTransaction.findUnique({
+    where: { id: parseInt(id) },
+    include: {
+      returnSale: { include: { items: true } },
+      newSale: { include: { items: true } }
+    }
+  });
+
+  if (!exchange) {
+    res.status(404);
+    throw new Error('Exchange transaction not found.');
+  }
+
+  if (exchange.status === 'cancelled') {
+    res.status(400);
+    throw new Error('Exchange transaction is already cancelled.');
+  }
+
+  await prisma.$transaction(async (tx) => {
+    // 1. Cancel Exchange Transaction record
+    await tx.exchangeTransaction.update({
+      where: { id: exchange.id },
+      data: { status: 'cancelled', notes: `${exchange.notes || ''} [Cancelled: ${cancelReason || 'User request'}]` }
+    });
+
+    // 2. Reverse Return Sale: status -> cancelled, DECREMENT stock
+    if (exchange.returnSale) {
+      await tx.sale.update({
+        where: { id: exchange.returnSale.id },
+        data: {
+          status: 'cancelled',
+          cancelledAt: new Date(),
+          cancelledBy: cancelledBy || req.user?.username || 'Admin',
+          cancelReason: cancelReason || 'Exchange Cancelled'
+        }
+      });
+
+      for (const item of exchange.returnSale.items) {
+        await tx.productStock.update({
+          where: { branchId_productId: { branchId: exchange.branchId, productId: item.productId } },
+          data: { quantity: { decrement: item.quantity } }
+        });
+        if (item.size) {
+          const prod = await tx.product.findUnique({ where: { id: item.productId } });
+          if (prod && prod.sizeStocks) {
+            let pStocks = prod.sizeStocks;
+            if (typeof pStocks === 'string') {
+              try { pStocks = JSON.parse(pStocks); } catch(e) { pStocks = []; }
+            }
+            if (Array.isArray(pStocks)) {
+              const updated = pStocks.map(s => {
+                if (String(s.size).trim().toLowerCase() === String(item.size).trim().toLowerCase()) {
+                  return { ...s, stock: Math.max(0, (parseInt(s.stock, 10) || 0) - item.quantity) };
+                }
+                return s;
+              });
+              await tx.product.update({ where: { id: item.productId }, data: { sizeStocks: updated } });
+            }
+          }
+        }
+      }
+      await tx.payment.deleteMany({ where: { saleId: exchange.returnSale.id } });
+    }
+
+    // 3. Reverse New Sale: status -> cancelled, INCREMENT stock
+    if (exchange.newSale) {
+      await tx.sale.update({
+        where: { id: exchange.newSale.id },
+        data: {
+          status: 'cancelled',
+          cancelledAt: new Date(),
+          cancelledBy: cancelledBy || req.user?.username || 'Admin',
+          cancelReason: cancelReason || 'Exchange Cancelled'
+        }
+      });
+
+      for (const item of exchange.newSale.items) {
+        await tx.productStock.update({
+          where: { branchId_productId: { branchId: exchange.branchId, productId: item.productId } },
+          data: { quantity: { increment: item.quantity } }
+        });
+        if (item.size) {
+          const prod = await tx.product.findUnique({ where: { id: item.productId } });
+          if (prod && prod.sizeStocks) {
+            let pStocks = prod.sizeStocks;
+            if (typeof pStocks === 'string') {
+              try { pStocks = JSON.parse(pStocks); } catch(e) { pStocks = []; }
+            }
+            if (Array.isArray(pStocks)) {
+              const updated = pStocks.map(s => {
+                if (String(s.size).trim().toLowerCase() === String(item.size).trim().toLowerCase()) {
+                  return { ...s, stock: (parseInt(s.stock, 10) || 0) + item.quantity };
+                }
+                return s;
+              });
+              await tx.product.update({ where: { id: item.productId }, data: { sizeStocks: updated } });
+            }
+          }
+        }
+      }
+      await tx.payment.deleteMany({ where: { saleId: exchange.newSale.id } });
+    }
+
+    // Cancel related Vouchers
+    await tx.voucher.updateMany({
+      where: {
+        reference: { in: [exchange.returnSale?.invoiceNumber, exchange.newSale?.invoiceNumber].filter(Boolean) }
+      },
+      data: { status: 'CANCELLED' }
+    });
+  });
+
+  res.json({ success: true, message: 'Exchange transaction cancelled and inventory reversed successfully.' });
 });
 
