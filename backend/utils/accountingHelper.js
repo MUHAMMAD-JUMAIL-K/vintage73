@@ -183,6 +183,7 @@ const { postTransaction } = require('../services/dynamicPostingService');
 async function processSalePosting(tx, sale, userId) {
   const { invoiceNumber, totalAmount, paidAmount, paymentMethod, saleDate, customer, taxAmount, subTotal } = sale;
   const grandTotal = parseFloat(String(totalAmount || 0));
+  const isReturn = sale.isReturn === true;
 
   if (!grandTotal || grandTotal === 0) {
     console.warn('Sale totalAmount is 0, skipping accounting posting.');
@@ -240,6 +241,33 @@ async function processSalePosting(tx, sale, userId) {
         createdBy: userId,
         branchId: sale.branchId
       }, entries);
+
+      // If refund was paid out in cash/bank for this return
+      const refAmt = parseFloat(String(sale.refundAmount || 0));
+      if (refAmt > 0) {
+        let role = 'CASH';
+        let defaultLedger = 'Cash';
+        let defaultGroup = 'Cash-in-Hand';
+        const payMethod = sale.paymentMethod || 'Cash';
+        if (payMethod.toLowerCase().includes('online') || payMethod.toLowerCase().includes('bank') || payMethod.toLowerCase().includes('card') || payMethod.toLowerCase().includes('upi')) {
+          role = 'BANK';
+          defaultLedger = 'Bank Account';
+          defaultGroup = 'Bank Accounts';
+        }
+        const assetLedger = await getLedgerByRole(tx, 'PAYMENT', role, defaultLedger, defaultGroup);
+        await postVoucher(tx, {
+          type: 'PAYMENT',
+          date: saleDate ? new Date(saleDate) : new Date(),
+          amount: refAmt,
+          narration: `Refund for Return Credit Note #${invoiceNumber}`,
+          reference: invoiceNumber,
+          createdBy: userId,
+          branchId: sale.branchId
+        }, [
+          { ledgerId: customerLedger.id, type: 'DEBIT', amount: refAmt },
+          { ledgerId: assetLedger.id, type: 'CREDIT', amount: refAmt }
+        ]);
+      }
     } else {
       entries.push({ ledgerId: customerLedger.id, type: 'DEBIT', amount: grandTotal });
 
@@ -268,9 +296,9 @@ async function processSalePosting(tx, sale, userId) {
     }
   }
 
-  // 3. Handle Receipt if paid
+  // 3. Handle Receipt if paid (for regular sales / exchanges)
   const paid = parseFloat(String(paidAmount || 0));
-  if (paid > 0) {
+  if (!isReturn && paid > 0) {
     const payMethod = paymentMethod || 'Cash';
     let role = 'CASH';
     let defaultLedger = 'Cash';

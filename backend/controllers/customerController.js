@@ -160,23 +160,25 @@ exports.deleteCustomer = asyncHandler(async (req, res) => {
 exports.getCustomerBalance = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const { branchId } = req.query;
-  const where = { customerId: parseInt(id) };
+  const where = { customerId: parseInt(id), status: { not: 'cancelled' } };
   if (branchId) where.branchId = parseInt(branchId);
 
   const sales = await prisma.sale.findMany({
     where
   });
 
-  // Net Balance = (Sum of Sales Balance) - (Sum of Return Values)
+  // Net Balance = (Sum of Sales Balance) - (Sum of Unapplied Return Values)
   const totalBalance = sales.reduce((sum, s) => {
     if (s.isReturn) {
-      // Returns reduce the balance (Credit to customer)
-      return sum - parseFloat(s.totalAmount || 0);
+      // Unapplied return credit = totalAmount - returnCreditUsed - refundAmount
+      // If return was used in an exchange or refunded, it does not reduce customer balance again.
+      const unappliedCredit = Math.max(0, parseFloat(s.totalAmount || 0) - parseFloat(s.returnCreditUsed || 0) - parseFloat(s.refundAmount || 0));
+      return sum - unappliedCredit;
     } else {
       // Outstanding balance from regular sales
       return sum + parseFloat(s.balanceAmount || 0);
     }
   }, 0);
 
-  res.json({ balance: totalBalance });
+  res.json({ balance: Number(totalBalance.toFixed(2)) });
 });
