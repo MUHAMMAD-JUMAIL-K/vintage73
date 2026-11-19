@@ -35,7 +35,15 @@ exports.createB2BInvoice = asyncHandler(async (req, res) => {
     roundOffAmount = 0
   } = req.body;
 
-  const branchId = bodyBranchId || req.user?.branchId;
+  let branchId = bodyBranchId || req.user?.branchId;
+  if (!branchId && req.headers && req.headers['x-branch-id'] && req.headers['x-branch-id'] !== 'all') {
+    const parsedHdr = parseInt(req.headers['x-branch-id']);
+    if (!isNaN(parsedHdr)) branchId = parsedHdr;
+  }
+  if (!branchId && (!req.user || req.user.role === 'admin' || !req.user.branchId)) {
+    const firstBranch = await prisma.branch.findFirst({ where: { isActive: true }, orderBy: { id: 'asc' } });
+    if (firstBranch) branchId = firstBranch.id;
+  }
   const branchIdInt = parseInt(branchId);
   if (isNaN(branchIdInt)) {
     res.status(400);

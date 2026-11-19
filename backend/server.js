@@ -33,6 +33,7 @@ app.use((req, res, next) => {
 
 // UPLOADS CONFIGURATION
 const UPLOADS_PATH = process.env.UPLOADS_PATH || path.join(__dirname, '../frontend/public/uploads');
+const FRONTEND_UPLOADS = path.join(__dirname, '../frontend/public/uploads');
 
 // Ensure uploads directory exists
 if (!fs.existsSync(UPLOADS_PATH)) {
@@ -41,6 +42,13 @@ if (!fs.existsSync(UPLOADS_PATH)) {
 }
 
 app.use('/uploads', express.static(UPLOADS_PATH));
+if (path.resolve(UPLOADS_PATH) !== path.resolve(FRONTEND_UPLOADS) && fs.existsSync(FRONTEND_UPLOADS)) {
+  app.use('/uploads', express.static(FRONTEND_UPLOADS));
+}
+// Clean 404 handler for missing uploads without CSP conflicts
+app.use('/uploads', (req, res) => {
+  res.status(404).end();
+});
 
 const server = http.createServer(app);
 initSocket(server);

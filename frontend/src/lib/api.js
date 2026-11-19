@@ -31,7 +31,7 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response) {
-      const { status, data } = error.response;
+      const { status, data, config } = error.response;
 
       if (status === 401) {
         // Token expired or invalid
@@ -42,6 +42,17 @@ api.interceptors.response.use(
           // Optional: redirect to login if not already there
           if (!window.location.pathname.includes('/login')) {
             window.location.href = '/login?reason=expired';
+          }
+        }
+      } else if (status === 404 && config?.url && /^\/branches\/\d+$/.test(config.url.split('?')[0])) {
+        // Stale branch requested
+        if (typeof window !== 'undefined') {
+          const activeBranchId = localStorage.getItem('activeBranchId');
+          const branchIdFromUrl = config.url.split('?')[0].replace('/branches/', '');
+          if (activeBranchId && String(activeBranchId) === String(branchIdFromUrl)) {
+            console.warn(`[API] Active branch ${activeBranchId} returned 404. Clearing activeBranchId.`);
+            localStorage.removeItem('activeBranchId');
+            window.dispatchEvent(new CustomEvent('activeBranchChanged', { detail: { branchId: null } }));
           }
         }
       } else if (status === 500) {

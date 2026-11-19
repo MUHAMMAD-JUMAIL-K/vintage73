@@ -22,6 +22,13 @@ export default function Layout({ children }) {
   const [branch, setBranch] = useState(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [totalUnread, setTotalUnread] = useState(0);
+  const [logoError, setLogoError] = useState(false);
+  const [dashboardImageError, setDashboardImageError] = useState(false);
+
+  useEffect(() => {
+    setLogoError(false);
+    setDashboardImageError(false);
+  }, [theme?.companyProfile?.logoUrl, theme?.companyProfile?.dashboardImageUrl]);
 
   useEffect(() => {
     // Company Profile is now managed by ThemeContext
@@ -52,8 +59,15 @@ export default function Layout({ children }) {
               }
             })
             .catch(err => {
-              console.error("Error fetching branch:", err);
-              if (userData.branchName) setBranch({ name: userData.branchName, currencyCode: 'AED' });
+              if (err?.response?.status === 404) {
+                if (!userData.branchId) {
+                  localStorage.removeItem('activeBranchId');
+                }
+                setBranch(null);
+              } else {
+                console.error("Error fetching branch:", err);
+                if (userData.branchName) setBranch({ name: userData.branchName, currencyCode: 'AED' });
+              }
             });
         } else if (userData.branchName) {
           setBranch({ name: userData.branchName, currencyCode: 'AED' });
@@ -68,11 +82,16 @@ export default function Layout({ children }) {
     }
 
     const handleActiveBranchEvent = (e) => {
-      const bId = e.detail?.branchId || localStorage.getItem('activeBranchId');
+      const bId = e.detail?.branchId !== undefined ? e.detail.branchId : localStorage.getItem('activeBranchId');
       if (bId) {
         api.get(`/branches/${bId}`)
           .then(res => setBranch(res.data))
-          .catch(() => {});
+          .catch((err) => {
+            if (err?.response?.status === 404) {
+              localStorage.removeItem('activeBranchId');
+              setBranch(null);
+            }
+          });
       } else {
         const u = localStorage.getItem('user');
         const parsed = u ? JSON.parse(u) : null;
@@ -114,12 +133,13 @@ export default function Layout({ children }) {
   return (
     <div className="min-h-screen bg-gray-50 font-sans flex flex-col relative">
       {/* Global Screen Layout Wallpaper - Only visible on Main Menu */}
-      {(router.pathname === '/' || router.pathname === '/dashboard') && theme.companyProfile?.dashboardImageUrl && (
+      {(router.pathname === '/' || router.pathname === '/dashboard') && theme.companyProfile?.dashboardImageUrl && !dashboardImageError && (
         <div className="fixed inset-0 z-0 flex items-center justify-center pointer-events-none mt-24 pb-12 px-4 md:px-6">
           <img
             src={`${getServerUrl()}${theme.companyProfile.dashboardImageUrl}`}
             alt="Layout Background"
             className="h-[500px] w-auto max-w-5xl object-contain opacity-80 shadow-sm"
+            onError={() => setDashboardImageError(true)}
           />
         </div>
       )}
@@ -130,11 +150,12 @@ export default function Layout({ children }) {
           <header className="h-14 flex items-center justify-between px-3 md:px-6 border-b border-gray-100 relative z-[1000]">
             {/* Left - Logo */}
             <div className="flex items-center gap-2 md:gap-3">
-              {theme.companyProfile?.logoUrl ? (
+              {theme.companyProfile?.logoUrl && !logoError ? (
                 <img
                   src={`${getServerUrl()}${theme.companyProfile.logoUrl}`}
                   alt="Company Logo"
                   className="h-8 md:h-10 w-auto object-contain"
+                  onError={() => setLogoError(true)}
                 />
               ) : (
                 <div className="w-7 h-7 md:w-8 md:h-8 rounded-lg flex items-center justify-center text-white font-medium text-base md:text-lg shadow-sm" style={{ backgroundColor: theme.primaryColor }}>
