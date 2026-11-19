@@ -116,6 +116,7 @@ export default function SalesReturn() {
     try {
       const payload = {
         customerId: invoiceData.customerId,
+        branchId: invoiceData.branchId || invoiceData.branch?.id || (typeof window !== 'undefined' ? localStorage.getItem('activeBranchId') : null),
         isReturn: true,
         returnReason: reason,
         originalInvoice: invoiceData.invoiceNumber,
@@ -248,6 +249,12 @@ export default function SalesReturn() {
                   <span className="text-slate-500">Customer</span>
                   <span className="font-medium text-slate-700">{invoiceData.customer?.name || invoiceData.customerName || 'Walk-in'}</span>
                 </div>
+                {(invoiceData.branch?.name || invoiceData.branchName) && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-slate-500">Branch</span>
+                    <span className="font-medium text-slate-700">{invoiceData.branch?.name || invoiceData.branchName}</span>
+                  </div>
+                )}
                 <div className="flex justify-between text-sm">
                   <span className="text-slate-500">Current Balance</span>
                   <span className="font-medium text-red-500">{formatAmountWithCurrency(customerBalance, invoiceData?.currencyCode || DEFAULT_CURRENCY, invoiceData?.currencySymbol)}</span>

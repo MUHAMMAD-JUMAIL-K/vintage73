@@ -345,7 +345,7 @@ const EXCHANGE_RATES = {
                 api.get('/customers'),
                 api.get('/company'),
                 api.get('/users'),
-                activeBranchId ? api.get(`/branches/${activeBranchId}`) : Promise.resolve({ data: null }),
+                activeBranchId ? api.get(`/branches/${activeBranchId}`).catch(() => ({ data: null })) : Promise.resolve({ data: null }),
                 api.get('/brands').catch(() => ({ data: [] }))
             ]);
             setProducts(prodRes.data);

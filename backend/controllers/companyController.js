@@ -1,5 +1,18 @@
 const prisma = require('../config/prisma');
 const asyncHandler = require('../middleware/asyncHandler');
+const path = require('path');
+const fs = require('fs');
+
+const verifyUploadExists = (urlPath) => {
+  if (!urlPath || typeof urlPath !== 'string') return false;
+  if (!urlPath.startsWith('/uploads/')) return true; // Keep remote/data URLs intact
+  const filename = path.basename(urlPath);
+  const uploadsPath = process.env.UPLOADS_PATH || path.join(__dirname, '../uploads');
+  const frontendUploadsPath = path.join(__dirname, '../../frontend/public/uploads');
+
+  return fs.existsSync(path.join(uploadsPath, filename)) ||
+         fs.existsSync(path.join(frontendUploadsPath, filename));
+};
 
 // Get Company Profile
 exports.getCompanyProfile = asyncHandler(async (req, res) => {
@@ -28,6 +41,28 @@ exports.getCompanyProfile = asyncHandler(async (req, res) => {
         showOnlyLogoOnDashboard: true,
       }
     });
+  } else {
+    // Self-heal: clear references to files that no longer exist on disk
+    let needsUpdate = false;
+    const updateData = {};
+
+    if (company.logoUrl && !verifyUploadExists(company.logoUrl)) {
+      company.logoUrl = null;
+      updateData.logoUrl = null;
+      needsUpdate = true;
+    }
+    if (company.dashboardImageUrl && !verifyUploadExists(company.dashboardImageUrl)) {
+      company.dashboardImageUrl = null;
+      updateData.dashboardImageUrl = null;
+      needsUpdate = true;
+    }
+
+    if (needsUpdate) {
+      await prisma.companyProfile.update({
+        where: { id: company.id },
+        data: updateData
+      });
+    }
   }
 
   res.json(company);

@@ -44,6 +44,30 @@ exports.createSale = asyncHandler(async (req, res) => {
     branchId = req.user.branchId;
   }
 
+  if (!branchId && req.headers && req.headers['x-branch-id'] && req.headers['x-branch-id'] !== 'all') {
+    const parsedHdr = parseInt(req.headers['x-branch-id']);
+    if (!isNaN(parsedHdr)) branchId = parsedHdr;
+  }
+
+  // Auto-inherit branch from original invoice for returns
+  if (!branchId && isReturn && originalInvoice) {
+    const origSale = await prisma.sale.findFirst({
+      where: { invoiceNumber: originalInvoice },
+      select: { branchId: true }
+    });
+    if (origSale && origSale.branchId) {
+      branchId = origSale.branchId;
+    }
+  }
+
+  // Fallback for global admin: use the active branch (or first active branch)
+  if (!branchId && (!req.user || req.user.role === 'admin' || !req.user.branchId)) {
+    const firstBranch = await prisma.branch.findFirst({ where: { isActive: true }, orderBy: { id: 'asc' } });
+    if (firstBranch) {
+      branchId = firstBranch.id;
+    }
+  }
+
   if (!branchId) {
     res.status(400);
     throw new Error('Branch selection is required.');
