@@ -1237,18 +1237,25 @@ exports.searchInvoicesForReturn = asyncHandler(async (req, res) => {
         include: { items: true }
       });
 
-      const returnedMap = {};
-      previousReturns.forEach(ret => {
-        ret.items.forEach(it => {
-          const key = `${it.productId}_${it.size || 'nosize'}`;
-          returnedMap[key] = (returnedMap[key] || 0) + it.quantity;
-          returnedMap[it.productId] = (returnedMap[it.productId] || 0) + it.quantity;
-        });
-      });
+      const norm = (s) => (s ? String(s).trim().toLowerCase() : '');
 
       const enrichedItems = sale.items.map(item => {
-        const key = `${item.productId}_${item.size || 'nosize'}`;
-        const alreadyReturned = returnedMap[key] !== undefined ? returnedMap[key] : (returnedMap[item.productId] || 0);
+        const origSize = norm(item.size);
+        let alreadyReturned = 0;
+        previousReturns.forEach(ret => {
+          ret.items.forEach(it => {
+            if (it.productId === item.productId) {
+              const itSize = norm(it.size);
+              if (origSize) {
+                if (!itSize || itSize === origSize) {
+                  alreadyReturned += it.quantity;
+                }
+              } else {
+                alreadyReturned += it.quantity;
+              }
+            }
+          });
+        });
         const remaining = Math.max(0, item.quantity - alreadyReturned);
         return {
           ...item,
@@ -1487,7 +1494,9 @@ exports.processExchange = asyncHandler(async (req, res) => {
 
   // 1. Verify Original Invoice
   const originalSale = await prisma.sale.findFirst({
-    where: { invoiceNumber: originalInvoice },
+    where: req.body.originalSaleId
+      ? { id: parseInt(req.body.originalSaleId) }
+      : { invoiceNumber: originalInvoice, isReturn: false },
     include: { items: { include: { product: true } }, branch: true, customer: true }
   });
 
@@ -1517,14 +1526,7 @@ exports.processExchange = asyncHandler(async (req, res) => {
     include: { items: true }
   });
 
-  const returnedQtyMap = {};
-  previousReturns.forEach(ret => {
-    ret.items.forEach(it => {
-      const key = `${it.productId}_${it.size || 'nosize'}`;
-      returnedQtyMap[key] = (returnedQtyMap[key] || 0) + it.quantity;
-      returnedQtyMap[it.productId] = (returnedQtyMap[it.productId] || 0) + it.quantity;
-    });
-  });
+  const norm = (s) => (s ? String(s).trim().toLowerCase() : '');
 
   for (const item of returnItems) {
     const qtyToReturn = parseInt(item.quantity || 0);
@@ -1533,9 +1535,11 @@ exports.processExchange = asyncHandler(async (req, res) => {
       throw new Error(`Invalid return quantity for product ID ${item.productId}.`);
     }
 
+    const itemSize = norm(item.size);
+
     const origItem = originalSale.items.find(i => 
       i.productId === parseInt(item.productId) && 
-      (!item.size || !i.size || String(i.size).trim().toLowerCase() === String(item.size).trim().toLowerCase())
+      (!itemSize || !norm(i.size) || norm(i.size) === itemSize)
     ) || originalSale.items.find(i => i.productId === parseInt(item.productId));
 
     if (!origItem) {
@@ -1543,9 +1547,25 @@ exports.processExchange = asyncHandler(async (req, res) => {
       throw new Error(`Product ID ${item.productId} was not part of the original invoice.`);
     }
 
-    const key = `${item.productId}_${item.size || origItem.size || 'nosize'}`;
-    const alreadyReturned = returnedQtyMap[key] !== undefined ? returnedQtyMap[key] : (returnedQtyMap[item.productId] || 0);
-    const remaining = origItem.quantity - alreadyReturned;
+    const origSize = norm(origItem.size);
+
+    let alreadyReturned = 0;
+    previousReturns.forEach(ret => {
+      ret.items.forEach(it => {
+        if (it.productId === origItem.productId) {
+          const itSize = norm(it.size);
+          if (origSize) {
+            if (!itSize || itSize === origSize) {
+              alreadyReturned += it.quantity;
+            }
+          } else {
+            alreadyReturned += it.quantity;
+          }
+        }
+      });
+    });
+
+    const remaining = Math.max(0, origItem.quantity - alreadyReturned);
 
     if (qtyToReturn > remaining) {
       res.status(400);
@@ -1719,13 +1739,6 @@ exports.processExchange = asyncHandler(async (req, res) => {
     }
 
     let newInvoiceNumber = null;
-    if (hasNewItems) {
-      const { number: newDocNumber, nextSeq: newSeq, financialYearId: newFyId } = await generateNextNumber(tx, 'invoice', validBranchId, effectiveDate);
-      newInvoiceNumber = newDocNumber;
-      if (newFyId) {
-        await tx.financialYear.update({ where: { id: newFyId }, data: { invoiceSequence: newSeq } });
-      }
-    }
 
     const resolvedCustomerId = customerId ? parseInt(customerId) : (originalSale.customerId || null);
 
@@ -1745,6 +1758,7 @@ exports.processExchange = asyncHandler(async (req, res) => {
     const returnSale = await tx.sale.create({
       data: {
         invoiceNumber: returnDocNumber,
+        financialYearId: retFyId,
         customerId: resolvedCustomerId,
         branchId: validBranchId,
         salesmanId: salesmanId ? parseInt(salesmanId) : originalSale.salesmanId,
@@ -1811,6 +1825,12 @@ exports.processExchange = asyncHandler(async (req, res) => {
     // G. Create New Sale Record & Decrement Inventory if replacement purchased
     let newSale = null;
     if (hasNewItems) {
+      const { number: newDocNumber, nextSeq: newSeq, financialYearId: newFyId } = await generateNextNumber(tx, 'invoice', validBranchId, effectiveDate);
+      newInvoiceNumber = newDocNumber;
+      if (newFyId) {
+        await tx.financialYear.update({ where: { id: newFyId }, data: { invoiceSequence: newSeq } });
+      }
+
       let calculatedPaidAmount = 0;
       if (Array.isArray(payments) && payments.length > 0) {
         calculatedPaidAmount = payments
@@ -1833,6 +1853,7 @@ exports.processExchange = asyncHandler(async (req, res) => {
       newSale = await tx.sale.create({
         data: {
           invoiceNumber: newInvoiceNumber,
+          financialYearId: newFyId,
           customerId: resolvedCustomerId,
           branchId: validBranchId,
           salesmanId: salesmanId ? parseInt(salesmanId) : null,

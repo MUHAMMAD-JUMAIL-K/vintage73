@@ -207,7 +207,13 @@ export default function AdvancedSalesReturn() {
     setReturnItems(mappedItems);
     setNewCart([]);
     setCustomerBalance(invoice.customerBalance || 0);
-    toast.success(`Loaded Invoice ${invoice.invoiceNumber}`);
+
+    const totalEligible = mappedItems.filter((i) => i.remainingQty > 0).length;
+    if (totalEligible === 0) {
+      toast.warn(`All items in Invoice #${invoice.invoiceNumber} have already been fully returned.`);
+    } else {
+      toast.success(`Loaded Invoice ${invoice.invoiceNumber} (${totalEligible} items eligible)`);
+    }
   };
 
   // --- Return Items Controls ---
@@ -497,6 +503,14 @@ export default function AdvancedSalesReturn() {
       return;
     }
 
+    // Client-side verification of eligible quantities
+    for (const item of activeReturnedItems) {
+      if (item.returnQty > item.remainingQty) {
+        toast.error(`Cannot return ${item.returnQty} units of "${item.product?.name || item.name}". Only ${item.remainingQty} units eligible.`);
+        return;
+      }
+    }
+
     try {
       setIsSubmitting(true);
 
@@ -539,6 +553,7 @@ export default function AdvancedSalesReturn() {
 
       const payload = {
         originalInvoice: selectedInvoice.invoiceNumber,
+        originalSaleId: selectedInvoice.id,
         customerId: selectedInvoice.customerId || null,
         branchId: selectedInvoice.branchId || activeBranchId,
         returnReason: commonReturnReason,
@@ -612,8 +627,13 @@ export default function AdvancedSalesReturn() {
       // Refresh history & KPIs
       fetchHistory();
     } catch (err) {
-      console.error('Submission error:', err);
-      toast.error(err.response?.data?.message || 'Failed to process return and exchange');
+      const errorMsg =
+        err.response?.data?.message ||
+        err.response?.data?.error ||
+        err.message ||
+        'Failed to process return and exchange';
+      console.error('Submission error details:', errorMsg, err.response?.data || err);
+      toast.error(errorMsg);
     } finally {
       setIsSubmitting(false);
     }
@@ -851,10 +871,20 @@ export default function AdvancedSalesReturn() {
                 </div>
                 <div>
                   <span className="text-[10px] font-bold uppercase text-slate-400">Return Eligibility</span>
-                  <p className="font-semibold text-emerald-700">
+                  <p className={`font-bold ${returnItems.some((i) => i.remainingQty > 0) ? 'text-emerald-700' : 'text-rose-600'}`}>
                     {returnItems.filter((i) => i.remainingQty > 0).length} of {returnItems.length} items eligible
                   </p>
                 </div>
+              </div>
+            )}
+
+            {/* Warning if 0 items eligible */}
+            {selectedInvoice && returnItems.length > 0 && returnItems.every((i) => i.remainingQty <= 0) && (
+              <div className="mt-3 p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl text-amber-800 text-xs font-semibold flex items-center gap-2 animate-fade-in">
+                <FiAlertCircle className="text-base text-amber-600 shrink-0" />
+                <span>
+                  All items on Invoice #{selectedInvoice.invoiceNumber} have already been fully returned in previous transactions. No units are eligible for another return.
+                </span>
               </div>
             )}
           </div>

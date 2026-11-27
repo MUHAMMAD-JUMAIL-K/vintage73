@@ -113,42 +113,69 @@ async function generateNextNumber(tx, module, branchId, date) {
     let lastNumber;
     if (module === 'invoice') {
         const last = await tx.sale.findFirst({
-            where: { branchId: branchId, financialYearId: fy.id, invoiceNumber: { startsWith: prefix } },
+            where: {
+                branchId: branchId,
+                OR: [
+                    { financialYearId: fy.id },
+                    { financialYearId: null }
+                ],
+                invoiceNumber: { startsWith: prefix }
+            },
             orderBy: { id: 'desc' }
         });
         lastNumber = last?.invoiceNumber;
     } else if (module === 'quotation') {
         const last = await tx.quotation.findFirst({
-            where: { branchId: branchId, financialYearId: fy.id, quotationNumber: { startsWith: prefix } },
+            where: {
+                branchId: branchId,
+                OR: [
+                    { financialYearId: fy.id },
+                    { financialYearId: null }
+                ],
+                quotationNumber: { startsWith: prefix }
+            },
             orderBy: { id: 'desc' }
         });
         lastNumber = last?.quotationNumber;
     } else if (module === 'purchase') {
         const last = await tx.purchase.findFirst({
-            where: { branchId: branchId, financialYearId: fy.id, invoiceNumber: { startsWith: prefix } },
+            where: {
+                branchId: branchId,
+                OR: [
+                    { financialYearId: fy.id },
+                    { financialYearId: null }
+                ],
+                invoiceNumber: { startsWith: prefix }
+            },
             orderBy: { id: 'desc' }
         });
         lastNumber = last?.invoiceNumber;
     } else if (module === 'challan') {
         const last = await tx.deliveryChallan.findFirst({
-            where: { branchId: branchId, financialYearId: fy.id, challanNumber: { startsWith: prefix } },
+            where: {
+                branchId: branchId,
+                OR: [
+                    { financialYearId: fy.id },
+                    { financialYearId: null }
+                ],
+                challanNumber: { startsWith: prefix }
+            },
             orderBy: { id: 'desc' }
         });
         lastNumber = last?.challanNumber;
     }
 
-    let nextSeq;
+    const fySeqNum = parseInt(currentSeq, 10);
+    let nextNum = !isNaN(fySeqNum) ? fySeqNum : 1;
     if (lastNumber && lastNumber.startsWith(prefix)) {
         const seqPart = lastNumber.slice(prefix.length);
         const lastNum = parseInt(seqPart, 10);
         if (!isNaN(lastNum)) {
-            nextSeq = (lastNum + 1).toString().padStart(currentSeq.length, '0');
-        } else {
-            nextSeq = currentSeq;
+            nextNum = Math.max(nextNum, lastNum + 1);
         }
-    } else {
-        nextSeq = currentSeq;
     }
+    const padLength = Math.max(currentSeq.length, String(nextNum).length);
+    const nextSeq = nextNum.toString().padStart(padLength, '0');
 
     // Update the Financial Year record with the NEW sequence (optional, but good for tracking)
     // Actually, we should only update it after the record is successfully created.
