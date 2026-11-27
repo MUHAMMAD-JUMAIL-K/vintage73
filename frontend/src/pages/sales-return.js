@@ -24,7 +24,8 @@ import {
   FiPhone,
   FiCreditCard,
   FiArchive,
-  FiTag
+  FiTag,
+  FiLayers
 } from 'react-icons/fi';
 import ExchangeBill from '@/components/ExchangeBill';
 import { formatAmountWithCurrency, normalizeCurrencySymbol, DEFAULT_CURRENCY } from '@/lib/currency';
@@ -57,6 +58,8 @@ export default function AdvancedSalesReturn() {
   const [settlementChoice, setSettlementChoice] = useState('STORE_CREDIT'); // 'STORE_CREDIT' | 'REFUNDED'
   const [paymentMethod, setPaymentMethod] = useState('Cash');
   const [tenderedAmount, setTenderedAmount] = useState('');
+  const [addedPayments, setAddedPayments] = useState([]); // For Split Payments (like POS module)
+  const [showPaymentModal, setShowPaymentModal] = useState(false); // POS-style Payment Modal
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Master Data & Configuration
@@ -180,6 +183,8 @@ export default function AdvancedSalesReturn() {
     setSelectedInvoice(invoice);
     setSearchResults([]);
     setSearchQuery(invoice.invoiceNumber);
+    setAddedPayments([]);
+    setShowPaymentModal(false);
 
     // Initialize return items table
     const mappedItems = (invoice.items || []).map((it) => {
@@ -410,10 +415,75 @@ export default function AdvancedSalesReturn() {
   }, [returnCreditTotal, newPurchaseTotal]);
   const remainingCredit = remainingCustomerCredit;
 
-  // Keep tendered amount synchronized
+  // Target settlement total (payable difference for exchange, or refund for return)
+  const targetTotal = useMemo(() => {
+    if (remainingPayable > 0) return remainingPayable;
+    if (settlementChoice === 'REFUNDED') return remainingCustomerCredit;
+    return 0;
+  }, [remainingPayable, settlementChoice, remainingCustomerCredit]);
+
+  const totalPaidSoFar = useMemo(() => {
+    return addedPayments.reduce((sum, p) => sum + (parseFloat(p.amount) || 0), 0);
+  }, [addedPayments]);
+
+  const balanceDiff = useMemo(() => {
+    const currentInput = parseFloat(tenderedAmount || 0);
+    return targetTotal - (totalPaidSoFar + currentInput);
+  }, [targetTotal, totalPaidSoFar, tenderedAmount]);
+
+  // Keep tendered amount synchronized with targetTotal and added split payments
   useEffect(() => {
-    setTenderedAmount(remainingPayable > 0 ? remainingPayable.toFixed(2) : '0.00');
-  }, [remainingPayable]);
+    const remaining = Math.max(0, targetTotal - totalPaidSoFar);
+    if (addedPayments.length === 0) {
+      setTenderedAmount(targetTotal > 0 ? targetTotal.toFixed(2) : '0.00');
+    } else {
+      setTenderedAmount(remaining > 0 ? remaining.toFixed(2) : '0.00');
+    }
+  }, [targetTotal, totalPaidSoFar, addedPayments.length]);
+
+  const handleSelectMethod = (m) => {
+    setPaymentMethod(m);
+    const remaining = Math.max(0, targetTotal - totalPaidSoFar);
+    if (remaining <= 0 && addedPayments.length > 0) {
+      setTenderedAmount('0.00');
+    } else {
+      setTenderedAmount(remaining > 0 ? remaining.toFixed(2) : '0.00');
+    }
+  };
+
+  const handleAddPayment = (customMethod, customAmt) => {
+    const method = customMethod || paymentMethod;
+    const amt = parseFloat(customAmt !== undefined ? customAmt : tenderedAmount) || 0;
+    if (amt <= 0) {
+      toast.error('Please enter a valid amount greater than 0');
+      return;
+    }
+
+    if (totalPaidSoFar + amt > targetTotal + 0.01) {
+      toast.error(`Total allocated (${curSymbol}${(totalPaidSoFar + amt).toFixed(2)}) cannot exceed target total (${curSymbol}${targetTotal.toFixed(2)})`);
+      return;
+    }
+
+    const updated = [...addedPayments, { method, amount: amt }];
+    setAddedPayments(updated);
+
+    const newTotalPaid = updated.reduce((s, p) => s + (parseFloat(p.amount) || 0), 0);
+    const remaining = Math.max(0, targetTotal - newTotalPaid);
+    setTenderedAmount(remaining > 0 ? remaining.toFixed(2) : '0.00');
+  };
+
+  const handleRemovePayment = (index) => {
+    const updated = addedPayments.filter((_, i) => i !== index);
+    setAddedPayments(updated);
+    const newTotalPaid = updated.reduce((s, p) => s + (parseFloat(p.amount) || 0), 0);
+    const remaining = Math.max(0, targetTotal - newTotalPaid);
+    setTenderedAmount(remaining > 0 ? remaining.toFixed(2) : '0.00');
+  };
+
+  const handleClearPayments = () => {
+    setAddedPayments([]);
+    setTenderedAmount(targetTotal > 0 ? targetTotal.toFixed(2) : '0.00');
+  };
 
   // --- Submit Return & Exchange ---
   const handleSubmitTransaction = async () => {
@@ -430,6 +500,43 @@ export default function AdvancedSalesReturn() {
     try {
       setIsSubmitting(true);
 
+      const isRefundCase = (newCart.length === 0 || remainingCustomerCredit > 0) && settlementChoice === 'REFUNDED';
+      const isPayableCase = remainingPayable > 0;
+      const targetAmount = isPayableCase ? remainingPayable : (isRefundCase ? remainingCustomerCredit : 0);
+
+      let finalPayments = [];
+      const currentInputAmount = parseFloat(tenderedAmount) || 0;
+
+      if (targetAmount > 0) {
+        if (addedPayments.length > 0) {
+          finalPayments = [...addedPayments];
+          // If there is an amount in the input field that equals remaining balance, include it automatically
+          const alreadyAdded = addedPayments.reduce((sum, p) => sum + (parseFloat(p.amount) || 0), 0);
+          const remainingDiff = targetAmount - alreadyAdded;
+          if (currentInputAmount > 0 && Math.abs(currentInputAmount - remainingDiff) < 0.01) {
+            finalPayments.push({
+              method: paymentMethod,
+              amount: currentInputAmount
+            });
+          }
+        } else {
+          // Simple single payment mode
+          const amtToRecord = currentInputAmount > 0 ? currentInputAmount : targetAmount;
+          finalPayments = [{ method: paymentMethod, amount: amtToRecord }];
+        }
+
+        const totalAllocated = finalPayments.reduce((sum, p) => sum + (parseFloat(p.amount) || 0), 0);
+        if (totalAllocated > targetAmount + 1) {
+          toast.error(`Total allocated (${curSymbol}${totalAllocated.toFixed(2)}) cannot exceed total ${isPayableCase ? 'payable' : 'refund'} (${curSymbol}${targetAmount.toFixed(2)})`);
+          setIsSubmitting(false);
+          return;
+        }
+      }
+
+      const resolvedPaymentMethod = finalPayments.length > 1
+        ? 'Split'
+        : (finalPayments[0]?.method || (isPayableCase ? paymentMethod : (isRefundCase ? 'Cash' : 'Credit')));
+
       const payload = {
         originalInvoice: selectedInvoice.invoiceNumber,
         customerId: selectedInvoice.customerId || null,
@@ -443,11 +550,8 @@ export default function AdvancedSalesReturn() {
               ? settlementChoice
               : 'EXACT_EXCHANGE'
             : settlementChoice,
-        paymentMethod: remainingPayable > 0 ? paymentMethod : settlementChoice === 'REFUNDED' ? 'Cash' : 'Credit',
-        payments:
-          remainingPayable > 0
-            ? [{ method: paymentMethod, amount: parseFloat(tenderedAmount || remainingPayable) }]
-            : [],
+        paymentMethod: resolvedPaymentMethod,
+        payments: finalPayments,
         returnItems: activeReturnedItems.map((item) => ({
           productId: item.productId,
           size: item.size || null,
@@ -485,7 +589,10 @@ export default function AdvancedSalesReturn() {
         newSale: data.newSale,
         customer: selectedInvoice.customer,
         branch: selectedInvoice.branch,
-        financials: data.financials,
+        financials: {
+          ...data.financials,
+          payments: finalPayments
+        },
         companyProfile
       });
 
@@ -494,6 +601,8 @@ export default function AdvancedSalesReturn() {
       setSearchQuery('');
       setReturnItems([]);
       setNewCart([]);
+      setAddedPayments([]);
+      setShowPaymentModal(false);
 
       // Trigger automatic print
       setTimeout(() => {
@@ -636,6 +745,8 @@ export default function AdvancedSalesReturn() {
                     setSearchQuery('');
                     setReturnItems([]);
                     setNewCart([]);
+                    setAddedPayments([]);
+                    setShowPaymentModal(false);
                   }}
                   className="btn btn-outline text-xs px-3 py-1.5 text-slate-500 hover:text-rose-600 flex items-center gap-1"
                 >
@@ -1046,7 +1157,7 @@ export default function AdvancedSalesReturn() {
 
                     {/* Case 3: Customer Has Remaining Credit */}
                     {remainingCredit > 0 && (
-                      <div className="mt-3 p-3 bg-blue-500/10 border border-blue-500/30 rounded-xl space-y-2">
+                      <div className="mt-3 p-3 bg-blue-500/10 border border-blue-500/30 rounded-xl space-y-2.5">
                         <div className="flex justify-between items-center">
                           <span className="text-xs uppercase font-bold text-blue-400">
                             {newCart.length > 0 ? 'Remaining Credit Balance' : 'Total Return Value'}
@@ -1057,10 +1168,10 @@ export default function AdvancedSalesReturn() {
                         {/* Settlement Choice Radios */}
                         <div className="pt-2 border-t border-slate-700/60 grid grid-cols-2 gap-2 text-[11px]">
                           <label
-                            className={`p-2 rounded-lg border cursor-pointer transition-all flex items-center gap-1.5 ${
+                            className={`p-2 rounded-lg border cursor-pointer transition-all flex items-center justify-center gap-1.5 ${
                               settlementChoice === 'STORE_CREDIT'
                                 ? 'bg-blue-600 text-white border-blue-500 font-bold'
-                                : 'bg-slate-800 text-slate-400 border-slate-700'
+                                : 'bg-slate-800 text-slate-400 border-slate-700 hover:bg-slate-700/60'
                             }`}
                           >
                             <input
@@ -1068,17 +1179,20 @@ export default function AdvancedSalesReturn() {
                               name="settlement"
                               value="STORE_CREDIT"
                               checked={settlementChoice === 'STORE_CREDIT'}
-                              onChange={() => setSettlementChoice('STORE_CREDIT')}
+                              onChange={() => {
+                                setSettlementChoice('STORE_CREDIT');
+                                setAddedPayments([]);
+                              }}
                               className="hidden"
                             />
                             <span>Store Credit</span>
                           </label>
 
                           <label
-                            className={`p-2 rounded-lg border cursor-pointer transition-all flex items-center gap-1.5 ${
+                            className={`p-2 rounded-lg border cursor-pointer transition-all flex items-center justify-center gap-1.5 ${
                               settlementChoice === 'REFUNDED'
                                 ? 'bg-purple-600 text-white border-purple-500 font-bold'
-                                : 'bg-slate-800 text-slate-400 border-slate-700'
+                                : 'bg-slate-800 text-slate-400 border-slate-700 hover:bg-slate-700/60'
                             }`}
                           >
                             <input
@@ -1086,38 +1200,248 @@ export default function AdvancedSalesReturn() {
                               name="settlement"
                               value="REFUNDED"
                               checked={settlementChoice === 'REFUNDED'}
-                              onChange={() => setSettlementChoice('REFUNDED')}
+                              onChange={() => {
+                                setSettlementChoice('REFUNDED');
+                                setTenderedAmount(remainingCredit.toFixed(2));
+                              }}
                               className="hidden"
                             />
-                            <span>Cash Refund</span>
+                            <span>Refund (Cash/Bank)</span>
                           </label>
                         </div>
+
+                        {/* Refund Methods & Split Options when REFUNDED is selected */}
+                        {settlementChoice === 'REFUNDED' && (
+                          <div className="pt-2.5 border-t border-slate-700/60 space-y-2 text-xs">
+                            <div className="flex justify-between items-center">
+                              <span className="text-[10px] font-bold uppercase text-slate-300 tracking-wider">
+                                Refund Outflow Method
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => setShowPaymentModal(true)}
+                                className="text-[10px] text-purple-300 hover:text-white font-bold flex items-center gap-1 bg-purple-500/20 hover:bg-purple-500/40 px-2 py-0.5 rounded border border-purple-500/40 transition-colors"
+                              >
+                                <FiLayers size={11} /> POS Split Window
+                              </button>
+                            </div>
+
+                            <div className="grid grid-cols-4 gap-1">
+                              {['Cash', 'Bank Transfer', 'Card', 'UPI'].map((m) => (
+                                <button
+                                  key={m}
+                                  type="button"
+                                  onClick={() => handleSelectMethod(m)}
+                                  className={`py-1.5 px-1 rounded-lg text-[10px] font-bold border transition-all text-center truncate ${
+                                    paymentMethod === m
+                                      ? 'bg-purple-600 text-white border-purple-500 shadow-sm'
+                                      : 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700'
+                                  }`}
+                                  title={m}
+                                >
+                                  {m}
+                                </button>
+                              ))}
+                            </div>
+
+                            <div className="space-y-1">
+                              <div className="flex justify-between items-center text-[10px]">
+                                <span className="text-slate-400 font-medium">Refund Amount:</span>
+                                <span className={`font-bold ${balanceDiff > 0.01 ? 'text-amber-400' : 'text-emerald-400'}`}>
+                                  {balanceDiff < -0.01
+                                    ? `Excess: ${fmt(Math.abs(balanceDiff))}`
+                                    : balanceDiff > 0.01
+                                    ? `Unallocated: ${fmt(balanceDiff)}`
+                                    : 'Fully Allocated'}
+                                </span>
+                              </div>
+                              <div className="flex gap-1.5">
+                                <div className="relative flex-1">
+                                  <span className="absolute top-1/2 -translate-y-1/2 left-2.5 text-slate-400 font-mono text-[11px]">
+                                    {curSymbol}
+                                  </span>
+                                  <input
+                                    type="number"
+                                    step="0.01"
+                                    min="0"
+                                    value={tenderedAmount}
+                                    onChange={(e) => setTenderedAmount(e.target.value)}
+                                    placeholder="0.00"
+                                    className="w-full py-1.5 bg-slate-800/90 border border-slate-700 rounded-lg text-white font-mono font-bold text-xs pl-8 pr-2 focus:outline-none focus:border-purple-500"
+                                  />
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => handleAddPayment()}
+                                  className="px-3 py-1.5 bg-slate-800 hover:bg-purple-600 text-purple-300 hover:text-white border border-purple-500/40 rounded-lg font-bold text-[11px] transition-all whitespace-nowrap"
+                                  title="Add as Partial Refund"
+                                >
+                                  + Add
+                                </button>
+                              </div>
+                            </div>
+
+                            {addedPayments.length > 0 && (
+                              <div className="bg-slate-800/70 rounded-xl border border-slate-700/70 p-2 space-y-1.5">
+                                <div className="flex justify-between items-center">
+                                  <span className="text-[10px] font-bold uppercase text-slate-400 tracking-wider">
+                                    Split Refunds ({addedPayments.length})
+                                  </span>
+                                  <button
+                                    type="button"
+                                    onClick={handleClearPayments}
+                                    className="text-[10px] text-slate-400 hover:text-rose-400 transition-colors font-medium"
+                                  >
+                                    Clear All
+                                  </button>
+                                </div>
+                                <div className="space-y-1 max-h-24 overflow-y-auto pr-0.5">
+                                  {addedPayments.map((p, idx) => (
+                                    <div
+                                      key={idx}
+                                      className="flex justify-between items-center py-1 px-2 bg-slate-900/60 rounded border border-slate-700/50 text-[11px]"
+                                    >
+                                      <div className="flex items-center gap-1.5">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-purple-400"></span>
+                                        <span className="font-medium text-slate-200">{p.method}</span>
+                                      </div>
+                                      <div className="flex items-center gap-2">
+                                        <span className="font-mono font-bold text-slate-100">{fmt(p.amount)}</span>
+                                        <button
+                                          type="button"
+                                          onClick={() => handleRemovePayment(idx)}
+                                          className="text-slate-400 hover:text-rose-400 transition-colors"
+                                        >
+                                          <FiX size={12} />
+                                        </button>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
 
-                  {/* SECTION F: PAYMENT METHOD SELECTION (When difference is payable) */}
+                  {/* SECTION F: PAYMENT METHOD SELECTION & SPLIT PAYMENTS (When difference is payable) */}
                   {remainingPayable > 0 && (
-                    <div className="mt-4 pt-3 border-t border-slate-700 space-y-2 text-xs">
-                      <span className="text-[10px] font-bold uppercase text-slate-400 block">
-                        Payment Method for Balance
-                      </span>
-                      <div className="grid grid-cols-3 gap-1.5">
-                        {['Cash', 'UPI', 'Card', 'Bank Transfer'].map((m) => (
+                    <div className="mt-4 pt-3 border-t border-slate-700 space-y-2.5 text-xs">
+                      <div className="flex justify-between items-center">
+                        <span className="text-[10px] font-bold uppercase text-slate-300 tracking-wider flex items-center gap-1.5">
+                          <FiCreditCard className="text-primary-light" /> Payment Method for Balance
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setShowPaymentModal(true)}
+                          className="text-[10px] text-primary-light hover:text-white font-bold flex items-center gap-1 bg-primary/20 hover:bg-primary/40 px-2 py-0.5 rounded-md border border-primary/40 transition-colors"
+                        >
+                          <FiLayers size={11} /> POS Payment Window
+                        </button>
+                      </div>
+
+                      {/* Payment Method Selection Buttons */}
+                      <div className="grid grid-cols-5 gap-1">
+                        {['Cash', 'Card', 'UPI', 'Bank Transfer', 'Credit'].map((m) => (
                           <button
                             key={m}
                             type="button"
-                            onClick={() => setPaymentMethod(m)}
-                            className={`py-1.5 px-2 rounded-lg text-[11px] font-semibold border transition-all ${
+                            onClick={() => handleSelectMethod(m)}
+                            className={`py-1.5 px-1 rounded-lg text-[10px] font-bold border transition-all text-center truncate ${
                               paymentMethod === m
-                                ? 'bg-primary text-white border-primary shadow-sm'
+                                ? 'bg-primary text-white border-primary shadow-sm shadow-primary/30'
                                 : 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700'
                             }`}
+                            title={m}
                           >
                             {m}
                           </button>
                         ))}
                       </div>
+
+                      {/* Received Amount Input & Split Add */}
+                      <div className="space-y-1">
+                        <div className="flex justify-between items-center text-[10px]">
+                          <span className="text-slate-400 font-medium uppercase">Received Amount:</span>
+                          <span className={`font-bold ${balanceDiff > 0.01 ? 'text-amber-400' : 'text-emerald-400'}`}>
+                            {balanceDiff < -0.01
+                              ? `Change: ${fmt(Math.abs(balanceDiff))}`
+                              : balanceDiff > 0.01
+                              ? `Balance: ${fmt(balanceDiff)}`
+                              : 'Settled'}
+                          </span>
+                        </div>
+                        <div className="flex gap-1.5">
+                          <div className="relative flex-1">
+                            <span className="absolute top-1/2 -translate-y-1/2 left-2.5 text-slate-400 font-mono text-[11px]">
+                              {curSymbol}
+                            </span>
+                            <input
+                              type="number"
+                              step="0.01"
+                              min="0"
+                              value={tenderedAmount}
+                              onChange={(e) => setTenderedAmount(e.target.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') handleAddPayment();
+                              }}
+                              placeholder="0.00"
+                              className="w-full py-1.5 bg-slate-800/90 border border-slate-700 rounded-lg text-white font-mono font-bold text-xs pl-8 pr-2 focus:outline-none focus:border-primary"
+                            />
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleAddPayment()}
+                            className="px-3 py-1.5 bg-slate-800 hover:bg-primary text-primary-light hover:text-white border border-primary/40 rounded-lg font-bold text-[11px] transition-all whitespace-nowrap"
+                            title="Add as Split Payment"
+                          >
+                            + Add
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Split Payments List */}
+                      {addedPayments.length > 0 && (
+                        <div className="bg-slate-800/70 rounded-xl border border-slate-700/70 p-2.5 space-y-1.5">
+                          <div className="flex justify-between items-center">
+                            <span className="text-[10px] font-bold uppercase text-slate-400 tracking-wider">
+                              Split Payments ({addedPayments.length})
+                            </span>
+                            <button
+                              type="button"
+                              onClick={handleClearPayments}
+                              className="text-[10px] text-slate-400 hover:text-rose-400 transition-colors font-medium"
+                            >
+                              Clear All
+                            </button>
+                          </div>
+                          <div className="space-y-1 max-h-28 overflow-y-auto pr-0.5">
+                            {addedPayments.map((p, idx) => (
+                              <div
+                                key={idx}
+                                className="flex justify-between items-center py-1 px-2 bg-slate-900/60 rounded-lg border border-slate-700/50 text-[11px]"
+                              >
+                                <div className="flex items-center gap-1.5">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-primary-light"></span>
+                                  <span className="font-medium text-slate-200">{p.method}</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <span className="font-mono font-bold text-slate-100">{fmt(p.amount)}</span>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleRemovePayment(idx)}
+                                    className="text-slate-400 hover:text-rose-400 transition-colors"
+                                  >
+                                    <FiX size={12} />
+                                  </button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
 
@@ -1132,7 +1456,9 @@ export default function AdvancedSalesReturn() {
                     ) : (
                       <FiSave className="text-base" />
                     )}
-                    {newCart.length > 0 ? 'Process Exchange & Print Bill' : 'Process Return & Print Note'}
+                    {newCart.length > 0
+                      ? (addedPayments.length > 0 ? 'Process Exchange (Split Payment)' : 'Process Exchange & Print Bill')
+                      : (addedPayments.length > 0 ? 'Process Return (Split Refund)' : 'Process Return & Print Note')}
                   </button>
                 </div>
               </div>
@@ -1569,6 +1895,35 @@ export default function AdvancedSalesReturn() {
                 </div>
               </div>
 
+              {/* Payment Method & Split Details Strip */}
+              <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl flex flex-wrap justify-between items-center gap-2 text-xs">
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-bold uppercase text-slate-400">Payment Method:</span>
+                  <span className="font-bold text-slate-800 bg-white border border-slate-200 px-2 py-0.5 rounded text-[11px]">
+                    {viewingTransaction.paymentMethod || viewingTransaction.newSale?.paymentMethod || viewingTransaction.returnSale?.paymentMethod || 'Cash'}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-bold uppercase text-slate-400">Settlement:</span>
+                  <span className="font-mono font-semibold text-slate-700 bg-white border border-slate-200 px-2 py-0.5 rounded text-[11px]">
+                    {viewingTransaction.settlementType?.replace(/_/g, ' ') || 'COMPLETED'}
+                  </span>
+                </div>
+                {((viewingTransaction.newSale?.payments && viewingTransaction.newSale.payments.length > 1) || (viewingTransaction.returnSale?.payments && viewingTransaction.returnSale.payments.length > 1)) && (
+                  <div className="w-full pt-2 border-t border-slate-200/80">
+                    <span className="text-[10px] font-bold uppercase text-slate-400 block mb-1">Split Payments Breakdown:</span>
+                    <div className="flex flex-wrap gap-2">
+                      {(viewingTransaction.newSale?.payments || viewingTransaction.returnSale?.payments).map((p, idx) => (
+                        <span key={idx} className="inline-flex items-center gap-1.5 px-2 py-1 bg-white border border-slate-200 rounded-lg text-xs font-mono">
+                          <span className="w-1.5 h-1.5 rounded-full bg-primary"></span>
+                          <strong className="text-slate-700">{p.method}:</strong> {fmt(p.amount)}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
               {/* Returned Items */}
               <div>
                 <h4 className="font-bold text-slate-800 uppercase text-[11px] mb-2 flex items-center gap-1.5">
@@ -1639,6 +1994,196 @@ export default function AdvancedSalesReturn() {
                 className="btn btn-outline px-4 py-1.5 rounded-lg text-xs"
               >
                 Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ============================================================== */}
+      {/* MODAL 3: POS-STYLE MULTI-PAYMENT & SPLIT PAYMENT MODAL         */}
+      {/* ============================================================== */}
+      {showPaymentModal && (
+        <div className="fixed inset-0 z-[100000] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh]">
+            {/* Header */}
+            <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-white">
+              <div>
+                <h2 className="text-base font-bold text-slate-800">
+                  {remainingPayable > 0 ? 'Complete Exchange Payment' : 'Complete Return Refund'}
+                </h2>
+                <p className="text-[11px] text-slate-400 mt-0.5">
+                  {remainingPayable > 0
+                    ? 'Choose multiple payment options for the exchange balance'
+                    : 'Choose multiple refund payment methods for customer'}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowPaymentModal(false)}
+                className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 hover:bg-slate-100 transition-colors"
+              >
+                <FiX />
+              </button>
+            </div>
+
+            <div className="p-6 flex-1 overflow-y-auto">
+              {/* Total Payable / Refund Box */}
+              <div className="text-center mb-6 p-4 bg-slate-50 rounded-xl border border-slate-100">
+                <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-1">
+                  {remainingPayable > 0 ? 'Total Payable Difference' : 'Total Refund Amount'}
+                </p>
+                <span className="text-3xl font-extrabold text-slate-800">
+                  {curSymbol}{targetTotal.toFixed(2)}
+                </span>
+                {newCart.length > 0 && (
+                  <p className="text-[11px] text-slate-500 mt-1">
+                    New Purchase: {fmt(newPurchaseTotal)} • Return Credit: -{fmt(creditAdjustment)}
+                  </p>
+                )}
+              </div>
+
+              {/* Payment Method Tabs */}
+              <div className="mb-5">
+                <label className="block text-xs font-semibold text-slate-500 uppercase mb-2">
+                  Payment Method
+                </label>
+                <div className="grid grid-cols-5 gap-1.5">
+                  {(remainingPayable > 0
+                    ? ['Cash', 'Card', 'UPI', 'Bank Transfer', 'Credit']
+                    : ['Cash', 'Bank Transfer', 'Card', 'UPI']
+                  ).map((method) => (
+                    <button
+                      key={method}
+                      type="button"
+                      onClick={() => handleSelectMethod(method)}
+                      className={`py-2 px-1 rounded-lg text-xs font-semibold transition-all border whitespace-nowrap text-center truncate ${
+                        paymentMethod === method
+                          ? 'bg-primary text-white border-primary shadow-md shadow-primary/20'
+                          : 'bg-white text-slate-600 border-slate-200 hover:border-primary/50 hover:bg-primary-light/10'
+                      }`}
+                      title={method}
+                    >
+                      {method}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Payment Input */}
+              <div className="mb-5">
+                <div className="flex justify-between items-center mb-2">
+                  <label className="text-xs font-semibold text-slate-500 uppercase">
+                    {remainingPayable > 0 ? 'Received Amount' : 'Refund Amount'}
+                  </label>
+                  <span
+                    className={`text-xs font-bold ${
+                      balanceDiff > 0.01 ? 'text-amber-500' : 'text-emerald-600'
+                    }`}
+                  >
+                    {balanceDiff < -0.01
+                      ? `Change: ${fmt(Math.abs(balanceDiff))}`
+                      : balanceDiff > 0.01
+                      ? `Balance: ${fmt(balanceDiff)}`
+                      : 'Settled'}
+                  </span>
+                </div>
+
+                <div className="flex gap-2">
+                  <div className="relative flex-1">
+                    <span className="absolute top-1/2 -translate-y-1/2 left-3 text-slate-400 font-semibold text-xs">
+                      {curSymbol}
+                    </span>
+                    <input
+                      autoFocus
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      className="w-full py-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 font-bold text-lg text-slate-800 transition-all pl-12 pr-4"
+                      placeholder="0.00"
+                      value={tenderedAmount}
+                      onChange={(e) => setTenderedAmount(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') handleAddPayment();
+                      }}
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleAddPayment()}
+                    className="px-4 py-3 bg-white border border-slate-200 text-primary rounded-lg font-bold hover:bg-primary-light/10 hover:border-primary/30 transition-all text-sm whitespace-nowrap"
+                    title="Add as Partial Payment"
+                  >
+                    + Add
+                  </button>
+                </div>
+              </div>
+
+              {/* Added Split Payments List */}
+              {addedPayments.length > 0 && (
+                <div className="mb-2 bg-slate-50 rounded-xl border border-slate-200 p-3">
+                  <div className="flex justify-between items-center mb-2">
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                      Split Payments ({addedPayments.length})
+                    </p>
+                    <button
+                      type="button"
+                      onClick={handleClearPayments}
+                      className="text-[10px] text-slate-400 hover:text-rose-500 font-bold transition-colors"
+                    >
+                      Clear All
+                    </button>
+                  </div>
+                  <div className="space-y-1.5 max-h-36 overflow-y-auto">
+                    {addedPayments.map((p, i) => (
+                      <div
+                        key={i}
+                        className="flex justify-between items-center text-xs py-1.5 px-2.5 bg-white rounded-lg border border-slate-100 shadow-xs"
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="w-2 h-2 rounded-full bg-primary"></span>
+                          <span className="font-semibold text-slate-700">{p.method}</span>
+                        </div>
+                        <div className="flex items-center gap-2.5">
+                          <span className="font-mono font-bold text-slate-800">{fmt(p.amount)}</span>
+                          <button
+                            type="button"
+                            onClick={() => handleRemovePayment(i)}
+                            className="text-slate-400 hover:text-rose-500 transition-colors"
+                          >
+                            <FiX size={14} />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-4 border-t border-slate-100 bg-slate-50 flex gap-3">
+              <button
+                type="button"
+                onClick={() => setShowPaymentModal(false)}
+                className="px-5 py-2.5 rounded-xl font-semibold text-slate-600 hover:bg-white hover:shadow-sm border border-transparent hover:border-slate-200 transition-all text-sm"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleSubmitTransaction}
+                disabled={isSubmitting}
+                className="flex-1 py-2.5 px-6 bg-primary hover:bg-primary-dark text-white rounded-xl font-bold shadow-lg shadow-primary/30 transition-all flex items-center justify-center gap-2 text-sm disabled:opacity-50"
+              >
+                {isSubmitting ? (
+                  <FiRefreshCw className="animate-spin text-base" />
+                ) : (
+                  <FiCheckCircle size={16} />
+                )}
+                {addedPayments.length > 0
+                  ? (newCart.length > 0 ? 'Complete Split Exchange' : 'Complete Split Return')
+                  : (newCart.length > 0 ? 'Complete Exchange' : 'Complete Return')}
               </button>
             </div>
           </div>

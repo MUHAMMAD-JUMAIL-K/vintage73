@@ -245,28 +245,65 @@ async function processSalePosting(tx, sale, userId) {
       // If refund was paid out in cash/bank for this return
       const refAmt = parseFloat(String(sale.refundAmount || 0));
       if (refAmt > 0) {
-        let role = 'CASH';
-        let defaultLedger = 'Cash';
-        let defaultGroup = 'Cash-in-Hand';
-        const payMethod = sale.paymentMethod || 'Cash';
-        if (payMethod.toLowerCase().includes('online') || payMethod.toLowerCase().includes('bank') || payMethod.toLowerCase().includes('card') || payMethod.toLowerCase().includes('upi')) {
-          role = 'BANK';
-          defaultLedger = 'Bank Account';
-          defaultGroup = 'Bank Accounts';
+        const refundPayments = (sale.payments && sale.payments.length > 0)
+          ? sale.payments
+          : await tx.payment.findMany({ where: { saleId: sale.id, type: 'payment' } });
+
+        if (refundPayments && refundPayments.length > 0) {
+          const refundEntries = [];
+          let totalRefundAmt = 0;
+          for (const p of refundPayments) {
+            const pAmt = parseFloat(String(p.amount || 0));
+            if (pAmt <= 0) continue;
+            const pMeth = p.method || 'Cash';
+            let role = 'CASH';
+            let defaultLedger = 'Cash';
+            let defaultGroup = 'Cash-in-Hand';
+            if (pMeth.toLowerCase().includes('online') || pMeth.toLowerCase().includes('bank') || pMeth.toLowerCase().includes('card') || pMeth.toLowerCase().includes('upi')) {
+              role = 'BANK';
+              defaultLedger = 'Bank Account';
+              defaultGroup = 'Bank Accounts';
+            }
+            const assetLedger = await getLedgerByRole(tx, 'PAYMENT', role, defaultLedger, defaultGroup);
+            refundEntries.push({ ledgerId: assetLedger.id, type: 'CREDIT', amount: pAmt });
+            totalRefundAmt += pAmt;
+          }
+          if (refundEntries.length > 0) {
+            refundEntries.unshift({ ledgerId: customerLedger.id, type: 'DEBIT', amount: totalRefundAmt });
+            await postVoucher(tx, {
+              type: 'PAYMENT',
+              date: saleDate ? new Date(saleDate) : new Date(),
+              amount: totalRefundAmt,
+              narration: `Refund for Return Credit Note #${invoiceNumber}`,
+              reference: invoiceNumber,
+              createdBy: userId,
+              branchId: sale.branchId
+            }, refundEntries);
+          }
+        } else {
+          let role = 'CASH';
+          let defaultLedger = 'Cash';
+          let defaultGroup = 'Cash-in-Hand';
+          const payMethod = sale.paymentMethod || 'Cash';
+          if (payMethod.toLowerCase().includes('online') || payMethod.toLowerCase().includes('bank') || payMethod.toLowerCase().includes('card') || payMethod.toLowerCase().includes('upi')) {
+            role = 'BANK';
+            defaultLedger = 'Bank Account';
+            defaultGroup = 'Bank Accounts';
+          }
+          const assetLedger = await getLedgerByRole(tx, 'PAYMENT', role, defaultLedger, defaultGroup);
+          await postVoucher(tx, {
+            type: 'PAYMENT',
+            date: saleDate ? new Date(saleDate) : new Date(),
+            amount: refAmt,
+            narration: `Refund for Return Credit Note #${invoiceNumber}`,
+            reference: invoiceNumber,
+            createdBy: userId,
+            branchId: sale.branchId
+          }, [
+            { ledgerId: customerLedger.id, type: 'DEBIT', amount: refAmt },
+            { ledgerId: assetLedger.id, type: 'CREDIT', amount: refAmt }
+          ]);
         }
-        const assetLedger = await getLedgerByRole(tx, 'PAYMENT', role, defaultLedger, defaultGroup);
-        await postVoucher(tx, {
-          type: 'PAYMENT',
-          date: saleDate ? new Date(saleDate) : new Date(),
-          amount: refAmt,
-          narration: `Refund for Return Credit Note #${invoiceNumber}`,
-          reference: invoiceNumber,
-          createdBy: userId,
-          branchId: sale.branchId
-        }, [
-          { ledgerId: customerLedger.id, type: 'DEBIT', amount: refAmt },
-          { ledgerId: assetLedger.id, type: 'CREDIT', amount: refAmt }
-        ]);
       }
     } else {
       entries.push({ ledgerId: customerLedger.id, type: 'DEBIT', amount: grandTotal });
@@ -299,19 +336,6 @@ async function processSalePosting(tx, sale, userId) {
   // 3. Handle Receipt if paid (for regular sales / exchanges)
   const paid = parseFloat(String(paidAmount || 0));
   if (!isReturn && paid > 0) {
-    const payMethod = paymentMethod || 'Cash';
-    let role = 'CASH';
-    let defaultLedger = 'Cash';
-    let defaultGroup = 'Cash-in-Hand';
-
-    if (payMethod.toLowerCase().includes('online') || payMethod.toLowerCase().includes('bank') || payMethod.toLowerCase().includes('card') || payMethod.toLowerCase().includes('upi')) {
-      role = 'BANK';
-      defaultLedger = 'Bank Account';
-      defaultGroup = 'Bank Accounts';
-    }
-
-    const assetLedger = await getLedgerByRole(tx, 'PAYMENT', role, defaultLedger, defaultGroup);
-
     let customerName = 'Walk-in Customer';
     if (customer && customer.name) {
       customerName = customer.name;
@@ -321,18 +345,68 @@ async function processSalePosting(tx, sale, userId) {
     }
     const customerLedger = await ensureLedger(tx, customerName, 'Sundry Debtors');
 
-    await postVoucher(tx, {
-      type: 'RECEIPT',
-      date: saleDate ? new Date(saleDate) : new Date(),
-      amount: paid,
-      narration: `Payment for #${invoiceNumber}`,
-      reference: invoiceNumber,
-      createdBy: userId,
-      branchId: sale.branchId
-    }, [
-      { ledgerId: assetLedger.id, type: 'DEBIT', amount: paid },
-      { ledgerId: customerLedger.id, type: 'CREDIT', amount: paid }
-    ]);
+    const receiptPayments = (sale.payments && sale.payments.length > 0)
+      ? sale.payments
+      : await tx.payment.findMany({ where: { saleId: sale.id, type: 'receipt' } });
+
+    if (receiptPayments && receiptPayments.length > 0) {
+      const receiptEntries = [];
+      let totalReceiptAmt = 0;
+      for (const p of receiptPayments) {
+        const pAmt = parseFloat(String(p.amount || 0));
+        if (pAmt <= 0) continue;
+        const pMeth = p.method || 'Cash';
+        let role = 'CASH';
+        let defaultLedger = 'Cash';
+        let defaultGroup = 'Cash-in-Hand';
+        if (pMeth.toLowerCase().includes('online') || pMeth.toLowerCase().includes('bank') || pMeth.toLowerCase().includes('card') || pMeth.toLowerCase().includes('upi')) {
+          role = 'BANK';
+          defaultLedger = 'Bank Account';
+          defaultGroup = 'Bank Accounts';
+        }
+        const assetLedger = await getLedgerByRole(tx, 'PAYMENT', role, defaultLedger, defaultGroup);
+        receiptEntries.push({ ledgerId: assetLedger.id, type: 'DEBIT', amount: pAmt });
+        totalReceiptAmt += pAmt;
+      }
+      if (receiptEntries.length > 0) {
+        receiptEntries.push({ ledgerId: customerLedger.id, type: 'CREDIT', amount: totalReceiptAmt });
+        await postVoucher(tx, {
+          type: 'RECEIPT',
+          date: saleDate ? new Date(saleDate) : new Date(),
+          amount: totalReceiptAmt,
+          narration: `Payment for #${invoiceNumber}`,
+          reference: invoiceNumber,
+          createdBy: userId,
+          branchId: sale.branchId
+        }, receiptEntries);
+      }
+    } else {
+      const payMethod = paymentMethod || 'Cash';
+      let role = 'CASH';
+      let defaultLedger = 'Cash';
+      let defaultGroup = 'Cash-in-Hand';
+
+      if (payMethod.toLowerCase().includes('online') || payMethod.toLowerCase().includes('bank') || payMethod.toLowerCase().includes('card') || payMethod.toLowerCase().includes('upi')) {
+        role = 'BANK';
+        defaultLedger = 'Bank Account';
+        defaultGroup = 'Bank Accounts';
+      }
+
+      const assetLedger = await getLedgerByRole(tx, 'PAYMENT', role, defaultLedger, defaultGroup);
+
+      await postVoucher(tx, {
+        type: 'RECEIPT',
+        date: saleDate ? new Date(saleDate) : new Date(),
+        amount: paid,
+        narration: `Payment for #${invoiceNumber}`,
+        reference: invoiceNumber,
+        createdBy: userId,
+        branchId: sale.branchId
+      }, [
+        { ledgerId: assetLedger.id, type: 'DEBIT', amount: paid },
+        { ledgerId: customerLedger.id, type: 'CREDIT', amount: paid }
+      ]);
+    }
   }
 }
 

@@ -1729,6 +1729,18 @@ exports.processExchange = asyncHandler(async (req, res) => {
 
     const resolvedCustomerId = customerId ? parseInt(customerId) : (originalSale.customerId || null);
 
+    // Resolve Return Sale Payment Method (handles split refund if applicable)
+    let resolvedReturnPaymentMethod = 'Credit';
+    if (actualRefundAmount > 0) {
+      if (Array.isArray(payments) && payments.length > 1 && (!hasNewItems || remainingCredit > 0)) {
+        resolvedReturnPaymentMethod = 'Split';
+      } else if (Array.isArray(payments) && payments.length === 1 && (!hasNewItems || remainingCredit > 0)) {
+        resolvedReturnPaymentMethod = payments[0].method || 'Cash';
+      } else {
+        resolvedReturnPaymentMethod = paymentMethod || 'Cash';
+      }
+    }
+
     // E. Create Return Sale Record
     const returnSale = await tx.sale.create({
       data: {
@@ -1744,7 +1756,7 @@ exports.processExchange = asyncHandler(async (req, res) => {
         roundOffAmount: 0,
         paidAmount: actualRefundAmount,
         balanceAmount: 0,
-        paymentMethod: actualRefundAmount > 0 ? (paymentMethod || 'Cash') : 'Credit',
+        paymentMethod: resolvedReturnPaymentMethod,
         status: 'completed',
         isInvoice: false,
         isReturn: true,
@@ -1812,10 +1824,10 @@ exports.processExchange = asyncHandler(async (req, res) => {
       const finalBalanceAmount = Number(Math.max(0, remainingPayable - finalPaidAmount).toFixed(2));
 
       let resolvedMethod = paymentMethod;
-      if (!resolvedMethod) {
+      if (!resolvedMethod || resolvedMethod === 'Split' || (Array.isArray(payments) && payments.length > 1)) {
         if (payments.length > 1) resolvedMethod = 'Split';
         else if (payments.length === 1) resolvedMethod = payments[0].method;
-        else resolvedMethod = 'Cash';
+        else resolvedMethod = paymentMethod || 'Cash';
       }
 
       newSale = await tx.sale.create({
@@ -1910,20 +1922,29 @@ exports.processExchange = asyncHandler(async (req, res) => {
       }
     }
 
-    // H. If Cash Refund was paid out, record Payment record for return
+    // H. If Cash/Bank Refund was paid out, record Payment record(s) for return
     if (actualRefundAmount > 0) {
-      await tx.payment.create({
-        data: {
-          type: 'payment',
-          amount: actualRefundAmount,
-          method: paymentMethod || 'Cash',
-          reference: `Refund for Return #${returnDocNumber}`,
-          description: `Cash Refund for Return Credit Note ${returnDocNumber}`,
-          saleId: returnSale.id,
-          branchId: validBranchId,
-          customerId: resolvedCustomerId
+      const refundPaymentsList = (Array.isArray(payments) && payments.length > 0 && (!hasNewItems || remainingCredit > 0))
+        ? payments.filter(p => p.method && p.method.toLowerCase() !== 'credit')
+        : [{ method: paymentMethod || 'Cash', amount: actualRefundAmount }];
+
+      for (const p of refundPaymentsList) {
+        const pAmt = parseFloat(p.amount || 0);
+        if (pAmt > 0) {
+          await tx.payment.create({
+            data: {
+              type: 'payment',
+              amount: pAmt,
+              method: p.method || 'Cash',
+              reference: `Refund for Return #${returnDocNumber}`,
+              description: `Refund for Return Credit Note ${returnDocNumber}${p.method ? ` (${p.method})` : ''}`,
+              saleId: returnSale.id,
+              branchId: validBranchId,
+              customerId: resolvedCustomerId
+            }
+          });
         }
-      });
+      }
     }
 
     // I. Accounting Integration
@@ -1934,6 +1955,14 @@ exports.processExchange = asyncHandler(async (req, res) => {
       }
     } catch (accErr) {
       console.warn('Accounting posting notice in Exchange:', accErr.message);
+    }
+
+    // Resolve overall transaction payment method
+    let finalTxPaymentMethod = paymentMethod || 'Cash';
+    if (Array.isArray(payments) && payments.length > 1) {
+      finalTxPaymentMethod = 'Split';
+    } else if (Array.isArray(payments) && payments.length === 1) {
+      finalTxPaymentMethod = payments[0].method || paymentMethod || 'Cash';
     }
 
     // J. Create Master ExchangeTransaction Record
@@ -1952,7 +1981,7 @@ exports.processExchange = asyncHandler(async (req, res) => {
         additionalPaid: hasNewItems ? remainingPayable : 0,
         refundAmount: actualRefundAmount,
         settlementType: finalSettlementType,
-        paymentMethod: paymentMethod || 'Cash',
+        paymentMethod: finalTxPaymentMethod,
         status: 'completed',
         notes: notes || returnReason
       },
@@ -1976,7 +2005,8 @@ exports.processExchange = asyncHandler(async (req, res) => {
         remainingCredit,
         remainingPayable,
         refundAmount: actualRefundAmount,
-        settlementType: finalSettlementType
+        settlementType: finalSettlementType,
+        payments: (hasNewItems && remainingPayable > 0) ? payments : (actualRefundAmount > 0 ? payments : [])
       }
     };
   });

@@ -293,9 +293,34 @@ const ExchangeBill = forwardRef(({ printData, companyProfile }, ref) => {
             <div className="flex justify-between text-[11px] pt-1 border-t">
               <span className="text-slate-600">Payment Method:</span>
               <span className="font-semibold text-slate-800">
-                {newSale?.paymentMethod || returnSale?.paymentMethod || 'Cash'}
+                {newSale?.paymentMethod || returnSale?.paymentMethod || exchange?.paymentMethod || 'Cash'}
               </span>
             </div>
+
+            {/* Split Payments Breakdown if multiple payments */}
+            {(() => {
+              const paymentList = (newSale?.payments && newSale.payments.length > 0)
+                ? newSale.payments
+                : (returnSale?.payments && returnSale.payments.length > 0)
+                ? returnSale.payments
+                : (financials?.payments && financials.payments.length > 0)
+                ? financials.payments
+                : [];
+              if (paymentList.length > 1) {
+                return (
+                  <div className="pt-1 border-t border-dashed space-y-0.5">
+                    <span className="text-[10px] font-bold text-slate-500 uppercase block">Split Payments:</span>
+                    {paymentList.map((p, idx) => (
+                      <div key={idx} className="flex justify-between text-[10px] text-slate-700 pl-1">
+                        <span>• {p.method}:</span>
+                        <span className="font-mono font-medium">{fmt(p.amount)}</span>
+                      </div>
+                    ))}
+                  </div>
+                );
+              }
+              return null;
+            })()}
 
             <div className="flex justify-between text-xs font-bold pt-1 border-t text-slate-900">
               <span>Transaction Net Balance:</span>
